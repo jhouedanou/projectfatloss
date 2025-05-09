@@ -1,26 +1,40 @@
 :root {
-  /* Theme variables */
-  --bg-primary: #f8f9fa;
-  --text-primary: #22223b;
-  --header-bg: #22223b;
-  --header-text: #fff;
-  --tabs-bg: #4a4e69;
-  --tab-text: #fff;
-  --tab-active-bg: #22223b;
-  --tab-active-border: #f2e9e4;
-  --card-bg: #fff;
-  --card-shadow: rgba(34,34,59,0.06);
-  --text-secondary: #9a8c98;
-  --text-tertiary: #4a4e69;
-  --button-bg: #4a4e69;
-  --button-text: #fff;
-  --button-active: #22223b;
-  --series-text: #ff0000; /* Nouvelle variable pour le texte des séries en rouge */
+  /* Material Design color palette */
+  --primary-light: #6573c3;
+  --primary-main: #3f51b5;
+  --primary-dark: #2c387e;
+  --secondary-light: #33ab9f;
+  --secondary-main: #009688;
+  --secondary-dark: #00695f;
+  --success-light: #4caf50;
+  --success-main: #2e7d32;
+  --success-dark: #1b5e20;
+  --error-light: #ef5350;
+  --error-main: #d32f2f;
+  --error-dark: #c62828;
+
+  /* Theme variables with Material Design colors */
+  --bg-primary: #f5f5f5;
+  --text-primary: #212121;
+  --header-bg: var(--primary-main);
+  --header-text: #ffffff;
+  --tabs-bg: var(--primary-light);
+  --tab-text: #ffffff;
+  --tab-active-bg: var(--primary-dark);
+  --tab-active-border: #ffffff;
+  --card-bg: #ffffff;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --text-secondary: #757575;
+  --text-tertiary: #9e9e9e;
+  --button-bg: var(--primary-main);
+  --button-text: #ffffff;
+  --button-active: var(--primary-dark);
+  --series-text: var(--error-main);
 }
 
 .dark-theme {
   --bg-primary: #121212;
-  --text-primary: #e0e0e0;
+  --text-primary: #ffffff;
   --header-bg: #1a1a2e;
   --header-text: #e0e0e0;
   --tabs-bg: #2d3748;
@@ -28,22 +42,43 @@
   --tab-active-bg: #1a1a2e;
   --tab-active-border: #e0e0e0;
   --card-bg: #1e1e30;
-  --card-shadow: rgba(0,0,0,0.2);
-  --text-secondary: #a0aec0;
-  --text-tertiary: #cbd5e0;
-  --button-bg: #2d3748;
-  --button-text: #e0e0e0;
-  --button-active: #1a1a2e;
-  --series-text: #ff3333; /* Rouge plus vif pour le mode sombre */
+  --card-shadow: rgba(0, 0, 0, 0.2);
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #808080;
+  --button-bg: var(--primary-main);
+  --button-text: #ffffff;
+  --button-active: var(--primary-dark);
+  --series-text: var(--error-light);
 }
 
+/* Transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Material Design Typography */
 body {
   margin: 0;
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: 'Roboto', 'Inter', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
   background: var(--bg-primary);
   color: var(--text-primary);
-  transition: background 0.3s, color 0.3s;
+  line-height: 1.5;
+  font-size: 16px;
 }
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 0.5em;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
 
 #root {
   min-height: 100vh;
@@ -416,6 +451,58 @@ body {
   height: 100%;
   background: linear-gradient(to right, #4CAF50, #2196F3);
   transition: width 1s linear;
+}
+
+/* Styles pour la liste d'exercices */
+.exercises-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.exercise-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px var(--card-shadow);
+  transition: transform 0.2s ease;
+}
+
+.exercise-card:hover {
+  transform: translateY(-2px);
+}
+
+.exercise-card h3 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.exercise-card p {
+  color: var(--text-secondary);
+  margin: 0.25rem 0;
+}
+
+.exercise-card .youtube-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background: var(--secondary-light);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.exercise-card .youtube-button:hover {
+  background: var(--secondary-main);
+}
+
+.exercise-card .youtube-button svg {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 /* Styles pour les boutons du modal de fin d'entraînement */

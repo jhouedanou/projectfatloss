@@ -1,0 +1,149 @@
+.youtube-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background-color: #ff0000;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin: 10px auto;
+}
+
+.youtube-btn:hover {
+  background-color: #cc0000;
+}
+
+.youtube-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.youtube-popup {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 90%;
+  width: 800px;
+  max-height: 90vh;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.youtube-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.youtube-popup-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.youtube-frame-container {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.youtube-frame-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.youtube-popup p {
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.youtube-popup-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.youtube-popup-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.youtube-popup-actions button:first-child {
+  background-color: #ff0000;
+  color: white;
+}
+
+.youtube-popup-actions button:first-child:hover {
+  background-color: #cc0000;
+}
+
+.youtube-popup-actions button:last-child {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.youtube-popup-actions button:last-child:hover {
+  background-color: #e0e0e0;
+}
+
+.dark-theme .youtube-popup {
+  background: #2d2d2d;
+}
+
+.dark-theme .youtube-popup h3 {
+  color: #fff;
+}
+
+.dark-theme .youtube-popup p {
+  color: #ccc;
+}
+
+.dark-theme .youtube-popup-actions button:last-child {
+  background-color: #404040;
+  color: #fff;
+}
+
+.dark-theme .youtube-popup-actions button:last-child:hover {
+  background-color: #505050;
+}

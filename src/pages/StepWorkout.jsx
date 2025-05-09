@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getWorkoutPlan } from '../services/WorkoutCustomization';
-import { days } from '../data';
+import { Button, Box, Typography, Paper, LinearProgress } from '@mui/material';
+import ProgressTracker from '../components/ProgressTracker';
+import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon, { EquipIcon } from '../components/ExoIcon';
 import ProgressBar from '../components/ProgressBar';
+import GoogleFitButton from '../components/GoogleFitButton';
+import CompletionAnimation from '../components/CompletionAnimation';
+
 // Load icons map
 import iconsMap from '../../public/exo-icons.json';
 
@@ -22,11 +27,9 @@ function parseSets(sets) {
   return m ? parseInt(m[1], 10) : 1;
 }
 
-function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime }) {
-  // isExerciseTransition = true signifie qu'on est dans une pause entre exercices (inactif)
-  // isExerciseTransition = false signifie qu'on est dans une pause normale (bouton actif)
-  const defaultTime = reducedTime ? 10 : 15; // 10 secondes en mode Fat Burner, 15 secondes sinon
-  const [time, setTime] = useState(defaultTime); // 15 secondes de repos pour tous les types de pause
+function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, nextExercise }) {
+  const defaultTime = reducedTime ? 10 : 15;
+  const [time, setTime] = useState(defaultTime);
   
   useEffect(() => {
     if (time === 0) {
@@ -34,11 +37,9 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime }) {
       return;
     }
     
-    // Jouer les bips à 6, 3, 2, 1 secondes avant la fin
     if (time === 6 || time === 3 || time === 2 || time === 1) {
       playBeep();
     } else if (time === 0) {
-      // Deux bips rapides à la fin
       playBeep();
       setTimeout(() => playBeep(), 200);
     }
@@ -51,16 +52,21 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime }) {
     <div style={{textAlign:'center',marginTop:40}}>
       <h2>Pause {reducedTime && "Rapide"}</h2>
       <div style={{fontSize:40,margin:20}}>{time}s</div>
-      <p>Prépare-toi pour {isExerciseTransition ? "le prochain exercice" : "la prochaine série"} !</p>
+      {isExerciseTransition && nextExercise ? (
+        <div className="next-exercise">
+          <p>Prochain exercice :</p>
+          <h3 style={{color: 'var(--text-primary)', marginTop: '8px'}}>{nextExercise.name}</h3>
+          <p style={{color: 'var(--text-secondary', fontSize: '0.9em', marginTop: '4px'}}>
+            {nextExercise.sets} - {nextExercise.equip}
+          </p>
+        </div>
+      ) : (
+        <p>Prépare-toi pour la prochaine série !</p>
+      )}
       <button 
         className="timer-btn" 
-        style={{
-          marginTop:20, 
-          opacity: isExerciseTransition ? 0.5 : 1,
-          cursor: isExerciseTransition ? 'not-allowed' : 'pointer'
-        }} 
-        onClick={isExerciseTransition ? undefined : onSkip}
-        disabled={isExerciseTransition}
+        style={{marginTop:20}}
+        onClick={onSkip}
       >
         Passer la pause
       </button>
@@ -160,109 +166,29 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
         <p className="calorie-total">Vous avez brûlé <span>{totalCalories}</span> calories !</p>
         <p className="weight-total">Poids total soulevé : <span>{totalWeightLifted} kg</span></p>
         <p className="motivation-text">Excellent travail ! Continuez ainsi pour atteindre vos objectifs.</p>
+        
+        {/* Ajouter le bouton Google Fit */}
+        <div className="google-fit-section">
+          <GoogleFitButton 
+            exercise={{
+              name: day.title,
+              desc: `Séance complète : ${day.exercises.length} exercices`,
+              caloriesPerSet: [totalCalories, totalCalories],
+              totalSets: 1,
+              googleFitActivity: {
+                type: 'strength_training',
+                name: day.title,
+                muscleGroups: ['full_body']
+              }
+            }} 
+          />
+        </div>
+        
         <div className="modal-actions">
           <button className="timer-btn save-btn" onClick={handleSave}>Enregistrer</button>
           <button className="timer-btn close-btn" onClick={onClose}>Fermer</button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMode }) {
-  const [timer, setTimer] = useState(exo.timer ? (exo.duration || 30) : null); // 30 secondes par défaut
-  const [running, setRunning] = useState(false);
-  const [showCalories, setShowCalories] = useState(false);
-  
-  // Always use the maximum calories per set value
-  const caloriesPerSet = exo.caloriesPerSet ? 
-    exo.caloriesPerSet[1] : // Take the maximum value (second value in the array)
-    Math.round(10 + Math.random() * 5); // Increased fallback if no data provided
-  
-  useEffect(() => {
-    if (!exo.timer || !running) return;
-    if (timer === 0) return;
-    
-    // Jouer des bips à certains moments clés du chronomètre
-    if (timer === 10 || timer === 5 || timer === 4 || timer === 3 || timer === 2 || timer === 1) {
-      playBeep();
-    }
-    
-    const id = setTimeout(() => setTimer(t => t - 1), 1000);
-    return () => clearTimeout(id);
-  }, [timer, running, exo.timer]);
-  
-  useEffect(() => { if (timer === 0 && running) handleDone(); }, [timer, running]);
-  
-  const iconType = iconsMap[exo.name] || 'dumbbell';
-  
-  const handleDone = () => {
-    // Show calories animation
-    setShowCalories(true);
-    
-    // Notify parent about calories burned
-    onCaloriesBurned(caloriesPerSet);
-    
-    // Hide calories animation after 2 seconds
-    setTimeout(() => {
-      setShowCalories(false);
-      onDone();
-    }, 2000);
-  };
-  
-  // Format le temps pour l'affichage mm:ss
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
-  
-  // Calcule le pourcentage du temps écoulé
-  const calculateProgress = () => {
-    if (!exo.timer || !exo.duration) return 0;
-    return 100 - (timer / exo.duration * 100);
-  };
-  
-  // Détermine la classe du timer en fonction du temps restant
-  const getTimerClass = () => {
-    if (!exo.timer) return '';
-    if (timer <= 5) return 'critical';
-    if (timer <= 10) return 'warning';
-    return '';
-  };
-  
-  return (
-    <div className="exo-card" style={{textAlign:'center',marginTop:32}}>
-      <ExoIcon type={iconType} size={48} />
-      <div className="exo-title" style={{fontSize:'1.3rem',margin:'12px 0'}}>{exo.name}</div>
-      <div className="exo-series">Série <span className="series-current">{setNum+1}</span> / {totalSets} &nbsp; <span style={{color:'#ff0000'}}>{exo.sets}</span></div>
-      <div className="exo-equip"><EquipIcon equip={exo.equip} />{exo.equip}</div>
-      <div className="exo-desc" style={{marginBottom:16}}>{exo.desc}</div>
-      {exo.timer ? (
-        <div className="exercise-timer">
-          <div className="timer-label">
-            {running ? 'En cours...' : 'Prêt ?'}
-          </div>
-          <div className={`timer-display ${getTimerClass()}`}>
-            {formatTime(timer)}
-          </div>
-          <div className="timer-progress">
-            <div 
-              className="timer-progress-bar" 
-              style={{ width: `${calculateProgress()}%` }}
-            ></div>
-          </div>
-          {!running ? (
-            <button className="timer-btn" onClick={()=>setRunning(true)}>Démarrer</button>
-          ) : (
-            <button className="timer-btn" onClick={()=>{setRunning(false);setTimer(exo.duration||30);}}>Réinitialiser</button>
-          )}
-        </div>
-      ) : (
-        <button className="timer-btn" onClick={handleDone} style={{marginTop:16}}>Terminer la série</button>
-      )}
-      
-      <CalorieDisplay calories={caloriesPerSet} visible={showCalories} />
     </div>
   );
 }
@@ -277,6 +203,7 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [showEndOfDayModal, setShowEndOfDayModal] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false); // Nouvel état pour suivre si l'entraînement est terminé
+  const [stepMode, setStepMode] = useState(false); // État pour le mode étape par étape
   const isFirstRender = useRef(true);
   
   // Utiliser le programme d'entraînement personnalisé
@@ -324,10 +251,9 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
   };
   
   const handleSkipPause = () => {
-    // Ne peut être appelé que si ce n'est pas une transition entre exercices
-    if (!isExerciseTransition) {
-      setPause(false);
-    }
+    // Autoriser le saut de la pause dans tous les cas
+    setPause(false);
+    setIsExerciseTransition(false);
   };
   
   const handleCaloriesBurned = (calories) => {
@@ -340,15 +266,14 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
     if (setNum < totalSets - 1) {
       setSetNum(s => s + 1);
       setPause(true);
-      setIsExerciseTransition(fatBurnerMode ? true : false); // En mode Fat Burner, on réduit le temps de pause entre les séries
+      setIsExerciseTransition(fatBurnerMode ? true : false);
     } else if (step < total - 1) {
       setPause(true);
-      setIsExerciseTransition(true); // Pause forcée entre exercices
+      setIsExerciseTransition(true);
       setSetNum(0);
       setStep(s => s + 1);
     } else {
-      // Workout completed - show end of day modal instead of simple message
-      setWorkoutCompleted(true); // Marquer l'entraînement comme terminé
+      setWorkoutCompleted(true);
       setShowEndOfDayModal(true);
     }
   };
@@ -381,37 +306,59 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
         </div>
       )}
       
-      <ProgressBar current={step+1} total={total} />
-      <div style={{textAlign:'right',marginBottom:8}}>{step+1} / {total}</div>
-      
-      {/* Current calories counter */}
-      <div className="calories-counter">
-        Calories brûlées: <span>{totalCaloriesBurned}</span>
-      </div>
-      
-      {/* Floating calorie counter */}
-      <FloatingCalorieCounter 
-        calories={totalCaloriesBurned} 
-        exerciseCompleted={workoutCompleted}
-        fatBurnerMode={fatBurnerMode} 
-      />
-      
-      {pause ? (
-        <Pause 
-          onEnd={handlePauseEnd} 
-          onSkip={handleSkipPause} 
-          isExerciseTransition={isExerciseTransition}
-          reducedTime={fatBurnerMode}
-        />
+      {!stepMode ? (
+        <>
+          <button className="timer-btn" style={{marginBottom:16}} onClick={()=>setStepMode(true)}>
+            Commencer
+          </button>
+          <div className="exercises-list">
+            {day.exercises.map((exo, i) => (
+              <div key={i} className="exercise-card">
+                <h3>{exo.name}</h3>
+                <p>{exo.sets} séries</p>
+                <p>{exo.equip}</p>
+                <p>{exo.desc}</p>
+                <YouTubeButton exercise={exo} />
+              </div>
+            ))}
+          </div>
+        </>
       ) : (
-        <StepSet 
-          exo={exo} 
-          setNum={setNum} 
-          totalSets={totalSets} 
-          onDone={next}
-          onCaloriesBurned={handleCaloriesBurned}
-          fatBurnerMode={fatBurnerMode}
-        />
+        <>
+          <ProgressTracker 
+            currentExercise={step + 1}
+            totalExercises={total}
+            currentSet={setNum + 1}
+            totalSets={totalSets}
+            calories={totalCaloriesBurned}
+            fatBurnerMode={fatBurnerMode}
+          />
+
+          {pause ? (
+            <Pause 
+              onEnd={handlePauseEnd} 
+              onSkip={handleSkipPause} 
+              isExerciseTransition={isExerciseTransition}
+              reducedTime={fatBurnerMode}
+              nextExercise={step < total - 1 ? day.exercises[step + 1] : null}
+            />
+          ) : (
+            <StepSet 
+              exo={exo} 
+              setNum={setNum} 
+              totalSets={totalSets} 
+              onDone={next}
+              onCaloriesBurned={handleCaloriesBurned}
+              fatBurnerMode={fatBurnerMode}
+            />
+          )}
+          
+          <FloatingCalorieCounter 
+            calories={totalCaloriesBurned} 
+            exerciseCompleted={workoutCompleted}
+            fatBurnerMode={fatBurnerMode} 
+          />
+        </>
       )}
       
       {/* End of day modal */}
@@ -425,5 +372,228 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
         />
       )}
     </div>
+  );
+}
+
+function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMode }) {
+  const [timer, setTimer] = useState(exo.timer ? (exo.duration || 30) : null);
+  const [running, setRunning] = useState(false);
+  const [showCalories, setShowCalories] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [completionAnimation, setCompletionAnimation] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const iconType = iconsMap[exo.name] || 'dumbbell';
+  
+  // Calculer les calories pour la série
+  const caloriesPerSet = exo.caloriesPerSet ? 
+    Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
+
+  useEffect(() => {
+    if (!exo.timer || !running) return;
+    if (timer === 0) return;
+    
+    // Jouer des bips à certains moments clés du chronomètre
+    if (timer === 10 || timer === 5 || timer === 4 || timer === 3 || timer === 2 || timer === 1) {
+      playBeep();
+    }
+    
+    const id = setTimeout(() => setTimer(t => t - 1), 1000);
+    return () => clearTimeout(id);
+  }, [timer, running, exo.timer]);
+  
+  useEffect(() => { if (timer === 0 && running) handleDone(); }, [timer, running]);
+  
+  const handleDone = () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setCompletionAnimation(true);
+    
+    // Montrer l'animation des calories
+    setShowCalories(true);
+    onCaloriesBurned(caloriesPerSet);
+    
+    // Afficher le message de succès avec un délai
+    setTimeout(() => {
+      setShowSuccessMessage(true);
+      // Cacher les animations et passer à l'exercice suivant
+      setTimeout(() => {
+        setShowCalories(false);
+        setCompletionAnimation(false);
+        setShowSuccessMessage(false);
+        setIsSubmitting(false);
+        onDone();
+      }, 1000);
+    }, 500);
+  };
+  
+  // Format le temps pour l'affichage mm:ss
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+  
+  // Calcule le pourcentage du temps écoulé
+  const calculateProgress = () => {
+    if (!exo.timer || !exo.duration) return 0;
+    return 100 - (timer / exo.duration * 100);
+  };
+  
+  // Détermine la classe du timer en fonction du temps restant
+  const getTimerClass = () => {
+    if (!exo.timer) return '';
+    if (timer <= 5) return 'critical';
+    if (timer <= 10) return 'warning';
+    return '';
+  };
+  
+  return (
+    <Box
+      sx={{
+        textAlign: 'center',
+        mt: 4,
+        position: 'relative',
+        '& .MuiButton-root': {
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+          },
+        },
+      }}
+    >
+      <ExoIcon type={iconType} size={48} />
+      
+      <Typography 
+        variant="h5" 
+        gutterBottom 
+        sx={{ 
+          fontWeight: 'bold',
+          color: 'text.primary',
+        }}
+      >
+        {exo.name}
+      </Typography>
+      
+      <Typography variant="body1" color="text.secondary">
+        Série {setNum + 1} / {totalSets}
+      </Typography>
+      
+      <Typography 
+        variant="body2" 
+        color="text.primary"
+        sx={{ 
+          fontSize: '1.1rem',
+          fontWeight: 500,
+          opacity: theme => theme.palette.mode === 'dark' ? 1 : 0.87,
+          mb: 2
+        }}
+      >
+        {exo.desc}
+      </Typography>
+
+      {/* Animation de complétion */}
+      <CompletionAnimation 
+        show={completionAnimation}
+        message={showSuccessMessage ? "Série terminée !" : null}
+      />
+
+      {/* Timer pour les exercices chronométrés */}
+      {exo.timer && (
+        <Box
+          sx={{
+            mt: 2,
+            p: 2,
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            boxShadow: 1,
+          }}
+        >
+          <Typography
+            variant="h4"
+            className={getTimerClass()}
+            sx={{
+              fontFamily: 'monospace',
+              color: timer <= 5 ? 'error.main' : 
+                     timer <= 10 ? 'warning.main' : 'text.primary',
+              animation: timer <= 10 ? 'pulse 1s infinite' : 'none',
+              '@keyframes pulse': {
+                '0%': { transform: 'scale(1)' },
+                '50%': { transform: 'scale(1.05)' },
+                '100%': { transform: 'scale(1)' },
+              },
+            }}
+          >
+            {formatTime(timer)}
+          </Typography>
+          
+          <LinearProgress
+            variant="determinate"
+            value={calculateProgress()}
+            sx={{
+              mt: 2,
+              height: 8,
+              borderRadius: 4,
+              bgcolor: 'grey.200',
+              '& .MuiLinearProgress-bar': {
+                bgcolor: timer <= 5 ? 'error.main' : 
+                         timer <= 10 ? 'warning.main' : 'success.main',
+              },
+            }}
+          />
+          
+          <Button
+            variant="contained"
+            color={running ? 'error' : 'primary'}
+            onClick={() => setRunning(r => !r)}
+            sx={{ mt: 2 }}
+          >
+            {running ? 'Pause' : 'Démarrer'}
+          </Button>
+        </Box>
+      )}
+
+      {/* Bouton de fin de série */}
+      <Button 
+        variant="contained" 
+        color="primary"
+        onClick={handleDone}
+        disabled={isSubmitting}
+        sx={{
+          mt: 2,
+          minWidth: 200,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {isSubmitting ? 'En cours...' : 'Terminer'}
+      </Button>
+
+      {/* Affichage des calories */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
+          transition: 'all 0.3s ease',
+          opacity: showCalories ? 1 : 0,
+          transform: showCalories ? 'translateY(0)' : 'translateY(20px)',
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            borderRadius: 2,
+            bgcolor: 'success.main',
+            color: 'white',
+          }}
+        >
+          <Typography variant="h6">
+            +{caloriesPerSet} calories !
+          </Typography>
+        </Paper>
+      </Box>
+    </Box>
   );
 }

@@ -1,0 +1,32 @@
+.google-fit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background-color: #4285f4;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.google-fit-btn:hover {
+  background-color: #3367d6;
+}
+
+.google-fit-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.google-fit-btn.loading {
+  opacity: 0.8;
+}
+
+.google-fit-btn img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}

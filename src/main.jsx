@@ -1,7 +1,25 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom/client';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { createAppTheme } from './theme';
 import App from './pages/App';
 import './index.css';
-import './i18n'; // Importation du système de traduction
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import './i18n';
 
-createRoot(document.getElementById('root')).render(<App />);
+// Récupérer le thème initial depuis le localStorage
+const initialDarkMode = localStorage.getItem('theme') !== 'light';
+const theme = createAppTheme(initialDarkMode);
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
+  </React.StrictMode>
+);
