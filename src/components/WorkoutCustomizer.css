@@ -106,6 +106,13 @@
 .exercises-list {
   margin-bottom: 20px;
 }
+.exercises-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))
+    ;
+ column-gap: normal;
+
+}
 
 .exercises-list h3 {
   font-size: 1.1rem;

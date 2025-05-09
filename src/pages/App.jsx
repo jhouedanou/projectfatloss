@@ -19,28 +19,15 @@ import '../components/WeightTracker.css';
 import '../components/WorkoutCustomizer.css'; // Importer les styles CSS
 import '../components/LoginForm.css'; // Importer les styles CSS du formulaire de connexion
 import '../components/SyncPanel.css'; // Importer les styles CSS du panneau de synchronisation
-import HomeCarousel from '../components/HomeCarousel';
+import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
+import DayPills from '../components/DayPills';
 
 function Tabs({ days, current, setCurrent }) {
-  const { t } = useTranslation();
-  // Vérifier si days est défini et non vide
   if (!days || days.length === 0) {
-    return null; // Ne rien afficher si days est vide
+    return null;
   }
-  
-  return (
-    <nav className="tabs">
-      {days.map((d, i) => (
-        <div
-          key={i}
-          className={"tab" + (i === current ? " active" : "")}
-          onClick={() => setCurrent(i)}
-        >
-          {t('app.tabs.day')} {i + 1}
-        </div>
-      ))}
-    </nav>
-  );
+
+  return <DayPills days={days} current={current} setCurrent={setCurrent} />;
 }
 
 export default function App() {
@@ -345,44 +332,26 @@ export default function App() {
         {showCustomizer && <WorkoutCustomizer onClose={handleCloseCustomizer} />}
         
         {viewMode === 'workout' ? (
-          // Mode Entraînement
           <>
             {isPlanAvailable && (
               <>
                 {!stepMode ? (
                   <div className="day-content">
-                    <HomeCarousel
-                      days={workoutPlan}
-                      current={current}
-                      setCurrent={(i) => {
-                        setCurrent(i);
-                        setStepMode(false);
-                      }}
-                      fatBurnerMode={fatBurnerMode}
-                    />
+                    {/* Sélecteur de jour */}
+                    <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
                     <h2 style={{ fontSize: '1.1rem', marginBottom: 16 }}>{workoutPlan[current].title}</h2>
-                    
-                    {/* Bouton mode Fat Burner */}
+                    {/* Bannière Fat Burner */}
                     {fatBurnerMode && (
                       <div className="fat-burner-banner">
                         <span className="fat-burner-icon">🔥</span>
                         <span className="fat-burner-text">{t('mode.fatBurner')}</span>
                       </div>
                     )}
-                    
                     <button className="timer-btn" style={{marginBottom:16}} onClick={()=>setStepMode(true)}>
                       {t('workout.start')}
                     </button>
-                    {workoutPlan[current].exercises.map((exo, i) => (
-                      <div className="exo-card" key={i}>
-                        <div className="exo-header">
-                          <span className="exo-title">{exo.name}</span>
-                          <span className="exo-series">{fatBurnerMode ? t('workout.fatBurnerSets', { sets: exo.sets }) : exo.sets}</span>
-                        </div>
-                        <div className="exo-equip">{t('workout.equipment')}: {exo.equip}</div>
-                        <div className="exo-desc">{exo.desc}</div>
-                      </div>
-                    ))}
+                    {/* Carousel des exercices du jour */}
+                    <HomeExerciseCarousel exercises={workoutPlan[current].exercises} />
                   </div>
                 ) : (
                   <StepWorkout 
