@@ -7,6 +7,7 @@ import ExoIcon, { EquipIcon } from '../components/ExoIcon';
 import ProgressBar from '../components/ProgressBar';
 import GoogleFitButton from '../components/GoogleFitButton';
 import CompletionAnimation from '../components/CompletionAnimation';
+import DayPills from '../components/DayPills'; // <-- AJOUTE CETTE LIGNE
 
 import iconsMap from '../../public/exo-icons.json';
 
@@ -180,7 +181,8 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
 
 import { saveWorkout } from '../services/WorkoutStorage';
 
-export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMode }) {
+export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, fatBurnerMode }) {
+  const [dayIndex, setDayIndex] = useState(initialDayIndex || 0); // Ajout d'un état local pour dayIndex
   const [step, setStep] = useState(0);
   const [pause, setPause] = useState(false);
   const [isExerciseTransition, setIsExerciseTransition] = useState(false);
@@ -286,6 +288,13 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
         </div>
       )}
       
+      <DayPills 
+        days={workoutPlan} 
+        current={dayIndex} 
+        setCurrent={setDayIndex}
+        setStepMode={setStepMode}  // Ajout de cette prop
+      />
+      
       {!stepMode ? (
         <>
           <button className="timer-btn" style={{marginBottom:16}} onClick={()=>setStepMode(true)}>
@@ -371,6 +380,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   const [isPulsing, setIsPulsing] = useState(false);
   const [currentRep, setCurrentRep] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [showCalories, setShowCalories] = useState(false);
+  const [caloriesToShow, setCaloriesToShow] = useState(0); // Ajout
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -380,24 +391,22 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           const newRep = prev + 1;
           if (newRep <= exo.nbRep) {
             playBeep();
-            // Calculer et afficher les calories après chaque répétition
             const calories = Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2);
-            onCaloriesBurned(calories);
+            onCaloriesBurned(calories); // Mise à jour correcte des calories
             onExerciseCompleted();
             return newRep;
           }
-          return exo.nbRep; // Empêche d'aller au-delà de nbRep
+          return exo.nbRep;
         });
-      }, 2000); // 2 secondes entre chaque répétition
+      }, 2000);
 
       timerRef.current = interval;
       return () => clearInterval(interval);
     }
-  }, [isPulsing, exo.nbRep, exo.caloriesPerSet]);
+  }, [isPulsing, exo.nbRep, exo.caloriesPerSet, onCaloriesBurned, onExerciseCompleted]);
 
   useEffect(() => {
     if (currentRep === exo.nbRep) {
-      // Affiche "OK !" pendant 2 secondes
       setShowOverlay(true);
       setTimeout(() => {
         setShowOverlay(false);
@@ -422,6 +431,18 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     }
   };
 
+  const handleFinish = () => {
+    const calories = exo.caloriesPerSet ? Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
+    setCaloriesToShow(calories); // Mémorise la valeur à afficher
+    onCaloriesBurned(calories);
+    onExerciseCompleted();
+    setShowCalories(true);
+    setTimeout(() => {
+      setShowCalories(false);
+      onDone();
+    }, 2000);
+  };
+
   const caloriesPerSet = exo.caloriesPerSet ? 
     Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
 
@@ -433,7 +454,11 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           p: 3, 
           mb: 2, 
           position: 'relative',
-          minHeight: 300
+          minHeight: 300,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}
       >
         {showOverlay && (
@@ -506,10 +531,12 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           Longueur de la série : <span style={{ fontWeight: 'bold', color: 'red' }}>{exo.sets}</span>
         </Typography>
 
+        <YouTubeButton exercise={exo} /> {/* Ajout du bouton YouTube */}
+
         <Button 
           variant="contained" 
           color="primary"
-          onClick={onDone}
+          onClick={handleFinish}
           sx={{
             mt: 2,
             minWidth: 200,
@@ -534,30 +561,33 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           {isPulsing ? 'Arrêter le rythme' : 'Démarrer le rythme'}
         </Button>
 
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 20,
-            right: 20,
-            transition: 'all 0.3s ease',
-            opacity: 1,
-            transform: 'translateY(0)',
-          }}
-        >
-          <Paper
-            elevation={3}
+        {showCalories && (
+          <Box
             sx={{
-              p: 2,
-              borderRadius: 2,
-              bgcolor: 'success.main',
-              color: 'white',
+              position: 'fixed',
+              bottom: 20,
+              right: 20,
+              transition: 'all 0.3s ease',
+              opacity: 1,
+              transform: 'translateY(0)',
+              animation: 'fadeInOut 2s ease-in-out',
             }}
           >
-            <Typography variant="h6">
-              +{caloriesPerSet} calories !
-            </Typography>
-          </Paper>
-        </Box>
+            <Paper
+              elevation={3}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: 'success.main',
+                color: 'white',
+              }}
+            >
+              <Typography variant="h6">
+                +{caloriesToShow} calories !
+              </Typography>
+            </Paper>
+          </Box>
+        )}
       </Paper>
     </Box>
   );

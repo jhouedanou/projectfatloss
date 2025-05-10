@@ -2,8 +2,13 @@ import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-function DayPills({ days, current, setCurrent }) {
+function DayPills({ days, current, setCurrent, setStepMode }) {
   const { t } = useTranslation();
+
+  const handleDayClick = (index) => {
+    setCurrent(index);
+    setStepMode && setStepMode(false);
+  };
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -16,10 +21,7 @@ function DayPills({ days, current, setCurrent }) {
             key={index}
             variant="outlined"
             size="small"
-            onClick={() => {
-              setCurrent(index);
-              setStepMode(false);
-            }}
+            onClick={() => handleDayClick(index)}
             sx={{
               borderRadius: '20px',
               padding: '8px 16px',
