@@ -193,14 +193,24 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const isFirstRender = useRef(true);
   
   const workoutPlan = getWorkoutPlan();
-  const day = workoutPlan[dayIndex];
-  const total = day.exercises.length;
-  const exo = day.exercises[step];
-  const totalSets = fatBurnerMode 
-    ? Math.max(1, Math.floor(parseSets(exo.sets) / 2))
-    : parseSets(exo.sets);
-  
-  const fatBurnerCalorieFactor = fatBurnerMode ? 1.5 : 1;
+  const day = workoutPlan?.[dayIndex];
+  const total = day?.exercises?.length || 0;
+  const exo = day?.exercises?.[step];
+  const totalSets = exo
+    ? (fatBurnerMode 
+        ? Math.max(1, Math.floor(parseSets(exo.sets) / 2))
+        : parseSets(exo.sets))
+    : 1;
+
+  // Ajout d'une vérification pour éviter le crash si les données ne sont pas prêtes
+  if (!workoutPlan || !day || !exo) {
+    return (
+      <div style={{textAlign: 'center', marginTop: 40}}>
+        <h2>Chargement...</h2>
+        <p>Veuillez patienter.</p>
+      </div>
+    );
+  }
   
   useEffect(()=>{
     setStep(0);
