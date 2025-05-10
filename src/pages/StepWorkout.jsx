@@ -383,7 +383,40 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
   const [completionAnimation, setCompletionAnimation] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const iconType = iconsMap[exo.name] || 'dumbbell';
-  
+  const [isPulsing, setIsPulsing] = useState(false);
+  const [pulseInterval, setPulseInterval] = useState(null);
+  const [repsRemaining, setRepsRemaining] = useState(parseSets(exo.sets));
+  const [showOverlay, setShowOverlay] = useState(false);
+
+  const handlePulse = () => {
+    if (isPulsing) {
+      clearInterval(pulseInterval);
+      setIsPulsing(false);
+    } else {
+      const interval = setInterval(() => {
+        navigator.vibrate(200); // Vibration de 200 ms
+        playBeep(); // Jouer le son
+
+        if (repsRemaining > 0) {
+          setRepsRemaining(prev => Math.max(prev - 1, 0)); // Ne pas décrémenter en dessous de 0
+          setShowOverlay(true);
+          setTimeout(() => setShowOverlay(false), 1000); // Afficher l'overlay pendant 1 seconde
+        } else if (repsRemaining === 0 && isPulsing) {
+          console.log('Arrêt du rythme, répétitions atteintes à 0'); // Log pour le débogage
+          clearInterval(interval);
+          setIsPulsing(false);
+          console.log('Rythme arrêté'); // Log pour confirmer l'arrêt
+          if (!showOverlay) {
+            setShowOverlay(true);
+            setTimeout(() => setShowOverlay(false), 1000); // Afficher l'overlay pendant 1 seconde
+          }
+        }
+      }, 4000); // Changer l'intervalle à 4 secondes
+      setPulseInterval(interval);
+      setIsPulsing(true);
+    }
+  };
+
   // Calculer les calories pour la série
   const caloriesPerSet = exo.caloriesPerSet ? 
     Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
@@ -472,6 +505,10 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
         }}
       >
         {exo.name}
+      </Typography>
+      
+      <Typography variant="body1" color="text.secondary">
+        Matériel : <span>{exo.equip}</span>
       </Typography>
       
       <Typography variant="body1" color="text.secondary">
@@ -576,6 +613,21 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
         {isSubmitting ? 'En cours...' : 'Terminer'}
       </Button>
 
+      {/* Bouton de rythme */}
+      <Button 
+        variant="contained" 
+        color="primary"
+        onClick={handlePulse}
+        sx={{
+          mt: 2,
+          minWidth: 200,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {isPulsing ? 'Arrêter le rythme' : 'Démarrer le rythme'}
+      </Button>
+
       {/* Affichage des calories */}
       <Box
         sx={{
@@ -601,6 +653,23 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
           </Typography>
         </Paper>
       </Box>
+
+      {/* Overlay pour afficher le nombre de répétitions restantes */}
+      {showOverlay && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          color: 'white',
+          padding: '20px',
+          borderRadius: '10px',
+          zIndex: 1000,
+        }}>
+          {repsRemaining} répétition(s) restante(s)
+        </div>
+      )}
     </Box>
   );
 }
