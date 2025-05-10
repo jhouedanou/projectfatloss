@@ -365,25 +365,31 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
     if (isPulsing) {
       const interval = setInterval(() => {
         setCurrentRep(prev => {
-          if (prev >= exo.nbRep - 1) {
-            clearInterval(interval);
-            setShowOverlay(true);
-            setTimeout(() => {
-              setShowOverlay(false);
-              setIsPulsing(false);
-              onDone();
-            }, 2000);
-            return exo.nbRep;
+          const newRep = prev + 1;
+          if (newRep <= exo.nbRep) {
+            playBeep();
+            return newRep;
           }
-          playBeep();
-          return prev + 1;
+          return exo.nbRep; // Empêche d'aller au-delà de nbRep
         });
-      }, 2000);
+      }, 2000); // 2 secondes entre chaque répétition
 
       timerRef.current = interval;
       return () => clearInterval(interval);
     }
-  }, [isPulsing, exo.nbRep, onDone]);
+  }, [isPulsing, exo.nbRep]);
+
+  useEffect(() => {
+    if (currentRep === exo.nbRep) {
+      // Affiche "OK !" pendant 2 secondes
+      setShowOverlay(true);
+      setTimeout(() => {
+        setShowOverlay(false);
+        setIsPulsing(false);
+        onDone();
+      }, 2000);
+    }
+  }, [currentRep, exo.nbRep, onDone]);
 
   const handlePulse = () => {
     if (!isPulsing) {
