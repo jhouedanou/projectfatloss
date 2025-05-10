@@ -190,7 +190,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
-  const [stepMode, setStepMode] = useState(false);
   const isFirstRender = useRef(true);
   
   const workoutPlan = getWorkoutPlan();
@@ -315,77 +314,55 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         days={workoutPlan} 
         current={dayIndex} 
         setCurrent={setDayIndex}
-        setStepMode={setStepMode}  // Ajout de cette prop
       />
       
-      {!stepMode ? (
-        <>
-          <button className="timer-btn" style={{marginBottom:16}} onClick={()=>setStepMode(true)}>
-            Commencer
-          </button>
-          <div className="exercises-list">
-            {day.exercises.map((exo, i) => (
-              <div key={i} className="exercise-card">
-                <h3>{exo.name}</h3>
-                <p>{exo.sets} séries</p>
-                <p>{exo.equip}</p>
-                <p>{exo.desc}</p>
-                <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(exo.name)}`} target="_blank" rel="noopener noreferrer">
-                  <button className="youtube-button">Voir sur YouTube</button>
-                </a>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <ProgressTracker 
-            currentExercise={step + 1}
-            totalExercises={total}
-            currentSet={setNum + 1}
-            totalSets={totalSets}
-            calories={totalCaloriesBurned}
+      <>
+        <ProgressTracker 
+          currentExercise={step + 1}
+          totalExercises={total}
+          currentSet={setNum + 1}
+          totalSets={totalSets}
+          calories={totalCaloriesBurned}
+          fatBurnerMode={fatBurnerMode}
+        />
+
+        {pause ? (
+          <Pause 
+            onEnd={handlePauseEnd} 
+            onSkip={handleSkipPause} 
+            isExerciseTransition={isExerciseTransition}
+            reducedTime={fatBurnerMode}
+            day={day}
+            step={step}
+            total={total}
+          />
+        ) : (
+          <StepSet 
+            exo={exo} 
+            setNum={setNum} 
+            totalSets={totalSets} 
+            onDone={next}
+            onCaloriesBurned={handleCaloriesBurned}
+            onExerciseCompleted={handleExerciseCompleted}
             fatBurnerMode={fatBurnerMode}
           />
-
-          {pause ? (
-            <Pause 
-              onEnd={handlePauseEnd} 
-              onSkip={handleSkipPause} 
-              isExerciseTransition={isExerciseTransition}
-              reducedTime={fatBurnerMode}
-              day={day}
-              step={step}
-              total={total}
-            />
-          ) : (
-            <StepSet 
-              exo={exo} 
-              setNum={setNum} 
-              totalSets={totalSets} 
-              onDone={next}
-              onCaloriesBurned={handleCaloriesBurned}
-              onExerciseCompleted={handleExerciseCompleted}
-              fatBurnerMode={fatBurnerMode}
-            />
-          )}
-          
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 50,
-              right: 20,
-              zIndex: 1000
-            }}
-          >
-            <FloatingCalorieCounter 
-              calories={totalCaloriesBurned} 
-              exerciseCompleted={exerciseCompleted} 
-              fatBurnerMode={fatBurnerMode}
-            />
-          </Box>
-        </>
-      )}
+        )}
+        
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 50,
+            right: 20,
+            zIndex: 1000
+          }}
+        >
+          <FloatingCalorieCounter 
+            calories={totalCaloriesBurned} 
+            exerciseCompleted={exerciseCompleted} 
+            fatBurnerMode={fatBurnerMode}
+          />
+        </Box>
+      </>
       
       {workoutCompleted && (
         <EndOfDayModal 
@@ -416,9 +393,6 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           const newRep = prev + 1;
           if (newRep <= exo.nbRep) {
             playBeep();
-            const calories = Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2);
-            onCaloriesBurned(calories); // Mise à jour correcte des calories
-            onExerciseCompleted();
             return newRep;
           }
           return exo.nbRep;
@@ -428,7 +402,18 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
       timerRef.current = interval;
       return () => clearInterval(interval);
     }
-  }, [isPulsing, exo.nbRep, exo.caloriesPerSet, onCaloriesBurned, onExerciseCompleted]);
+  }, [isPulsing, exo.nbRep]);
+
+  // Ajout : simuler un clic sur "Terminer" 2s après la dernière répétition
+  useEffect(() => {
+    if (currentRep === exo.nbRep && isPulsing) {
+      const timeout = setTimeout(() => {
+        handleFinish();
+        setIsPulsing(false);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentRep, exo.nbRep, isPulsing]);
 
   useEffect(() => {
     if (currentRep === exo.nbRep) {
