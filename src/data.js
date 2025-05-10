@@ -9,6 +9,7 @@ export const days = [
         desc: "Position assise ou allongée, poussez les haltères vers le haut en alignant les coudes avec les épaules. Travaille les pectoraux, épaules et triceps.",
         caloriesPerSet: [10, 12],
         totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Dumbbell Press',
@@ -22,6 +23,7 @@ export const days = [
         desc: "Debout, bras le long du corps, soulevez les haltères latéralement jusqu'à hauteur d'épaules. Cible le deltoïde moyen.",
         caloriesPerSet: [6, 8],
         totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Lateral Raises',
@@ -35,6 +37,7 @@ export const days = [
         desc: "Sur banc incliné (30-45°), poussez les haltères vers le haut. Accentue le travail du haut des pectoraux.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Incline Dumbbell Press',
@@ -48,6 +51,7 @@ export const days = [
         desc: "Debout, bras devant vous, soulevez les haltères jusqu'à hauteur d'épaules. Cible le deltoïde antérieur.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Front Raises',
@@ -61,6 +65,7 @@ export const days = [
         desc: "Allongé ou assis, haltère tenu à deux mains au-dessus de la tête, pliez les coudes puis tendez les bras. Isole les triceps.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Triceps Extensions',
@@ -74,6 +79,7 @@ export const days = [
         desc: "Mains sur un banc/chaise, fléchissez les coudes pour descendre le corps puis remontez. Travaille triceps et pectoraux.",
         caloriesPerSet: [10, 12],
         totalSets: 3,
+        nbRep: 0,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Dips',
@@ -87,6 +93,7 @@ export const days = [
         desc: "Allongé sur le dos, haltère sur la poitrine, soulevez les épaules du sol. Intensifie le travail abdominal.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 25,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Crunches',
@@ -102,6 +109,7 @@ export const days = [
         duration: 60,
         caloriesPerSet: [4, 6],
         totalSets: 3,
+        nbRep: 0,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Plank',
@@ -120,6 +128,7 @@ export const days = [
         desc: "Un genou et une main sur un banc, tirez l'haltère vers la hanche en gardant le coude près du corps. Isole un côté du dos à la fois.",
         caloriesPerSet: [8, 10],
         totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'One-Arm Dumbbell Row',
@@ -133,6 +142,7 @@ export const days = [
         desc: "Penché en avant, dos droit, tirez la barre vers le ventre puis redescendez. Travaille l'ensemble du dos.",
         caloriesPerSet: [10, 13],
         totalSets: 4,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Barbell Row',
@@ -146,6 +156,7 @@ export const days = [
         desc: "Penché en avant, tirez les haltères vers les hanches puis redescendez. Alternative au rowing barre.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Two-Arm Dumbbell Row',
@@ -159,6 +170,7 @@ export const days = [
         desc: "Debout, pliez les coudes pour ramener les haltères vers les épaules. Cible les biceps.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Dumbbell Bicep Curl',
@@ -172,6 +184,7 @@ export const days = [
         desc: "Comme le curl biceps mais paumes face à face. Travaille biceps et avant-bras.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Hammer Curl',
@@ -185,6 +198,7 @@ export const days = [
         desc: "Debout, soulevez les épaules vers les oreilles sans plier les coudes. Isole les trapèzes.",
         caloriesPerSet: [5, 7],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Shrugs',
@@ -200,6 +214,7 @@ export const days = [
         duration: 30,
         caloriesPerSet: [12, 15],
         totalSets: 3,
+        nbRep: 0,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Mountain Climbers',
@@ -213,6 +228,7 @@ export const days = [
         desc: "Assis, pieds décollés, tournez le torse alternativement de chaque côté. Cible les obliques.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Russian Twists',
@@ -231,6 +247,7 @@ export const days = [
         desc: "Debout, pieds écartés largeur d'épaules, barre sur les épaules, descendez comme pour s'asseoir puis remontez. Travaille quadriceps, ischio-jambiers et fessiers.",
         caloriesPerSet: [12, 15],
         totalSets: 4,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Squats',
@@ -244,6 +261,7 @@ export const days = [
         desc: "Un pas en avant, haltères en main, fléchissez les genoux pour descendre, puis remontez. Cible quadriceps, fessiers et équilibre.",
         caloriesPerSet: [14, 18],
         totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Alternating Lunges',
@@ -257,6 +275,7 @@ export const days = [
         desc: "Debout, jambes légèrement fléchies, penchez le buste en avant en gardant le dos droit. Cible les ischio-jambiers et les lombaires.",
         caloriesPerSet: [10, 13],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Romanian Deadlift',
@@ -270,6 +289,7 @@ export const days = [
         desc: "Montez sur une marche/banc avec un pied, puis l'autre. Alternative aux extensions de jambes.",
         caloriesPerSet: [10, 12],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Step-Ups',
@@ -283,6 +303,7 @@ export const days = [
         desc: "Épaules sur un banc/canapé, barre sur les hanches, soulevez le bassin. Maximise le travail des fessiers.",
         caloriesPerSet: [12, 15],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Hip Thrust',
@@ -296,6 +317,7 @@ export const days = [
         desc: "Debout sur une marche/livre, montez sur la pointe des pieds puis redescendez. Cible les mollets.",
         caloriesPerSet: [8, 10],
         totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Standing Calf Raises',
@@ -309,6 +331,7 @@ export const days = [
         desc: "Allongé, soulevez les jambes et le bassin vers le haut. Travaille le bas des abdominaux.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Reverse Crunches',
@@ -322,6 +345,7 @@ export const days = [
         desc: "Allongé, soulevez les jambes tendues à 90°. Cible le bas des abdominaux.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Leg Raises',
@@ -340,6 +364,7 @@ export const days = [
         desc: "En appui sur mains et pieds, fléchissez les coudes puis poussez. Différentes positions des mains ciblent différentes parties des pectoraux.",
         caloriesPerSet: [10, 12],
         totalSets: 4,
+        nbRep: 0,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Push-Ups',
@@ -353,6 +378,7 @@ export const days = [
         desc: "Assis, partez haltères devant vous, paumes face à vous, puis tournez les poignets en poussant vers le haut. Travaille tous les faisceaux des deltoïdes.",
         caloriesPerSet: [8, 10],
         totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Arnold Press',
@@ -366,6 +392,7 @@ export const days = [
         desc: "Allongé, bras ouverts sur les côtés, rapprochez les haltères au-dessus de la poitrine. Étire et contracte les pectoraux.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Dumbbell Flyes',
@@ -379,6 +406,7 @@ export const days = [
         desc: "Penché en avant, effectuez des élévations latérales. Cible le deltoïde postérieur.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Incline Lateral Raises',
@@ -392,6 +420,7 @@ export const days = [
         desc: "Bras au-dessus de la tête, pliez le coude derrière la nuque puis tendez. Étire complètement le triceps.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Overhead Triceps Extensions',
@@ -405,6 +434,7 @@ export const days = [
         desc: "Allongé, descendez la barre vers le front puis remontez en tendant les bras. Alternative aux kickbacks, cible les triceps.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Skull Crushers',
@@ -418,6 +448,7 @@ export const days = [
         desc: "Allongé, fléchissez le buste en orientant le coude vers le genou opposé. Cible les obliques.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 25,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Oblique Crunches',
@@ -433,6 +464,7 @@ export const days = [
         duration: 30,
         caloriesPerSet: [4, 6],
         totalSets: 3,
+        nbRep: 0,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Hollow Hold',
@@ -451,6 +483,7 @@ export const days = [
         desc: "Debout, pieds écartés, saisissez la barre au sol et soulevez-la en gardant le dos droit. Travaille tout le corps, particulièrement le dos et les jambes.",
         caloriesPerSet: [12, 15],
         totalSets: 4,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Deadlift',
@@ -464,6 +497,7 @@ export const days = [
         desc: "Allongé, bras tendus au-dessus de la poitrine, amenez l'haltère derrière la tête puis remontez. Étire le grand dorsal et les pectoraux.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Dumbbell Pullover',
@@ -477,6 +511,7 @@ export const days = [
         desc: "Barre sur les épaules, penchez le buste en avant en gardant le dos droit. Alternative au face pull, travaille les trapèzes et le dos.",
         caloriesPerSet: [10, 13],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Good Mornings',
@@ -490,6 +525,7 @@ export const days = [
         desc: "Assis, coude calé contre la cuisse, fléchissez le bras. Maximise l'isolation du biceps.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Concentration Curl',
@@ -503,6 +539,7 @@ export const days = [
         desc: "7 répétitions partie basse + 7 répétitions partie haute + 7 répétitions complètes. Bombarde le biceps sous tous les angles.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 21,
         googleFitActivity: {
           type: 'strength_training',
           name: '21s Curl',
@@ -516,6 +553,7 @@ export const days = [
         desc: "Penché en avant, écartez les bras sur les côtés. Renforce les muscles posturaux du haut du dos.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Reverse Fly',
@@ -531,6 +569,7 @@ export const days = [
         duration: 30,
         caloriesPerSet: [4, 6],
         totalSets: 3,
+        nbRep: 0,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Side Plank',
@@ -544,6 +583,7 @@ export const days = [
         desc: "Allongé, amenez le coude vers le genou opposé en alternant. Excellent pour cibler tous les abdominaux.",
         caloriesPerSet: [8, 10],
         totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Bicycle Crunches',
@@ -562,6 +602,7 @@ export const days = [
         desc: "Pieds très écartés, pointes vers l'extérieur, descendez puis remontez. Accentue le travail des adducteurs et des fessiers.",
         caloriesPerSet: [14, 18],
         totalSets: 4,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Sumo Squats',
@@ -575,6 +616,7 @@ export const days = [
         desc: "Écartez une jambe sur le côté, fléchissez puis revenez. Cible particulièrement les adducteurs.",
         caloriesPerSet: [12, 15],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Lateral Lunges',
@@ -588,6 +630,7 @@ export const days = [
         desc: "Allongé, pieds au sol, barre sur les hanches, soulevez le bassin. Isolation des fessiers.",
         caloriesPerSet: [12, 15],
         totalSets: 4,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Glute Bridge',
@@ -601,6 +644,7 @@ export const days = [
         desc: "À quatre pattes, étendez une jambe vers l'arrière et le haut. Cible les fessiers et les lombaires.",
         caloriesPerSet: [10, 12],
         totalSets: 3,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Hip Extensions',
@@ -614,6 +658,7 @@ export const days = [
         desc: "Pied arrière sur un banc, descendez en fente. Alternative au good morning, cible les quadriceps et les fessiers.",
         caloriesPerSet: [12, 15],
         totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Bulgarian Split Squats',
@@ -627,6 +672,7 @@ export const days = [
         desc: "Assis, montez sur la pointe des pieds puis redescendez. Cible différemment les mollets.",
         caloriesPerSet: [8, 10],
         totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Seated Calf Raises',
@@ -640,6 +686,7 @@ export const days = [
         desc: "Allongé sur le dos, jambes fléchies, soulevez les épaules du sol. Travaille la partie supérieure des abdominaux.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 25,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Crunches',
@@ -653,6 +700,7 @@ export const days = [
         desc: "Allongé, bras et jambes en l'air, descendez le bras et la jambe opposés. Excellent pour la stabilité du core.",
         caloriesPerSet: [6, 8],
         totalSets: 3,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Dead Bug',
@@ -673,6 +721,7 @@ export const days = [
         duration: 2700,
         caloriesPerSet: [20, 25],
         totalSets: 1,
+        nbRep: 0,
         googleFitActivity: {
           type: 'cycling',
           name: 'Moderate Intensity Cycling',
@@ -688,6 +737,7 @@ export const days = [
         duration: 1800,
         caloriesPerSet: [15, 20],
         totalSets: 1,
+        nbRep: 0,
         googleFitActivity: {
           type: 'cardio',
           name: 'Cardio of Choice',
@@ -703,6 +753,7 @@ export const days = [
         duration: 900,
         caloriesPerSet: [4, 6],
         totalSets: 1,
+        nbRep: 0,
         googleFitActivity: {
           type: 'stretching',
           name: 'Full Body Stretch',
@@ -718,6 +769,7 @@ export const days = [
         duration: 600,
         caloriesPerSet: [2, 4],
         totalSets: 1,
+        nbRep: 0,
         googleFitActivity: {
           type: 'mobility',
           name: 'Joint Mobility',
