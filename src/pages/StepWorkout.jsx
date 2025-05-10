@@ -394,6 +394,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   const [showOverlay, setShowOverlay] = useState(false);
   const [showCalories, setShowCalories] = useState(false);
   const [caloriesToShow, setCaloriesToShow] = useState(0);
+  const [countdown, setCountdown] = useState(null); // null = pas de décompte, sinon 3,2,1
   const timerRef = useRef(null);
 
   // Remise à zéro des états internes à chaque changement d'exercice ou de série
@@ -403,11 +404,43 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     setShowOverlay(false);
     setShowCalories(false);
     setCaloriesToShow(0);
+    setCountdown(null);
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
   }, [exo, setNum, totalSets]);
+
+  // Lancer le décompte avant le rythme
+  const handlePulse = () => {
+    if (!isPulsing && countdown === null) {
+      setCountdown(3);
+      setShowOverlay(true);
+    } else if (isPulsing) {
+      setIsPulsing(false);
+      setShowOverlay(false);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  };
+
+  // Décompte 3-2-1 avant le rythme
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown > 0) {
+      const t = setTimeout(() => setCountdown(c => c - 1), 1000);
+      playBeep();
+      return () => clearTimeout(t);
+    }
+    if (countdown === 0) {
+      setCountdown(null);
+      setIsPulsing(true);
+      setCurrentRep(0);
+      // Laisser l'overlay affiché pour le rythme
+    }
+  }, [countdown]);
 
   useEffect(() => {
     if (isPulsing) {
@@ -427,49 +460,21 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     }
   }, [isPulsing, exo.nbRep]);
 
-  // Ajout : simuler un clic sur "Terminer" 2s après la dernière répétition
-  useEffect(() => {
-    if (currentRep === exo.nbRep && isPulsing) {
-      const timeout = setTimeout(() => {
-        handleFinish();
-        setIsPulsing(false);
-      }, 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [currentRep, exo.nbRep, isPulsing]);
-
   useEffect(() => {
     if (currentRep === exo.nbRep) {
       setShowOverlay(true);
-      setTimeout(() => {
-        setShowOverlay(false);
-        setIsPulsing(false);
-        onDone();
-      }, 2000);
-    }
-  }, [currentRep, exo.nbRep, onDone]);
-
-  const handlePulse = () => {
-    if (!isPulsing) {
-      setIsPulsing(true);
-      setCurrentRep(0);
-      setShowOverlay(true);
-    } else {
       setIsPulsing(false);
-      setShowOverlay(false);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
     }
-  };
+  }, [currentRep, exo.nbRep]);
 
-  const handleFinish = () => {
+  // Nouveau : bouton "Suivant" sur l'overlay OK
+  const handleNext = () => {
     const calories = exo.caloriesPerSet ? Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
-    setCaloriesToShow(calories); // Mémorise la valeur à afficher
+    setCaloriesToShow(calories);
     onCaloriesBurned(calories);
     onExerciseCompleted();
     setShowCalories(true);
+    setShowOverlay(false);
     setTimeout(() => {
       setShowCalories(false);
       onDone();
@@ -511,14 +516,33 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
               zIndex: 1
             }}
           >
-            {currentRep < exo.nbRep ? (
+            {countdown !== null ? (
+              <Typography variant="h3" component="div" sx={{ mb: 2 }}>
+                {countdown > 0 ? countdown : "Go!"}
+              </Typography>
+            ) : currentRep < exo.nbRep ? (
               <Typography variant="h4" component="div" sx={{ mb: 2 }}>
                 Répétition {currentRep + 1} / {exo.nbRep}
               </Typography>
             ) : (
-              <Typography variant="h4" component="div" sx={{ mb: 2, color: 'green' }}>
-                OK !
-              </Typography>
+              <>
+                <Typography variant="h4" component="div" sx={{ mb: 2, color: 'green' }}>
+                  OK !
+                </Typography>
+                <Button 
+                  variant="contained" 
+                  color="primary"
+                  onClick={handleNext}
+                  sx={{
+                    mt: 2,
+                    minWidth: 200,
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  Suivant
+                </Button>
+              </>
             )}
           </Box>
         )}
@@ -569,20 +593,6 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
         <Button 
           variant="contained" 
           color="primary"
-          onClick={handleFinish}
-          sx={{
-            mt: 2,
-            minWidth: 200,
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          Terminer
-        </Button>
-
-        <Button 
-          variant="contained" 
-          color="primary"
           onClick={handlePulse}
           sx={{
             mt: 2,
@@ -591,7 +601,34 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
             overflow: 'hidden',
           }}
         >
-          {isPulsing ? 'Arrêter le rythme' : 'Démarrer le rythme'}
+          {isPulsing || countdown !== null ? 'Arrêter le rythme' : 'Démarrer le rythme'}
+        </Button>
+
+        {/* Déplacement du bouton "Exercice suivant" ici, il sera toujours visible */}
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => {
+            // On considère que l'utilisateur saute l'exercice, on affiche les calories
+            const calories = exo.caloriesPerSet ? Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
+            setCaloriesToShow(calories);
+            onCaloriesBurned(calories);
+            onExerciseCompleted();
+            setShowCalories(true);
+            setShowOverlay(false);
+            setTimeout(() => {
+              setShowCalories(false);
+              onDone();
+            }, 1000);
+          }}
+          sx={{
+            mt: 2,
+            minWidth: 200,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          Exercice suivant
         </Button>
 
         {showCalories && (
