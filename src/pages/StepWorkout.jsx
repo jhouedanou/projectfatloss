@@ -7,6 +7,7 @@ import ProgressBar from '../components/ProgressBar';
 import GoogleFitButton from '../components/GoogleFitButton';
 import CompletionAnimation from '../components/CompletionAnimation';
 import DayPills from '../components/DayPills'; // <-- AJOUTE CETTE LIGNE
+import YouTubeButton from '../components/YouTubeButton'; // <-- AJOUTER CETTE LIGNE
 
 import iconsMap from '../../public/exo-icons.json';
 
