@@ -393,8 +393,21 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   const [currentRep, setCurrentRep] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
   const [showCalories, setShowCalories] = useState(false);
-  const [caloriesToShow, setCaloriesToShow] = useState(0); // Ajout
+  const [caloriesToShow, setCaloriesToShow] = useState(0);
   const timerRef = useRef(null);
+
+  // Remise à zéro des états internes à chaque changement d'exercice ou de série
+  useEffect(() => {
+    setIsPulsing(false);
+    setCurrentRep(0);
+    setShowOverlay(false);
+    setShowCalories(false);
+    setCaloriesToShow(0);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, [exo, setNum, totalSets]);
 
   useEffect(() => {
     if (isPulsing) {
