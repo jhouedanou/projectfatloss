@@ -17,7 +17,7 @@ const beepSound = new Audio('/beep.mp3');
 function playBeep() {
   // Clone l'audio pour pouvoir jouer plusieurs instances simultanément
   const beep = beepSound.cloneNode();
-  beep.volume = 0.7;
+  beep.volume = 1.0; // Augmenter le volume à 1.0
   beep.play().catch(err => console.error("Erreur de lecture audio:", err));
 }
 
@@ -490,6 +490,14 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
         }}
       >
         {exo.desc}
+      </Typography>
+      
+      <Typography variant="body1" color="text.secondary">
+        Répétitions : <span style={{ fontWeight: 'bold', color: 'red' }}>{parseSets(exo.sets)}</span>
+      </Typography>
+      
+      <Typography variant="body1" color="text.secondary">
+        Longueur de la série : <span style={{ fontWeight: 'bold', color: 'red' }}>{exo.sets}</span>
       </Typography>
 
       {/* Animation de complétion */}
