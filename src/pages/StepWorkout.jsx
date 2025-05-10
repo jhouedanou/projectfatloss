@@ -12,12 +12,11 @@ import CompletionAnimation from '../components/CompletionAnimation';
 import iconsMap from '../../public/exo-icons.json';
 
 // Son de notification
-const beepSound = new Audio('/beep.mp3');
+import beepSound from '../../public/beep.mp3'; // Adjust the path based on your file structure
 
 function playBeep() {
-  // Clone l'audio pour pouvoir jouer plusieurs instances simultanément
-  const beep = beepSound.cloneNode();
-  beep.volume = 1.0; // Augmenter le volume à 1.0
+  const beep = new Audio(beepSound);
+  beep.volume = 1.0; // Set volume
   beep.play().catch(err => console.error("Erreur de lecture audio:", err));
 }
 
@@ -26,9 +25,10 @@ function parseSets(sets) {
   return m ? parseInt(m[1], 10) : 1;
 }
 
-function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, nextExercise }) {
+function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total }) {
   const defaultTime = reducedTime ? 10 : 15;
   const [time, setTime] = useState(defaultTime);
+  const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
   
   useEffect(() => {
     if (time === 0) {
@@ -51,17 +51,6 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, nextExercise 
     <div style={{textAlign:'center',marginTop:40}}>
       <h2>Pause {reducedTime && "Rapide"}</h2>
       <div style={{fontSize:40,margin:20}}>{time}s</div>
-      {isExerciseTransition && nextExercise ? (
-        <div className="next-exercise">
-          <p>Prochain exercice :</p>
-          <h3 style={{color: 'var(--text-primary)', marginTop: '8px'}}>{nextExercise.name}</h3>
-          <p style={{color: 'var(--text-secondary', fontSize: '0.9em', marginTop: '4px'}}>
-            {nextExercise.sets} - {nextExercise.equip}
-          </p>
-        </div>
-      ) : (
-        <p>Prépare-toi pour la prochaine série !</p>
-      )}
       <button 
         className="timer-btn" 
         style={{marginTop:20}}
@@ -262,6 +251,9 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
   };
   
   const next = () => {
+    const currentExercise = day.exercises[step];
+    const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
+
     if (setNum < totalSets - 1) {
       setSetNum(s => s + 1);
       setPause(true);
@@ -339,7 +331,9 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
               onSkip={handleSkipPause} 
               isExerciseTransition={isExerciseTransition}
               reducedTime={fatBurnerMode}
-              nextExercise={step < total - 1 ? day.exercises[step + 1] : null}
+              day={day}
+              step={step}
+              total={total}
             />
           ) : (
             <StepSet 
