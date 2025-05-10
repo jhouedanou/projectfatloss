@@ -1,16 +1,27 @@
 {
-  "name": "Project Fat Loss",
-  "short_name": "Fat Loss",
-  "description": "Application d'entraînement personnalisé",
-  "start_url": "/",
+  "name": "Project Fatloss",
+  "short_name": "Fatloss",
+  "description": "Application mobile pour la semaine muscu.",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#1976d2",
   "icons": [
     {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
       "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/bicep.svg",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
