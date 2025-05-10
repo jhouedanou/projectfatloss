@@ -12,7 +12,7 @@ import CompletionAnimation from '../components/CompletionAnimation';
 import iconsMap from '../../public/exo-icons.json';
 
 // Son de notification
-import beepSound from '../../public/beep.mp3'; // Adjust the path based on your file structure
+import beepSound from '../beep.mp3'; // Correct path from src/pages to src
 
 function playBeep() {
   const beep = new Audio(beepSound);
