@@ -22,7 +22,6 @@ function playBeep() {
 }
 
 function parseSets(sets) {
-  // Ex: "4 × 12-15" => 4
   const m = sets.match(/(\d+)\s*[x×]/i);
   return m ? parseInt(m[1], 10) : 1;
 }
