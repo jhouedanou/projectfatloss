@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getWorkoutPlan } from '../services/WorkoutCustomization';
 import { Button, Box, Typography, Paper, LinearProgress } from '@mui/material';
 import ProgressTracker from '../components/ProgressTracker';
-import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon, { EquipIcon } from '../components/ExoIcon';
 import ProgressBar from '../components/ProgressBar';
 import GoogleFitButton from '../components/GoogleFitButton';
@@ -250,6 +249,8 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
     setTotalCaloriesBurned(prev => prev + adjustedCalories);
   };
   
+  let beepTimeouts = [];
+
   const next = () => {
     const currentExercise = day.exercises[step];
     const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
@@ -263,12 +264,32 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
       setIsExerciseTransition(true);
       setSetNum(0);
       setStep(s => s + 1);
+      
+      // Play initial beep
+      playBeep();
+
+      // Start rhythm based on repetitions
+      const repetitions = parseSets(nextExercise.sets);
+      beepTimeouts = [];
+      for (let i = 0; i < repetitions; i++) {
+        beepTimeouts.push(setTimeout(() => {
+          playBeep();
+          if (i === repetitions - 1) {
+            clearBeepRhythm(); // Clear rhythm when reaching 0 repetitions
+          }
+        }, (i + 1) * 1000)); // Adjust timing as needed
+      }
     } else {
       setWorkoutCompleted(true);
       setShowEndOfDayModal(true);
     }
   };
-  
+
+  function clearBeepRhythm() {
+    beepTimeouts.forEach(timeout => clearTimeout(timeout));
+    beepTimeouts = [];
+  }
+
   const handleCloseEndOfDayModal = () => {
     setShowEndOfDayModal(false);
     onBack(); // Return to workout list
@@ -283,6 +304,9 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
     
     // Appeler le callback pour enregistrer les données
     onComplete && onComplete(workoutDataWithMode);
+    
+    // Fermer la modale
+    onClose();
   };
   
   return (
@@ -309,7 +333,9 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
                 <p>{exo.sets} séries</p>
                 <p>{exo.equip}</p>
                 <p>{exo.desc}</p>
-                <YouTubeButton exercise={exo} />
+                <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(exo.name)}`} target="_blank" rel="noopener noreferrer">
+                  <button className="youtube-button">Voir sur YouTube</button>
+                </a>
               </div>
             ))}
           </div>
@@ -621,6 +647,22 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
       >
         {isPulsing ? 'Arrêter le rythme' : 'Démarrer le rythme'}
       </Button>
+
+      {/* Bouton de YouTube */}
+      <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(exo.name)}`} target="_blank" rel="noopener noreferrer">
+        <Button 
+          variant="contained" 
+          color="primary"
+          sx={{
+            mt: 2,
+            minWidth: 200,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          Voir sur YouTube
+        </Button>
+      </a>
 
       {/* Affichage des calories */}
       <Box
