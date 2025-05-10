@@ -12,11 +12,11 @@ import CompletionAnimation from '../components/CompletionAnimation';
 import iconsMap from '../../public/exo-icons.json';
 
 // Son de notification
-import beepSound from '../beep.mp3'; // Correct path from src/pages to src
+import beepSound from '../beep.mp3';
 
 function playBeep() {
   const beep = new Audio(beepSound);
-  beep.volume = 1.0; // Set volume
+  beep.volume = 1.0;
   beep.play().catch(err => console.error("Erreur de lecture audio:", err));
 }
 
@@ -62,7 +62,6 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   );
 }
 
-// Component for displaying animated calories
 function CalorieDisplay({ calories, visible }) {
   return (
     <div className={`calorie-display ${visible ? 'visible' : ''}`}>
@@ -71,11 +70,9 @@ function CalorieDisplay({ calories, visible }) {
   );
 }
 
-// Component for floating calorie counter
 function FloatingCalorieCounter({ calories, exerciseCompleted, fatBurnerMode }) {
   const [pulse, setPulse] = useState(false);
   
-  // Effet pour déclencher l'animation de pouls quand les calories changent
   useEffect(() => {
     if (calories > 0) {
       setPulse(true);
@@ -92,25 +89,19 @@ function FloatingCalorieCounter({ calories, exerciseCompleted, fatBurnerMode }) 
   );
 }
 
-// Component for end of day summary modal
 function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMode }) {
-  // Fonction pour calculer le poids total en fonction de l'équipement
   function calculateWeight(equipment) {
-    // Extraire les nombres de la chaîne d'équipement (ex: "Haltères 15 kg" -> 15)
     const match = equipment && equipment.match(/(\d+)\s*kg/i);
     return match ? parseInt(match[1], 10) : 0;
   }
   
-  // Calculer le poids total soulevé pendant la séance
   const totalWeightLifted = day.exercises.reduce((total, exercise) => {
     const weight = calculateWeight(exercise.equip);
     const sets = parseSets(exercise.sets);
-    // Estimation des répétitions basée sur le format "4 × 12-15"
     let reps = 0;
     const repsMatch = exercise.sets.match(/\d+\s*[x×]\s*(\d+)(?:-(\d+))?/i);
     if (repsMatch) {
       if (repsMatch[2]) {
-        // Si format "12-15", prendre la moyenne
         reps = Math.round((parseInt(repsMatch[1], 10) + parseInt(repsMatch[2], 10)) / 2);
       } else {
         reps = parseInt(repsMatch[1], 10);
@@ -120,7 +111,6 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
   }, 0);
   
   const handleSave = () => {
-    // Préparer les données de l'entraînement à sauvegarder
     const workoutData = {
       title: day.title,
       date: new Date().toISOString(),
@@ -135,13 +125,8 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
       fatBurnerMode: fatBurnerMode
     };
     
-    // Sauvegarder dans le stockage local
     const savedWorkout = saveWorkout(workoutData);
-    
-    // Appeler le callback de sauvegarde
     onSaveWorkout && onSaveWorkout(savedWorkout);
-    
-    // Fermer la modale
     onClose();
   };
   
@@ -155,7 +140,6 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
         <p className="weight-total">Poids total soulevé : <span>{totalWeightLifted} kg</span></p>
         <p className="motivation-text">Excellent travail ! Continuez ainsi pour atteindre vos objectifs.</p>
         
-        {/* Ajouter le bouton Google Fit */}
         <div className="google-fit-section">
           <GoogleFitButton 
             exercise={{
@@ -184,26 +168,24 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
 import { saveWorkout } from '../services/WorkoutStorage';
 
 export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMode }) {
-  const [step, setStep] = useState(0); // exercice
+  const [step, setStep] = useState(0);
   const [pause, setPause] = useState(false);
-  const [isExerciseTransition, setIsExerciseTransition] = useState(false); // Indique si on est dans une transition entre exercices
+  const [isExerciseTransition, setIsExerciseTransition] = useState(false);
   const [setNum, setSetNum] = useState(0);
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [showEndOfDayModal, setShowEndOfDayModal] = useState(false);
-  const [workoutCompleted, setWorkoutCompleted] = useState(false); // Nouvel état pour suivre si l'entraînement est terminé
-  const [stepMode, setStepMode] = useState(false); // État pour le mode étape par étape
+  const [workoutCompleted, setWorkoutCompleted] = useState(false);
+  const [stepMode, setStepMode] = useState(false);
   const isFirstRender = useRef(true);
   
-  // Utiliser le programme d'entraînement personnalisé
   const workoutPlan = getWorkoutPlan();
   const day = workoutPlan[dayIndex];
   const total = day.exercises.length;
   const exo = day.exercises[step];
   const totalSets = fatBurnerMode 
-    ? Math.max(1, Math.floor(parseSets(exo.sets) / 2)) // Réduire de moitié le nombre de séries en mode Fat Burner (minimum 1)
+    ? Math.max(1, Math.floor(parseSets(exo.sets) / 2))
     : parseSets(exo.sets);
   
-  // En mode Fat Burner, on augmente le facteur de calories brûlées
   const fatBurnerCalorieFactor = fatBurnerMode ? 1.5 : 1;
   
   useEffect(()=>{
@@ -215,15 +197,12 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
     setShowEndOfDayModal(false);
   },[dayIndex]);
   
-  // Effet pour jouer le bip sonore lors du changement d'exercice
   useEffect(() => {
-    // Ne pas jouer le son au premier rendu
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
     
-    // Jouer le son quand on passe à un nouvel exercice ou à une nouvelle série
     if (step > 0 || setNum > 0) {
       try {
         playBeep();
@@ -239,13 +218,11 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
   };
   
   const handleSkipPause = () => {
-    // Autoriser le saut de la pause dans tous les cas
     setPause(false);
     setIsExerciseTransition(false);
   };
   
   const handleCaloriesBurned = (calories) => {
-    // Appliquer le facteur de calories du mode Fat Burner
     const adjustedCalories = Math.round(calories * fatBurnerCalorieFactor);
     setTotalCaloriesBurned(prev => prev + adjustedCalories);
   };
@@ -271,17 +248,15 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
   
   const handleCloseEndOfDayModal = () => {
     setShowEndOfDayModal(false);
-    onBack(); // Return to workout list
+    onBack();
   };
   
   const handleSaveWorkout = (workoutData) => {
-    // Ajouter l'information sur le mode Fat Burner
     const workoutDataWithMode = {
       ...workoutData,
       fatBurnerMode: fatBurnerMode
     };
     
-    // Appeler le callback pour enregistrer les données
     onComplete && onComplete(workoutDataWithMode);
   };
   
@@ -290,7 +265,6 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
       <button className="timer-btn" style={{marginBottom:10}} onClick={onBack}>Retour</button>
       <h2 style={{fontSize:'1.1rem',marginBottom:8}}>{day.title}</h2>
       
-      {/* Afficher une bannière Fat Burner si nécessaire */}
       {fatBurnerMode && (
         <div className="fat-burner-indicator">
           🔥 Mode Fat Burner actif ! 🔥
@@ -354,7 +328,6 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
         </>
       )}
       
-      {/* End of day modal */}
       {showEndOfDayModal && (
         <EndOfDayModal 
           day={day} 
@@ -373,28 +346,29 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
   const [isPulsing, setIsPulsing] = useState(false);
   const [currentRep, setCurrentRep] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
-  const [timer, setTimer] = useState(null);
+  const timerRef = useRef(null);
 
   useEffect(() => {
     if (isPulsing) {
       const interval = setInterval(() => {
-        if (currentRep < exo.nbRep) {
-          setCurrentRep(prev => prev + 1);
+        setCurrentRep(prev => {
+          if (prev >= exo.nbRep - 1) {
+            clearInterval(interval);
+            setShowOverlay(true);
+            setTimeout(() => {
+              setShowOverlay(false);
+              setIsPulsing(false);
+              onDone();
+            }, 2000);
+            return exo.nbRep;
+          }
           playBeep();
-        } else {
-          // Arrête le compteur et le son
-          clearInterval(interval);
-          setTimer(null);
-          // Affiche "OK !" pendant 2 secondes
-          setShowOverlay(true);
-          setTimeout(() => {
-            setShowOverlay(false);
-            onDone();
-          }, 2000);
-        }
-      }, 2000); // 2 secondes entre chaque répétition
+          return prev + 1;
+        });
+      }, 2000);
 
-      setTimer(interval);
+      timerRef.current = interval;
+      return () => clearInterval(interval);
     }
   }, [isPulsing, exo.nbRep, onDone]);
 
@@ -406,14 +380,13 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
     } else {
       setIsPulsing(false);
       setShowOverlay(false);
-      if (timer) {
-        clearInterval(timer);
-        setTimer(null);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
       }
     }
   };
 
-  // Calculer les calories pour la série
   const caloriesPerSet = exo.caloriesPerSet ? 
     Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
 
@@ -498,7 +471,6 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
           Longueur de la série : <span style={{ fontWeight: 'bold', color: 'red' }}>{exo.sets}</span>
         </Typography>
 
-        {/* Bouton de fin de série */}
         <Button 
           variant="contained" 
           color="primary"
@@ -513,7 +485,6 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
           Terminer
         </Button>
 
-        {/* Bouton de rythme */}
         <Button 
           variant="contained" 
           color="primary"
@@ -528,7 +499,6 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
           {isPulsing ? 'Arrêter le rythme' : 'Démarrer le rythme'}
         </Button>
 
-        {/* Affichage des calories */}
         <Box
           sx={{
             position: 'fixed',
