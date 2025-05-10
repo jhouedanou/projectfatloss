@@ -50,7 +50,7 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
       <h2>Pause {reducedTime && "Rapide"}</h2>
       <div style={{fontSize:40,margin:20}}>{time}s</div>
       
-      {isExerciseTransition && nextExercise && (
+      {/* {isExerciseTransition && nextExercise && (
         <Box sx={{ mt: 2, mb: 2, p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
           <Typography variant="h6" gutterBottom>
             Prochain exercice:
@@ -62,7 +62,7 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
             Équipement: {nextExercise.equip}
           </Typography>
         </Box>
-      )}
+      )} */}
       
       <button 
         className="timer-btn" 
