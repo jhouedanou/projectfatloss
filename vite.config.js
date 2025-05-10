@@ -9,26 +9,32 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/bicep.svg'],
       manifest: {
-        name: 'Project Fat Loss',
-        short_name: 'Fat Loss',
+        name: 'Project Fatloss',
+        short_name: 'Fatloss',
         description: "Application de suivi d'entraînement avec calcul des calories brûlées",
-        theme_color: '#22223b',
-        background_color: '#f8f9fa',
+        theme_color: '#1976d2',
+        background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/projectfatloss/',
-        start_url: '/projectfatloss/',
+        start_url: '.',
         icons: [
           {
-            src: 'icons/icon-192x192.png',
+            src: '/icons/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'icons/icon-512x512.png',
+            src: '/icons/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
+          },
+          {
+            src: '/icons/bicep.svg',
+            sizes: '96x96',
+            type: 'image/svg+xml',
+            purpose: 'any'
           }
         ]
       },
