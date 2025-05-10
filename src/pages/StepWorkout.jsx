@@ -186,7 +186,7 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
   const [isExerciseTransition, setIsExerciseTransition] = useState(false);
   const [setNum, setSetNum] = useState(0);
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
-  const [showEndOfDayModal, setShowEndOfDayModal] = useState(false);
+  const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
   const [stepMode, setStepMode] = useState(false);
   const isFirstRender = useRef(true);
@@ -207,7 +207,6 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
     setIsExerciseTransition(false);
     setSetNum(0);
     setTotalCaloriesBurned(0);
-    setShowEndOfDayModal(false);
   },[dayIndex]);
   
   useEffect(() => {
@@ -236,10 +235,14 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
   };
   
   const handleCaloriesBurned = (calories) => {
-    const adjustedCalories = Math.round(calories * fatBurnerCalorieFactor);
-    setTotalCaloriesBurned(prev => prev + adjustedCalories);
+    setTotalCaloriesBurned(prev => prev + calories);
   };
-  
+
+  const handleExerciseCompleted = () => {
+    setExerciseCompleted(true);
+    setTimeout(() => setExerciseCompleted(false), 1000);
+  };
+
   const next = () => {
     const currentExercise = day.exercises[step];
     const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
@@ -255,12 +258,11 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
       setStep(s => s + 1);
     } else {
       setWorkoutCompleted(true);
-      setShowEndOfDayModal(true);
     }
   };
   
   const handleCloseEndOfDayModal = () => {
-    setShowEndOfDayModal(false);
+    setWorkoutCompleted(false);
     onBack();
   };
   
@@ -329,19 +331,29 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
               totalSets={totalSets} 
               onDone={next}
               onCaloriesBurned={handleCaloriesBurned}
+              onExerciseCompleted={handleExerciseCompleted}
               fatBurnerMode={fatBurnerMode}
             />
           )}
           
-          <FloatingCalorieCounter 
-            calories={totalCaloriesBurned} 
-            exerciseCompleted={workoutCompleted}
-            fatBurnerMode={fatBurnerMode} 
-          />
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 50,
+              right: 20,
+              zIndex: 1000
+            }}
+          >
+            <FloatingCalorieCounter 
+              calories={totalCaloriesBurned} 
+              exerciseCompleted={exerciseCompleted} 
+              fatBurnerMode={fatBurnerMode}
+            />
+          </Box>
         </>
       )}
       
-      {showEndOfDayModal && (
+      {workoutCompleted && (
         <EndOfDayModal 
           day={day} 
           totalCalories={totalCaloriesBurned} 
@@ -354,7 +366,7 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
   );
 }
 
-function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMode }) {
+function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, fatBurnerMode }) {
   const iconType = iconsMap[exo.name] || 'dumbbell';
   const [isPulsing, setIsPulsing] = useState(false);
   const [currentRep, setCurrentRep] = useState(0);
@@ -368,6 +380,10 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
           const newRep = prev + 1;
           if (newRep <= exo.nbRep) {
             playBeep();
+            // Calculer et afficher les calories après chaque répétition
+            const calories = Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2);
+            onCaloriesBurned(calories);
+            onExerciseCompleted();
             return newRep;
           }
           return exo.nbRep; // Empêche d'aller au-delà de nbRep
@@ -377,7 +393,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
       timerRef.current = interval;
       return () => clearInterval(interval);
     }
-  }, [isPulsing, exo.nbRep]);
+  }, [isPulsing, exo.nbRep, exo.caloriesPerSet]);
 
   useEffect(() => {
     if (currentRep === exo.nbRep) {
