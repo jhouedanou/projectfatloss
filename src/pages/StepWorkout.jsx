@@ -8,10 +8,8 @@ import ProgressBar from '../components/ProgressBar';
 import GoogleFitButton from '../components/GoogleFitButton';
 import CompletionAnimation from '../components/CompletionAnimation';
 
-// Load icons map
 import iconsMap from '../../public/exo-icons.json';
 
-// Son de notification
 import beepSound from '../beep.mp3';
 
 function playBeep() {
@@ -46,11 +44,26 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
     const id = setTimeout(() => setTime(t => t - 1), 1000);
     return () => clearTimeout(id);
   }, [time, onEnd, isExerciseTransition]);
-  
+
   return (
     <div style={{textAlign:'center',marginTop:40}}>
       <h2>Pause {reducedTime && "Rapide"}</h2>
       <div style={{fontSize:40,margin:20}}>{time}s</div>
+      
+      {isExerciseTransition && nextExercise && (
+        <Box sx={{ mt: 2, mb: 2, p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            Prochain exercice:
+          </Typography>
+          <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
+            {nextExercise.name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Équipement: {nextExercise.equip}
+          </Typography>
+        </Box>
+      )}
+      
       <button 
         className="timer-btn" 
         style={{marginTop:20}}
