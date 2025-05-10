@@ -369,45 +369,47 @@ export default function StepWorkout({ dayIndex, onBack, onComplete, fatBurnerMod
 }
 
 function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMode }) {
-  const [timer, setTimer] = useState(exo.timer ? (exo.duration || 30) : null);
-  const [running, setRunning] = useState(false);
-  const [showCalories, setShowCalories] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [completed, setCompleted] = useState(false);
-  const [completionAnimation, setCompletionAnimation] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const iconType = iconsMap[exo.name] || 'dumbbell';
   const [isPulsing, setIsPulsing] = useState(false);
-  const [pulseInterval, setPulseInterval] = useState(null);
-  const [repsRemaining, setRepsRemaining] = useState(parseSets(exo.sets));
+  const [currentRep, setCurrentRep] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [timer, setTimer] = useState(null);
+
+  useEffect(() => {
+    if (isPulsing) {
+      const interval = setInterval(() => {
+        if (currentRep < exo.nbRep) {
+          setCurrentRep(prev => prev + 1);
+          playBeep();
+        } else {
+          // Arrête le compteur et le son
+          clearInterval(interval);
+          setTimer(null);
+          // Affiche "OK !" pendant 2 secondes
+          setShowOverlay(true);
+          setTimeout(() => {
+            setShowOverlay(false);
+            onDone();
+          }, 2000);
+        }
+      }, 2000); // 2 secondes entre chaque répétition
+
+      setTimer(interval);
+    }
+  }, [isPulsing, exo.nbRep, onDone]);
 
   const handlePulse = () => {
-    if (isPulsing) {
-      clearInterval(pulseInterval);
-      setIsPulsing(false);
-    } else {
-      const interval = setInterval(() => {
-        navigator.vibrate(200); // Vibration de 200 ms
-        playBeep(); // Jouer le son
-
-        if (repsRemaining > 0) {
-          setRepsRemaining(prev => Math.max(prev - 1, 0)); // Ne pas décrémenter en dessous de 0
-          setShowOverlay(true);
-          setTimeout(() => setShowOverlay(false), 1000); // Afficher l'overlay pendant 1 seconde
-        } else if (repsRemaining === 0 && isPulsing) {
-          console.log('Arrêt du rythme, répétitions atteintes à 0'); // Log pour le débogage
-          clearInterval(interval);
-          setIsPulsing(false);
-          console.log('Rythme arrêté'); // Log pour confirmer l'arrêt
-          if (!showOverlay) {
-            setShowOverlay(true);
-            setTimeout(() => setShowOverlay(false), 1000); // Afficher l'overlay pendant 1 seconde
-          }
-        }
-      }, 4000); // Changer l'intervalle à 4 secondes
-      setPulseInterval(interval);
+    if (!isPulsing) {
       setIsPulsing(true);
+      setCurrentRep(0);
+      setShowOverlay(true);
+    } else {
+      setIsPulsing(false);
+      setShowOverlay(false);
+      if (timer) {
+        clearInterval(timer);
+        setTimer(null);
+      }
     }
   };
 
@@ -415,255 +417,143 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
   const caloriesPerSet = exo.caloriesPerSet ? 
     Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
 
-  useEffect(() => {
-    if (!exo.timer || !running) return;
-    if (timer === 0) return;
-    
-    // Jouer des bips à certains moments clés du chronomètre
-    if (timer === 10 || timer === 5 || timer === 4 || timer === 3 || timer === 2 || timer === 1) {
-      playBeep();
-    }
-    
-    const id = setTimeout(() => setTimer(t => t - 1), 1000);
-    return () => clearTimeout(id);
-  }, [timer, running, exo.timer]);
-  
-  useEffect(() => { if (timer === 0 && running) handleDone(); }, [timer, running]);
-  
-  const handleDone = () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    setCompletionAnimation(true);
-    
-    // Montrer l'animation des calories
-    setShowCalories(true);
-    onCaloriesBurned(caloriesPerSet);
-    
-    // Afficher le message de succès avec un délai
-    setTimeout(() => {
-      setShowSuccessMessage(true);
-      // Cacher les animations et passer à l'exercice suivant
-      setTimeout(() => {
-        setShowCalories(false);
-        setCompletionAnimation(false);
-        setShowSuccessMessage(false);
-        setIsSubmitting(false);
-        onDone();
-      }, 1000);
-    }, 500);
-  };
-  
-  // Format le temps pour l'affichage mm:ss
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
-  
-  // Calcule le pourcentage du temps écoulé
-  const calculateProgress = () => {
-    if (!exo.timer || !exo.duration) return 0;
-    return 100 - (timer / exo.duration * 100);
-  };
-  
-  // Détermine la classe du timer en fonction du temps restant
-  const getTimerClass = () => {
-    if (!exo.timer) return '';
-    if (timer <= 5) return 'critical';
-    if (timer <= 10) return 'warning';
-    return '';
-  };
-  
   return (
-    <Box
-      sx={{
-        textAlign: 'center',
-        mt: 4,
-        position: 'relative',
-        '& .MuiButton-root': {
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            transform: 'translateY(-2px)',
-          },
-        },
-      }}
-    >
-      <ExoIcon type={iconType} size={48} />
-      
-      <Typography 
-        variant="h5" 
-        gutterBottom 
+    <Box sx={{ p: 2 }}>
+      <Paper 
+        elevation={3} 
         sx={{ 
-          fontWeight: 'bold',
-          color: 'text.primary',
+          p: 3, 
+          mb: 2, 
+          position: 'relative',
+          minHeight: 300
         }}
       >
-        {exo.name}
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary">
-        Matériel : <span>{exo.equip}</span>
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary">
-        Série {setNum + 1} / {totalSets}
-      </Typography>
-      
-      <Typography 
-        variant="body2" 
-        color="text.primary"
-        sx={{ 
-          fontSize: '1.1rem',
-          fontWeight: 500,
-          opacity: theme => theme.palette.mode === 'dark' ? 1 : 0.87,
-          mb: 2
-        }}
-      >
-        {exo.desc}
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary">
-        Répétitions : <span style={{ fontWeight: 'bold', color: 'red' }}>{parseSets(exo.sets)}</span>
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary">
-        Longueur de la série : <span style={{ fontWeight: 'bold', color: 'red' }}>{exo.sets}</span>
-      </Typography>
+        {showOverlay && (
+          <Box 
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              zIndex: 1
+            }}
+          >
+            {currentRep < exo.nbRep ? (
+              <Typography variant="h4" component="div" sx={{ mb: 2 }}>
+                Répétition {currentRep + 1} / {exo.nbRep}
+              </Typography>
+            ) : (
+              <Typography variant="h4" component="div" sx={{ mb: 2, color: 'green' }}>
+                OK !
+              </Typography>
+            )}
+          </Box>
+        )}
+        <ExoIcon type={iconType} size={48} />
+        
+        <Typography 
+          variant="h5" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 'bold',
+            color: 'text.primary',
+          }}
+        >
+          {exo.name}
+        </Typography>
+        
+        <Typography variant="body1" color="text.secondary">
+          Matériel : <span>{exo.equip}</span>
+        </Typography>
+        
+        <Typography variant="body1" color="text.secondary">
+          Série <span style={{ color: 'red', fontWeight: 'bold' }}>{setNum + 1}</span> / {totalSets}
+        </Typography>
+        
+        <Typography 
+          variant="body2" 
+          color="text.primary"
+          sx={{ 
+            fontSize: '1.1rem',
+            fontWeight: 500,
+            opacity: theme => theme.palette.mode === 'dark' ? 1 : 0.87,
+            mb: 2
+          }}
+        >
+          {exo.desc}
+        </Typography>
+        
+        <Typography variant="body1" color="text.secondary">
+          Répétitions : <span style={{ fontWeight: 'bold', color: 'red' }}>{exo.nbRep}</span>
+        </Typography>
+        
+        <Typography variant="body1" color="text.secondary">
+          Longueur de la série : <span style={{ fontWeight: 'bold', color: 'red' }}>{exo.sets}</span>
+        </Typography>
 
-      {/* Animation de complétion */}
-      <CompletionAnimation 
-        show={completionAnimation}
-        message={showSuccessMessage ? "Série terminée !" : null}
-      />
-
-      {/* Timer pour les exercices chronométrés */}
-      {exo.timer && (
-        <Box
+        {/* Bouton de fin de série */}
+        <Button 
+          variant="contained" 
+          color="primary"
+          onClick={onDone}
           sx={{
             mt: 2,
-            p: 2,
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            boxShadow: 1,
+            minWidth: 200,
+            position: 'relative',
+            overflow: 'hidden',
           }}
         >
-          <Typography
-            variant="h4"
-            className={getTimerClass()}
-            sx={{
-              fontFamily: 'monospace',
-              color: timer <= 5 ? 'error.main' : 
-                     timer <= 10 ? 'warning.main' : 'text.primary',
-              animation: timer <= 10 ? 'pulse 1s infinite' : 'none',
-              '@keyframes pulse': {
-                '0%': { transform: 'scale(1)' },
-                '50%': { transform: 'scale(1.05)' },
-                '100%': { transform: 'scale(1)' },
-              },
-            }}
-          >
-            {formatTime(timer)}
-          </Typography>
-          
-          <LinearProgress
-            variant="determinate"
-            value={calculateProgress()}
-            sx={{
-              mt: 2,
-              height: 8,
-              borderRadius: 4,
-              bgcolor: 'grey.200',
-              '& .MuiLinearProgress-bar': {
-                bgcolor: timer <= 5 ? 'error.main' : 
-                         timer <= 10 ? 'warning.main' : 'success.main',
-              },
-            }}
-          />
-          
-          <Button
-            variant="contained"
-            color={running ? 'error' : 'primary'}
-            onClick={() => setRunning(r => !r)}
-            sx={{ mt: 2 }}
-          >
-            {running ? 'Pause' : 'Démarrer'}
-          </Button>
-        </Box>
-      )}
+          Terminer
+        </Button>
 
-      {/* Bouton de fin de série */}
-      <Button 
-        variant="contained" 
-        color="primary"
-        onClick={handleDone}
-        disabled={isSubmitting}
-        sx={{
-          mt: 2,
-          minWidth: 200,
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {isSubmitting ? 'En cours...' : 'Terminer'}
-      </Button>
-
-      {/* Bouton de rythme */}
-      <Button 
-        variant="contained" 
-        color="primary"
-        onClick={handlePulse}
-        sx={{
-          mt: 2,
-          minWidth: 200,
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {isPulsing ? 'Arrêter le rythme' : 'Démarrer le rythme'}
-      </Button>
-
-      {/* Affichage des calories */}
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: 20,
-          right: 20,
-          transition: 'all 0.3s ease',
-          opacity: showCalories ? 1 : 0,
-          transform: showCalories ? 'translateY(0)' : 'translateY(20px)',
-        }}
-      >
-        <Paper
-          elevation={3}
+        {/* Bouton de rythme */}
+        <Button 
+          variant="contained" 
+          color="primary"
+          onClick={handlePulse}
           sx={{
-            p: 2,
-            borderRadius: 2,
-            bgcolor: 'success.main',
-            color: 'white',
+            mt: 2,
+            minWidth: 200,
+            position: 'relative',
+            overflow: 'hidden',
           }}
         >
-          <Typography variant="h6">
-            +{caloriesPerSet} calories !
-          </Typography>
-        </Paper>
-      </Box>
+          {isPulsing ? 'Arrêter le rythme' : 'Démarrer le rythme'}
+        </Button>
 
-      {/* Overlay pour afficher le nombre de répétitions restantes */}
-      {showOverlay && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          color: 'white',
-          padding: '20px',
-          borderRadius: '10px',
-          zIndex: 1000,
-        }}>
-          {repsRemaining} répétition(s) restante(s)
-        </div>
-      )}
+        {/* Affichage des calories */}
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 20,
+            right: 20,
+            transition: 'all 0.3s ease',
+            opacity: 1,
+            transform: 'translateY(0)',
+          }}
+        >
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor: 'success.main',
+              color: 'white',
+            }}
+          >
+            <Typography variant="h6">
+              +{caloriesPerSet} calories !
+            </Typography>
+          </Paper>
+        </Box>
+      </Paper>
     </Box>
   );
 }
