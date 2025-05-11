@@ -1,8 +1,10 @@
 {
-  "name": "Project Fatloss",
-  "short_name": "Fatloss",
-  "description": "Application mobile pour la semaine muscu.",
-  "start_url": ".",
+  "name": "Project Fat Loss",
+  "short_name": "Fat Loss",
+  "description": "Application de suivi d'entraînement avec calcul des calories brûlées",
+  "start_url": "/",
+  "orientation": "portrait",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1976d2",
@@ -15,13 +17,8 @@
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/bicep.svg",
-      "sizes": "96x96",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
