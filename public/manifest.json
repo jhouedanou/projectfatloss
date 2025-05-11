@@ -1,8 +1,10 @@
 {
   "name": "Project Fat Loss",
   "short_name": "Fat Loss",
-  "description": "Application d'entraînement personnalisé",
+  "description": "Application de suivi d'entraînement avec calcul des calories brûlées",
   "start_url": "/",
+  "orientation": "portrait",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#22223b",
@@ -45,7 +47,8 @@
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

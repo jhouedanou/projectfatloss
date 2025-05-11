@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "build": "vite build",
+    "build": "node scripts/generate-icons.js && vite build",
     "preview": "vite preview",
-    "predeploy": "vite build",
-    "deploy": "gh-pages -d dist"
+    "predeploy": "node scripts/generate-icons.js && vite build",
+    "deploy": "gh-pages -d dist",
+    "generate-icons": "node scripts/generate-icons.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -29,7 +30,9 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",
     "gh-pages": "^6.0.0",
+    "sharp": "^0.34.1",
     "vite": "^4.0.0",
-    "vite-plugin-pwa": "^1.0.0"
+    "vite-plugin-pwa": "^1.0.0",
+    "workbox-window": "^7.3.0"
   }
 }

@@ -10,6 +10,19 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import './i18n';
+import { registerSW } from 'virtual:pwa-register';
+
+// Enregistrement du service worker avec mise à jour automatique
+const updateSW = registerSW({
+  onNeedRefresh() {
+    if (confirm('Une nouvelle version est disponible. Voulez-vous mettre à jour ?')) {
+      updateSW();
+    }
+  },
+  onOfflineReady() {
+    console.log('L\'application est prête pour une utilisation hors ligne');
+  },
+});
 
 // Récupérer le thème initial depuis le localStorage
 const initialDarkMode = localStorage.getItem('theme') !== 'light';

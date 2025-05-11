@@ -9,7 +9,7 @@ import CompletionAnimation from '../components/CompletionAnimation';
 
 import iconsMap from '../../public/exo-icons.json';
 
-import beepSound from '../beep.mp3';
+import beepSound from '../../public/beep.mp3';
 
 function playBeep() {
   const beep = new Audio(beepSound);
