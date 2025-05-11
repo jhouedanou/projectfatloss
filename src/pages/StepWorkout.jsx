@@ -1,13 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getWorkoutPlan } from '../services/WorkoutCustomization';
-import { Button, Box, Typography, Paper, LinearProgress } from '@mui/material';
+import { Button, Box, Typography, Paper, LinearProgress, Switch, FormControlLabel, IconButton } from '@mui/material';
 import ProgressTracker from '../components/ProgressTracker';
 import ExoIcon, { EquipIcon } from '../components/ExoIcon';
 import ProgressBar from '../components/ProgressBar';
 import GoogleFitButton from '../components/GoogleFitButton';
 import CompletionAnimation from '../components/CompletionAnimation';
-import DayPills from '../components/DayPills'; // <-- AJOUTE CETTE LIGNE
-import YouTubeButton from '../components/YouTubeButton'; // <-- AJOUTER CETTE LIGNE
+import DayPills from '../components/DayPills';
+import YouTubeButton from '../components/YouTubeButton';
+import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
+import '../components/SpeechSettings.css';
+import { 
+  initSpeechService, 
+  speak, 
+  setEnabled as setSpeechEnabled, 
+  announceExercise, 
+  announcePause, 
+  announceCount,
+  announceRepetition,
+  announceWorkoutComplete 
+} from '../services/SpeechService';
 
 import iconsMap from '../../public/exo-icons.json';
 
@@ -29,17 +41,29 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const [time, setTime] = useState(defaultTime);
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
   
+  // Annoncer la pause lorsqu'elle commence
+  useEffect(() => {
+    if (isExerciseTransition && nextExercise) {
+      announcePause(defaultTime, true, nextExercise);
+    } else {
+      announcePause(defaultTime, false);
+    }
+  }, []);
+  
   useEffect(() => {
     if (time === 0) {
+      // Jouer un double beep à la fin de la pause uniquement
+      playBeep();
+      setTimeout(() => playBeep(), 200);
       onEnd();
       return;
     }
     
-    if (time === 6 || time === 3 || time === 2 || time === 1) {
+    // Jouer les beeps uniquement à partir de 4 secondes
+    if (time <= 4 && time > 0) {
       playBeep();
-    } else if (time === 0) {
-      playBeep();
-      setTimeout(() => playBeep(), 200);
+      // Annoncer le compte à rebours avec la synthèse vocale
+      announceCount(time);
     }
     
     const id = setTimeout(() => setTime(t => t - 1), 1000);
@@ -182,7 +206,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
 import { saveWorkout } from '../services/WorkoutStorage';
 
 export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, fatBurnerMode }) {
-  const [dayIndex, setDayIndex] = useState(initialDayIndex || 0); // Ajout d'un état local pour dayIndex
+  const [dayIndex, setDayIndex] = useState(initialDayIndex || 0);
   const [step, setStep] = useState(0);
   const [pause, setPause] = useState(false);
   const [isExerciseTransition, setIsExerciseTransition] = useState(false);
@@ -190,7 +214,32 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
+  const [speechEnabled, setSpeechEnabledState] = useState(false);
+  const [speechSettingsOpen, setSpeechSettingsOpen] = useState(false);
   const isFirstRender = useRef(true);
+  let beepTimeouts = [];
+  
+  // Initialiser le service de synthèse vocale
+  useEffect(() => {
+    initSpeechService();
+  }, []);
+  
+  // Gérer l'activation/désactivation de la synthèse vocale
+  const handleSpeechToggle = (event) => {
+    const newState = event.target.checked;
+    setSpeechEnabledState(newState);
+    setSpeechEnabled(newState);
+  };
+  
+  // Ouvrir la boîte de dialogue des paramètres
+  const handleOpenSpeechSettings = () => {
+    setSpeechSettingsOpen(true);
+  };
+  
+  // Fermer la boîte de dialogue des paramètres
+  const handleCloseSpeechSettings = () => {
+    setSpeechSettingsOpen(false);
+  };
   
   const workoutPlan = getWorkoutPlan();
   const day = workoutPlan?.[dayIndex];
@@ -303,10 +352,15 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       fatBurnerMode: fatBurnerMode
     };
     
+    // Annoncer la fin de l'entraînement
+    announceWorkoutComplete({
+      calories: totalCaloriesBurned
+    });
+    
     onComplete && onComplete(workoutDataWithMode);
     
     // Fermer la modale
-    onClose();
+    handleCloseEndOfDayModal();
   };
   
   return (
@@ -319,6 +373,24 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           🔥 Mode Fat Burner actif ! 🔥
         </div>
       )}
+      
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1 }} className="speech-controls">
+        <FormControlLabel
+          control={<Switch checked={speechEnabled} onChange={handleSpeechToggle} />}
+          label="Synthèse vocale"
+        />
+        {speechEnabled && (
+          <IconButton 
+            onClick={handleOpenSpeechSettings} 
+            color="primary" 
+            size="small"
+            aria-label="Paramètres vocaux"
+            className="speech-settings-button"
+          >
+            <span role="img" aria-label="Paramètres">⚙️</span>
+          </IconButton>
+        )}
+      </Box>
       
       <DayPills 
         days={workoutPlan} 
@@ -383,6 +455,13 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           fatBurnerMode={fatBurnerMode}
         />
       )}
+      
+      {/* Boîte de dialogue des paramètres de synthèse vocale */}
+      <SpeechSettingsDialog 
+        open={speechSettingsOpen} 
+        onClose={handleCloseSpeechSettings}
+        speechEnabled={speechEnabled}
+      />
     </div>
   );
 }
@@ -409,6 +488,9 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    
+    // Annoncer le nouvel exercice
+    announceExercise(exo);
   }, [exo, setNum, totalSets]);
 
   // Lancer le décompte avant le rythme
@@ -432,6 +514,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     if (countdown > 0) {
       const t = setTimeout(() => setCountdown(c => c - 1), 1000);
       playBeep();
+      // Annoncer le compte à rebours
+      announceCount(countdown);
       return () => clearTimeout(t);
     }
     if (countdown === 0) {
@@ -449,6 +533,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           const newRep = prev + 1;
           if (newRep <= exo.nbRep) {
             playBeep();
+            // Annoncer certaines répétitions
+            announceRepetition(newRep, exo.nbRep);
             return newRep;
           }
           return exo.nbRep;
