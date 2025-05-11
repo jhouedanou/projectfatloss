@@ -392,11 +392,12 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         )}
       </Box>
       
-      <DayPills 
+      {/* DayPills masqué selon la demande */}
+      {/* <DayPills 
         days={workoutPlan} 
         current={dayIndex} 
         setCurrent={setDayIndex}
-      />
+      /> */}
       
       <>
         <ProgressTracker 
@@ -489,8 +490,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
       timerRef.current = null;
     }
     
-    // Annoncer le nouvel exercice
-    announceExercise(exo);
+    // Annoncer le nouvel exercice avec le numéro de série
+    announceExercise(exo, setNum, totalSets);
   }, [exo, setNum, totalSets]);
 
   // Lancer le décompte avant le rythme

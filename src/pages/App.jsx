@@ -45,7 +45,8 @@ export default function App() {
   // État pour contrôler l'affichage du sélecteur de langue
   const [showLanguageSelector, setShowLanguageSelector] = useState(() => {
     const savedPref = localStorage.getItem('showLanguageSelector');
-    return savedPref === null ? true : savedPref === 'true';
+    // Toujours masquer le sélecteur de langue selon la demande
+    return false;
   });
   
   // État pour le mode d'urgence "Fat Burner"
@@ -267,13 +268,14 @@ export default function App() {
         
         {/* Menu de configuration - ajouté pour permettre de masquer le sélecteur de langue */}
         <div className="settings-bar">
-          <button 
+          {/* Bouton du sélecteur de langue masqué selon la demande */}
+          {/* <button 
             className="settings-button"
             onClick={toggleLanguageSelector}
             title={showLanguageSelector ? t('settings.hideLanguage') : t('settings.showLanguage')}
           >
             {showLanguageSelector ? t('settings.hideLanguage') : t('settings.showLanguage')} 🌐
-          </button>
+          </button> */}
           
           {/* Bouton pour le mode Fat Burner */}
           <button 
