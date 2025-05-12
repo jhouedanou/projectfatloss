@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Authentification Strava</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      background-color: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+    }
+    .logo {
+      width: 120px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0 0 20px 0;
+      color: #FC4C02; /* Strava orange */
+    }
+    .status {
+      font-size: 18px;
+      margin: 15px 0;
+    }
+    .success {
+      color: #2E7D32;
+    }
+    .error {
+      color: #D32F2F;
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: #FC4C02;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://cdn.worldvectorlogo.com/logos/strava-2.svg" alt="Strava Logo" class="logo">
+    <h1>Project Fat Loss</h1>
+    
+    <div id="loading">
+      <div class="spinner"></div>
+      <p class="status">Authentification Strava en cours...</p>
+    </div>
+    
+    <div id="success" style="display: none;">
+      <p class="status success">✅ Authentification réussie !</p>
+      <p>Vous pouvez maintenant synchroniser vos entraînements avec Strava.</p>
+      <p>Cette fenêtre va se fermer automatiquement dans <span id="countdown">5</span> secondes.</p>
+    </div>
+    
+    <div id="error" style="display: none;">
+      <p class="status error">❌ Erreur d'authentification</p>
+      <p id="error-message">Impossible de se connecter à Strava.</p>
+      <p>Vous pouvez fermer cette fenêtre et réessayer.</p>
+    </div>
+  </div>
+
+  <script>
+    // Récupérer le code d'autorisation ou l'erreur de l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const error = urlParams.get('error');
+    
+    // Références aux éléments DOM
+    const loadingEl = document.getElementById('loading');
+    const successEl = document.getElementById('success');
+    const errorEl = document.getElementById('error');
+    const errorMsgEl = document.getElementById('error-message');
+    const countdownEl = document.getElementById('countdown');
+    
+    // Fonction pour échanger le code contre un token
+    async function exchangeCodeForToken(code) {
+      try {
+        // Récupérer les configurations de Strava depuis localStorage (si disponible)
+        let clientId = '159311';
+        let clientSecret = '6e2acab2c5731c20a946fe672afdfc8a6b6485f1';
+        
+        // Construire l'URL pour l'échange
+        const tokenEndpoint = 'https://www.strava.com/oauth/token';
+        
+        // Envoyer la requête pour obtenir le token
+        const response = await fetch(tokenEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            client_id: clientId,
+            client_secret: clientSecret,
+            code: code,
+            grant_type: 'authorization_code'
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Sauvegarder les tokens dans localStorage
+        localStorage.setItem('strava_access_token', data.access_token);
+        localStorage.setItem('strava_refresh_token', data.refresh_token);
+        localStorage.setItem('strava_expires_at', new Date(Date.now() + data.expires_in * 1000).toISOString());
+        
+        // Afficher le succès
+        loadingEl.style.display = 'none';
+        successEl.style.display = 'block';
+        
+        // Compteur pour fermer la fenêtre
+        let countdown = 5;
+        const timer = setInterval(() => {
+          countdown--;
+          countdownEl.textContent = countdown;
+          if (countdown <= 0) {
+            clearInterval(timer);
+            window.close();
+          }
+        }, 1000);
+        
+        return true;
+      } catch (error) {
+        console.error('Erreur lors de l\'échange du code:', error);
+        
+        // Afficher l'erreur
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'block';
+        errorMsgEl.textContent = `Erreur: ${error.message}`;
+        
+        return false;
+      }
+    }
+    
+    // Traiter le retour de Strava
+    if (error) {
+      // Afficher l'erreur si présente dans l'URL
+      loadingEl.style.display = 'none';
+      errorEl.style.display = 'block';
+      errorMsgEl.textContent = `Erreur Strava: ${error}`;
+    } else if (code) {
+      // Échanger le code contre un token
+      exchangeCodeForToken(code);
+    } else {
+      // Aucun code ni erreur dans l'URL
+      loadingEl.style.display = 'none';
+      errorEl.style.display = 'block';
+      errorMsgEl.textContent = 'Aucun code d\'autorisation reçu de Strava.';
+    }
+  </script>
+</body>
+</html>
