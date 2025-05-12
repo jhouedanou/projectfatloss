@@ -10,6 +10,9 @@ const STRAVA_CONFIG = {
   scope: 'read',
 };
 
+// Clé de stockage local pour les statistiques Strava
+const STRAVA_STATS_KEY = 'project_fat_loss_strava_stats';
+
 // Informations d'authentification de l'utilisateur
 let stravaAuth = {
   accessToken: localStorage.getItem('strava_access_token') || '09dae37d7b963c3fe7fd1478e6c0315260e45404',
