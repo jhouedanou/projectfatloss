@@ -6,10 +6,10 @@
 const STRAVA_CONFIG = {
   clientId: '159311',
   clientSecret: '6e2acab2c5731c20a946fe672afdfc8a6b6485f1',
-  redirectUri: window.location.origin + '/strava-callback.html',  // Page callback spécifique
-  scope: 'read,activity:write',
-  authUrl: 'https://www.strava.com/oauth/authorize',  // Sans /api/v3/
-  tokenUrl: 'https://www.strava.com/oauth/token'      // Sans /api/v3/
+  redirectUri: window.location.origin,
+  scope: 'read,activity:write',  // Ajout de activity:write pour créer des activités
+  authUrl: 'https://www.strava.com/api/v3/oauth/authorize',
+  tokenUrl: 'https://www.strava.com/api/v3/oauth/token'
 };
 
 // Clé de stockage local pour les statistiques Strava
@@ -100,11 +100,16 @@ async function refreshToken() {
  * @returns {Promise<boolean>} - true si l'authentification a réussi
  */
 export function authenticateWithStrava() {
-  // Forcer une nouvelle authentification en effaçant les tokens
-  clearStravaAuth();
+  // Si déjà authentifié et token valide, ne rien faire
+  if (stravaAuth.accessToken) {
+    const expiresAt = new Date(stravaAuth.expiresAt).getTime();
+    if (expiresAt > Date.now()) {
+      return Promise.resolve(true);
+    }
+  }
   
   // Rediriger vers la page d'authentification Strava
-  const authUrl = `${STRAVA_CONFIG.authUrl}?client_id=${STRAVA_CONFIG.clientId}&redirect_uri=${encodeURIComponent(STRAVA_CONFIG.redirectUri)}&response_type=code&scope=${STRAVA_CONFIG.scope}&approval_prompt=force`;
+  const authUrl = `${STRAVA_CONFIG.authUrl}?client_id=${STRAVA_CONFIG.clientId}&redirect_uri=${encodeURIComponent(STRAVA_CONFIG.redirectUri)}&response_type=code&scope=${STRAVA_CONFIG.scope}`;
   
   console.log('Redirection vers URL d\'authentification Strava:', authUrl);
   
@@ -118,35 +123,17 @@ export function authenticateWithStrava() {
         clearInterval(checkAuth);
         
         // Vérifier si l'authentification a réussi (le token est présent)
-        const accessToken = localStorage.getItem('strava_access_token');
-        if (accessToken) {
-          console.log('Authentification Strava réussie, token récupéré');
-          stravaAuth.accessToken = accessToken;
+        if (localStorage.getItem('strava_access_token')) {
+          stravaAuth.accessToken = localStorage.getItem('strava_access_token');
           stravaAuth.refreshToken = localStorage.getItem('strava_refresh_token');
           stravaAuth.expiresAt = localStorage.getItem('strava_expires_at');
           resolve(true);
         } else {
-          console.log('Échec de l\'authentification Strava: pas de token récupéré');
           resolve(false);
         }
       }
     }, 500);
   });
-}
-
-/**
- * Efface tous les tokens Strava
- */
-export function clearStravaAuth() {
-  console.log('Effacement des tokens Strava pour forcer une nouvelle authentification');
-  localStorage.removeItem('strava_access_token');
-  localStorage.removeItem('strava_refresh_token');
-  localStorage.removeItem('strava_expires_at');
-  stravaAuth = {
-    accessToken: null,
-    refreshToken: null,
-    expiresAt: null
-  };
 }
 
 /**
@@ -360,7 +347,7 @@ export async function syncWorkoutHistory(limit = 5) {
       });
       
       // Envoyer l'entraînement à Strava
-      const response = await fetch('https://www.strava.com/api/v3/activities', {
+      let response = await fetch('https://www.strava.com/api/v3/activities', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${stravaAuth.accessToken}`,
@@ -368,6 +355,33 @@ export async function syncWorkoutHistory(limit = 5) {
         },
         body: JSON.stringify(stravaActivity)
       });
+      
+      // Si 401, tenter une reconnexion automatique
+      if (response.status === 401) {
+        console.warn('Token Strava expiré ou invalide, tentative de reconnexion...');
+        const refreshed = await refreshToken();
+        if (refreshed) {
+          response = await fetch('https://www.strava.com/api/v3/activities', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${stravaAuth.accessToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(stravaActivity)
+          });
+        } else {
+          // Forcer une nouvelle authentification utilisateur
+          await authenticateWithStrava();
+          response = await fetch('https://www.strava.com/api/v3/activities', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${stravaAuth.accessToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(stravaActivity)
+          });
+        }
+      }
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -417,6 +431,7 @@ export async function syncWorkoutHistory(limit = 5) {
  */
 export function isConnectedToStrava() {
   const accessToken = localStorage.getItem('strava_access_token') || stravaAuth.accessToken;
+  const expiresAt = localStorage.getItem('strava_expires_at') || stravaAuth.expiresAt;
   
   if (!accessToken) {
     console.log('Pas de token Strava: utilisateur non connecté');
@@ -427,7 +442,7 @@ export function isConnectedToStrava() {
   if (accessToken !== stravaAuth.accessToken) {
     stravaAuth.accessToken = accessToken;
     stravaAuth.refreshToken = localStorage.getItem('strava_refresh_token') || stravaAuth.refreshToken;
-    stravaAuth.expiresAt = localStorage.getItem('strava_expires_at') || stravaAuth.expiresAt;
+    stravaAuth.expiresAt = expiresAt;
   }
   
   return true;
