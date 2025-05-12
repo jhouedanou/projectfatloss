@@ -4,15 +4,16 @@ import { useTheme } from '@mui/material/styles';
 import SettingsIcon from '@mui/icons-material/Settings';
 import beepSound from '../../public/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
+import StravaButton from '../components/StravaButton';
 import ExoIcon from '../components/ExoIcon';
 import FloatingButtons from '../components/FloatingButtons/FloatingButtons';
 import ProgressTracker from '../components/ProgressTracker';
 import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
 import DayPills from '../components/DayPills';
-import GoogleFitButton from '../components/GoogleFitButton';
 import { getWorkoutPlan } from '../services/WorkoutCustomization';
 import { initSpeechService, announceExercise, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
+import { syncWorkout } from '../services/StravaService';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -186,18 +187,14 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
         <p className="weight-total">Poids total soulevé : <span>{totalWeightLifted} kg</span></p>
         <p className="motivation-text">Excellent travail ! Continuez ainsi pour atteindre vos objectifs.</p>
         
-        <div className="google-fit-section">
-          <GoogleFitButton 
+        <div className="strava-section">
+          <StravaButton 
             exercise={{
               name: day.title,
               desc: `Séance complète : ${day.exercises.length} exercices`,
               caloriesPerSet: [totalCalories, totalCalories],
               totalSets: 1,
-              googleFitActivity: {
-                type: 'strength_training',
-                name: day.title,
-                muscleGroups: ['full_body']
-              }
+              duration: day.exercises.length * 180, // Estimation de la durée : 3 minutes par exercice
             }} 
           />
         </div>
@@ -448,14 +445,19 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             date: new Date()
           });
           
-          // Synchroniser avec Google Fit si disponible
-          if (window.gapi && window.gapi.auth2) {
-            await GoogleFitService.syncWorkout({
+          // Synchroniser avec Strava si l'utilisateur est connecté
+          try {
+            await syncWorkout({
               name: day.title,
+              desc: `Séance de musculation : ${step + 1} exercices sur ${total}`,
               calories: totalCaloriesBurned,
-              duration: step * 2, // estimation basique
+              duration: step * 180, // estimation : 3 minutes par exercice
               date: new Date()
             });
+            console.log('Entraînement synchronisé avec Strava');
+          } catch (stravaError) {
+            console.error('Erreur lors de la synchronisation avec Strava:', stravaError);
+            // Continuer même si Strava échoue
           }
           
           onBack();
