@@ -467,13 +467,33 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, fatBurnerMode }) {
+function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMode }) {
+  const [timer, setTimer] = useState(() => {
+    if (exo.timer) {
+      return exo.duration || 30;
+    }
+    return null;
+  });
+  const [running, setRunning] = useState(false);
+  const [showCalories, setShowCalories] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completionAnimation, setCompletionAnimation] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  
+  // Limiter les répétitions "max" à 15 pour éviter les problèmes de timer
+  const safeReps = exo.reps && exo.reps.toString().toLowerCase().includes('max') 
+    ? 15 
+    : (exo.reps || '');
+  
   const iconType = iconsMap[exo.name] || 'dumbbell';
+  
+  // Calculer les calories pour la série avec une valeur par défaut sécurisée
+  const caloriesPerSet = exo.caloriesPerSet ? 
+    Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
+
   const [isPulsing, setIsPulsing] = useState(false);
   const [currentRep, setCurrentRep] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
-  const [showCalories, setShowCalories] = useState(false);
-  const [caloriesToShow, setCaloriesToShow] = useState(0);
   const [countdown, setCountdown] = useState(null); // null = pas de décompte, sinon 3,2,1
   const timerRef = useRef(null);
 
@@ -482,8 +502,6 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     setIsPulsing(false);
     setCurrentRep(0);
     setShowOverlay(false);
-    setShowCalories(false);
-    setCaloriesToShow(0);
     setCountdown(null);
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -557,19 +575,13 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   // Nouveau : bouton "Suivant" sur l'overlay OK
   const handleNext = () => {
     const calories = exo.caloriesPerSet ? Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
-    setCaloriesToShow(calories);
-    onCaloriesBurned(calories);
-    onExerciseCompleted();
     setShowCalories(true);
-    setShowOverlay(false);
+    onCaloriesBurned(calories);
     setTimeout(() => {
       setShowCalories(false);
       onDone();
     }, 2000);
   };
-
-  const caloriesPerSet = exo.caloriesPerSet ? 
-    Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
 
   return (
     <Box sx={{ p: 2 }}>
@@ -698,11 +710,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           onClick={() => {
             // On considère que l'utilisateur saute l'exercice, on affiche les calories
             const calories = exo.caloriesPerSet ? Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
-            setCaloriesToShow(calories);
-            onCaloriesBurned(calories);
-            onExerciseCompleted();
             setShowCalories(true);
-            setShowOverlay(false);
+            onCaloriesBurned(calories);
             setTimeout(() => {
               setShowCalories(false);
               onDone();

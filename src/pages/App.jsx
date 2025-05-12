@@ -13,6 +13,7 @@ import WorkoutCustomizer from '../components/WorkoutCustomizer'; // Importer le 
 import LoginForm from '../components/LoginForm'; // Importer le formulaire de connexion
 import SyncPanel from '../components/SyncPanel'; // Importer le panneau de synchronisation
 import { getCurrentUser } from '../services/AuthService'; // Importer le service d'authentification
+import { initSpeechService } from '../services/SpeechService'; // Importer le service de synthèse vocale
 // Importer les données initiales au cas où le chargement échoue
 import { days as initialWorkoutPlan } from '../data'; 
 import '../components/WeightTracker.css';
@@ -168,6 +169,12 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('showLanguageSelector', showLanguageSelector);
   }, [showLanguageSelector]);
+
+  // Initialiser la synthèse vocale au démarrage de l'application
+  useEffect(() => {
+    const speechInitialized = initSpeechService();
+    console.log("Synthèse vocale initialisée:", speechInitialized);
+  }, []);
 
   const toggleTheme = () => {
     setDarkTheme(prev => !prev);

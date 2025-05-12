@@ -5,7 +5,7 @@
 
 // Configuration initiale de la voix
 let voiceConfig = {
-  enabled: false,          // Synthèse vocale activée par défaut
+  enabled: true,          // Activée par défaut maintenant
   volume: 1.0,             // Volume (0 à 1)
   rate: 1.0,               // Vitesse de parole (0.1 à 10)
   pitch: 1.0,              // Tonalité (0 à 2)
@@ -19,23 +19,35 @@ let voiceConfig = {
 // Liste des voix disponibles
 let availableVoices = [];
 
-// Initialisation du service de synthèse vocale
-function initSpeechService() {
+/**
+ * Initialiser le service de synthèse vocale
+ */
+export function initSpeechService() {
   if (!window.speechSynthesis) {
     console.error("La synthèse vocale n'est pas prise en charge par ce navigateur.");
     return false;
   }
 
-  // Récupérer les voix disponibles
+  console.log("Initialisation du service de synthèse vocale...");
+
+  // Nettoyer tout état précédent
+  window.speechSynthesis.cancel();
+
+  // Fonction pour mettre à jour les voix disponibles
   const updateVoices = () => {
     availableVoices = window.speechSynthesis.getVoices();
+    console.log("Voix disponibles:", availableVoices.length);
     
     // Essayer de trouver une voix française
-    const frenchVoice = availableVoices.find(voice => voice.lang.includes('fr'));
+    const frenchVoice = availableVoices.find(voice => 
+      voice.lang.includes('fr') || voice.name.includes('French') || voice.name.includes('français')
+    );
+    
     if (frenchVoice) {
+      console.log("Voix française trouvée:", frenchVoice.name);
       voiceConfig.voice = frenchVoice;
     } else if (availableVoices.length > 0) {
-      // Sinon, utiliser la première voix disponible
+      console.log("Aucune voix française trouvée, utilisation de:", availableVoices[0].name);
       voiceConfig.voice = availableVoices[0];
     }
   };
@@ -47,6 +59,11 @@ function initSpeechService() {
 
   // Essayer de charger les voix immédiatement (peut fonctionner sur Firefox)
   updateVoices();
+
+  // Tester la synthèse avec un message court pour vérifier que ça fonctionne
+  setTimeout(() => {
+    speak("Synthèse vocale initialisée.", { volume: 0.7 });
+  }, 1000);
 
   return true;
 }
