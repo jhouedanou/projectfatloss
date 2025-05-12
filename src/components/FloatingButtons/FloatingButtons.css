@@ -1,0 +1,75 @@
+.floating-buttons-container {
+  position: fixed;
+  right: 20px;
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 1000;
+}
+
+.floating-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.floating-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.floating-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.youtube-btn {
+  background-color: #FF0000;
+}
+
+.youtube-btn:hover {
+  background-color: #CC0000;
+}
+
+.rhythm-btn {
+  background-color: #4CAF50;
+}
+
+.rhythm-btn:hover {
+  background-color: #388E3C;
+}
+
+.next-btn {
+  background-color: #2196F3;
+}
+
+.next-btn:hover {
+  background-color: #1976D2;
+}
+
+/* Ajustement pour le mode sombre */
+.dark-theme .floating-button {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Ajustement pour les écrans mobiles */
+@media (max-width: 768px) {
+  .floating-buttons-container {
+    right: 15px;
+    bottom: 70px;
+  }
+  
+  .floating-button {
+    width: 48px;
+    height: 48px;
+  }
+}

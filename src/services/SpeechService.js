@@ -22,7 +22,7 @@ let availableVoices = [];
 /**
  * Initialiser le service de synthèse vocale
  */
-export function initSpeechService() {
+function initSpeechService() {
   if (!window.speechSynthesis) {
     console.error("La synthèse vocale n'est pas prise en charge par ce navigateur.");
     return false;
