@@ -350,10 +350,58 @@ export function disconnectFromStrava() {
   localStorage.removeItem('strava_access_token');
   localStorage.removeItem('strava_refresh_token');
   localStorage.removeItem('strava_expires_at');
+  localStorage.removeItem(STRAVA_STATS_KEY);
   
   stravaAuth = {
     accessToken: null,
     refreshToken: null,
     expiresAt: null
   };
+}
+
+/**
+ * Récupère les statistiques d'entraînements synchronisés avec Strava
+ * @returns {Promise<Object>} - Les statistiques
+ */
+export async function getStravaSyncStats() {
+  try {
+    // Vérifier si les stats sont en cache
+    const cachedStats = localStorage.getItem(STRAVA_STATS_KEY);
+    if (cachedStats) {
+      const stats = JSON.parse(cachedStats);
+      const cacheAge = Date.now() - stats.lastUpdate;
+      // Utiliser le cache si moins de 1 heure
+      if (cacheAge < 3600000) {
+        return stats;
+      }
+    }
+
+    // Si pas connecté, retourner des stats vides
+    if (!isConnectedToStrava()) {
+      return {
+        totalSynced: 0,
+        totalDistance: 0,
+        totalCalories: 0,
+        lastSync: null,
+        lastUpdate: Date.now()
+      };
+    }
+
+    // Chercher les 100 dernières activités
+    const activities = await getStravaActivities(100);
+    const stats = {
+      totalSynced: activities.length,
+      totalDistance: activities.reduce((sum, act) => sum + (act.distance || 0), 0),
+      totalCalories: activities.reduce((sum, act) => sum + (act.calories || 0), 0),
+      lastSync: activities[0]?.start_date || null,
+      lastUpdate: Date.now()
+    };
+
+    // Mettre en cache
+    localStorage.setItem(STRAVA_STATS_KEY, JSON.stringify(stats));
+    return stats;
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques Strava:', error);
+    throw error;
+  }
 }
