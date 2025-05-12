@@ -1,13 +1,14 @@
 .app-header {
+  background-color: var(--background-paper);
   padding: env(safe-area-inset-top) 1rem 0.5rem;
-  background-color: var(--seashell);
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   position: sticky;
   top: 0;
   z-index: 1000;
+  border-bottom: 1px solid rgba(240, 61, 50, 0.2);
 }
 
 .logo-container {
@@ -20,4 +21,10 @@
   height: 100%;
   width: auto;
   object-fit: contain;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }

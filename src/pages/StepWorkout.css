@@ -38,3 +38,90 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+.step-workout-container {
+  background-color: var(--background-dark);
+  min-height: 100vh;
+  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+}
+
+.exercise-card {
+  background-color: var(--background-paper);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(240, 61, 50, 0.2);
+}
+
+.exercise-title {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+.exercise-description {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.timer-btn {
+  background-color: var(--vermilion);
+  color: var(--text-primary);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.timer-btn:hover {
+  background-color: var(--cinnabar);
+  transform: translateY(-1px);
+}
+
+.timer-btn:active {
+  transform: translateY(1px);
+}
+
+.timer-btn.secondary {
+  background-color: var(--background-paper);
+  border: 1px solid var(--vermilion);
+}
+
+.timer-value {
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.rep-counter {
+  color: var(--vermilion);
+  font-size: 2rem;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.exercise-overlay {
+  background-color: rgba(0, 0, 0, 0.9);
+  color: var(--text-primary);
+}
+
+.calorie-display {
+  background-color: var(--vermilion);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(240, 61, 50, 0.3);
+}
+
+.floating-calories {
+  background-color: var(--background-paper);
+  color: var(--vermilion);
+  border: 2px solid var(--vermilion);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
