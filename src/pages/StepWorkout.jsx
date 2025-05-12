@@ -42,22 +42,23 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
   const isLastSet = setNum === totalSets - 1; // On vérifie si c'est la dernière série
   
-  // Annoncer la pause et le prochain exercice uniquement si c'est la dernière série
+  // Annoncer la pause et le prochain exercice
   useEffect(() => {
-    if (window.speechSynthesis && isExerciseTransition && isLastSet) {
-      const message = new SpeechSynthesisUtterance();
-      if (nextExercise) {
-        message.text = `Pause. Prochain exercice : ${nextExercise.name}`;
-      } else {
-        message.text = "Dernière pause. Félicitations, vous avez presque terminé !";
+    let message = null;
+    
+    if (window.speechSynthesis) {
+      if (isExerciseTransition && isLastSet && nextExercise) {
+        message = new SpeechSynthesisUtterance(`Pause. Prochain exercice : ${nextExercise.name}`);
+      } else if (isExerciseTransition && isLastSet) {
+        message = new SpeechSynthesisUtterance("Dernière pause. Félicitations, vous avez presque terminé !");
+      } else if (window.speechSynthesis) {
+        message = new SpeechSynthesisUtterance(`Pause entre les séries. Série ${setNum + 2} sur ${totalSets}`);
       }
-      message.lang = 'fr-FR';
-      window.speechSynthesis.speak(message);
-    } else if (window.speechSynthesis) {
-      const message = new SpeechSynthesisUtterance();
-      message.text = `Pause entre les séries. Série ${setNum + 2} sur ${totalSets}`;
-      message.lang = 'fr-FR';
-      window.speechSynthesis.speak(message);
+      
+      if (message) {
+        message.lang = 'fr-FR';
+        window.speechSynthesis.speak(message);
+      }
     }
   }, []);
   
@@ -87,7 +88,7 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
       <h2 className="pause-title">Pause {reducedTime && "Rapide"}</h2>
       <div className="pause-timer">{time}s</div>
       
-      {/* Afficher le prochain exercice uniquement si on est à la dernière série */}
+      {/* Afficher le prochain exercice uniquement sur le dernier exercice de la série */}
       {nextExercise && isLastSet && (
         <div className="next-exercise-info">
           <h3>Prochain exercice :</h3>
@@ -923,14 +924,17 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
           onYouTube={handleYouTube}
           onToggleRhythm={handlePulse}
           onNext={() => {
-            const calories = caloriesPerSet;
-            setCaloriesToShow(calories);
-            setShowCalories(true);
-            onCaloriesBurned(calories);
-            setTimeout(() => {
-              setShowCalories(false);
-              onDone();
-            }, 1000);
+            // Vérifie si l'overlay n'est pas déjà affiché pour éviter de compléter deux fois
+            if (!showOverlay) {
+              const calories = caloriesPerSet;
+              setCaloriesToShow(calories);
+              setShowCalories(true);
+              onCaloriesBurned(calories);
+              setTimeout(() => {
+                setShowCalories(false);
+                onDone();
+              }, 1000);
+            }
           }}
           onBack={handleBackConfirmation}
           isRhythmActive={isPulsing || countdown !== null}

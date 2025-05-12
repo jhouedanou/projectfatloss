@@ -1,8 +1,4 @@
 import {
-  TransitionGroup_default,
-  Transition_default
-} from "./chunk-LQFCTLZH.js";
-import {
   CssVarsProvider,
   Experimental_CssVarsProvider,
   InitColorSchemeScript_default,
@@ -22,6 +18,10 @@ import {
   withStyles,
   withTheme
 } from "./chunk-P34IYYVP.js";
+import {
+  TransitionGroup_default,
+  Transition_default
+} from "./chunk-LQFCTLZH.js";
 import {
   CssBaseline_default,
   body,

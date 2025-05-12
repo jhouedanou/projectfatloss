@@ -91,7 +91,14 @@ function speak(text, options = {}) {
     // Ajouter des gestionnaires d'événements
     utterance.onend = () => resolve();
     utterance.onerror = (event) => {
-      console.error("Erreur de synthèse vocale:", event);
+      console.log("Erreur de synthèse vocale:", event);
+      
+      // Ne pas rejeter la promesse si l'erreur est de type 'canceled'
+      if (event.error === 'canceled') {
+        console.log("Synthèse vocale annulée, ce n'est pas une erreur critique");
+        resolve();
+        return;
+      }
       
       // Essayer de récupérer avec une voix par défaut si celle spécifique échoue
       if (utterance.voice && window.speechSynthesis.getVoices().length > 0) {
@@ -99,8 +106,14 @@ function speak(text, options = {}) {
         const defaultUtterance = new SpeechSynthesisUtterance(text);
         defaultUtterance.onend = () => resolve();
         defaultUtterance.onerror = (fallbackError) => {
-          console.error("Échec également avec la voix par défaut:", fallbackError);
-          reject(fallbackError);
+          // Ne pas rejeter la promesse si l'erreur est de type 'canceled'
+          if (fallbackError.error === 'canceled') {
+            console.log("Synthèse vocale de repli annulée");
+            resolve();
+          } else {
+            console.error("Échec également avec la voix par défaut:", fallbackError);
+            reject(fallbackError);
+          }
         };
         window.speechSynthesis.speak(defaultUtterance);
       } else {
