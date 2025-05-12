@@ -22,6 +22,7 @@ import '../components/LoginForm.css'; // Importer les styles CSS du formulaire d
 import '../components/SyncPanel.css'; // Importer les styles CSS du panneau de synchronisation
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
 import DayPills from '../components/DayPills';
+import Header from '../components/Header/Header';
 
 function Tabs({ days, current, setCurrent }) {
   if (!days || days.length === 0) {
@@ -239,164 +240,167 @@ export default function App() {
 
   return (
     <ThemeProvider theme={appTheme}>
-      <div>
-        <header className="app-header">
-          <button className="theme-toggle" onClick={toggleTheme} title={darkTheme ? t('theme.light') : t('theme.dark')}>
-            {darkTheme ? '☀️' : '🌙'}
-          </button>
-          <span className="header-title">{t('app.title')}</span>
-          <div className="header-controls">
-            <button 
-              className={`view-toggle ${viewMode === 'workout' ? 'active' : ''}`}
-              onClick={() => setViewMode('workout')}
-              title={t('nav.workout')}
-            >
-              <span className="view-icon">🏋️</span>
-              <span className="view-text">{t('nav.workout')}</span>
+      <div className="app">
+        <Header />
+        <div>
+          <header className="app-header">
+            <button className="theme-toggle" onClick={toggleTheme} title={darkTheme ? t('theme.light') : t('theme.dark')}>
+              {darkTheme ? '☀️' : '🌙'}
             </button>
-            <button 
-              className={`view-toggle ${viewMode === 'history' ? 'active' : ''}`}
-              onClick={() => setViewMode('history')}
-              title={t('nav.history')}
-            >
-              <span className="view-icon">📊</span>
-              <span className="view-text">{t('nav.history')}</span>
-            </button>
-            <button 
-              className={`view-toggle ${viewMode === 'weight' ? 'active' : ''}`}
-              onClick={() => setViewMode('weight')}
-              title={t('nav.weight')}
-            >
-              <span className="view-icon">⚖️</span>
-              <span className="view-text">{t('nav.weight')}</span>
-            </button>
-          </div>
-        </header>
-        
-        {/* Menu de configuration - ajouté pour permettre de masquer le sélecteur de langue */}
-        <div className="settings-bar">
-          {/* Bouton du sélecteur de langue masqué selon la demande */}
-          {/* <button 
-            className="settings-button"
-            onClick={toggleLanguageSelector}
-            title={showLanguageSelector ? t('settings.hideLanguage') : t('settings.showLanguage')}
-          >
-            {showLanguageSelector ? t('settings.hideLanguage') : t('settings.showLanguage')} 🌐
-          </button> */}
+            <span className="header-title">{t('app.title')}</span>
+            <div className="header-controls">
+              <button 
+                className={`view-toggle ${viewMode === 'workout' ? 'active' : ''}`}
+                onClick={() => setViewMode('workout')}
+                title={t('nav.workout')}
+              >
+                <span className="view-icon">🏋️</span>
+                <span className="view-text">{t('nav.workout')}</span>
+              </button>
+              <button 
+                className={`view-toggle ${viewMode === 'history' ? 'active' : ''}`}
+                onClick={() => setViewMode('history')}
+                title={t('nav.history')}
+              >
+                <span className="view-icon">📊</span>
+                <span className="view-text">{t('nav.history')}</span>
+              </button>
+              <button 
+                className={`view-toggle ${viewMode === 'weight' ? 'active' : ''}`}
+                onClick={() => setViewMode('weight')}
+                title={t('nav.weight')}
+              >
+                <span className="view-icon">⚖️</span>
+                <span className="view-text">{t('nav.weight')}</span>
+              </button>
+            </div>
+          </header>
           
-          {/* Bouton pour le mode Fat Burner */}
-          <button 
-            className={`settings-button ${fatBurnerMode ? 'active-mode' : ''}`}
-            onClick={toggleFatBurnerMode}
-            title={t('settings.fatBurnerMode')}
-          >
-            {t('settings.fatBurner')} 🔥
-          </button>
-          
-          {/* Bouton pour personnaliser le programme */}
-          <button 
-            className="settings-button"
-            onClick={() => setShowCustomizer(true)}
-            title={t('settings.customizeProgram')}
-          >
-            {t('settings.customize')} ⚙️
-          </button>
-          
-          {/* Bouton pour se connecter/synchroniser */}
-          {user ? (
-            <button 
-              className="settings-button sync-toggle-button"
-              onClick={() => setShowSyncPanel(!showSyncPanel)}
-              title={t('settings.sync')}
+          {/* Menu de configuration - ajouté pour permettre de masquer le sélecteur de langue */}
+          <div className="settings-bar">
+            {/* Bouton du sélecteur de langue masqué selon la demande */}
+            {/* <button 
+              className="settings-button"
+              onClick={toggleLanguageSelector}
+              title={showLanguageSelector ? t('settings.hideLanguage') : t('settings.showLanguage')}
             >
-              {t('settings.sync')} ☁️
+              {showLanguageSelector ? t('settings.hideLanguage') : t('settings.showLanguage')} 🌐
+            </button> */}
+            
+            {/* Bouton pour le mode Fat Burner */}
+            <button 
+              className={`settings-button ${fatBurnerMode ? 'active-mode' : ''}`}
+              onClick={toggleFatBurnerMode}
+              title={t('settings.fatBurnerMode')}
+            >
+              {t('settings.fatBurner')} 🔥
             </button>
-          ) : (
+            
+            {/* Bouton pour personnaliser le programme */}
             <button 
               className="settings-button"
-              onClick={() => setShowLoginForm(true)}
-              title={t('auth.login')}
+              onClick={() => setShowCustomizer(true)}
+              title={t('settings.customizeProgram')}
             >
-              {t('auth.login')} 🔒
+              {t('settings.customize')} ⚙️
             </button>
+            
+            {/* Bouton pour se connecter/synchroniser */}
+            {user ? (
+              <button 
+                className="settings-button sync-toggle-button"
+                onClick={() => setShowSyncPanel(!showSyncPanel)}
+                title={t('settings.sync')}
+              >
+                {t('settings.sync')} ☁️
+              </button>
+            ) : (
+              <button 
+                className="settings-button"
+                onClick={() => setShowLoginForm(true)}
+                title={t('auth.login')}
+              >
+                {t('auth.login')} 🔒
+              </button>
+            )}
+          </div>
+          
+          {/* Sélecteur de langue */}
+          {showLanguageSelector && <LanguageSelector />}
+          
+          {/* Formulaire de connexion */}
+          {showLoginForm && <LoginForm onLoginSuccess={handleLoginSuccess} onClose={() => setShowLoginForm(false)} />}
+          
+          {/* Panneau de synchronisation */}
+          {showSyncPanel && user && (
+            <SyncPanel 
+              user={user}
+              onLogout={handleLogout}
+              onSyncComplete={handleSyncComplete}
+            />
+          )}
+          
+          {/* Customizer de programme */}
+          {showCustomizer && <WorkoutCustomizer onClose={handleCloseCustomizer} />}
+          
+          {viewMode === 'workout' ? (
+            <>
+              {isPlanAvailable && (
+                <>
+                  {!stepMode ? (
+                    <div className="day-content">
+                      {/* Sélecteur de jour */}
+                      <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
+                      <h2 style={{ fontSize: '1.1rem', marginBottom: 16 }}>{workoutPlan[current].title}</h2>
+                      {/* Bannière Fat Burner */}
+                      {fatBurnerMode && (
+                        <div className="fat-burner-banner">
+                          <span className="fat-burner-icon">🔥</span>
+                          <span className="fat-burner-text">{t('mode.fatBurner')}</span>
+                        </div>
+                      )}
+                      <button className="timer-btn" style={{marginBottom:16}} onClick={()=>setStepMode(true)}>
+                        {t('workout.start')}
+                      </button>
+                      {/* Carousel des exercices du jour */}
+                      <HomeExerciseCarousel exercises={workoutPlan[current].exercises} />
+                    </div>
+                  ) : (
+                    <StepWorkout 
+                      dayIndex={current} 
+                      onBack={()=>setStepMode(false)}
+                      onComplete={handleWorkoutComplete}
+                      fatBurnerMode={fatBurnerMode}
+                    />
+                  )}
+                </>
+              )}
+              {!isPlanAvailable && (
+                <div className="error-message">
+                  <h2>{t('app.planError')}</h2>
+                  <p>{t('app.planErrorDetails')}</p>
+                  <button 
+                    className="reload-button"
+                    onClick={() => window.location.reload()}
+                  >
+                    {t('app.reload')}
+                  </button>
+                </div>
+              )}
+            </>
+          ) : viewMode === 'history' ? (
+            // Mode Historique et Statistiques
+            <div className="history-content">
+              <WorkoutStats />
+              <WorkoutCalendar />
+            </div>
+          ) : (
+            // Mode Suivi de Poids
+            <div className="weight-content">
+              <WeightTracker />
+            </div>
           )}
         </div>
-        
-        {/* Sélecteur de langue */}
-        {showLanguageSelector && <LanguageSelector />}
-        
-        {/* Formulaire de connexion */}
-        {showLoginForm && <LoginForm onLoginSuccess={handleLoginSuccess} onClose={() => setShowLoginForm(false)} />}
-        
-        {/* Panneau de synchronisation */}
-        {showSyncPanel && user && (
-          <SyncPanel 
-            user={user}
-            onLogout={handleLogout}
-            onSyncComplete={handleSyncComplete}
-          />
-        )}
-        
-        {/* Customizer de programme */}
-        {showCustomizer && <WorkoutCustomizer onClose={handleCloseCustomizer} />}
-        
-        {viewMode === 'workout' ? (
-          <>
-            {isPlanAvailable && (
-              <>
-                {!stepMode ? (
-                  <div className="day-content">
-                    {/* Sélecteur de jour */}
-                    <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
-                    <h2 style={{ fontSize: '1.1rem', marginBottom: 16 }}>{workoutPlan[current].title}</h2>
-                    {/* Bannière Fat Burner */}
-                    {fatBurnerMode && (
-                      <div className="fat-burner-banner">
-                        <span className="fat-burner-icon">🔥</span>
-                        <span className="fat-burner-text">{t('mode.fatBurner')}</span>
-                      </div>
-                    )}
-                    <button className="timer-btn" style={{marginBottom:16}} onClick={()=>setStepMode(true)}>
-                      {t('workout.start')}
-                    </button>
-                    {/* Carousel des exercices du jour */}
-                    <HomeExerciseCarousel exercises={workoutPlan[current].exercises} />
-                  </div>
-                ) : (
-                  <StepWorkout 
-                    dayIndex={current} 
-                    onBack={()=>setStepMode(false)}
-                    onComplete={handleWorkoutComplete}
-                    fatBurnerMode={fatBurnerMode}
-                  />
-                )}
-              </>
-            )}
-            {!isPlanAvailable && (
-              <div className="error-message">
-                <h2>{t('app.planError')}</h2>
-                <p>{t('app.planErrorDetails')}</p>
-                <button 
-                  className="reload-button"
-                  onClick={() => window.location.reload()}
-                >
-                  {t('app.reload')}
-                </button>
-              </div>
-            )}
-          </>
-        ) : viewMode === 'history' ? (
-          // Mode Historique et Statistiques
-          <div className="history-content">
-            <WorkoutStats />
-            <WorkoutCalendar />
-          </div>
-        ) : (
-          // Mode Suivi de Poids
-          <div className="weight-content">
-            <WeightTracker />
-          </div>
-        )}
       </div>
     </ThemeProvider>
   );
