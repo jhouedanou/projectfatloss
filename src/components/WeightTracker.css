@@ -81,7 +81,7 @@
 }
 
 .success-message {
-  color: #4CAF50;
+  color: #2E7D32; /* Vert foncé */
   margin-top: 10px;
   font-size: 0.9rem;
   width: 100%;
@@ -128,12 +128,12 @@
 
 .weight-change.positive .stat-value,
 .weight-change.positive .stat-percentage {
-  color: #4CAF50;
+  color: #2E7D32; /* Vert foncé pour un meilleur contraste */
 }
 
 .weight-change.negative .stat-value,
 .weight-change.negative .stat-percentage {
-  color: #ff5252;
+  color: var(--cinnabar);
 }
 
 .min-max {
@@ -148,12 +148,12 @@
 }
 
 .min-weight .stat-value {
-  color: #4CAF50;
+  color: #2E7D32; /* Vert foncé */
   font-size: 1.2rem;
 }
 
 .max-weight .stat-value {
-  color: #ff5252;
+  color: var(--rosewood); /* Rosewood pour le poids max */
   font-size: 1.2rem;
 }
 

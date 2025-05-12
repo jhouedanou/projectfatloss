@@ -5,32 +5,34 @@ export const createAppTheme = (darkMode) => createTheme({
   palette: {
     mode: darkMode ? 'dark' : 'light',
     primary: {
-      light: '#6573c3',
-      main: '#3f51b5',
-      dark: '#2c387e',
+      light: '#536DFE', // Bleu indigo clair
+      main: '#3949AB', // Bleu indigo
+      dark: '#1A237E', // Bleu indigo foncé
+      contrastText: '#FDF6F0', // seashell
     },
     secondary: {
-      light: '#33ab9f',
-      main: '#009688',
-      dark: '#00695f',
+      light: '#80CBC4', // Vert-bleu clair
+      main: '#455A64', // Bleu-gris
+      dark: '#263238', // Bleu-gris foncé
+      contrastText: '#FDF6F0', // seashell
     },
     success: {
-      light: '#4caf50',
-      main: '#2e7d32',
-      dark: '#1b5e20',
+      light: '#66BB6A', // Vert clair
+      main: '#2E7D32', // Vert
+      dark: '#1B5E20', // Vert foncé
     },
     error: {
-      light: '#ef5350',
-      main: '#d32f2f',
-      dark: '#c62828',
+      light: '#EF9A9A', // Rouge clair
+      main: '#D32F2F', // Rouge
+      dark: '#B71C1C', // Rouge foncé
     },
     background: {
-      default: darkMode ? '#121212' : '#f5f5f5',
-      paper: darkMode ? '#1e1e30' : '#ffffff',
+      default: darkMode ? '#121212' : '#FDF6F0', // seashell en mode clair
+      paper: darkMode ? '#1e1e30' : '#FFFFFF',
     },
     text: {
-      primary: darkMode ? '#e0e0e0' : '#212121',
-      secondary: darkMode ? '#b0b0b0' : '#757575',
+      primary: darkMode ? '#FDF6F0' : '#263238', // seashell en sombre, bleu-gris foncé en clair
+      secondary: darkMode ? '#90CAF9' : '#455A64', // bleu clair en sombre, bleu-gris en clair
     },
   },
   typography: {

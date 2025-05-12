@@ -41,27 +41,27 @@
 }
 
 .rhythm-btn {
-  background-color: #4CAF50;
+  background-color: #3949AB; /* Bleu indigo au lieu de vermilion */
 }
 
 .rhythm-btn:hover {
-  background-color: #388E3C;
+  background-color: #1A237E; /* Bleu indigo foncé */
 }
 
 .next-btn {
-  background-color: #2196F3;
+  background-color: #2E7D32; /* Vert au lieu de cinnabar */
 }
 
 .next-btn:hover {
-  background-color: #1976D2;
+  background-color: #1B5E20; /* Vert foncé */
 }
 
 .back-btn {
-  background-color: #FF9800;
+  background-color: #455A64; /* Bleu-gris au lieu de cinnabar-2 */
 }
 
 .back-btn:hover {
-  background-color: #F57C00;
+  background-color: #263238; /* Bleu-gris foncé */
 }
 
 /* Ajustement pour le mode sombre */

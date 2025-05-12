@@ -28,15 +28,12 @@ function initSpeechService() {
     return false;
   }
 
-  console.log("Initialisation du service de synthèse vocale...");
-
   // Nettoyer tout état précédent
   window.speechSynthesis.cancel();
 
   // Fonction pour mettre à jour les voix disponibles
   const updateVoices = () => {
     availableVoices = window.speechSynthesis.getVoices();
-    console.log("Voix disponibles:", availableVoices.length);
     
     // Essayer de trouver une voix française
     const frenchVoice = availableVoices.find(voice => 
@@ -44,10 +41,8 @@ function initSpeechService() {
     );
     
     if (frenchVoice) {
-      console.log("Voix française trouvée:", frenchVoice.name);
       voiceConfig.voice = frenchVoice;
     } else if (availableVoices.length > 0) {
-      console.log("Aucune voix française trouvée, utilisation de:", availableVoices[0].name);
       voiceConfig.voice = availableVoices[0];
     }
   };
@@ -59,11 +54,6 @@ function initSpeechService() {
 
   // Essayer de charger les voix immédiatement (peut fonctionner sur Firefox)
   updateVoices();
-
-  // Tester la synthèse avec un message court pour vérifier que ça fonctionne
-  setTimeout(() => {
-    speak("Synthèse vocale initialisée.", { volume: 0.7 });
-  }, 1000);
 
   return true;
 }
@@ -92,17 +82,39 @@ function speak(text, options = {}) {
     utterance.rate = options.rate !== undefined ? options.rate : voiceConfig.rate;
     utterance.pitch = options.pitch !== undefined ? options.pitch : voiceConfig.pitch;
     utterance.lang = options.lang || voiceConfig.lang;
-    utterance.voice = options.voice || voiceConfig.voice;
+    
+    // Vérifier si la voix est disponible
+    if (options.voice || voiceConfig.voice) {
+      utterance.voice = options.voice || voiceConfig.voice;
+    }
 
     // Ajouter des gestionnaires d'événements
     utterance.onend = () => resolve();
     utterance.onerror = (event) => {
       console.error("Erreur de synthèse vocale:", event);
-      reject(event);
+      
+      // Essayer de récupérer avec une voix par défaut si celle spécifique échoue
+      if (utterance.voice && window.speechSynthesis.getVoices().length > 0) {
+        console.log("Tentative avec une voix par défaut...");
+        const defaultUtterance = new SpeechSynthesisUtterance(text);
+        defaultUtterance.onend = () => resolve();
+        defaultUtterance.onerror = (fallbackError) => {
+          console.error("Échec également avec la voix par défaut:", fallbackError);
+          reject(fallbackError);
+        };
+        window.speechSynthesis.speak(defaultUtterance);
+      } else {
+        reject(event);
+      }
     };
 
-    // Prononcer le texte
-    window.speechSynthesis.speak(utterance);
+    try {
+      // Prononcer le texte
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.error("Exception lors de la tentative de synthèse vocale:", error);
+      reject(error);
+    }
   });
 }
 
