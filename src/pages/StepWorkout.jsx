@@ -437,7 +437,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         minHeight: '100vh',
       }}
     >
-      <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor: 'var(--seashell)' }}>
+      <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor:'#2e2e3f' }}>
         <button className="timer-btn" onClick={handleBackClick}>Retour</button>
         <button className="timer-btn save-btn" onClick={handleSaveAndExit}>
           Sauvegarder et quitter

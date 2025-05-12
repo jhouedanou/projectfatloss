@@ -7,6 +7,14 @@
   justify-content: space-between;
   padding: 10px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: var(--card-bg);
+}
+
+html.dark-theme .action-buttons,
+body.dark-theme .action-buttons {
+  background-color: var(--card-bg);
+  box-shadow: 0 2px 4px rgba(255,255,255,0.05) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
 }
 
 .timer-btn {
@@ -20,16 +28,37 @@
   transition: background-color 0.3s ease;
 }
 
+html.dark-theme .timer-btn,
+body.dark-theme .timer-btn {
+  background-color: var(--primary-dark);
+  color: var(--seashell);
+}
+
 .timer-btn:hover {
   background-color: var(--cinnabar);
+}
+
+html.dark-theme .timer-btn:hover,
+body.dark-theme .timer-btn:hover {
+  background-color: #3949AB; /* Bleu indigo */
 }
 
 .save-btn {
   background-color: var(--rosewood);
 }
 
+html.dark-theme .save-btn,
+body.dark-theme .save-btn {
+  background-color: #1A237E; /* Bleu indigo très foncé */
+}
+
 .save-btn:hover {
   background-color: var(--cinnabar-2);
+}
+
+html.dark-theme .save-btn:hover,
+body.dark-theme .save-btn:hover {
+  background-color: #303F9F; /* Bleu indigo foncé */
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {
@@ -95,6 +124,12 @@
   font-weight: bold;
   text-align: center;
   margin: 20px 0;
+}
+
+html.dark-theme .timer-value,
+body.dark-theme .timer-value {
+  color: var(--seashell);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .rep-counter {
