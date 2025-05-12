@@ -109,7 +109,25 @@ export default defineConfig({
           }
         ]
       }
-    })
+    }),
   ],
-  base: process.env.NODE_ENV === 'production' ? '/projectfatloss/' : '/'
+  
+  // Optimisations pour éviter les problèmes de cache
+  optimizeDeps: {
+    force: true // Forcer la réoptimisation à chaque démarrage
+  },
+  
+  // Configurer le serveur de développement
+  server: {
+    hmr: {
+      overlay: true // Afficher les erreurs dans un overlay
+    },
+    watch: {
+      usePolling: true, // Utiliser le polling pour la détection des changements
+      interval: 1000 // Intervalle de polling en ms
+    }
+  },
+  
+  // Configurer la gestion du cache
+  cacheDir: '.vite_cache', // Dossier de cache personnalisé
 });
