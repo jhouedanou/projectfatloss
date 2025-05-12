@@ -56,6 +56,14 @@
   background-color: #1976D2;
 }
 
+.back-btn {
+  background-color: #FF9800;
+}
+
+.back-btn:hover {
+  background-color: #F57C00;
+}
+
 /* Ajustement pour le mode sombre */
 .dark-theme .floating-button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);

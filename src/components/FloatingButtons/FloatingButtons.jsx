@@ -4,16 +4,28 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const FloatingButtons = ({ 
   onYouTube, 
   onToggleRhythm, 
   onNext, 
+  onBack,
   isRhythmActive,
   exerciseName 
 }) => {
   return (
     <div className="floating-buttons-container">
+      {onBack && (
+        <button 
+          className="floating-button back-btn"
+          onClick={onBack}
+          title="Retour au menu"
+        >
+          <ArrowBackIcon />
+        </button>
+      )}
+      
       {onYouTube && (
         <button 
           className="floating-button youtube-btn"

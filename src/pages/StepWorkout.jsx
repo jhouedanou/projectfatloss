@@ -1,29 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getWorkoutPlan } from '../services/WorkoutCustomization';
-import { Button, Box, Typography, Paper, LinearProgress, Switch, FormControlLabel, IconButton } from '@mui/material';
-import ProgressTracker from '../components/ProgressTracker';
-import ExoIcon, { EquipIcon } from '../components/ExoIcon';
-import ProgressBar from '../components/ProgressBar';
-import GoogleFitButton from '../components/GoogleFitButton';
-import CompletionAnimation from '../components/CompletionAnimation';
-import DayPills from '../components/DayPills';
-import YouTubeButton from '../components/YouTubeButton';
-import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
-import '../components/SpeechSettings.css';
-import { 
-  initSpeechService, 
-  speak, 
-  setEnabled as setSpeechEnabled, 
-  announceExercise, 
-  announcePause, 
-  announceCount,
-  announceRepetition,
-  announceWorkoutComplete 
-} from '../services/SpeechService';
-
-import iconsMap from '../../public/exo-icons.json';
-
+import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import SettingsIcon from '@mui/icons-material/Settings';
 import beepSound from '../../public/beep.mp3';
+import YouTubeButton from '../components/YouTubeButton';
+import ExoIcon from '../components/ExoIcon';
+import FloatingButtons from '../components/FloatingButtons/FloatingButtons';
+import ProgressTracker from '../components/ProgressTracker';
+import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
+import DayPills from '../components/DayPills';
+import GoogleFitButton from '../components/GoogleFitButton';
+import { getWorkoutPlan } from '../services/WorkoutCustomization';
+import { initSpeechService, announceExercise, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled } from '../services/SpeechService';
+import { saveWorkout } from '../services/WorkoutStorage';
+
+import '../components/SpeechSettings.css';
+import iconsMap from '../../public/exo-icons.json';
 
 function playBeep() {
   const beep = new Audio(beepSound);
@@ -202,8 +194,6 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
     </div>
   );
 }
-
-import { saveWorkout } from '../services/WorkoutStorage';
 
 export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, fatBurnerMode }) {
   const [dayIndex, setDayIndex] = useState(initialDayIndex || 0);
@@ -476,9 +466,11 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
   });
   const [running, setRunning] = useState(false);
   const [showCalories, setShowCalories] = useState(false);
+  const [caloriesToShow, setCaloriesToShow] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completionAnimation, setCompletionAnimation] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   
   // Limiter les répétitions "max" à 15 pour éviter les problèmes de timer
   const safeReps = exo.reps && exo.reps.toString().toLowerCase().includes('max') 
@@ -574,13 +566,32 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
 
   // Nouveau : bouton "Suivant" sur l'overlay OK
   const handleNext = () => {
-    const calories = exo.caloriesPerSet ? Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
+    const calories = caloriesPerSet;
+    setCaloriesToShow(calories);
     setShowCalories(true);
     onCaloriesBurned(calories);
     setTimeout(() => {
       setShowCalories(false);
       onDone();
     }, 2000);
+  };
+  
+  // Ouvrir YouTube pour l'exercice actuel
+  const handleYouTube = () => {
+    const name = exo.name;
+    const searchQuery = encodeURIComponent(`exercice ${name} tutoriel`);
+    const searchPageUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
+    window.open(searchPageUrl, '_blank');
+  };
+
+  // Nouvelle fonction: Ouvrir la boîte de dialogue de confirmation
+  const handleBackConfirmation = () => {
+    setOpenConfirmDialog(true);
+  };
+
+  // Gérer la fermeture de la boîte de dialogue
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false);
   };
 
   return (
@@ -687,29 +698,13 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
           Longueur de la série : <span style={{ fontWeight: 'bold', color: 'red' }}>{exo.sets}</span>
         </Typography>
 
-        <YouTubeButton exercise={exo} /> {/* Ajout du bouton YouTube */}
-
-        <Button 
-          variant="contained" 
-          color="primary"
-          onClick={handlePulse}
-          sx={{
-            mt: 2,
-            minWidth: 200,
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {isPulsing || countdown !== null ? 'Arrêter le rythme' : 'Démarrer le rythme'}
-        </Button>
-
-        {/* Déplacement du bouton "Exercice suivant" ici, il sera toujours visible */}
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => {
-            // On considère que l'utilisateur saute l'exercice, on affiche les calories
-            const calories = exo.caloriesPerSet ? Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
+        {/* Boutons flottants pour toutes les actions */}
+        <FloatingButtons 
+          onYouTube={handleYouTube}
+          onToggleRhythm={handlePulse}
+          onNext={() => {
+            const calories = caloriesPerSet;
+            setCaloriesToShow(calories);
             setShowCalories(true);
             onCaloriesBurned(calories);
             setTimeout(() => {
@@ -717,15 +712,42 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
               onDone();
             }, 1000);
           }}
-          sx={{
-            mt: 2,
-            minWidth: 200,
-            position: 'relative',
-            overflow: 'hidden',
-          }}
+          onBack={handleBackConfirmation}
+          isRhythmActive={isPulsing || countdown !== null}
+          exerciseName={exo.name}
+        />
+
+        {/* Boîte de dialogue de confirmation pour le retour au menu */}
+        <Dialog
+          open={openConfirmDialog}
+          onClose={handleCloseConfirmDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
         >
-          Exercice suivant
-        </Button>
+          <DialogTitle id="alert-dialog-title">
+            {"Quitter l'entraînement ?"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Êtes-vous sûr de vouloir quitter cet entraînement ? Votre progression ne sera pas enregistrée.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseConfirmDialog} color="primary">
+              Annuler
+            </Button>
+            <Button 
+              onClick={() => {
+                handleCloseConfirmDialog();
+                window.location.href = '/';
+              }} 
+              color="primary" 
+              autoFocus
+            >
+              Quitter
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {showCalories && (
           <Box
