@@ -227,6 +227,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     cancelAction: () => {}
   });
   const isFirstRender = useRef(true);
+  const isPaused = pause; // Ajouter cette variable pour la passer à announceExercise
   let beepTimeouts = [];
   
   // Initialiser le service de synthèse vocale
@@ -308,10 +309,10 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     if (exo && setNum === 0 && step === 0 && !isFirstRender.current) {
       // Petit délai pour que l'annonce soit plus naturelle après le chargement
       setTimeout(() => {
-        announceExercise(exo, setNum, totalSets);
+        announceExercise(exo, setNum, totalSets, isPaused);
       }, 500);
     }
-  }, [exo, totalSets]);
+  }, [exo, totalSets, isPaused]);
   
   useEffect(() => {
     if (isFirstRender.current) {
@@ -580,6 +581,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             onCaloriesBurned={handleCaloriesBurned}
             onExerciseCompleted={handleExerciseCompleted}
             fatBurnerMode={fatBurnerMode}
+            isPaused={isPaused}
           />
         )}
         
@@ -639,7 +641,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMode }) {
+function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, fatBurnerMode, isPaused }) {
   const [timer, setTimer] = useState(() => {
     if (exo.timer) {
       return exo.duration || 30;
@@ -682,8 +684,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
     }
     
     // Annoncer le nouvel exercice avec le numéro de série
-    announceExerciseDirectly(exo, setNum, totalSets);
-  }, [exo, setNum, totalSets]);
+    announceExerciseDirectly(exo, setNum, totalSets, isPaused);
+  }, [exo, setNum, totalSets, isPaused]);
 
   // Lancer le décompte avant le rythme
   const handlePulse = () => {
@@ -966,13 +968,13 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
 }
 
 // Fonction directe pour annoncer un exercice, garantie de fonctionner
-function announceExerciseDirectly(exo, setNum, totalSets) {
-  if (!window.speechSynthesis) return;
-  
+function announceExerciseDirectly(exo, setNum, totalSets, isPaused = false) {
+  if (!window.speechSynthesis || isPaused) return;
+
   try {
     const exoName = exo?.name || "Exercice inconnu";
     const setInfo = setNum !== undefined ? `Série ${setNum + 1} sur ${totalSets}` : "";
-    
+
     const message = new SpeechSynthesisUtterance();
     message.text = `${exoName}. ${setInfo}`;
     message.lang = 'fr-FR';

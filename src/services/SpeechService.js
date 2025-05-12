@@ -171,10 +171,11 @@ function getVoices() {
  * @param {Object} exercise - L'exercice à annoncer
  * @param {number} setNum - Numéro de la série actuelle
  * @param {number} totalSets - Nombre total de séries
+ * @param {boolean} isPaused - Indique si l'exercice est en pause
  */
-function announceExercise(exercise, setNum = 0, totalSets = 1) {
-  if (!voiceConfig.enabled || !voiceConfig.exerciseEnabled) return;
-  
+function announceExercise(exercise, setNum = 0, totalSets = 1, isPaused = false) {
+  if (!voiceConfig.enabled || !voiceConfig.exerciseEnabled || isPaused) return;
+
   // Extraire les informations de l'exercice
   const name = exercise.name || '';
   const equipment = exercise.equip || '';

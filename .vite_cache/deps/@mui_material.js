@@ -1,12 +1,12 @@
 import {
+  TransitionGroup_default,
+  Transition_default
+} from "./chunk-LQFCTLZH.js";
+import {
   CssBaseline_default,
   body,
   html
 } from "./chunk-SJAI4GSS.js";
-import {
-  TransitionGroup_default,
-  Transition_default
-} from "./chunk-LQFCTLZH.js";
 import {
   CssVarsProvider,
   Experimental_CssVarsProvider,

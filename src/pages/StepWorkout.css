@@ -63,7 +63,7 @@ body.dark-theme .save-btn:hover {
 
 @supports (padding-top: env(safe-area-inset-top)) {
   .day-content {
-    padding-top: env(safe-area-inset-top);
+    padding-top: 10px; /* Réduction du padding supérieur */
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
