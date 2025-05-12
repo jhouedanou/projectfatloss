@@ -6,8 +6,10 @@
 const STRAVA_CONFIG = {
   clientId: '159311',
   clientSecret: '6e2acab2c5731c20a946fe672afdfc8a6b6485f1',
-  redirectUri: window.location.origin,
-  scope: 'read',
+  redirectUri: window.location.origin + '/strava-callback.html',  // Page callback spécifique
+  scope: 'read,activity:write',
+  authUrl: 'https://www.strava.com/oauth/authorize',  // Sans /api/v3/
+  tokenUrl: 'https://www.strava.com/oauth/token'      // Sans /api/v3/
 };
 
 // Clé de stockage local pour les statistiques Strava
@@ -49,7 +51,12 @@ export function initStravaService() {
  */
 async function refreshToken() {
   try {
-    const response = await fetch('https://www.strava.com/oauth/token', {
+    console.log('Tentative de rafraîchissement du token avec:', {
+      refresh_token: `${stravaAuth.refreshToken.substring(0, 5)}...`,
+      client_id: STRAVA_CONFIG.clientId
+    });
+    
+    const response = await fetch(STRAVA_CONFIG.tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -93,16 +100,13 @@ async function refreshToken() {
  * @returns {Promise<boolean>} - true si l'authentification a réussi
  */
 export function authenticateWithStrava() {
-  // Si déjà authentifié et token valide, ne rien faire
-  if (stravaAuth.accessToken) {
-    const expiresAt = new Date(stravaAuth.expiresAt).getTime();
-    if (expiresAt > Date.now()) {
-      return Promise.resolve(true);
-    }
-  }
+  // Forcer une nouvelle authentification en effaçant les tokens
+  clearStravaAuth();
   
   // Rediriger vers la page d'authentification Strava
-  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CONFIG.clientId}&redirect_uri=${encodeURIComponent(STRAVA_CONFIG.redirectUri)}&response_type=code&scope=${STRAVA_CONFIG.scope}`;
+  const authUrl = `${STRAVA_CONFIG.authUrl}?client_id=${STRAVA_CONFIG.clientId}&redirect_uri=${encodeURIComponent(STRAVA_CONFIG.redirectUri)}&response_type=code&scope=${STRAVA_CONFIG.scope}&approval_prompt=force`;
+  
+  console.log('Redirection vers URL d\'authentification Strava:', authUrl);
   
   // Ouvrir dans une nouvelle fenêtre
   const authWindow = window.open(authUrl, 'StravaAuth', 'width=600,height=800');
@@ -128,13 +132,31 @@ export function authenticateWithStrava() {
 }
 
 /**
+ * Efface tous les tokens Strava
+ */
+export function clearStravaAuth() {
+  console.log('Effacement des tokens Strava pour forcer une nouvelle authentification');
+  localStorage.removeItem('strava_access_token');
+  localStorage.removeItem('strava_refresh_token');
+  localStorage.removeItem('strava_expires_at');
+  stravaAuth = {
+    accessToken: null,
+    refreshToken: null,
+    expiresAt: null
+  };
+}
+
+/**
  * Enregistre un entraînement sur Strava
  * @param {Object} workout - Les données de l'entraînement
  * @returns {Promise<Object>} - Les données de l'entraînement enregistré
  */
 export async function syncWorkout(workout) {
+  console.log('Début de synchronisation avec Strava');
+  
   // Vérifier si l'utilisateur est authentifié
-  if (!stravaAuth.accessToken) {
+  if (!isConnectedToStrava()) {
+    console.log('Utilisateur non connecté, tentative d\'authentification...');
     const authenticated = await authenticateWithStrava();
     if (!authenticated) {
       throw new Error("L'utilisateur n'est pas authentifié avec Strava");
@@ -142,15 +164,24 @@ export async function syncWorkout(workout) {
   }
 
   // Vérifier si le token est expiré
-  const expiresAt = new Date(stravaAuth.expiresAt).getTime();
-  if (Date.now() >= expiresAt) {
-    const refreshed = await refreshToken();
-    if (!refreshed) {
-      throw new Error("Impossible de rafraîchir le token Strava");
-    }
-  }
-
   try {
+    const expiresAt = new Date(stravaAuth.expiresAt).getTime();
+    const now = Date.now();
+    
+    console.log('Vérification de l\'expiration du token:', {
+      expiresAt: new Date(expiresAt).toISOString(),
+      now: new Date(now).toISOString(),
+      isExpired: now >= expiresAt
+    });
+    
+    if (now >= expiresAt) {
+      console.log('Token expiré, tentative de rafraîchissement...');
+      const refreshed = await refreshToken();
+      if (!refreshed) {
+        throw new Error("Impossible de rafraîchir le token Strava");
+      }
+    }
+
     // Formatter les données pour Strava
     const stravaActivity = {
       name: workout.name || "Entraînement Project Fat Loss",
@@ -159,6 +190,11 @@ export async function syncWorkout(workout) {
       elapsed_time: workout.duration || 1800, // Par défaut 30 minutes
       description: workout.desc || `Entraînement de musculation: ${workout.exerciseCount || 0} exercices, ${workout.calories || 0} calories brûlées`,
     };
+
+    console.log('Envoi des données à Strava:', {
+      token: `${stravaAuth.accessToken.substring(0, 5)}...`,
+      activity: stravaActivity
+    });
 
     // Envoyer l'entraînement à Strava
     const response = await fetch('https://www.strava.com/api/v3/activities', {
@@ -171,17 +207,28 @@ export async function syncWorkout(workout) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Erreur Strava: ${errorData.message || response.statusText}`);
+      const errorText = await response.text();
+      let errorMessage;
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || response.statusText;
+      } catch (e) {
+        errorMessage = `${response.status} ${response.statusText}: ${errorText}`;
+      }
+      console.error('Erreur Strava:', {
+        status: response.status,
+        message: errorMessage
+      });
+      throw new Error(`Erreur Strava: ${errorMessage}`);
     }
 
     const data = await response.json();
     console.log('Entraînement synchronisé avec Strava:', data);
     
     return data;
-  } catch (error) {
-    console.error('Erreur lors de la synchronisation avec Strava:', error);
-    throw error;
+  } catch (err) {
+    console.error('Erreur lors de la synchronisation avec Strava:', err);
+    throw err;
   }
 }
 
@@ -230,109 +277,135 @@ export async function getStravaActivities(limit = 10) {
 
 /**
  * Synchronise l'historique des entraînements avec Strava
- * @param {number} limit - Nombre d'entraînements à synchroniser (du plus récent au plus ancien)
+ * @param {number} limit - Nombre maximum d'entraînements à synchroniser
  * @returns {Promise<Object>} - Résultats de la synchronisation
  */
 export async function syncWorkoutHistory(limit = 5) {
-  try {
-    // Vérifier si l'utilisateur est authentifié
-    if (!stravaAuth.accessToken) {
-      const authenticated = await authenticateWithStrava();
-      if (!authenticated) {
-        throw new Error("L'utilisateur n'est pas authentifié avec Strava");
-      }
+  console.log('Début de synchronisation de l\'historique avec Strava');
+  
+  // Vérifier si l'utilisateur est authentifié
+  if (!isConnectedToStrava()) {
+    console.log('Utilisateur non connecté, tentative d\'authentification...');
+    const authenticated = await authenticateWithStrava();
+    if (!authenticated) {
+      throw new Error("L'utilisateur n'est pas authentifié avec Strava");
     }
-
-    // Vérifier si le token est expiré
-    const expiresAt = new Date(stravaAuth.expiresAt).getTime();
-    if (Date.now() >= expiresAt) {
-      const refreshed = await refreshToken();
-      if (!refreshed) {
-        throw new Error("Impossible de rafraîchir le token Strava");
-      }
-    }
-
-    // Récupérer l'historique des entraînements depuis le stockage local
-    const { getWorkoutHistory } = await import('./WorkoutStorage');
-    const workouts = getWorkoutHistory();
-    
-    // Prendre uniquement les plus récents
-    const recentWorkouts = workouts.sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    ).slice(0, limit);
-    
-    // Synchroniser chaque entraînement
-    const results = {
-      total: recentWorkouts.length,
-      synced: 0,
-      failed: 0,
-      details: []
-    };
-    
-    for (const workout of recentWorkouts) {
-      try {
-        // Vérifier si cet entraînement contient déjà un ID Strava (pour éviter les doublons)
-        if (workout.stravaId) {
-          results.details.push({
-            title: workout.title,
-            status: 'skipped',
-            reason: 'Déjà synchronisé'
-          });
-          continue;
-        }
-        
-        // Préparer les données pour Strava
-        const stravaActivity = {
-          name: workout.title || "Entraînement Project Fat Loss",
-          type: "WeightTraining",
-          start_date_local: workout.date,
-          elapsed_time: workout.duration || workout.exerciseCount * 180 || 1800, // 3 min par exercice ou 30min par défaut
-          description: `Entraînement de musculation: ${workout.exerciseCount} exercices, ${workout.calories} calories brûlées, ${workout.weightLifted || 0}kg soulevés`,
-        };
-        
-        // Envoyer l'entraînement à Strava
-        const response = await fetch('https://www.strava.com/api/v3/activities', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${stravaAuth.accessToken}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(stravaActivity)
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`Erreur Strava: ${errorData.message || response.statusText}`);
-        }
-        
-        const data = await response.json();
-        
-        // Mettre à jour l'entrainement local avec l'ID Strava
-        const { updateWorkoutWithStravaId } = await import('./WorkoutStorage');
-        await updateWorkoutWithStravaId(workout.id, data.id);
-        
-        results.synced++;
-        results.details.push({
-          title: workout.title,
-          status: 'success',
-          stravaId: data.id
-        });
-      } catch (error) {
-        console.error(`Erreur lors de la synchronisation de l'entraînement ${workout.title}:`, error);
-        results.failed++;
-        results.details.push({
-          title: workout.title,
-          status: 'failed',
-          error: error.message
-        });
-      }
-    }
-    
-    return results;
-  } catch (error) {
-    console.error('Erreur lors de la synchronisation de l\'historique:', error);
-    throw error;
   }
+
+  // Vérifier si le token est expiré et le rafraîchir si nécessaire
+  const expiresAt = new Date(stravaAuth.expiresAt).getTime();
+  const now = Date.now();
+  
+  console.log('Vérification de l\'expiration du token:', {
+    expiresAt: new Date(expiresAt).toISOString(),
+    now: new Date(now).toISOString(),
+    isExpired: now >= expiresAt
+  });
+  
+  if (now >= expiresAt) {
+    console.log('Token expiré, tentative de rafraîchissement...');
+    const refreshed = await refreshToken();
+    if (!refreshed) {
+      throw new Error("Impossible de rafraîchir le token Strava");
+    }
+  }
+
+  // Récupérer l'historique des entraînements
+  const { getWorkoutHistory, updateWorkoutWithStravaId } = await import('./WorkoutStorage');
+  const history = getWorkoutHistory();
+  
+  // Filtrer les entraînements qui n'ont pas encore été synchronisés
+  const unsyncedWorkouts = history
+    .filter(workout => !workout.syncedWithStrava && !workout.stravaId)
+    .slice(0, limit);
+  
+  console.log(`${unsyncedWorkouts.length} entraînements à synchroniser`);
+  
+  const results = {
+    synced: 0,
+    failed: 0,
+    details: []
+  };
+  
+  // Synchroniser chaque entraînement non synchronisé
+  for (const workout of unsyncedWorkouts) {
+    try {
+      console.log(`Synchronisation de l'entraînement: ${workout.title}`);
+      
+      // Vérifier si cet entraînement contient déjà un ID Strava (pour éviter les doublons)
+      if (workout.stravaId) {
+        results.details.push({
+          title: workout.title,
+          status: 'skipped',
+          reason: 'Déjà synchronisé'
+        });
+        continue;
+      }
+      
+      // Préparer les données pour Strava
+      const stravaActivity = {
+        name: workout.title || "Entraînement Project Fat Loss",
+        type: "WeightTraining",
+        start_date_local: workout.date,
+        elapsed_time: workout.duration || workout.exerciseCount * 180 || 1800, // 3 min par exercice ou 30min par défaut
+        description: `Entraînement de musculation: ${workout.exerciseCount} exercices, ${workout.calories} calories brûlées, ${workout.weightLifted || 0}kg soulevés`,
+      };
+      
+      console.log('Envoi des données à Strava:', {
+        token: `${stravaAuth.accessToken.substring(0, 5)}...`,
+        activity: stravaActivity
+      });
+      
+      // Envoyer l'entraînement à Strava
+      const response = await fetch('https://www.strava.com/api/v3/activities', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${stravaAuth.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(stravaActivity)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage;
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || response.statusText;
+        } catch (e) {
+          errorMessage = `${response.status} ${response.statusText}: ${errorText}`;
+        }
+        console.error('Erreur Strava:', {
+          status: response.status,
+          message: errorMessage
+        });
+        throw new Error(`Erreur Strava: ${errorMessage}`);
+      }
+      
+      const data = await response.json();
+      console.log('Activité créée sur Strava:', data.id);
+      
+      // Mettre à jour l'entrainement local avec l'ID Strava
+      await updateWorkoutWithStravaId(workout.id, data.id);
+      
+      results.synced++;
+      results.details.push({
+        title: workout.title,
+        status: 'success',
+        stravaId: data.id
+      });
+    } catch (error) {
+      console.error(`Erreur lors de la synchronisation de l'entraînement ${workout.title}:`, error);
+      results.failed++;
+      results.details.push({
+        title: workout.title,
+        status: 'failed',
+        error: error.message
+      });
+    }
+  }
+  
+  return results;
 }
 
 /**
@@ -340,7 +413,21 @@ export async function syncWorkoutHistory(limit = 5) {
  * @returns {boolean} - true si l'utilisateur est connecté
  */
 export function isConnectedToStrava() {
-  return !!stravaAuth.accessToken;
+  const accessToken = localStorage.getItem('strava_access_token') || stravaAuth.accessToken;
+  
+  if (!accessToken) {
+    console.log('Pas de token Strava: utilisateur non connecté');
+    return false;
+  }
+
+  // Mettre à jour stravaAuth depuis localStorage si nécessaire
+  if (accessToken !== stravaAuth.accessToken) {
+    stravaAuth.accessToken = accessToken;
+    stravaAuth.refreshToken = localStorage.getItem('strava_refresh_token') || stravaAuth.refreshToken;
+    stravaAuth.expiresAt = localStorage.getItem('strava_expires_at') || stravaAuth.expiresAt;
+  }
+  
+  return true;
 }
 
 /**
