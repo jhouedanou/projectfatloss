@@ -1,8 +1,8 @@
 {
   "name": "project-fat-loss",
-  "version": "2.0.0",
+  "version": "2.5.0",
   "private": true,
-  "homepage": "https://<utilisateur>.github.io/<nom-du-repo>",
+  "homepage": "https://github.com/jhouedanou/projectfatloss",
   "scripts": {
     "dev": "vite",
     "start": "vite",
