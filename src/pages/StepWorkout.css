@@ -230,3 +230,30 @@ body.dark-theme .timer-value {
   color: var(--text-primary);
   font-weight: bold;
 }
+
+/* Animation pour l'indicateur de synthèse vocale */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+}
+
+.speech-active-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #4CAF50;
+  margin-left: 5px;
+  box-shadow: 0 0 5px #4CAF50;
+  animation: pulse 1.5s infinite;
+}

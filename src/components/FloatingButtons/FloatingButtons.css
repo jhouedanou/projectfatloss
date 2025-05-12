@@ -24,7 +24,6 @@
 }
 
 .floating-button:hover {
-  background-color: var(--cinnabar);
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
@@ -33,13 +32,31 @@
   transform: translateY(1px);
 }
 
-.floating-button.secondary {
-  background-color: var(--background-paper);
-  border: 2px solid var(--vermilion);
+/* Bouton retour - jaune */
+.back-btn {
+  background-color: #FFC107; /* Jaune */
 }
 
-.floating-button.secondary:hover {
-  background-color: rgba(240, 61, 50, 0.1);
+.back-btn:hover {
+  background-color: #FFD54F; /* Jaune plus clair */
+}
+
+/* Bouton rythme - vert */
+.rhythm-btn {
+  background-color: #4CAF50; /* Vert */
+}
+
+.rhythm-btn:hover {
+  background-color: #66BB6A; /* Vert plus clair */
+}
+
+/* Bouton suivant - bleu */
+.next-btn {
+  background-color: #2196F3; /* Bleu */
+}
+
+.next-btn:hover {
+  background-color: #42A5F5; /* Bleu plus clair */
 }
 
 /* Ajustement pour le mode sombre */

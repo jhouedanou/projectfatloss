@@ -29,21 +29,27 @@ function parseSets(sets) {
   return m ? parseInt(m[1], 10) : 1;
 }
 
-function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total }) {
+function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets }) {
   const defaultTime = reducedTime ? 10 : 15;
   const [time, setTime] = useState(defaultTime);
   const currentExercise = day.exercises[step];
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
+  const isLastSet = setNum === totalSets - 1; // On vérifie si c'est la dernière série
   
-  // Annoncer la pause et le prochain exercice lorsqu'elle commence
+  // Annoncer la pause et le prochain exercice uniquement si c'est la dernière série
   useEffect(() => {
-    if (window.speechSynthesis && isExerciseTransition) {
+    if (window.speechSynthesis && isExerciseTransition && isLastSet) {
       const message = new SpeechSynthesisUtterance();
       if (nextExercise) {
         message.text = `Pause. Prochain exercice : ${nextExercise.name}`;
       } else {
         message.text = "Dernière pause. Félicitations, vous avez presque terminé !";
       }
+      message.lang = 'fr-FR';
+      window.speechSynthesis.speak(message);
+    } else if (window.speechSynthesis) {
+      const message = new SpeechSynthesisUtterance();
+      message.text = `Pause entre les séries. Série ${setNum + 2} sur ${totalSets}`;
       message.lang = 'fr-FR';
       window.speechSynthesis.speak(message);
     }
@@ -55,8 +61,8 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
         if (prevTime === 1) {
           clearInterval(timer);
           onEnd();
-          // Annoncer le début de l'exercice
-          if (window.speechSynthesis && nextExercise) {
+          // Annoncer le début de l'exercice si on change d'exercice
+          if (window.speechSynthesis && nextExercise && isLastSet) {
             const message = new SpeechSynthesisUtterance();
             message.text = `Début de l'exercice : ${nextExercise.name}`;
             message.lang = 'fr-FR';
@@ -68,14 +74,15 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [time, onEnd, nextExercise]);
+  }, [time, onEnd, nextExercise, isLastSet]);
 
   return (
     <div className="pause-screen">
       <h2 className="pause-title">Pause {reducedTime && "Rapide"}</h2>
       <div className="pause-timer">{time}s</div>
       
-      {nextExercise && (
+      {/* Afficher le prochain exercice uniquement si on est à la dernière série */}
+      {nextExercise && isLastSet && (
         <div className="next-exercise-info">
           <h3>Prochain exercice :</h3>
           <div className="exercise-card">
@@ -213,7 +220,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
-  const [speechEnabled, setSpeechEnabledState] = useState(false);
+  const [speechEnabled, setSpeechEnabledState] = useState(true);
   const [speechSettingsOpen, setSpeechSettingsOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState({
@@ -228,6 +235,30 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // Initialiser le service de synthèse vocale
   useEffect(() => {
     initSpeechService();
+    // S'assurer que la synthèse vocale est activée dès le départ
+    setSpeechEnabled(true);
+    
+    // Test de la synthèse vocale
+    const testSpeech = () => {
+      if (window.speechSynthesis) {
+        const message = new SpeechSynthesisUtterance("Bienvenue dans l'application Project Fat Loss");
+        message.lang = 'fr-FR';
+        message.volume = 1.0;
+        window.speechSynthesis.speak(message);
+      } else {
+        console.error("La synthèse vocale n'est pas supportée par ce navigateur");
+      }
+    };
+    
+    // Lancer le test après un petit délai
+    setTimeout(testSpeech, 1000);
+    
+    return () => {
+      // Nettoyer la synthèse vocale à la fermeture du composant
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, []);
   
   // Gérer l'activation/désactivation de la synthèse vocale
@@ -463,7 +494,25 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1 }} className="speech-controls">
         <FormControlLabel
           control={<Switch checked={speechEnabled} onChange={handleSpeechToggle} />}
-          label="Synthèse vocale"
+          label={
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span>Synthèse vocale</span>
+              {speechEnabled && (
+                <span 
+                  className="speech-active-indicator" 
+                  style={{ 
+                    width: '8px', 
+                    height: '8px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#4CAF50', 
+                    marginLeft: '5px',
+                    boxShadow: '0 0 5px #4CAF50',
+                    animation: 'pulse 1.5s infinite'
+                  }}
+                />
+              )}
+            </div>
+          }
         />
         {speechEnabled && (
           <IconButton 
@@ -504,6 +553,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             day={day}
             step={step}
             total={total}
+            setNum={setNum}
+            totalSets={totalSets}
           />
         ) : (
           <StepSet 
@@ -616,7 +667,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
     }
     
     // Annoncer le nouvel exercice avec le numéro de série
-    announceExercise(exo, setNum, totalSets);
+    announceExerciseDirectly(exo, setNum, totalSets);
   }, [exo, setNum, totalSets]);
 
   // Lancer le décompte avant le rythme
@@ -894,4 +945,36 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
       </Paper>
     </Box>
   );
+}
+
+// Fonction directe pour annoncer un exercice, garantie de fonctionner
+function announceExerciseDirectly(exo, setNum, totalSets) {
+  if (!window.speechSynthesis) return;
+  
+  try {
+    const exoName = exo?.name || "Exercice inconnu";
+    const setInfo = setNum !== undefined ? `Série ${setNum + 1} sur ${totalSets}` : "";
+    
+    const message = new SpeechSynthesisUtterance();
+    message.text = `${exoName}. ${setInfo}`;
+    message.lang = 'fr-FR';
+    message.volume = 1.0;
+    message.rate = 1.0;
+    
+    console.log("Annonce de l'exercice:", message.text);
+    
+    // Essayons de trouver une voix en français
+    const voices = window.speechSynthesis.getVoices();
+    const frenchVoice = voices.find(voice => 
+      voice.lang.includes('fr') || voice.name.includes('French') || voice.name.includes('français')
+    );
+    
+    if (frenchVoice) {
+      message.voice = frenchVoice;
+    }
+    
+    window.speechSynthesis.speak(message);
+  } catch (error) {
+    console.error("Erreur lors de l'annonce de l'exercice:", error);
+  }
 }
