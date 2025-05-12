@@ -4,8 +4,8 @@
   "description": "Application d'entraînement musculaire",
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff",
+  "theme_color": "#F03D32",
+  "background_color": "#FDF6F0",
   "icons": [
     {
       "src": "playstore.png",

@@ -30,6 +30,13 @@
   --button-text: #ffffff;
   --button-active: var(--primary-dark);
   --series-text: var(--error-main);
+
+  --vermilion: #f03d32ff;
+  --vermilion-2: #f13d30ff;
+  --cinnabar: #f34430ff;
+  --cinnabar-2: #f6452fff;
+  --rosewood: #6a1d1cff;
+  --seashell: #fdf6f0ff;
 }
 
 .dark-theme {
