@@ -425,7 +425,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           sx={{
             position: 'fixed',
             top: 50,
-            right: 20,
+            left: 20, // Changé de right à left
             zIndex: 1000
           }}
         >
@@ -754,7 +754,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
             sx={{
               position: 'fixed',
               bottom: 20,
-              right: 20,
+              left: 20, // Changé de right à left
               transition: 'all 0.3s ease',
               opacity: 1,
               transform: 'translateY(0)',

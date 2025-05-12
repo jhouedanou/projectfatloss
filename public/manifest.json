@@ -1,21 +1,14 @@
 {
   "name": "Project Fat Loss",
   "short_name": "Fat Loss",
-  "description": "Application de suivi d'entraînement avec calcul des calories brûlées",
-  "start_url": "/",
-  "orientation": "portrait",
-  "scope": "/",
+  "description": "Application d'entraînement musculaire",
+  "start_url": ".",
   "display": "standalone",
+  "theme_color": "#000000",
   "background_color": "#ffffff",
-  "theme_color": "#1976d2",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
+      "src": "playstore.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
