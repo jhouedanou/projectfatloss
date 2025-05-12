@@ -2,17 +2,18 @@ import { createTheme } from '@mui/material/styles';
 
 export const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
       main: '#F03D32', // vermilion
       light: '#F34430', // cinnabar
       dark: '#6A1D1C', // rosewood
-      contrastText: '#FDF6F0', // seashell
+      contrastText: '#FFFFFF',
     },
     secondary: {
       main: '#F13D30', // vermilion-2
       light: '#F6452F', // cinnabar-2
       dark: '#6A1D1C', // rosewood
-      contrastText: '#FDF6F0', // seashell
+      contrastText: '#FFFFFF',
     },
     success: {
       light: '#F6452F', // cinnabar-2
@@ -25,11 +26,11 @@ export const theme = createTheme({
       dark: '#6A1D1C', // rosewood
     },
     background: {
-      default: '#FDF6F0', // seashell
-      paper: '#FFFFFF',
+      default: '#000000',
+      paper: '#121212',
     },
     text: {
-      primary: '#6A1D1C', // rosewood
+      primary: '#FFFFFF',
       secondary: '#F03D32', // vermilion
     }
   }
