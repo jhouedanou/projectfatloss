@@ -71,9 +71,19 @@
   background-color: #121212;
 }
 
+.dark-theme .day-content {
+  background-color: #121212;
+}
+
 /* Transitions */
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+html.dark-theme, 
+body.dark-theme {
+  background-color: #121212;
+  color: var(--seashell);
 }
 
 html, body {
@@ -219,6 +229,7 @@ h6 { font-size: 1rem; }
 
 .day-content {
   padding: 1rem;
+  background-color: var(--bg-primary);
 }
 
 .exercice-list, .djacat {
@@ -398,7 +409,7 @@ h6 { font-size: 1rem; }
 .floating-calories {
   position: fixed;
   bottom: 20px;
-  right: 25px; /* Positionné à droite */
+  left: 25px; /* Positionné à gauche */
   width: 80px;
   height: 80px;
   border-radius: 50%;

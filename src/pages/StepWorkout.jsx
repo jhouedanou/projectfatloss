@@ -267,6 +267,16 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     setTotalCaloriesBurned(0);
   },[dayIndex]);
   
+  // Annoncer le premier exercice lors du chargement initial
+  useEffect(() => {
+    if (exo && setNum === 0 && step === 0 && !isFirstRender.current) {
+      // Petit délai pour que l'annonce soit plus naturelle après le chargement
+      setTimeout(() => {
+        announceExercise(exo, setNum, totalSets);
+      }, 500);
+    }
+  }, [exo, totalSets]);
+  
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
