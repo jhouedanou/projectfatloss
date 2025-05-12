@@ -63,11 +63,25 @@
   --button-text: var(--seashell);
   --button-active: var(--rosewood);
   --series-text: #82B1FF; /* Bleu indigo clair */
+  background-color: #121212; /* Assurer que le fond est bien foncé */
+}
+
+/* S'assurer que tous les éléments du corps en mode sombre ont un fond cohérent */
+.dark-theme .app {
+  background-color: #121212;
 }
 
 /* Transitions */
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s ease;
 }
 
 /* Material Design Typography */
@@ -79,6 +93,7 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   font-size: 16px;
+  min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -98,6 +113,12 @@ h6 { font-size: 1rem; }
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-primary);
+}
+
+.app {
+  background-color: var(--bg-primary);
+  min-height: 100vh;
 }
 
 /* Header et navigation */
@@ -377,7 +398,7 @@ h6 { font-size: 1rem; }
 .floating-calories {
   position: fixed;
   bottom: 20px;
-  left: 25px; /* Déplacé à droite */
+  right: 25px; /* Positionné à droite */
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -572,6 +593,13 @@ gap:1rem;
 /* Styles pour la vue historique */
 .history-content {
   padding: 10px;
+  background-color: var(--bg-primary);
+}
+
+/* Styles pour le contenu de la section poids */
+.weight-content {
+  padding: 10px;
+  background-color: var(--bg-primary);
 }
 
 /* Sélecteur de langue */
@@ -779,6 +807,56 @@ gap:1rem;
   border-color: #FB8C00 !important; /* Orange foncé */
   color: #E65100 !important; /* Orange très foncé */
   font-weight: bold;
+}
+
+/* Styles pour les messages d'erreur */
+.error-message {
+  background-color: rgba(211, 47, 47, 0.1); /* Rouge avec transparence */
+  color: var(--text-primary);
+  border-left: 4px solid #D32F2F; /* Rouge */
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.dark-theme .error-message {
+  background-color: rgba(229, 57, 53, 0.15); /* Rouge plus clair avec transparence */
+  border-left: 4px solid #E57373; /* Rouge clair */
+}
+
+/* Styles pour le conteneur de chargement */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  text-align: center;
+  padding: 20px;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: var(--header-bg);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+.dark-theme .loading-spinner {
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-left-color: var(--header-bg);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Responsive updates */
