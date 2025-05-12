@@ -74,12 +74,12 @@ export const days = [
       },
       {
         name: 'Dips lestés',
-        sets: '3 × max',
+        sets: '3 × 10',
         equip: 'Gilet lesté 10 kg',
         desc: "Mains sur un banc/chaise, fléchissez les coudes pour descendre le corps puis remontez. Travaille triceps et pectoraux.",
         caloriesPerSet: [10, 12],
         totalSets: 3,
-        nbRep: 0,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Dips',
@@ -359,12 +359,12 @@ export const days = [
     exercises: [
       {
         name: 'Pompes lestées',
-        sets: '4 × max',
+        sets: '4 × 10',
         equip: 'Gilet lesté 10 kg',
         desc: "En appui sur mains et pieds, fléchissez les coudes puis poussez. Différentes positions des mains ciblent différentes parties des pectoraux.",
         caloriesPerSet: [10, 12],
         totalSets: 4,
-        nbRep: 0,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Weighted Push-Ups',

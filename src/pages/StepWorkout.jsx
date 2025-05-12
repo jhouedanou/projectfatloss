@@ -580,9 +580,9 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   
-  // Limiter les répétitions "max" à 15 pour éviter les problèmes de timer
+  // Limiter les répétitions "max" à 10
   const safeReps = exo.reps && exo.reps.toString().toLowerCase().includes('max') 
-    ? 15 
+    ? 10 
     : (exo.reps || '');
   
   const iconType = iconsMap[exo.name] || 'dumbbell';
