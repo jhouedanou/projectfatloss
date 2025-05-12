@@ -32,59 +32,67 @@ function parseSets(sets) {
 function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total }) {
   const defaultTime = reducedTime ? 10 : 15;
   const [time, setTime] = useState(defaultTime);
+  const currentExercise = day.exercises[step];
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
   
-  // Annoncer la pause lorsqu'elle commence
+  // Annoncer la pause et le prochain exercice lorsqu'elle commence
   useEffect(() => {
-    if (isExerciseTransition && nextExercise) {
-      announcePause(defaultTime, true, nextExercise);
-    } else {
-      announcePause(defaultTime, false);
+    if (window.speechSynthesis && isExerciseTransition) {
+      const message = new SpeechSynthesisUtterance();
+      if (nextExercise) {
+        message.text = `Pause. Prochain exercice : ${nextExercise.name}`;
+      } else {
+        message.text = "Dernière pause. Félicitations, vous avez presque terminé !";
+      }
+      message.lang = 'fr-FR';
+      window.speechSynthesis.speak(message);
     }
   }, []);
   
   useEffect(() => {
-    if (time === 0) {
-      // Jouer un double beep à la fin de la pause uniquement
-      playBeep();
-      setTimeout(() => playBeep(), 200);
-      onEnd();
-      return;
-    }
+    const timer = setInterval(() => {
+      setTime((prevTime) => {
+        if (prevTime === 1) {
+          clearInterval(timer);
+          onEnd();
+          // Annoncer le début de l'exercice
+          if (window.speechSynthesis && nextExercise) {
+            const message = new SpeechSynthesisUtterance();
+            message.text = `Début de l'exercice : ${nextExercise.name}`;
+            message.lang = 'fr-FR';
+            window.speechSynthesis.speak(message);
+          }
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
     
-    // Jouer les beeps uniquement à partir de 4 secondes
-    if (time <= 4 && time > 0) {
-      playBeep();
-      // Annoncer le compte à rebours avec la synthèse vocale
-      announceCount(time);
-    }
-    
-    const id = setTimeout(() => setTime(t => t - 1), 1000);
-    return () => clearTimeout(id);
-  }, [time, onEnd, isExerciseTransition]);
+    return () => clearInterval(timer);
+  }, [time, onEnd, nextExercise]);
 
   return (
-    <div style={{textAlign:'center',marginTop:40}}>
-      <h2>Pause {reducedTime && "Rapide"}</h2>
-      <div style={{fontSize:40,margin:20}}>{time}s</div>
+    <div className="pause-screen">
+      <h2 className="pause-title">Pause {reducedTime && "Rapide"}</h2>
+      <div className="pause-timer">{time}s</div>
       
-      {/* {isExerciseTransition && nextExercise && (
-        <Box sx={{ mt: 2, mb: 2, p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            Prochain exercice:
-          </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
-            {nextExercise.name}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Équipement: {nextExercise.equip}
-          </Typography>
-        </Box>
-      )} */}
+      {nextExercise && (
+        <div className="next-exercise-info">
+          <h3>Prochain exercice :</h3>
+          <div className="exercise-card">
+            <ExoIcon type={iconsMap[nextExercise.name] || 'dumbbell'} size={32} />
+            <div className="exercise-details">
+              <p className="exercise-name">{nextExercise.name}</p>
+              <p className="exercise-desc">{nextExercise.desc}</p>
+              <p className="exercise-reps">
+                {nextExercise.nbRep} répétitions × {nextExercise.sets}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <button 
-        className="timer-btn" 
-        style={{marginTop:20}}
+        className="timer-btn"
         onClick={onSkip}
       >
         Passer la pause

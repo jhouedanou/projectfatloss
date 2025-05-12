@@ -160,3 +160,73 @@ body.dark-theme .timer-value {
   padding: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
+
+.pause-screen {
+  background-color: var(--background-dark);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: var(--text-primary);
+}
+
+.pause-title {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.pause-timer {
+  font-size: 4rem;
+  font-weight: bold;
+  color: var(--vermilion);
+  margin: 2rem 0;
+}
+
+.next-exercise-info {
+  background-color: var(--background-paper);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 1rem 0;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid rgba(240, 61, 50, 0.2);
+}
+
+.next-exercise-info h3 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.exercise-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: rgba(240, 61, 50, 0.1);
+}
+
+.exercise-details {
+  flex: 1;
+}
+
+.exercise-name {
+  font-weight: bold;
+  color: var(--vermilion);
+  margin-bottom: 0.5rem;
+}
+
+.exercise-desc {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.exercise-reps {
+  color: var(--text-primary);
+  font-weight: bold;
+}
