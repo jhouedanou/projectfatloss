@@ -38,6 +38,12 @@
   --button-text: var(--seashell);
   --button-active: var(--rosewood);
   --series-text: #536DFE; /* Bleu indigo */
+
+  /* Variables pour le thème sombre */
+  --background-dark: #000000;
+  --background-paper: #121212;
+  --text-primary-dark: #FFFFFF;
+  --text-secondary-dark: #F03D32;
 }
 
 .dark-theme {
