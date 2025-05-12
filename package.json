@@ -4,8 +4,8 @@
   "private": true,
   "homepage": "https://github.com/jhouedanou/projectfatloss",
   "scripts": {
-    "dev": "vite",
-    "start": "vite",
+    "dev": "vite --force",
+    "start": "vite --force",
     "build": "node scripts/generate-icons.js && vite build",
     "preview": "vite preview",
     "predeploy": "node scripts/generate-icons.js && vite build",
