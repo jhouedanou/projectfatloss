@@ -30,6 +30,11 @@ function parseSets(sets) {
   return m ? parseInt(m[1], 10) : 1;
 }
 
+function calculateWeight(equipment) {
+  const match = equipment && equipment.match(/(\d+)\s*kg/i);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
 function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets }) {
   const defaultTime = reducedTime ? 10 : 15;
   const [time, setTime] = useState(defaultTime);
@@ -157,7 +162,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
     return total + (weight * sets * reps);
   }, 0);
   
-  const handleSave = () => {
+  const handleSave = async () => {
     const workoutData = {
       title: day.title,
       date: new Date().toISOString(),
@@ -172,7 +177,24 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
       fatBurnerMode: fatBurnerMode
     };
     
+    // Sauvegarder localement
     const savedWorkout = saveWorkout(workoutData);
+    
+    // Synchroniser avec Strava
+    try {
+      await syncWorkout({
+        name: day.title,
+        desc: `Séance complète : ${day.exercises.length} exercices, poids total soulevé : ${totalWeightLifted}kg`,
+        calories: totalCalories,
+        duration: day.exercises.length * 180, // Estimation de la durée : 3 minutes par exercice
+        exerciseCount: day.exercises.length,
+        exercises: workoutData.exercises.map(ex => ex.name).join(', ')
+      });
+    } catch (error) {
+      console.error('Erreur lors de la synchronisation avec Strava:', error);
+      // Ne pas interrompre le flux, même si Strava échoue
+    }
+    
     onSaveWorkout && onSaveWorkout(savedWorkout);
     onClose();
   };
@@ -191,11 +213,14 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
           <StravaButton 
             exercise={{
               name: day.title,
-              desc: `Séance complète : ${day.exercises.length} exercices`,
+              desc: `Séance complète : ${day.exercises.length} exercices, poids total soulevé : ${totalWeightLifted}kg`,
               caloriesPerSet: [totalCalories, totalCalories],
               totalSets: 1,
               duration: day.exercises.length * 180, // Estimation de la durée : 3 minutes par exercice
+              exerciseCount: day.exercises.length,
+              exercises: day.exercises.map(ex => ex.name).join(', ')
             }} 
+            autoSync={true}
           />
         </div>
         
@@ -434,30 +459,57 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
   const handleSaveAndExit = async () => {
     showConfirmDialog(
-      "Sauvegarder et quitter",
-      "Voulez-vous sauvegarder votre progression et quitter ?",
+      "Sauvegarder et synchroniser",
+      "Voulez-vous enregistrer votre entraînement et le synchroniser avec Strava ?",
       async () => {
         try {
-          // Sauvegarder la progression
-          await WorkoutStorage.saveWorkoutProgress(day.id, {
-            completed: step,
-            totalCalories: totalCaloriesBurned,
-            date: new Date()
-          });
+          // Sauvegarder la progression et créer un objet workout complet
+          const workoutData = {
+            title: day.title,
+            date: new Date().toISOString(),
+            calories: totalCaloriesBurned,
+            weightLifted: day.exercises.reduce((total, exercise) => {
+              const weight = calculateWeight(exercise.equip);
+              const sets = parseSets(exercise.sets);
+              let reps = 0;
+              const repsMatch = exercise.sets.match(/\d+\s*[x×]\s*(\d+)(?:-(\d+))?/i);
+              if (repsMatch) {
+                if (repsMatch[2]) {
+                  reps = Math.round((parseInt(repsMatch[1], 10) + parseInt(repsMatch[2], 10)) / 2);
+                } else {
+                  reps = parseInt(repsMatch[1], 10);
+                }
+              }
+              return total + (weight * sets * reps);
+            }, 0),
+            exerciseCount: step + 1,
+            exercises: day.exercises.slice(0, step + 1).map(exercise => ({
+              name: exercise.name,
+              sets: parseSets(exercise.sets),
+              weightLifted: calculateWeight(exercise.equip)
+            })),
+            fatBurnerMode: fatBurnerMode
+          };
           
-          // Synchroniser avec Strava si l'utilisateur est connecté
+          // Sauvegarder d'abord localement
+          const savedWorkout = saveWorkout(workoutData);
+          
+          // Synchroniser avec Strava
           try {
             await syncWorkout({
               name: day.title,
-              desc: `Séance de musculation : ${step + 1} exercices sur ${total}`,
+              desc: `Séance de musculation : ${step + 1} exercices sur ${total}, poids total soulevé: ${workoutData.weightLifted}kg`,
               calories: totalCaloriesBurned,
               duration: step * 180, // estimation : 3 minutes par exercice
-              date: new Date()
+              date: new Date(),
+              exerciseCount: step + 1,
+              exercises: workoutData.exercises.map(ex => ex.name).join(', ')
             });
             console.log('Entraînement synchronisé avec Strava');
           } catch (stravaError) {
             console.error('Erreur lors de la synchronisation avec Strava:', stravaError);
-            // Continuer même si Strava échoue
+            // Afficher un message d'erreur plus convivial
+            alert('Votre entraînement a été sauvegardé, mais la synchronisation avec Strava a échoué. Veuillez vérifier votre connexion.');
           }
           
           onBack();
@@ -481,7 +533,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor:'#2e2e3f' }}>
         <button className="timer-btn" onClick={handleBackClick}>Retour</button>
         <button className="timer-btn save-btn" onClick={handleSaveAndExit}>
-          Sauvegarder et quitter
+          Sauvegarder sur Strava
         </button>
       </div>
 

@@ -159,3 +159,55 @@ export const getWeightLiftedByExercise = () => {
     return {};
   }
 };
+
+/**
+ * Met à jour un entraînement avec l'ID Strava après synchronisation
+ * @param {number} workoutId - ID de l'entraînement local
+ * @param {number} stravaId - ID de l'activité Strava
+ * @returns {boolean} - Succès de l'opération
+ */
+export const updateWorkoutWithStravaId = (workoutId, stravaId) => {
+  try {
+    const history = getWorkoutHistory();
+    const workoutIndex = history.findIndex(w => w.id === workoutId);
+    
+    if (workoutIndex === -1) {
+      return false;
+    }
+    
+    // Ajouter l'ID Strava à l'entraînement
+    history[workoutIndex] = {
+      ...history[workoutIndex],
+      stravaId: stravaId,
+      syncedWithStrava: true,
+      lastSyncDate: new Date().toISOString()
+    };
+    
+    // Sauvegarder l'historique mis à jour
+    localStorage.setItem(WORKOUT_HISTORY_KEY, JSON.stringify(history));
+    return true;
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de l\'ID Strava:', error);
+    return false;
+  }
+};
+
+/**
+ * Sauvegarde la progression d'un entraînement non terminé
+ * @param {string} dayId - Identifiant du jour d'entraînement
+ * @param {Object} progress - Données de progression
+ * @returns {boolean} - Succès de l'opération
+ */
+export const saveWorkoutProgress = (dayId, progress) => {
+  try {
+    const progressKey = `workout_progress_${dayId}`;
+    localStorage.setItem(progressKey, JSON.stringify({
+      ...progress,
+      timestamp: Date.now()
+    }));
+    return true;
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde de la progression:', error);
+    return false;
+  }
+};
