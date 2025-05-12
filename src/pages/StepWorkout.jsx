@@ -85,8 +85,10 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
 
   return (
     <div className="pause-screen">
-      <h2 className="pause-title">Pause {reducedTime && "Rapide"}</h2>
-      <div className="pause-timer">{time}s</div>
+      <div className="pause-header">
+        <h2 className="pause-title">Pause {reducedTime && "Rapide"}</h2>
+        <div className="pause-timer">{time}s</div>
+      </div>
       
       {/* Afficher le prochain exercice uniquement sur le dernier exercice de la série */}
       {nextExercise && isLastSet && (

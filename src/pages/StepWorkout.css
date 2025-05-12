@@ -163,26 +163,39 @@ body.dark-theme .timer-value {
 
 .pause-screen {
   background-color: var(--background-dark);
-  padding: 20px;
+  padding: 20px 20px 100px 20px; /* Ajout de padding en bas pour le bouton flottant */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between; /* Distribution égale des éléments sur la hauteur */
   min-height: 100vh;
+  height: 100vh; /* Force l'écran de pause à prendre toute la hauteur */
   color: var(--text-primary);
+  position: relative; /* Pour le positionnement des éléments enfants */
+  overflow-y: auto; /* Permet le scroll si nécessaire */
+  box-sizing: border-box; /* Inclut padding dans la hauteur */
+}
+
+/* Conteneur pour le titre et le timer */
+.pause-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15vh; /* Positionne le header vers le haut */
 }
 
 .pause-title {
   font-size: 2rem;
   color: var(--text-primary);
-  margin-bottom: 1rem;
+  margin: 0; /* Supprime toutes les marges */
 }
 
 .pause-timer {
-  font-size: 4rem;
+  font-size: 5rem; /* Plus grand */
   font-weight: bold;
   color: var(--vermilion);
-  margin: 2rem 0;
+  margin-top: 0.5rem; /* Espace minimal entre le titre et le timer */
+  text-align: center;
 }
 
 .next-exercise-info {
@@ -195,10 +208,28 @@ body.dark-theme .timer-value {
   border: 1px solid rgba(240, 61, 50, 0.2);
 }
 
-.next-exercise-info h3 {
-  color: var(--text-primary);
-  margin-bottom: 1rem;
+.pause-screen .timer-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 300px;
+  padding: 15px 20px;
   font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 30px;
+  background-color: var(--vermilion);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(240, 61, 50, 0.3);
+  z-index: 100;
+  transition: all 0.2s ease;
+}
+
+.pause-screen .timer-btn:active {
+  transform: translateX(-50%) scale(0.95);
+  box-shadow: 0 2px 10px rgba(240, 61, 50, 0.2);
 }
 
 .exercise-card {

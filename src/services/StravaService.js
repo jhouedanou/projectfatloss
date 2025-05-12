@@ -118,12 +118,15 @@ export function authenticateWithStrava() {
         clearInterval(checkAuth);
         
         // Vérifier si l'authentification a réussi (le token est présent)
-        if (localStorage.getItem('strava_access_token')) {
-          stravaAuth.accessToken = localStorage.getItem('strava_access_token');
+        const accessToken = localStorage.getItem('strava_access_token');
+        if (accessToken) {
+          console.log('Authentification Strava réussie, token récupéré');
+          stravaAuth.accessToken = accessToken;
           stravaAuth.refreshToken = localStorage.getItem('strava_refresh_token');
           stravaAuth.expiresAt = localStorage.getItem('strava_expires_at');
           resolve(true);
         } else {
+          console.log('Échec de l\'authentification Strava: pas de token récupéré');
           resolve(false);
         }
       }
