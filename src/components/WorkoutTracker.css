@@ -52,7 +52,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #4CAF50;
+  background-color: #2E7D32; /* Vert foncé */
 }
 
 .calories-badge {
@@ -81,7 +81,7 @@
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 12px;
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid #2E7D32; /* Vert foncé */
 }
 
 .workout-header {
@@ -236,7 +236,7 @@
 
 .exercise-weight {
   font-weight: bold;
-  color: #4CAF50;
+  color: #2E7D32; /* Vert foncé */
 }
 
 /* Responsive */

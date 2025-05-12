@@ -586,7 +586,6 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
   const [showOverlay, setShowOverlay] = useState(false);
   const [countdown, setCountdown] = useState(null); // null = pas de décompte, sinon 3,2,1
   const timerRef = useRef(null);
-
   // Remise à zéro des états internes à chaque changement d'exercice ou de série
   useEffect(() => {
     setIsPulsing(false);
@@ -734,7 +733,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
               </Typography>
             ) : (
               <>
-                <Typography variant="h4" component="div" sx={{ mb: 2, color: 'green' }}>
+                <Typography variant="h4" component="div" sx={{ mb: 2, color: '#4CAF50' }}>
                   OK !
                 </Typography>
                 <Button 
@@ -768,11 +767,11 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
         </Typography>
         
         <Typography variant="body1" color="text.secondary">
-          Matériel : <span>{exo.equip}</span>
+          Matériel : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#455A64', padding: '2px 6px', borderRadius: '4px' }}>{exo.equip}</span>
         </Typography>
         
         <Typography variant="body1" color="text.secondary">
-          Série <span style={{ color: 'red', fontWeight: 'bold' }}>{setNum + 1}</span> / {totalSets}
+          Série <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#3949AB', padding: '2px 6px', borderRadius: '4px' }}>{setNum + 1}</span> / {totalSets}
         </Typography>
         
         <Typography 
@@ -789,11 +788,11 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, fatBurnerMo
         </Typography>
         
         <Typography variant="body1" color="text.secondary">
-          Répétitions : <span style={{ fontWeight: 'bold', color: 'red' }}>{exo.nbRep}</span>
+          Répétitions : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#2E7D32', padding: '2px 6px', borderRadius: '4px' }}>{exo.nbRep}</span>
         </Typography>
         
         <Typography variant="body1" color="text.secondary">
-          Longueur de la série : <span style={{ fontWeight: 'bold', color: 'red' }}>{exo.sets}</span>
+          Longueur de la série : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#536DFE', padding: '2px 6px', borderRadius: '4px' }}>{exo.sets}</span>
         </Typography>
 
         {/* Boutons flottants pour toutes les actions */}
