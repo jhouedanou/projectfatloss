@@ -2,7 +2,19 @@
   "name": "project-fat-loss",
   "version": "2.5.0",
   "private": true,
-  "homepage": "https://github.com/jhouedanou/projectfatloss",
+ "homepage": "https://jhouedanou.github.io",
+  "description": "Application d'entraînement musculaire", 
+  "author": "Jhouedanou",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "vite",
+    "pwa",
+    "fat loss",
+    "fitness",
+    "workout"
+  ],
+  
   "scripts": {
     "dev": "vite --force",
     "start": "vite --force",
