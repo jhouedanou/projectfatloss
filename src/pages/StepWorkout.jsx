@@ -15,6 +15,7 @@ import { initSpeechService, announceExercise, announcePause, announceCount, anno
 import { saveWorkout } from '../services/WorkoutStorage';
 
 import '../components/SpeechSettings.css';
+import './StepWorkout.css';
 import iconsMap from '../../public/exo-icons.json';
 
 function playBeep() {
@@ -206,6 +207,13 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
   const [speechEnabled, setSpeechEnabledState] = useState(false);
   const [speechSettingsOpen, setSpeechSettingsOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogConfig, setDialogConfig] = useState({
+    title: '',
+    message: '',
+    confirmAction: () => {},
+    cancelAction: () => {}
+  });
   const isFirstRender = useRef(true);
   let beepTimeouts = [];
   
@@ -353,9 +361,79 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     handleCloseEndOfDayModal();
   };
   
+  const showConfirmDialog = (title, message, onConfirm, onCancel = () => {}) => {
+    setDialogConfig({
+      title,
+      message,
+      confirmAction: () => {
+        onConfirm();
+        setDialogOpen(false);
+      },
+      cancelAction: () => {
+        onCancel();
+        setDialogOpen(false);
+      }
+    });
+    setDialogOpen(true);
+  };
+
+  const handleBackClick = () => {
+    showConfirmDialog(
+      "Quitter l'entraînement ?",
+      "Voulez-vous vraiment quitter ? Votre progression sera perdue.",
+      () => onBack(),
+      () => {}
+    );
+  };
+
+  const handleSaveAndExit = async () => {
+    showConfirmDialog(
+      "Sauvegarder et quitter",
+      "Voulez-vous sauvegarder votre progression et quitter ?",
+      async () => {
+        try {
+          // Sauvegarder la progression
+          await WorkoutStorage.saveWorkoutProgress(day.id, {
+            completed: step,
+            totalCalories: totalCaloriesBurned,
+            date: new Date()
+          });
+          
+          // Synchroniser avec Google Fit si disponible
+          if (window.gapi && window.gapi.auth2) {
+            await GoogleFitService.syncWorkout({
+              name: day.title,
+              calories: totalCaloriesBurned,
+              duration: step * 2, // estimation basique
+              date: new Date()
+            });
+          }
+          
+          onBack();
+        } catch (error) {
+          console.error('Erreur lors de la sauvegarde:', error);
+          alert('Erreur lors de la sauvegarde. Veuillez réessayer.');
+        }
+      }
+    );
+  };
+
   return (
-    <div className="day-content">
-      <button className="timer-btn" style={{marginBottom:10}} onClick={onBack}>Retour</button>
+    <div 
+      className="day-content" 
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 20px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 20px)',
+        minHeight: '100vh',
+      }}
+    >
+      <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor: 'var(--seashell)' }}>
+        <button className="timer-btn" onClick={handleBackClick}>Retour</button>
+        <button className="timer-btn save-btn" onClick={handleSaveAndExit}>
+          Sauvegarder et quitter
+        </button>
+      </div>
+
       <h2 style={{fontSize:'1.1rem',marginBottom:8}}>{day.title}</h2>
       
       {fatBurnerMode && (
@@ -453,6 +531,26 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         onClose={handleCloseSpeechSettings}
         speechEnabled={speechEnabled}
       />
+
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+      >
+        <DialogTitle>{dialogConfig.title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {dialogConfig.message}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={dialogConfig.cancelAction}>
+            Annuler
+          </Button>
+          <Button onClick={dialogConfig.confirmAction} color="primary">
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

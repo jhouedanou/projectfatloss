@@ -1,0 +1,23 @@
+.app-header {
+  padding: env(safe-area-inset-top) 1rem 0.5rem;
+  background-color: var(--seashell);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo-container {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.app-logo {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}

@@ -1,0 +1,40 @@
+.day-content {
+  background-color: var(--seashell);
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timer-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  background-color: var(--vermilion);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.timer-btn:hover {
+  background-color: var(--cinnabar);
+}
+
+.save-btn {
+  background-color: var(--rosewood);
+}
+
+.save-btn:hover {
+  background-color: var(--cinnabar-2);
+}
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  .day-content {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
