@@ -3,91 +3,55 @@ import { ThemeProvider } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { createAppTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
-import { getWorkoutPlan } from '../services/WorkoutCustomization'; // Importer le service de personnalisation
+import { getWorkoutPlan } from '../services/WorkoutCustomization'; 
 import StepWorkout from './StepWorkout';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import WorkoutStats from '../components/WorkoutStats';
 import WeightTracker from '../components/WeightTracker';
 import LanguageSelector from '../components/LanguageSelector';
-import WorkoutCustomizer from '../components/WorkoutCustomizer'; // Importer le composant de personnalisation
-import LoginForm from '../components/LoginForm'; // Importer le formulaire de connexion
-import SyncPanel from '../components/SyncPanel'; // Importer le panneau de synchronisation
-import { getCurrentUser } from '../services/AuthService'; // Importer le service d'authentification
-import { initSpeechService } from '../services/SpeechService'; // Importer le service de synthèse vocale
-// Importer les données initiales au cas où le chargement échoue
+import WorkoutCustomizer from '../components/WorkoutCustomizer'; 
+import { initSpeechService } from '../services/SpeechService'; 
 import { days as initialWorkoutPlan } from '../data'; 
 import '../components/WeightTracker.css';
-import '../components/WorkoutCustomizer.css'; // Importer les styles CSS
-import '../components/LoginForm.css'; // Importer les styles CSS du formulaire de connexion
-import '../components/SyncPanel.css'; // Importer les styles CSS du panneau de synchronisation
+import '../components/WorkoutCustomizer.css'; 
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
 import DayPills from '../components/DayPills';
 import Header from '../components/Header/Header';
 
-function Tabs({ days, current, setCurrent }) {
-  if (!days || days.length === 0) {
-    return null;
-  }
-
-  return <DayPills days={days} current={current} setCurrent={setCurrent} />;
-}
+const NOTIFICATION_DURATION = 3000; 
 
 export default function App() {
   const { t } = useTranslation();
-  // Restaurer le jour actuel depuis localStorage
   const [current, setCurrent] = useState(() => {
     const savedDay = localStorage.getItem('currentWorkoutDay');
     return savedDay !== null ? parseInt(savedDay, 10) : 0;
   });
   const [stepMode, setStepMode] = useState(false);
-  const [viewMode, setViewMode] = useState('workout'); // 'workout', 'history' ou 'weight'
+  const [viewMode, setViewMode] = useState('workout'); 
   const [darkTheme, setDarkTheme] = useState(
-    localStorage.getItem('theme') !== 'light' // Par défaut en mode sombre si pas de préférence
+    localStorage.getItem('theme') !== 'light' 
   );
-  // État pour contrôler l'affichage du sélecteur de langue
   const [showLanguageSelector, setShowLanguageSelector] = useState(() => {
     const savedPref = localStorage.getItem('showLanguageSelector');
-    // Toujours masquer le sélecteur de langue selon la demande
     return false;
   });
   
-  // État pour le mode d'urgence "Fat Burner"
   const [fatBurnerMode, setFatBurnerMode] = useState(false);
   
-  // État pour le programme d'entraînement personnalisé, initialiser avec un tableau vide
   const [workoutPlan, setWorkoutPlan] = useState([]);
-  // État de chargement pour indiquer si le plan est prêt
   const [isLoading, setIsLoading] = useState(true);
   
-  // État pour afficher/masquer le customizer
   const [showCustomizer, setShowCustomizer] = useState(false);
   
-  // État pour l'authentification et la synchronisation
-  const [user, setUser] = useState(null);
-  const [showLoginForm, setShowLoginForm] = useState(false);
-  const [showSyncPanel, setShowSyncPanel] = useState(false);
-  
-  // État pour le thème Material UI
   const [appTheme, setAppTheme] = useState(() => createAppTheme(
     localStorage.getItem('theme') !== 'light'
   ));
 
-  // Charger l'utilisateur connecté au démarrage
-  useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-    }
-  }, []);
-  
-  // Charger le programme d'entraînement personnalisé
   useEffect(() => {
     try {
       setIsLoading(true);
-      // Essayer de charger le plan personnalisé
       const plan = getWorkoutPlan();
       
-      // Si le plan est vide ou invalide, utiliser le plan initial
       if (!plan || plan.length === 0) {
         setWorkoutPlan(initialWorkoutPlan);
       } else {
@@ -95,24 +59,20 @@ export default function App() {
       }
     } catch (error) {
       console.error('Erreur lors du chargement du plan d\'entraînement:', error);
-      // En cas d'erreur, utiliser le plan initial
       setWorkoutPlan(initialWorkoutPlan);
     } finally {
       setIsLoading(false);
     }
   }, []);
   
-  // S'assurer que l'index current est valide
   useEffect(() => {
     if (!isLoading && workoutPlan.length > 0 && current >= workoutPlan.length) {
       setCurrent(0);
     }
   }, [workoutPlan, current, isLoading]);
   
-  // Rafraîchir le programme quand le customizer est fermé
   const handleCloseCustomizer = () => {
     setShowCustomizer(false);
-    // Recharger le programme mis à jour
     try {
       const plan = getWorkoutPlan();
       if (plan && plan.length > 0) {
@@ -123,55 +83,24 @@ export default function App() {
     }
   };
   
-  // Gestion du login
-  const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    setShowLoginForm(false);
-    setShowSyncPanel(true); // Afficher le panneau de synchronisation après connexion
-  };
-  
-  // Gestion du logout
-  const handleLogout = () => {
-    setUser(null);
-    setShowSyncPanel(false);
-  };
-  
-  // Gestion de la synchronisation complète
-  const handleSyncComplete = () => {
-    // Recharger les données après synchronisation
-    try {
-      const plan = getWorkoutPlan();
-      if (plan && plan.length > 0) {
-        setWorkoutPlan(plan);
-      }
-    } catch (error) {
-      console.error('Erreur lors du rechargement du plan après synchronisation:', error);
-    }
-  };
-  
-  // Sauvegarder le jour actuel dans localStorage quand il change
   useEffect(() => {
     localStorage.setItem('currentWorkoutDay', current.toString());
   }, [current]);
 
   useEffect(() => {
-    // Appliquer le thème à chaque changement
     if (darkTheme) {
       document.body.classList.add('dark-theme');
     } else {
       document.body.classList.remove('dark-theme');
     }
-    localStorage.setItem('darkTheme', darkTheme);
-    // Mettre à jour le thème Material UI
+    localStorage.setItem('theme', darkTheme ? 'dark' : 'light');
     setAppTheme(createAppTheme(darkTheme));
   }, [darkTheme]);
 
-  // Sauvegarder la préférence du sélecteur de langue dans localStorage
   useEffect(() => {
     localStorage.setItem('showLanguageSelector', showLanguageSelector);
   }, [showLanguageSelector]);
 
-  // Initialiser la synthèse vocale au démarrage de l'application
   useEffect(() => {
     const speechInitialized = initSpeechService();
     console.log("Synthèse vocale initialisée:", speechInitialized);
@@ -190,20 +119,15 @@ export default function App() {
   };
   
   const moveToNextDay = () => {
-    // S'assurer que workoutPlan est chargé et non vide
     if (workoutPlan && workoutPlan.length > 0) {
-      // Passer au jour suivant en suivant la séquence de 7 jours
       setCurrent(prev => (prev + 1) % workoutPlan.length);
     }
-    setStepMode(false); // Réinitialiser en mode non-étape
+    setStepMode(false); 
   };
   
   const handleWorkoutComplete = (workoutData) => {
-    // Cette fonction sera passée à StepWorkout pour enregistrer les données d'entraînement
-    // lorsqu'une séance est terminée
     console.log('Entraînement terminé:', workoutData);
     
-    // Affichage d'une notification si l'API est disponible
     if ("Notification" in window && Notification.permission === "granted" && workoutPlan && workoutPlan.length > 0) {
       new Notification(t('notifications.workoutComplete'), {
         body: t('notifications.nextDay', { day: (current + 1) % workoutPlan.length + 1 }),
@@ -211,21 +135,17 @@ export default function App() {
       });
     }
     
-    // Passage automatique au jour suivant d'entraînement
     moveToNextDay();
     
-    // Après l'enregistrement, passer à la vue historique
     setViewMode('history');
   };
   
-  // Demander la permission pour les notifications lors du premier chargement
   useEffect(() => {
     if ("Notification" in window && Notification.permission !== "denied") {
       Notification.requestPermission();
     }
   }, []);
 
-  // Afficher un indicateur de chargement si nécessaire
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -235,7 +155,6 @@ export default function App() {
     );
   }
 
-  // Vérifier si le plan d'entraînement est disponible
   const isPlanAvailable = workoutPlan && workoutPlan.length > 0 && current < workoutPlan.length;
 
   return (
@@ -276,18 +195,8 @@ export default function App() {
             </div>
           </header>
           
-          {/* Menu de configuration - ajouté pour permettre de masquer le sélecteur de langue */}
           <div className="settings-bar">
-            {/* Bouton du sélecteur de langue masqué selon la demande */}
-            {/* <button 
-              className="settings-button"
-              onClick={toggleLanguageSelector}
-              title={showLanguageSelector ? t('settings.hideLanguage') : t('settings.showLanguage')}
-            >
-              {showLanguageSelector ? t('settings.hideLanguage') : t('settings.showLanguage')} 🌐
-            </button> */}
             
-            {/* Bouton pour le mode Fat Burner */}
             <button 
               className={`settings-button ${fatBurnerMode ? 'active-mode' : ''}`}
               onClick={toggleFatBurnerMode}
@@ -296,7 +205,6 @@ export default function App() {
               {t('settings.fatBurner')} 🔥
             </button>
             
-            {/* Bouton pour personnaliser le programme */}
             <button 
               className="settings-button"
               onClick={() => setShowCustomizer(true)}
@@ -304,43 +212,10 @@ export default function App() {
             >
               {t('settings.customize')} ⚙️
             </button>
-            
-            {/* Bouton pour se connecter/synchroniser */}
-            {user ? (
-              <button 
-                className="settings-button sync-toggle-button"
-                onClick={() => setShowSyncPanel(!showSyncPanel)}
-                title={t('settings.sync')}
-              >
-                {t('settings.sync')} ☁️
-              </button>
-            ) : (
-              <button 
-                className="settings-button"
-                onClick={() => setShowLoginForm(true)}
-                title={t('auth.login')}
-              >
-                {t('auth.login')} 🔒
-              </button>
-            )}
           </div>
           
-          {/* Sélecteur de langue */}
           {showLanguageSelector && <LanguageSelector />}
           
-          {/* Formulaire de connexion */}
-          {showLoginForm && <LoginForm onLoginSuccess={handleLoginSuccess} onClose={() => setShowLoginForm(false)} />}
-          
-          {/* Panneau de synchronisation */}
-          {showSyncPanel && user && (
-            <SyncPanel 
-              user={user}
-              onLogout={handleLogout}
-              onSyncComplete={handleSyncComplete}
-            />
-          )}
-          
-          {/* Customizer de programme */}
           {showCustomizer && <WorkoutCustomizer onClose={handleCloseCustomizer} />}
           
           {viewMode === 'workout' ? (
@@ -349,10 +224,8 @@ export default function App() {
                 <>
                   {!stepMode ? (
                     <div className="day-content">
-                      {/* Sélecteur de jour */}
                       <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
                       <h2 style={{ fontSize: '1.1rem', marginBottom: 16 }}>{workoutPlan[current].title}</h2>
-                      {/* Bannière Fat Burner */}
                       {fatBurnerMode && (
                         <div className="fat-burner-banner">
                           <span className="fat-burner-icon">🔥</span>
@@ -362,7 +235,6 @@ export default function App() {
                       <button className="timer-btn" style={{marginBottom:16}} onClick={()=>setStepMode(true)}>
                         {t('workout.start')}
                       </button>
-                      {/* Carousel des exercices du jour */}
                       <HomeExerciseCarousel exercises={workoutPlan[current].exercises} />
                     </div>
                   ) : (
@@ -389,13 +261,11 @@ export default function App() {
               )}
             </>
           ) : viewMode === 'history' ? (
-            // Mode Historique et Statistiques
             <div className="history-content">
               <WorkoutStats />
               <WorkoutCalendar />
             </div>
           ) : (
-            // Mode Suivi de Poids
             <div className="weight-content">
               <WeightTracker />
             </div>

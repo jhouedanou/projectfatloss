@@ -4,7 +4,6 @@ import { useTheme } from '@mui/material/styles';
 import SettingsIcon from '@mui/icons-material/Settings';
 import beepSound from '../../public/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
-import StravaButton from '../components/StravaButton';
 import ExoIcon from '../components/ExoIcon';
 import FloatingButtons from '../components/FloatingButtons/FloatingButtons';
 import ProgressTracker from '../components/ProgressTracker';
@@ -13,7 +12,6 @@ import DayPills from '../components/DayPills';
 import { getWorkoutPlan } from '../services/WorkoutCustomization';
 import { initSpeechService, announceExercise, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
-import { syncWorkout } from '../services/StravaService';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -177,28 +175,17 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
         sets: parseSets(exercise.sets),
         weightLifted: calculateWeight(exercise.equip)
       })),
-      fatBurnerMode: fatBurnerMode
+      fatBurnerMode: fatBurnerMode,
+      duration: day.exercises.length * 180 // Estimation de la durée : 3 minutes par exercice
     };
     
     // Sauvegarder localement
     const savedWorkout = saveWorkout(workoutData);
     
-    // Synchroniser avec Strava
-    try {
-      await syncWorkout({
-        name: day.title,
-        desc: `Séance complète : ${day.exercises.length} exercices, poids total soulevé : ${totalWeightLifted}kg`,
-        calories: totalCalories,
-        duration: day.exercises.length * 180, // Estimation de la durée : 3 minutes par exercice
-        exerciseCount: day.exercises.length,
-        exercises: workoutData.exercises.map(ex => ex.name).join(', ')
-      });
-    } catch (error) {
-      console.error('Erreur lors de la synchronisation avec Strava:', error);
-      // Ne pas interrompre le flux, même si Strava échoue
-    }
-    
+    // Informer le parent que l'entraînement a été sauvegardé
     onSaveWorkout && onSaveWorkout(savedWorkout);
+    
+    // Fermer la modale
     onClose();
   };
   
@@ -211,21 +198,6 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
         <p className="calorie-total">Vous avez brûlé <span>{totalCalories}</span> calories !</p>
         <p className="weight-total">Poids total soulevé : <span>{totalWeightLifted} kg</span></p>
         <p className="motivation-text">Excellent travail ! Continuez ainsi pour atteindre vos objectifs.</p>
-        
-        <div className="strava-section">
-          <StravaButton 
-            exercise={{
-              name: day.title,
-              desc: `Séance complète : ${day.exercises.length} exercices, poids total soulevé : ${totalWeightLifted}kg`,
-              caloriesPerSet: [totalCalories, totalCalories],
-              totalSets: 1,
-              duration: day.exercises.length * 180, // Estimation de la durée : 3 minutes par exercice
-              exerciseCount: day.exercises.length,
-              exercises: day.exercises.map(ex => ex.name).join(', ')
-            }} 
-            autoSync={true}
-          />
-        </div>
         
         <div className="modal-actions">
           <button className="timer-btn save-btn" onClick={handleSave}>Enregistrer</button>
@@ -462,8 +434,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
   const handleSaveAndExit = async () => {
     showConfirmDialog(
-      "Sauvegarder et synchroniser",
-      "Voulez-vous enregistrer votre entraînement et le synchroniser avec Strava ?",
+      "Sauvegarder et quitter",
+      "Voulez-vous enregistrer votre entraînement ?",
       async () => {
         try {
           // Sauvegarder la progression et créer un objet workout complet
@@ -497,24 +469,10 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           // Sauvegarder d'abord localement
           const savedWorkout = saveWorkout(workoutData);
           
-          // Synchroniser avec Strava
-          try {
-            await syncWorkout({
-              name: day.title,
-              desc: `Séance de musculation : ${step + 1} exercices sur ${total}, poids total soulevé: ${workoutData.weightLifted}kg`,
-              calories: totalCaloriesBurned,
-              duration: step * 180, // estimation : 3 minutes par exercice
-              date: new Date(),
-              exerciseCount: step + 1,
-              exercises: workoutData.exercises.map(ex => ex.name).join(', ')
-            });
-            console.log('Entraînement synchronisé avec Strava');
-          } catch (stravaError) {
-            console.error('Erreur lors de la synchronisation avec Strava:', stravaError);
-            // Afficher un message d'erreur plus convivial
-            alert('Votre entraînement a été sauvegardé, mais la synchronisation avec Strava a échoué. Veuillez vérifier votre connexion.');
-          }
+          // Informer le parent que l'entraînement a été sauvegardé
+          onComplete && onComplete(savedWorkout);
           
+          // Fermer la page
           onBack();
         } catch (error) {
           console.error('Erreur lors de la sauvegarde:', error);
@@ -536,7 +494,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor:'#2e2e3f' }}>
         <button className="timer-btn" onClick={handleBackClick}>Retour</button>
         <button className="timer-btn save-btn" onClick={handleSaveAndExit}>
-          Sauvegarder sur Strava
+          Sauvegarder et quitter
         </button>
       </div>
 
