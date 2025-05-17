@@ -18,11 +18,20 @@ export function saveWorkout(workout) {
   // Générer un ID unique pour cet entraînement
   const workoutId = Date.now();
   
-  // Ajouter l'ID et la date actuelle à l'entraînement
+  // S'assurer que le titre est bien formaté pour l'affichage
+  const formattedTitle = workout.title || "Entraînement";
+  
+  // Formatter la date correctement pour l'affichage
+  const now = new Date();
+  const formattedDate = workout.date || now.toISOString();
+  
+  // Ajouter l'ID, le titre formaté et la date à l'entraînement
   const workoutWithId = {
     ...workout,
     id: workoutId,
-    date: workout.date || new Date().toISOString()
+    title: formattedTitle,
+    date: formattedDate,
+    displayDate: `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`
   };
   
   // Ajouter l'entraînement à l'historique

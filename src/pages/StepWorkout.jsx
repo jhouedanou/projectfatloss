@@ -39,10 +39,12 @@ function calculateWeight(equipment) {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-function Pause({ pauseTime, currentExercise, nextExercise, onDone, fatBurnerMode, reducedTime = false, autoMode }) {
-  const [time, setTime] = useState(pauseTime);
-  const isFinalExercise = !nextExercise;
-  const { t } = useTranslation();
+function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode }) {
+  const defaultTime = reducedTime ? 10 : 15;
+  const [time, setTime] = useState(defaultTime);
+  const currentExercise = day.exercises[step];
+  const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
+  const isLastSet = setNum === totalSets - 1;
   
   // Annoncer la pause et le prochain exercice uniquement au début
   useEffect(() => {
@@ -68,18 +70,17 @@ function Pause({ pauseTime, currentExercise, nextExercise, onDone, fatBurnerMode
   }, [isExerciseTransition, isLastSet, nextExercise, setNum, totalSets, time, defaultTime]);
   
   useEffect(() => {
+    // Si mode automatique activé, réduire le temps de pause de moitié
+    if (autoMode && time === defaultTime) {
+      setTime(Math.ceil(defaultTime / 2));
+    }
+    
     const timer = setInterval(() => {
       setTime((prevTime) => {
         if (prevTime === 1) {
           clearInterval(timer);
           onEnd();
-          // Annoncer le début de l'exercice si on change d'exercice
-          if (window.speechSynthesis && nextExercise && isLastSet) {
-            const message = new SpeechSynthesisUtterance();
-            message.text = `Début de l'exercice : ${nextExercise.name}`;
-            message.lang = 'fr-FR';
-            window.speechSynthesis.speak(message);
-          }
+          // Fonctionnalité d'annonce vocale supprimée
         }
         return prevTime - 1;
       });
@@ -252,6 +253,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     confirmAction: () => {},
     cancelAction: () => {}
   });
+  const [showAutoModeDialog, setShowAutoModeDialog] = useState(false);
   const isFirstRender = useRef(true);
   let beepTimeouts = [];
   
@@ -321,6 +323,17 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const handlePauseEnd = () => {
     setPause(false);
     setIsExerciseTransition(false);
+    
+    // Si mode automatique activé, préparer le passage à l'exercice suivant après délai
+    if (autoMode && !pause && day && day.exercises) {
+      // Attendre que l'exercice soit terminé avant de passer au suivant
+      const exerciseDuration = day.exercises[step]?.timer || 30;
+      const delay = exerciseDuration * 1000 + 2000; // Ajouter 2 secondes de délai supplémentaire
+      
+      setTimeout(() => {
+        handleSetComplete();
+      }, delay);
+    }
   };
   
   const handleSkipPause = () => {
@@ -421,6 +434,29 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     });
     setDialogOpen(true);
   };
+  
+  // Gestionnaire pour le toggle du mode automatique
+  const handleAutoModeToggle = (e) => {
+    const isChecked = e.target.checked;
+    
+    if (isChecked) {
+      // Afficher la confirmation uniquement si on active le mode
+      showConfirmDialog(
+        "Activer le mode automatique ?",
+        "En mode automatique, les exercices et séries défileront sans que vous ayez à interagir avec l'application. Voulez-vous continuer ?",
+        () => {
+          setAutoMode(true);
+        },
+        () => {
+          // Si l'utilisateur annule, remettre le switch à off
+          setAutoMode(false);
+        }
+      );
+    } else {
+      // Désactiver directement sans confirmation
+      setAutoMode(false);
+    }
+  };
 
   const handleBackClick = () => {
     showConfirmDialog(
@@ -508,17 +544,22 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       {/* Contrôles de synthèse vocale supprimés */}
       
       {/* Option pour mode automatique */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
         <FormControlLabel
           control={
             <Switch
               checked={autoMode}
-              onChange={(e) => setAutoMode(e.target.checked)}
+              onChange={handleAutoModeToggle}
               color="primary"
             />
           }
-          label="Mode automatique"
+          label="Défilement automatique"
         />
+        {autoMode && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+            Les exercices et séries défileront automatiquement
+          </Typography>
+        )}
       </Box>
       
       {/* DayPills supprimés de la page StepWorkout - uniquement sur page d'accueil */}
@@ -531,18 +572,20 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           totalSets={totalSets}
           calories={totalCaloriesBurned}
           fatBurnerMode={fatBurnerMode}
+          autoMode={autoMode}
         />
 
         {!pause ? (
           <StepSet 
-            exo={exo} 
-            setNum={setNum} 
-            totalSets={totalSets} 
-            onDone={next}
+            exo={day.exercises[step]}
+            setNum={setNum}
+            totalSets={day.exercises[step]?.sets || 1}
+            onDone={handleSetComplete}
             onCaloriesBurned={handleCaloriesBurned}
             onExerciseCompleted={handleExerciseCompleted}
             fatBurnerMode={fatBurnerMode}
             isPaused={pause}
+            autoMode={autoMode}
           />
         ) : (
           <Pause 
@@ -555,6 +598,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             total={total}
             setNum={setNum}
             totalSets={totalSets}
+            autoMode={autoMode}
           />
         )}  
         
