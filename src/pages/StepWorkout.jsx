@@ -242,8 +242,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [speechEnabled, setSpeechEnabledState] = useState(true);
   const [speechSettingsOpen, setSpeechSettingsOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [startDelay, setStartDelay] = useState(10); // Compte à rebours de 10 secondes
-  const startDelayRef = useRef(null);
   const [dialogConfig, setDialogConfig] = useState({
     title: '',
     message: '',
@@ -256,41 +254,17 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   
   // Désactivation de la synthèse vocale
   useEffect(() => {
-    // Ne pas initialiser le service de synthèse vocale
+    // Désactivation de la synthèse vocale
     setSpeechEnabled(false);
     setSpeechEnabledState(false);
     
-    // Démarrer le compte à rebours de démarrage
-    startDelayRef.current = setInterval(() => {
-      setStartDelay(prev => {
-        if (prev <= 1) {
-          clearInterval(startDelayRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
     return () => {
-      // Nettoyage
+      // Nettoyage de la synthèse vocale
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
-      if (startDelayRef.current) {
-        clearInterval(startDelayRef.current);
-      }
     };
   }, []);
-  
-  // Démarrer automatiquement quand le compte à rebours est terminé
-  useEffect(() => {
-    if (startDelay === 0) {
-      // Démarrer le premier exercice
-      if (exo && !isPaused) {
-        handlePulse();
-      }
-    }
-  }, [startDelay, exo, isPaused]);
   
   // Désactiver le toggle de synthèse vocale
   const handleSpeechToggle = (event) => {
@@ -606,7 +580,18 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           fatBurnerMode={fatBurnerMode}
         />
 
-        {pause ? (
+        {!pause ? (
+          <StepSet 
+            exo={exo} 
+            setNum={setNum} 
+            totalSets={totalSets} 
+            onDone={next}
+            onCaloriesBurned={handleCaloriesBurned}
+            onExerciseCompleted={handleExerciseCompleted}
+            fatBurnerMode={fatBurnerMode}
+            isPaused={isPaused}
+          />
+        ) : (
           <Pause 
             onEnd={handlePauseEnd} 
             onSkip={handleSkipPause} 
@@ -618,37 +603,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             setNum={setNum}
             totalSets={totalSets}
           />
-        ) : !pause && startDelay > 0 ? (
-          <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '60vh',
-            textAlign: 'center'
-          }}>
-            <Typography variant="h4" gutterBottom>
-              Début de l'entraînement dans
-            </Typography>
-            <Typography variant="h1" color="primary" sx={{ fontSize: '4rem', fontWeight: 'bold' }}>
-              {startDelay}
-            </Typography>
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              Préparez-vous pour le premier exercice
-            </Typography>
-          </Box>
-        ) : !pause ? (
-          <StepSet 
-            exo={exo} 
-            setNum={setNum} 
-            totalSets={totalSets} 
-            onDone={next}
-            onCaloriesBurned={handleCaloriesBurned}
-            onExerciseCompleted={handleExerciseCompleted}
-            fatBurnerMode={fatBurnerMode}
-            isPaused={isPaused}
-          />
-        ) : null}  
+        )}  
         
         <Box
           sx={{
@@ -842,6 +797,49 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     setOpenConfirmDialog(false);
   };
 
+  // Liste des exercices chrono (nom normalisé)
+  const chronoExercises = [
+    'Planche latérale',
+    'Planche lestée',
+    'Cardio au choix',
+    'Étirements complets',
+    'Mobilité articulaire',
+    'Vélo',
+    'Vélo d’appartement',
+    'Vélo elliptique',
+    'Cardio',
+    'Cardio (30-45 min à intensité modérée)',
+  ];
+  const isChrono = chronoExercises.some(name => exo.name && exo.name.toLowerCase().includes(name.toLowerCase()));
+  const [chrono, setChrono] = useState(0);
+  const [chronoRunning, setChronoRunning] = useState(false);
+  const chronoInterval = useRef(null);
+
+  // Gestion du chrono
+  useEffect(() => {
+    if (!isChrono) return;
+    if (chronoRunning) {
+      chronoInterval.current = setInterval(() => {
+        setChrono(prev => prev + 1);
+      }, 1000);
+    } else if (chronoInterval.current) {
+      clearInterval(chronoInterval.current);
+      chronoInterval.current = null;
+    }
+    return () => {
+      if (chronoInterval.current) {
+        clearInterval(chronoInterval.current);
+        chronoInterval.current = null;
+      }
+    };
+  }, [chronoRunning, isChrono]);
+
+  // Remise à zéro du chrono à chaque nouvel exercice
+  useEffect(() => {
+    setChrono(0);
+    setChronoRunning(false);
+  }, [exo.name]);
+
   return (
     <Box sx={{ p: 2 }}>
       <Paper 
@@ -857,7 +855,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           justifyContent: 'space-between'
         }}
       >
-        {showOverlay && (
+        {/* Overlay OK désactivé pour les exercices chrono */}
+        {showOverlay && !isChrono && (
           <Box 
             sx={{
               position: 'absolute',
@@ -907,8 +906,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
         <ExoIcon type={iconType} size={48} />
         
         <Typography 
-          variant="h5" 
-          gutterBottom 
+          variant="h6" 
+          className="exercise-name"
           sx={{ 
             fontWeight: 'bold',
             color: 'text.primary',
@@ -916,6 +915,12 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
         >
           {exo.name}
         </Typography>
+        {/* Affichage du poids réel soulevé */}
+        {calculateWeight(exo.equipment) > 0 && (
+          <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
+            Poids soulevé : {calculateWeight(exo.equipment)} kg
+          </Typography>
+        )}
         
         <Typography variant="body1" color="text.secondary">
           Matériel : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#455A64', padding: '2px 6px', borderRadius: '4px' }}>{exo.equip}</span>
@@ -938,14 +943,37 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           {exo.desc}
         </Typography>
         
-        <Typography variant="body1" color="text.secondary">
-          Répétitions : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#2E7D32', padding: '2px 6px', borderRadius: '4px' }}>{exo.nbRep}</span>
-        </Typography>
-        
-        <Typography variant="body1" color="text.secondary">
-          Longueur de la série : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#536DFE', padding: '2px 6px', borderRadius: '4px' }}>{exo.sets}</span>
-        </Typography>
-
+        {/* Bloc chrono pour exercices spéciaux */}
+        {isChrono ? (
+          <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Typography variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
+              Chronomètre
+            </Typography>
+            <Typography variant="h3" sx={{ mb: 2, fontFamily: 'monospace', letterSpacing: 2 }}>
+              {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button variant={chronoRunning ? 'outlined' : 'contained'} color="primary" onClick={() => setChronoRunning(r => !r)}>
+                {chronoRunning ? 'Pause' : (chrono === 0 ? 'Démarrer' : 'Reprendre')}
+              </Button>
+              <Button variant="outlined" color="secondary" onClick={() => { setChrono(0); setChronoRunning(false); }} disabled={chrono === 0}>
+                Réinitialiser
+              </Button>
+              <Button variant="contained" color="success" onClick={() => { setChronoRunning(false); onDone(); }} sx={{ ml: 2 }}>
+                Terminer
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <>
+            <Typography variant="body1" color="text.secondary">
+              Répétitions : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#2E7D32', padding: '2px 6px', borderRadius: '4px' }}>{exo.nbRep}</span>
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Longueur de la série : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#536DFE', padding: '2px 6px', borderRadius: '4px' }}>{exo.sets}</span>
+            </Typography>
+          </>
+        )}
         {/* Boutons flottants pour toutes les actions */}
         <FloatingButtons 
           onYouTube={handleYouTube}
