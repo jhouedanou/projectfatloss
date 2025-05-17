@@ -542,12 +542,12 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         )}
       </Box>
       
-      {/* DayPills masqué selon la demande */}
-      {/* <DayPills 
+      {/* DayPills activé avec navigation swipe */}
+      <DayPills 
         days={workoutPlan} 
         current={dayIndex} 
         setCurrent={setDayIndex}
-      /> */}
+      />
       
       <>
         <ProgressTracker 
