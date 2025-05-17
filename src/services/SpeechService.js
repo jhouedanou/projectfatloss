@@ -3,17 +3,17 @@
  * Utilise l'API Web Speech de Google intégrée dans les navigateurs modernes
  */
 
-// Configuration initiale de la voix
+// Configuration initiale de la voix - DÉSACTIVÉE
 let voiceConfig = {
-  enabled: true,          // Activée par défaut maintenant
+  enabled: false,          // Désactivée par défaut
   volume: 1.0,             // Volume (0 à 1)
   rate: 1.0,               // Vitesse de parole (0.1 à 10)
   pitch: 1.0,              // Tonalité (0 à 2)
   lang: 'fr-FR',           // Langue par défaut
   voice: null,             // Voix spécifique (sera définie automatiquement)
-  countdownEnabled: true,  // Annoncer les décomptes
-  exerciseEnabled: true,   // Annoncer les exercices
-  pauseEnabled: true       // Annoncer les pauses
+  countdownEnabled: false,  // Ne pas annoncer les décomptes
+  exerciseEnabled: false,   // Ne pas annoncer les exercices
+  pauseEnabled: false       // Ne pas annoncer les pauses
 };
 
 // Liste des voix disponibles
@@ -65,69 +65,18 @@ function initSpeechService() {
  * @returns {Promise} Une promesse résolue lorsque l'énoncé est terminé
  */
 function speak(text, options = {}) {
-  return new Promise((resolve, reject) => {
-    if (!voiceConfig.enabled || !window.speechSynthesis) {
-      resolve(); // Résout immédiatement si la synthèse est désactivée
-      return;
-    }
-
-    // Annuler toute annonce en cours
-    window.speechSynthesis.cancel();
-
-    // Créer un nouvel objet d'énoncé
-    const utterance = new SpeechSynthesisUtterance(text);
-
-    // Configurer l'énoncé avec les options par défaut et personnalisées
-    utterance.volume = options.volume !== undefined ? options.volume : voiceConfig.volume;
-    utterance.rate = options.rate !== undefined ? options.rate : voiceConfig.rate;
-    utterance.pitch = options.pitch !== undefined ? options.pitch : voiceConfig.pitch;
-    utterance.lang = options.lang || voiceConfig.lang;
+  // Fonction désactivée - ne prononce plus aucun texte
+  return new Promise((resolve) => {
+    // Résout immédiatement sans prononcer de texte
+    resolve();
     
-    // Vérifier si la voix est disponible
-    if (options.voice || voiceConfig.voice) {
-      utterance.voice = options.voice || voiceConfig.voice;
+    // Annuler toute annonce en cours au cas où
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
     }
-
-    // Ajouter des gestionnaires d'événements
-    utterance.onend = () => resolve();
-    utterance.onerror = (event) => {
-      console.log("Erreur de synthèse vocale:", event);
-      
-      // Ne pas rejeter la promesse si l'erreur est de type 'canceled'
-      if (event.error === 'canceled') {
-        console.log("Synthèse vocale annulée, ce n'est pas une erreur critique");
-        resolve();
-        return;
-      }
-      
-      // Essayer de récupérer avec une voix par défaut si celle spécifique échoue
-      if (utterance.voice && window.speechSynthesis.getVoices().length > 0) {
-        console.log("Tentative avec une voix par défaut...");
-        const defaultUtterance = new SpeechSynthesisUtterance(text);
-        defaultUtterance.onend = () => resolve();
-        defaultUtterance.onerror = (fallbackError) => {
-          // Ne pas rejeter la promesse si l'erreur est de type 'canceled'
-          if (fallbackError.error === 'canceled') {
-            console.log("Synthèse vocale de repli annulée");
-            resolve();
-          } else {
-            console.error("Échec également avec la voix par défaut:", fallbackError);
-            reject(fallbackError);
-          }
-        };
-        window.speechSynthesis.speak(defaultUtterance);
-      } else {
-        reject(event);
-      }
-    };
-
-    try {
-      // Prononcer le texte
-      window.speechSynthesis.speak(utterance);
-    } catch (error) {
-      console.error("Exception lors de la tentative de synthèse vocale:", error);
-      reject(error);
-    }
+    
+    // Log pour le débogage (optionnel)
+    // console.log("Synthèse vocale désactivée, texte ignoré:", text);
   });
 }
 

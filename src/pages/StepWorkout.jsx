@@ -46,28 +46,8 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
   const isLastSet = setNum === totalSets - 1;
   
-  // Annoncer la pause et le prochain exercice uniquement au début
-  useEffect(() => {
-    if (window.speechSynthesis) {
-      // Annoncer uniquement au début de la pause
-      if (time === defaultTime) {
-        let message = null;
-        
-        if (isExerciseTransition && isLastSet && nextExercise) {
-          message = new SpeechSynthesisUtterance(`Pause. Prochain exercice : ${nextExercise.name}`);
-        } else if (isExerciseTransition && isLastSet) {
-          message = new SpeechSynthesisUtterance("Dernière pause. Félicitations, vous avez presque terminé !");
-        } else if (window.speechSynthesis) {
-          message = new SpeechSynthesisUtterance(`Pause entre les séries. Série ${setNum + 2} sur ${totalSets}`);
-        }
-        
-        if (message) {
-          message.lang = 'fr-FR';
-          window.speechSynthesis.speak(message);
-        }
-      }
-    }
-  }, [isExerciseTransition, isLastSet, nextExercise, setNum, totalSets, time, defaultTime]);
+  // Synthèse vocale désactivée
+  // Aucune annonce vocale pendant la pause
   
   useEffect(() => {
     // Si mode automatique activé, réduire le temps de pause de moitié
@@ -398,10 +378,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       fatBurnerMode: fatBurnerMode
     };
     
-    // Annoncer la fin de l'entraînement
-    announceWorkoutComplete({
-      calories: totalCaloriesBurned
-    });
+    // Synthèse vocale désactivée
+    // Aucune annonce vocale à la fin de l'entraînement
     
     onComplete && onComplete(workoutDataWithMode);
     
