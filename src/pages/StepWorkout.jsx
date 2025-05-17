@@ -809,14 +809,34 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     'Vélo elliptique',
     'Cardio',
     'Cardio (30-45 min à intensité modérée)',
+    'Mountain climbers lestés',
+    'Extensions de hanche',
+    'Step-ups',
+    'Fentes avant alternées',
+    'Squats bulgares',
+    'Dead bug',
   ];
+
+  // Exercices à faire sur chaque membre (nécessitant deux fois le rythme)
+  const doubleSidedExercises = [
+    'Planche latérale',
+    'Mountain climbers lestés',
+    'Extensions de hanche',
+    'Step-ups',
+    'Fentes avant alternées',
+    'Squats bulgares',
+    'Dead bug',
+  ];
+  const isDoubleSided = doubleSidedExercises.some(name => exo.name && exo.name.toLowerCase().includes(name.toLowerCase()));
   const isChrono = chronoExercises.some(name => exo.name && exo.name.toLowerCase().includes(name.toLowerCase()));
   const [chrono, setChrono] = useState(0);
   const [chronoRunning, setChronoRunning] = useState(false);
+  const [side, setSide] = useState(0); // 0: premier côté, 1: deuxième côté
   const chronoInterval = useRef(null);
 
   // Gestion du chrono
   useEffect(() => {
+
     if (!isChrono) return;
     if (chronoRunning) {
       chronoInterval.current = setInterval(() => {
@@ -832,13 +852,19 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
         chronoInterval.current = null;
       }
     };
-  }, [chronoRunning, isChrono]);
+  }, [chronoRunning, isChrono, isDoubleSided]);
 
-  // Remise à zéro du chrono à chaque nouvel exercice
+  // Remise à zéro du chrono et du côté à chaque nouvel exercice
   useEffect(() => {
     setChrono(0);
     setChronoRunning(false);
+    setSide(0);
   }, [exo.name]);
+
+  // Remise à zéro du timer à chaque changement de côté (pour double sided timer uniquement)
+  useEffect(() => {
+    if (isDoubleSided) setChrono(0);
+  }, [side, isDoubleSided]);
 
   return (
     <Box sx={{ p: 2 }}>
@@ -856,7 +882,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
         }}
       >
         {/* Overlay OK désactivé pour les exercices chrono */}
-        {showOverlay && !isChrono && (
+        {showOverlay && (
           <Box 
             sx={{
               position: 'absolute',
@@ -886,19 +912,51 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
                 <Typography variant="h4" component="div" sx={{ mb: 2, color: '#4CAF50' }}>
                   OK !
                 </Typography>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  onClick={handleNext}
-                  sx={{
-                    mt: 2,
-                    minWidth: 200,
-                    position: 'relative',
-                    overflow: 'hidden',
-                  }}
-                >
-                  Suivant
-                </Button>
+                {isDoubleSided ? (
+                  <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'center' }}>
+                    <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+                      Côté {side + 1} sur 2 terminé
+                    </Typography>
+                    {side === 0 ? (
+                      <Button 
+                        variant="contained" 
+                        color="info"
+                        onClick={() => {
+                          setShowOverlay(false);
+                          setSide(1);
+                          setCurrentRep(0);
+                          setIsPulsing(false);
+                        }}
+                        sx={{ minWidth: 200 }}
+                      >
+                        Passer au second côté
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="contained" 
+                        color="success"
+                        onClick={handleNext}
+                        sx={{ minWidth: 200 }}
+                      >
+                        Terminer l'exercice
+                      </Button>
+                    )}
+                  </Box>
+                ) : (
+                  <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={handleNext}
+                    sx={{
+                      mt: 2,
+                      minWidth: 200,
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    Suivant
+                  </Button>
+                )}
               </>
             )}
           </Box>
@@ -944,7 +1002,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
         </Typography>
         
         {/* Bloc chrono pour exercices spéciaux */}
-        {isChrono ? (
+        {isChrono && !isDoubleSided ? (
           <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
               Chronomètre
