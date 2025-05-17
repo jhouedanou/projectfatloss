@@ -1,3 +1,4 @@
+// Correction des bugs liés à pause/isPaused - v1.0.1
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -239,8 +240,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
-  const [speechEnabled, setSpeechEnabledState] = useState(true);
-  const [speechSettingsOpen, setSpeechSettingsOpen] = useState(false);
+  // Synthèse vocale désactivée
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState({
     title: '',
@@ -249,39 +249,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     cancelAction: () => {}
   });
   const isFirstRender = useRef(true);
-  const isPaused = pause; // Ajouter cette variable pour la passer à announceExercise
   let beepTimeouts = [];
-  
-  // Désactivation de la synthèse vocale
-  useEffect(() => {
-    // Désactivation de la synthèse vocale
-    setSpeechEnabled(false);
-    setSpeechEnabledState(false);
-    
-    return () => {
-      // Nettoyage de la synthèse vocale
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
-  
-  // Désactiver le toggle de synthèse vocale
-  const handleSpeechToggle = (event) => {
-    // Forcer la désactivation
-    setSpeechEnabledState(false);
-    setSpeechEnabled(false);
-  };
-  
-  // Ouvrir la boîte de dialogue des paramètres
-  const handleOpenSpeechSettings = () => {
-    setSpeechSettingsOpen(true);
-  };
-  
-  // Fermer la boîte de dialogue des paramètres
-  const handleCloseSpeechSettings = () => {
-    setSpeechSettingsOpen(false);
-  };
   
   const workoutPlan = getWorkoutPlan();
   const day = workoutPlan?.[dayIndex];
@@ -322,17 +290,14 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     if (isNewSet && exo && !isFirstRender.current) {
       // Annoncer l'exercice uniquement au début de la première série
       if (setNum === 0) {
-        // Petit délai pour que l'annonce soit plus naturelle après le chargement
-        setTimeout(() => {
-          announceExercise(exo, setNum, totalSets, isPaused);
-        }, 500);
+        // Fonctionnalité d'annonce vocale supprimée
       }
     }
     
     // Mettre à jour les références
     prevSetNumRef.current = setNum;
     prevStepRef.current = step;
-  }, [exo, setNum, step, totalSets, isPaused]);
+  }, [exo, setNum, step, totalSets, pause]);
   
   useEffect(() => {
     if (isFirstRender.current) {
@@ -527,20 +492,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         </div>
       )}
       
-      {/* Contrôles de synthèse vocale masqués */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1 }}>
-        {speechEnabled && (
-          <IconButton 
-            onClick={handleOpenSpeechSettings} 
-            color="primary" 
-            size="small"
-            aria-label="Paramètres vocaux"
-            className="speech-settings-button"
-          >
-            <span role="img" aria-label="Paramètres">⚙️</span>
-          </IconButton>
-        )}
-      </Box>
+      {/* Contrôles de synthèse vocale supprimés */}
       
       {/* DayPills activé avec navigation swipe */}
       <DayPills 
@@ -568,7 +520,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             onCaloriesBurned={handleCaloriesBurned}
             onExerciseCompleted={handleExerciseCompleted}
             fatBurnerMode={fatBurnerMode}
-            isPaused={isPaused}
+            isPaused={pause}
           />
         ) : (
           <Pause 
@@ -611,11 +563,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       )}
       
       {/* Boîte de dialogue des paramètres de synthèse vocale */}
-      <SpeechSettingsDialog 
-        open={speechSettingsOpen} 
-        onClose={handleCloseSpeechSettings}
-        speechEnabled={speechEnabled}
-      />
+      {/* Dialogue de paramètres vocaux supprimé */}
 
       <Dialog
         open={dialogOpen}
@@ -682,9 +630,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
       timerRef.current = null;
     }
     
-    // Annoncer le nouvel exercice avec le numéro de série
-    announceExerciseDirectly(exo, setNum, totalSets, isPaused);
-  }, [exo, setNum, totalSets, isPaused]);
+    // Fonctionnalité d'annonce vocale désactivée
+  }, [exo, setNum, totalSets]);
 
   // Lancer le décompte avant le rythme
   const handlePulse = () => {
@@ -707,8 +654,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     if (countdown > 0) {
       const t = setTimeout(() => setCountdown(c => c - 1), 1000);
       playBeep();
-      // Annoncer le compte à rebours
-      announceCount(countdown);
+      // Annonce vocale désactivée
       return () => clearTimeout(t);
     }
     if (countdown === 0) {
@@ -726,8 +672,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           const newRep = prev + 1;
           if (newRep <= exo.nbRep) {
             playBeep();
-            // Annoncer certaines répétitions
-            announceRepetition(newRep, exo.nbRep);
+            // Annonce vocale désactivée
             return newRep;
           }
           return exo.nbRep;
@@ -812,6 +757,9 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   const [chronoRunning, setChronoRunning] = useState(false);
   const [side, setSide] = useState(0); // 0: premier côté, 1: deuxième côté
   const chronoInterval = useRef(null);
+  
+  // Détecter si l'exercice a un timer
+  const hasTimer = exo.timer || exo.sets?.toLowerCase().includes('sec') || exo.name?.toLowerCase().includes('planche');
 
   // Gestion du chrono
   useEffect(() => {
@@ -834,11 +782,21 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   }, [chronoRunning, isChrono, isDoubleSided]);
 
   // Remise à zéro du chrono et du côté à chaque nouvel exercice
+  // Démarrage automatique du timer si l'exercice en a besoin
   useEffect(() => {
     setChrono(0);
-    setChronoRunning(false);
     setSide(0);
-  }, [exo.name]);
+    
+    // Démarrer automatiquement le timer pour les exercices qui en ont besoin
+    if ((hasTimer || isChrono) && !isPaused) {
+      // Délai court pour laisser l'interface se charger
+      setTimeout(() => {
+        setChronoRunning(true);
+      }, 500);
+    } else {
+      setChronoRunning(false);
+    }
+  }, [exo.name, hasTimer, isChrono, isPaused]);
 
   // Remise à zéro du timer à chaque changement de côté (pour double sided timer uniquement)
   useEffect(() => {
@@ -1097,34 +1055,4 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   );
 }
 
-// Fonction directe pour annoncer un exercice, garantie de fonctionner
-function announceExerciseDirectly(exo, setNum, totalSets, isPaused = false) {
-  if (!window.speechSynthesis || isPaused) return;
-
-  try {
-    const exoName = exo?.name || "Exercice inconnu";
-    const setInfo = setNum !== undefined ? `Série ${setNum + 1} sur ${totalSets}` : "";
-
-    const message = new SpeechSynthesisUtterance();
-    message.text = `${exoName}. ${setInfo}`;
-    message.lang = 'fr-FR';
-    message.volume = 1.0;
-    message.rate = 1.0;
-    
-    console.log("Annonce de l'exercice:", message.text);
-    
-    // Essayons de trouver une voix en français
-    const voices = window.speechSynthesis.getVoices();
-    const frenchVoice = voices.find(voice => 
-      voice.lang.includes('fr') || voice.name.includes('French') || voice.name.includes('français')
-    );
-    
-    if (frenchVoice) {
-      message.voice = frenchVoice;
-    }
-    
-    window.speechSynthesis.speak(message);
-  } catch (error) {
-    console.error("Erreur lors de l'annonce de l'exercice:", error);
-  }
-}
+// Fonction d'annonce vocale supprimée

@@ -10,7 +10,7 @@ import WorkoutStats from '../components/WorkoutStats';
 import WeightTracker from '../components/WeightTracker';
 import LanguageSelector from '../components/LanguageSelector';
 import WorkoutCustomizer from '../components/WorkoutCustomizer'; 
-import { initSpeechService } from '../services/SpeechService'; 
+// Import de la synthèse vocale supprimé
 import { days as initialWorkoutPlan } from '../data'; 
 import '../components/WeightTracker.css';
 import '../components/WorkoutCustomizer.css'; 
@@ -101,10 +101,7 @@ export default function App() {
     localStorage.setItem('showLanguageSelector', showLanguageSelector);
   }, [showLanguageSelector]);
 
-  useEffect(() => {
-    const speechInitialized = initSpeechService();
-    console.log("Synthèse vocale initialisée:", speechInitialized);
-  }, []);
+  // Initialisation de la synthèse vocale supprimée
 
   const toggleTheme = () => {
     setDarkTheme(prev => !prev);
