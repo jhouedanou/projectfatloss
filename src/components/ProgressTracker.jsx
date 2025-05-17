@@ -25,6 +25,9 @@ const ProgressTracker = ({
         borderRadius: 2,
         bgcolor: 'background.paper',
         mb: 2,
+        width: '80vw',
+        maxWidth: '100%',
+        margin: '0 auto',
       }}
     >
       {/* Progress Indicators */}
@@ -81,54 +84,7 @@ const ProgressTracker = ({
         </Box>
       </Box>
 
-      {/* Calories Circle */}
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <Box position="relative" display="inline-flex">
-          <CircularProgress
-            variant="determinate"
-            value={100}
-            size={80}
-            thickness={4}
-            sx={{
-              color: theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800],
-            }}
-          />
-          <CircularProgress
-            variant="determinate"
-            value={calories > 0 ? 100 : 0}
-            size={80}
-            thickness={4}
-            sx={{
-              color: theme.palette.success.main,
-              position: 'absolute',
-              left: 0,
-              '& circle': {
-                strokeLinecap: 'round',
-              },
-            }}
-          />
-          <Box
-            sx={{
-              top: 0,
-              left: 0,
-              bottom: 0,
-              right: 0,
-              position: 'absolute',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-            }}
-          >
-            <Typography variant="h6" component="div" color="textPrimary">
-              {calories}
-            </Typography>
-            <Typography variant="caption" component="div" color="textSecondary">
-              calories
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
+
 
       {fatBurnerMode && (
         <Box 

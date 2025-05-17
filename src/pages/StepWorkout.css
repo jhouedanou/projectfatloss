@@ -168,8 +168,7 @@ body.dark-theme .timer-value {
   flex-direction: column;
   align-items: center;
   justify-content: space-between; /* Distribution égale des éléments sur la hauteur */
-  min-height: 100vh;
-  height: 100vh; /* Force l'écran de pause à prendre toute la hauteur */
+  min-height: 10vh;
   color: var(--text-primary);
   position: relative; /* Pour le positionnement des éléments enfants */
   overflow-y: auto; /* Permet le scroll si nécessaire */
@@ -181,7 +180,7 @@ body.dark-theme .timer-value {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 15vh; /* Positionne le header vers le haut */
+  margin-top: 5vh; /* Positionne le header vers le haut */
 }
 
 .pause-title {
@@ -215,7 +214,7 @@ body.dark-theme .timer-value {
   transform: translateX(-50%);
   width: 80%;
   max-width: 300px;
-  padding: 15px 20px;
+  padding: 4px;
   font-size: 1.2rem;
   font-weight: 600;
   border-radius: 30px;

@@ -242,6 +242,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [speechEnabled, setSpeechEnabledState] = useState(true);
   const [speechSettingsOpen, setSpeechSettingsOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [startDelay, setStartDelay] = useState(10); // Compte à rebours de 10 secondes
+  const startDelayRef = useRef(null);
   const [dialogConfig, setDialogConfig] = useState({
     title: '',
     message: '',
@@ -252,40 +254,49 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const isPaused = pause; // Ajouter cette variable pour la passer à announceExercise
   let beepTimeouts = [];
   
-  // Initialiser le service de synthèse vocale
+  // Désactivation de la synthèse vocale
   useEffect(() => {
-    initSpeechService();
-    // S'assurer que la synthèse vocale est activée dès le départ
-    setSpeechEnabled(true);
+    // Ne pas initialiser le service de synthèse vocale
+    setSpeechEnabled(false);
+    setSpeechEnabledState(false);
     
-    // Test de la synthèse vocale
-    const testSpeech = () => {
-      if (window.speechSynthesis) {
-        const message = new SpeechSynthesisUtterance("Bienvenue dans l'application Project Fat Loss");
-        message.lang = 'fr-FR';
-        message.volume = 1.0;
-        window.speechSynthesis.speak(message);
-      } else {
-        console.error("La synthèse vocale n'est pas supportée par ce navigateur");
-      }
-    };
-    
-    // Lancer le test après un petit délai
-    setTimeout(testSpeech, 1000);
+    // Démarrer le compte à rebours de démarrage
+    startDelayRef.current = setInterval(() => {
+      setStartDelay(prev => {
+        if (prev <= 1) {
+          clearInterval(startDelayRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
     
     return () => {
-      // Nettoyer la synthèse vocale à la fermeture du composant
+      // Nettoyage
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
+      }
+      if (startDelayRef.current) {
+        clearInterval(startDelayRef.current);
       }
     };
   }, []);
   
-  // Gérer l'activation/désactivation de la synthèse vocale
+  // Démarrer automatiquement quand le compte à rebours est terminé
+  useEffect(() => {
+    if (startDelay === 0) {
+      // Démarrer le premier exercice
+      if (exo && !isPaused) {
+        handlePulse();
+      }
+    }
+  }, [startDelay, exo, isPaused]);
+  
+  // Désactiver le toggle de synthèse vocale
   const handleSpeechToggle = (event) => {
-    const newState = event.target.checked;
-    setSpeechEnabledState(newState);
-    setSpeechEnabled(newState);
+    // Forcer la désactivation
+    setSpeechEnabledState(false);
+    setSpeechEnabled(false);
   };
   
   // Ouvrir la boîte de dialogue des paramètres
@@ -607,7 +618,26 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             setNum={setNum}
             totalSets={totalSets}
           />
-        ) : (
+        ) : !pause && startDelay > 0 ? (
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '60vh',
+            textAlign: 'center'
+          }}>
+            <Typography variant="h4" gutterBottom>
+              Début de l'entraînement dans
+            </Typography>
+            <Typography variant="h1" color="primary" sx={{ fontSize: '4rem', fontWeight: 'bold' }}>
+              {startDelay}
+            </Typography>
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              Préparez-vous pour le premier exercice
+            </Typography>
+          </Box>
+        ) : !pause ? (
           <StepSet 
             exo={exo} 
             setNum={setNum} 
@@ -618,7 +648,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             fatBurnerMode={fatBurnerMode}
             isPaused={isPaused}
           />
-        )}
+        ) : null}  
         
         <Box
           sx={{
