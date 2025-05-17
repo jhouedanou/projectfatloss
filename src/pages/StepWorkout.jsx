@@ -527,29 +527,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         </div>
       )}
       
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1 }} className="speech-controls">
-        <FormControlLabel
-          control={<Switch checked={speechEnabled} onChange={handleSpeechToggle} />}
-          label={
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span>Synthèse vocale</span>
-              {speechEnabled && (
-                <span 
-                  className="speech-active-indicator" 
-                  style={{ 
-                    width: '8px', 
-                    height: '8px', 
-                    borderRadius: '50%', 
-                    backgroundColor: '#4CAF50', 
-                    marginLeft: '5px',
-                    boxShadow: '0 0 5px #4CAF50',
-                    animation: 'pulse 1.5s infinite'
-                  }}
-                />
-              )}
-            </div>
-          }
-        />
+      {/* Contrôles de synthèse vocale masqués */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1 }}>
         {speechEnabled && (
           <IconButton 
             onClick={handleOpenSpeechSettings} 
