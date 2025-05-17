@@ -69,8 +69,8 @@ function WorkoutCalendar() {
   };
   
   return (
-    <div className="workout-calendar-container">
-      <h2>Calendrier d'Entraînement</h2>
+    <div className="workout-calendar-container workout-calendar-centered">
+      <h2 className="calendar-title">Calendrier d'Entraînement</h2>
       
       <Calendar
         onChange={setValue}
@@ -82,7 +82,7 @@ function WorkoutCalendar() {
       
       {selectedDayWorkouts.length > 0 ? (
         <div className="selected-day-workouts">
-          <h3>Entraînements du {format(value, 'dd MMMM yyyy', { locale: fr })}</h3>
+          <h3 className="selected-day-title">Entraînements du {format(value, 'dd MMMM yyyy', { locale: fr })}</h3>
           
           {selectedDayWorkouts.map(workout => (
             <div key={workout.id} className="day-workout-card">

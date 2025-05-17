@@ -38,27 +38,30 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const [time, setTime] = useState(defaultTime);
   const currentExercise = day.exercises[step];
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
-  const isLastSet = setNum === totalSets - 1; // On vérifie si c'est la dernière série
+  const isLastSet = setNum === totalSets - 1;
   
-  // Annoncer la pause et le prochain exercice
+  // Annoncer la pause et le prochain exercice uniquement au début
   useEffect(() => {
-    let message = null;
-    
     if (window.speechSynthesis) {
-      if (isExerciseTransition && isLastSet && nextExercise) {
-        message = new SpeechSynthesisUtterance(`Pause. Prochain exercice : ${nextExercise.name}`);
-      } else if (isExerciseTransition && isLastSet) {
-        message = new SpeechSynthesisUtterance("Dernière pause. Félicitations, vous avez presque terminé !");
-      } else if (window.speechSynthesis) {
-        message = new SpeechSynthesisUtterance(`Pause entre les séries. Série ${setNum + 2} sur ${totalSets}`);
-      }
-      
-      if (message) {
-        message.lang = 'fr-FR';
-        window.speechSynthesis.speak(message);
+      // Annoncer uniquement au début de la pause
+      if (time === defaultTime) {
+        let message = null;
+        
+        if (isExerciseTransition && isLastSet && nextExercise) {
+          message = new SpeechSynthesisUtterance(`Pause. Prochain exercice : ${nextExercise.name}`);
+        } else if (isExerciseTransition && isLastSet) {
+          message = new SpeechSynthesisUtterance("Dernière pause. Félicitations, vous avez presque terminé !");
+        } else if (window.speechSynthesis) {
+          message = new SpeechSynthesisUtterance(`Pause entre les séries. Série ${setNum + 2} sur ${totalSets}`);
+        }
+        
+        if (message) {
+          message.lang = 'fr-FR';
+          window.speechSynthesis.speak(message);
+        }
       }
     }
-  }, []);
+  }, [isExerciseTransition, isLastSet, nextExercise, setNum, totalSets, time, defaultTime]);
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -88,29 +91,48 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
         <div className="pause-timer">{time}s</div>
       </div>
       
-      {/* Afficher le prochain exercice uniquement sur le dernier exercice de la série */}
+      {/* Afficher le prochain exercice sur la dernière série */}
       {nextExercise && isLastSet && (
         <div className="next-exercise-info">
-          <h3>Prochain exercice :</h3>
-          <div className="exercise-card">
-            <ExoIcon type={iconsMap[nextExercise.name] || 'dumbbell'} size={32} />
-            <div className="exercise-details">
-              <p className="exercise-name">{nextExercise.name}</p>
-              <p className="exercise-desc">{nextExercise.desc}</p>
-              <p className="exercise-reps">
+          <h3 style={{ marginTop: 0, marginBottom: '12px', color: 'var(--text-primary)' }}>Prochain exercice :</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <ExoIcon type={iconsMap[nextExercise.name] || 'dumbbell'} size={48} />
+            <div>
+              <p style={{ margin: '0 0 4px 0', fontWeight: 500, fontSize: '1.1rem' }}>{nextExercise.name}</p>
+              <p style={{ margin: '0 0 4px 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                 {nextExercise.nbRep} répétitions × {nextExercise.sets}
               </p>
+              {nextExercise.equip && (
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
+                  {nextExercise.equip}
+                </p>
+              )}
             </div>
           </div>
         </div>
       )}
       
-      <button 
-        className="timer-btn"
-        onClick={onSkip}
-      >
-        Passer la pause
-      </button>
+      {/* Afficher le bouton pour passer la pause */}
+      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
+        <button 
+          onClick={onSkip}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: 'var(--button-bg)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '20px',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            fontWeight: 500,
+            transition: 'background-color 0.2s, transform 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--button-active)'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--button-bg)'}
+        >
+          Passer la pause
+        </button>
+      </div>
     </div>
   );
 }
@@ -304,15 +326,28 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     setTotalCaloriesBurned(0);
   },[dayIndex]);
   
-  // Annoncer le premier exercice lors du chargement initial
+  // Annoncer l'exercice uniquement au début de chaque série
+  const prevSetNumRef = useRef(setNum);
+  const prevStepRef = useRef(step);
+  
   useEffect(() => {
-    if (exo && setNum === 0 && step === 0 && !isFirstRender.current) {
-      // Petit délai pour que l'annonce soit plus naturelle après le chargement
-      setTimeout(() => {
-        announceExercise(exo, setNum, totalSets, isPaused);
-      }, 500);
+    // Vérifier si c'est le début d'une nouvelle série ou d'un nouvel exercice
+    const isNewSet = prevSetNumRef.current !== setNum || prevStepRef.current !== step;
+    
+    if (isNewSet && exo && !isFirstRender.current) {
+      // Annoncer l'exercice uniquement au début de la première série
+      if (setNum === 0) {
+        // Petit délai pour que l'annonce soit plus naturelle après le chargement
+        setTimeout(() => {
+          announceExercise(exo, setNum, totalSets, isPaused);
+        }, 500);
+      }
     }
-  }, [exo, totalSets, isPaused]);
+    
+    // Mettre à jour les références
+    prevSetNumRef.current = setNum;
+    prevStepRef.current = step;
+  }, [exo, setNum, step, totalSets, isPaused]);
   
   useEffect(() => {
     if (isFirstRender.current) {

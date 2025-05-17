@@ -737,6 +737,71 @@ gap:1rem;
   color: var(--text-tertiary-dark);
 }
 
+/* Style pour la liste d'exercices */
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 16px;
+  overflow-y: auto;
+  max-height: 50vh;
+  padding: 8px 0;
+}
+
+.exercise-item {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 4px var(--card-shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.exercise-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--card-shadow);
+}
+
+.exercise-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+}
+
+.exercise-details {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exercise-desc {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin: 6px 0 0 0;
+  line-height: 1.4;
+}
+
+/* Réduire le padding sur l'écran de pause */
+.pause-screen {
+  padding: 12px;
+}
+
+.pause-header {
+  margin-bottom: 12px;
+}
+
+.next-exercise-info {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--card-shadow);
+}
+
 .dark-theme .settings-button:hover {
   background-color: rgba(248, 249, 250, 0.1);
 }
@@ -896,4 +961,43 @@ gap:1rem;
   .floating-calories-value {
     font-size: 1.2rem;
   }
+}
+
+/* Styles pour la liste d'exercices sur la page d'accueil */
+.exercise-list {
+  margin-top: 20px;
+}
+
+.exercise-item {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.exercise-item:hover {
+  transform: translateY(-3px);
+}
+
+.exercise-name {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.exercise-sets,
+.exercise-equipment,
+.exercise-description {
+  font-size: 0.95em;
+  color: var(--text-color);
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.exercise-description {
+  font-style: italic;
+  color: var(--text-secondary);
 }

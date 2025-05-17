@@ -224,7 +224,9 @@ export default function App() {
                 <>
                   {!stepMode ? (
                     <div className="day-content">
-                      <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                        <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
+                      </div>
                       <h2 style={{ fontSize: '1.1rem', marginBottom: 16 }}>{workoutPlan[current].title}</h2>
                       {fatBurnerMode && (
                         <div className="fat-burner-banner">
@@ -235,7 +237,16 @@ export default function App() {
                       <button className="timer-btn" style={{marginBottom:16}} onClick={()=>setStepMode(true)}>
                         {t('workout.start')}
                       </button>
-                      <HomeExerciseCarousel exercises={workoutPlan[current].exercises} />
+                      <div className="exercise-list">
+                        {workoutPlan[current].exercises.map((exo, index) => (
+                          <div key={index} className="exercise-item">
+                            <h3 className="exercise-name">{exo.name}</h3>
+                            <p className="exercise-sets">{exo.sets}</p>
+                            <p className="exercise-equipment">{exo.equip}</p>
+                            {exo.desc && <p className="exercise-description">{exo.desc}</p>}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <StepWorkout 

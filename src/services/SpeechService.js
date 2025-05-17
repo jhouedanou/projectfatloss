@@ -226,12 +226,17 @@ function announceCount(count) {
  * @param {number} total - Nombre total de répétitions
  */
 function announceRepetition(rep, total) {
+  // Désactivé pour limiter les annonces au début de chaque série
+  return;
+  
+  /* Ancien code conservé en commentaire pour référence
   if (!voiceConfig.enabled || !voiceConfig.countdownEnabled) return;
   
   // Annoncer uniquement certaines répétitions pour ne pas trop submerger l'utilisateur
   if (rep === 1 || rep === Math.floor(total / 2) || rep === total) {
     speak(`Répétition ${rep}`, { rate: 1.2 });
   }
+  */
 }
 
 /**

@@ -40,8 +40,8 @@ function WorkoutStats() {
   }, []);
   
   return (
-    <div className="workout-stats-container">
-      <h2>Statistiques d'Entraînement</h2>
+    <div className="workout-stats-container workout-stats-centered">
+      <h2 className="stats-title">Statistiques d'Entraînement</h2>
       
       <div className="stats-summary">
         <div className="stat-item">
@@ -74,12 +74,12 @@ function WorkoutStats() {
       
       {topExercises.length > 0 && (
         <div className="top-exercises">
-          <h3>Top Exercices (poids total soulevé)</h3>
-          <ul className="exercise-list">
+          <h3 className="top-exercises-title">Top Exercices (poids total soulevé)</h3>
+          <ul className="exercise-list-stats">
             {topExercises.map(([exercise, weight], index) => (
-              <li key={index} className="exercise-item">
-                <span className="exercise-name">{exercise}</span>
-                <span className="exercise-weight">{Math.round(weight)} kg</span>
+              <li key={index} className="exercise-item-stats">
+                <span className="exercise-name-stats">{exercise}</span>
+                <span className="exercise-weight-stats">{Math.round(weight)} kg</span>
               </li>
             ))}
           </ul>
