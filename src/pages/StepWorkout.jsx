@@ -1,5 +1,5 @@
 // Correction des bugs liés à pause/isPaused - v1.0.1
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, createContext } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -18,6 +18,11 @@ import '../components/SpeechSettings.css';
 import './StepWorkout.css';
 import iconsMap from '../../public/exo-icons.json';
 
+// Créer un contexte pour partager le mode automatique entre composants
+const WorkoutContext = createContext({
+  autoMode: false,
+});
+
 function playBeep() {
   const beep = new Audio(beepSound);
   beep.volume = 1.0;
@@ -34,12 +39,10 @@ function calculateWeight(equipment) {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets }) {
-  const defaultTime = reducedTime ? 10 : 15;
-  const [time, setTime] = useState(defaultTime);
-  const currentExercise = day.exercises[step];
-  const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
-  const isLastSet = setNum === totalSets - 1;
+function Pause({ pauseTime, currentExercise, nextExercise, onDone, fatBurnerMode, reducedTime = false, autoMode }) {
+  const [time, setTime] = useState(pauseTime);
+  const isFinalExercise = !nextExercise;
+  const { t } = useTranslation();
   
   // Annoncer la pause et le prochain exercice uniquement au début
   useEffect(() => {
@@ -235,6 +238,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [dayIndex, setDayIndex] = useState(initialDayIndex || 0);
   const [step, setStep] = useState(0);
   const [pause, setPause] = useState(false);
+  const [autoMode, setAutoMode] = useState(false);
   const [isExerciseTransition, setIsExerciseTransition] = useState(false);
   const [setNum, setSetNum] = useState(0);
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
@@ -333,6 +337,27 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     setTimeout(() => setExerciseCompleted(false), 1000);
   };
 
+  const handleSetComplete = () => {
+    // Si on a fait toutes les séries de cet exercice
+    if (setNum + 1 >= totalSets) {
+      // Si c'est le dernier exercice
+      if (step + 1 >= total) {
+        // Jour terminé
+        setWorkoutCompleted(true);
+      } else {
+        // Passer à l'exercice suivant
+        setStep(step + 1);
+        setSetNum(0); // Réinitialiser le numéro de série
+        setPause(true);
+        setIsExerciseTransition(true);
+      }
+    } else {
+      // Passer à la série suivante
+      setSetNum(setNum + 1);
+      setPause(true);
+    }
+  };
+
   const next = () => {
     const currentExercise = day.exercises[step];
     const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
@@ -349,18 +374,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       
       // Play initial beep
       playBeep();
-
-      // Start rhythm based on repetitions
-      const repetitions = parseSets(nextExercise.sets);
-      beepTimeouts = [];
-      for (let i = 0; i < repetitions; i++) {
-        beepTimeouts.push(setTimeout(() => {
-          playBeep();
-          if (i === repetitions - 1) {
-            clearBeepRhythm(); // Clear rhythm when reaching 0 repetitions
-          }
-        }, (i + 1) * 1000)); // Adjust timing as needed
-      }
     } else {
       setWorkoutCompleted(true);
     }
@@ -494,12 +507,21 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       
       {/* Contrôles de synthèse vocale supprimés */}
       
-      {/* DayPills activé avec navigation swipe */}
-      <DayPills 
-        days={workoutPlan} 
-        current={dayIndex} 
-        setCurrent={setDayIndex}
-      />
+      {/* Option pour mode automatique */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={autoMode}
+              onChange={(e) => setAutoMode(e.target.checked)}
+              color="primary"
+            />
+          }
+          label="Mode automatique"
+        />
+      </Box>
+      
+      {/* DayPills supprimés de la page StepWorkout - uniquement sur page d'accueil */}
       
       <>
         <ProgressTracker 
