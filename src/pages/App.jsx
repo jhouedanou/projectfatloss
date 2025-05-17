@@ -241,8 +241,12 @@ export default function App() {
                         {workoutPlan[current].exercises.map((exo, index) => (
                           <div key={index} className="exercise-item">
                             <h3 className="exercise-name">{exo.name}</h3>
-                            <p className="exercise-sets">{exo.sets}</p>
-                            <p className="exercise-equipment">{exo.equip}</p>
+                            <div className="exercise-details">
+                              <span className="exercise-sets">{exo.sets}</span>
+                              {exo.equip && (
+                                <span className="exercise-equipment">{exo.equip}</span>
+                              )}
+                            </div>
                             {exo.desc && <p className="exercise-description">{exo.desc}</p>}
                           </div>
                         ))}

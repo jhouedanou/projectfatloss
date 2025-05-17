@@ -6,6 +6,7 @@ import { getWorkoutHistory } from '../services/WorkoutStorage';
 
 // Importez le CSS par défaut de react-calendar
 import 'react-calendar/dist/Calendar.css';
+import './WorkoutCalendar.css'; // Importer les styles personnalisés
 
 function WorkoutCalendar() {
   const [value, setValue] = useState(new Date());
