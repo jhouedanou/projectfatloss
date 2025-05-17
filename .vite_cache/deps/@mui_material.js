@@ -1,13 +1,4 @@
 import {
-  TransitionGroup_default,
-  Transition_default
-} from "./chunk-LQFCTLZH.js";
-import {
-  CssBaseline_default,
-  body,
-  html
-} from "./chunk-SJAI4GSS.js";
-import {
   CssVarsProvider,
   Experimental_CssVarsProvider,
   InitColorSchemeScript_default,
@@ -27,6 +18,15 @@ import {
   withStyles,
   withTheme
 } from "./chunk-P34IYYVP.js";
+import {
+  TransitionGroup_default,
+  Transition_default
+} from "./chunk-LQFCTLZH.js";
+import {
+  CssBaseline_default,
+  body,
+  html
+} from "./chunk-SJAI4GSS.js";
 import {
   require_react_dom
 } from "./chunk-LZLOI2WW.js";

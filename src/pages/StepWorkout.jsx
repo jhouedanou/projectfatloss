@@ -39,7 +39,7 @@ function calculateWeight(equipment) {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets }) {
+function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode }) {
   const defaultTime = reducedTime ? 10 : 15;
   const [time, setTime] = useState(defaultTime);
   const currentExercise = day.exercises[step];
@@ -244,6 +244,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
+  const [autoMode, setAutoMode] = useState(false); // Mode automatique pour les pauses
   // Synthèse vocale désactivée
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState({
@@ -545,6 +546,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             total={total}
             setNum={setNum}
             totalSets={totalSets}
+            autoMode={autoMode}
           />
         )}  
         
