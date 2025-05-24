@@ -205,6 +205,17 @@ h6 { font-size: 1rem; }
   transform: scale(1.1);
 }
 
+.view-toggle.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.view-toggle.disabled:hover {
+  opacity: 0.3;
+  transform: none;
+}
+
 .tabs {
   display: flex;
   justify-content: space-around;

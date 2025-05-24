@@ -10,6 +10,8 @@ import WorkoutStats from '../components/WorkoutStats';
 import WeightTracker from '../components/WeightTracker';
 import LanguageSelector from '../components/LanguageSelector';
 import WorkoutCustomizer from '../components/WorkoutCustomizer'; 
+import NotificationSettingsDialog from '../components/NotificationSettingsDialog';
+import { initNotificationService } from '../services/NotificationService';
 // Import de la synthèse vocale supprimé
 import { days as initialWorkoutPlan } from '../data'; 
 import '../components/WeightTracker.css';
@@ -42,6 +44,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   
   const [showCustomizer, setShowCustomizer] = useState(false);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   
   const [appTheme, setAppTheme] = useState(() => createAppTheme(
     localStorage.getItem('theme') !== 'light'
@@ -57,6 +60,21 @@ export default function App() {
       } else {
         setWorkoutPlan(plan);
       }
+      
+      // Initialiser les notifications
+      initNotificationService();
+      
+      // Enregistrer le service worker pour les notifications
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('Service Worker enregistré avec succès:', registration);
+          })
+          .catch(error => {
+            console.error('Erreur lors de l\'enregistrement du Service Worker:', error);
+          });
+      }
+      
     } catch (error) {
       console.error('Erreur lors du chargement du plan d\'entraînement:', error);
       setWorkoutPlan(initialWorkoutPlan);
@@ -70,6 +88,13 @@ export default function App() {
       setCurrent(0);
     }
   }, [workoutPlan, current, isLoading]);
+  
+  // Forcer le retour à la vue workout lors du démarrage d'une séance
+  useEffect(() => {
+    if (stepMode && viewMode !== 'workout') {
+      setViewMode('workout');
+    }
+  }, [stepMode, viewMode]);
   
   const handleCloseCustomizer = () => {
     setShowCustomizer(false);
@@ -141,6 +166,9 @@ export default function App() {
     if ("Notification" in window && Notification.permission !== "denied") {
       Notification.requestPermission();
     }
+    
+    // Initialiser le service de notifications
+    initNotificationService();
   }, []);
 
   if (isLoading) {
@@ -157,7 +185,7 @@ export default function App() {
   return (
     <ThemeProvider theme={appTheme}>
       <div className="app">
-        <Header />
+        <Header onNotificationSettings={() => setShowNotificationSettings(true)} />
         <div>
           <header className="app-header">
             <button className="theme-toggle" onClick={toggleTheme} title={darkTheme ? t('theme.light') : t('theme.dark')}>
@@ -174,17 +202,19 @@ export default function App() {
                 <span className="view-text">{t('nav.workout')}</span>
               </button>
               <button 
-                className={`view-toggle ${viewMode === 'history' ? 'active' : ''}`}
-                onClick={() => setViewMode('history')}
-                title={t('nav.history')}
+                className={`view-toggle ${viewMode === 'history' ? 'active' : ''} ${stepMode ? 'disabled' : ''}`}
+                onClick={() => !stepMode && setViewMode('history')}
+                title={stepMode ? t('nav.historyDisabled') : t('nav.history')}
+                disabled={stepMode}
               >
                 <span className="view-icon">📊</span>
                 <span className="view-text">{t('nav.history')}</span>
               </button>
               <button 
-                className={`view-toggle ${viewMode === 'weight' ? 'active' : ''}`}
-                onClick={() => setViewMode('weight')}
-                title={t('nav.weight')}
+                className={`view-toggle ${viewMode === 'weight' ? 'active' : ''} ${stepMode ? 'disabled' : ''}`}
+                onClick={() => !stepMode && setViewMode('weight')}
+                title={stepMode ? t('nav.weightDisabled') : t('nav.weight')}
+                disabled={stepMode}
               >
                 <span className="view-icon">⚖️</span>
                 <span className="view-text">{t('nav.weight')}</span>
@@ -283,6 +313,12 @@ export default function App() {
             </div>
           )}
         </div>
+        
+        {/* Boîte de dialogue des paramètres de notification */}
+        <NotificationSettingsDialog 
+          open={showNotificationSettings}
+          onClose={() => setShowNotificationSettings(false)}
+        />
       </div>
     </ThemeProvider>
   );

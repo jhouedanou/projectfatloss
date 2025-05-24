@@ -8,7 +8,9 @@
   "nav": {
     "workout": "Entraînement",
     "history": "Historique",
-    "weight": "Suivi Poids"
+    "weight": "Suivi Poids",
+    "historyDisabled": "Historique indisponible pendant l'entraînement",
+    "weightDisabled": "Suivi poids indisponible pendant l'entraînement"
   },
   "workout": {
     "start": "Commencer la séance",

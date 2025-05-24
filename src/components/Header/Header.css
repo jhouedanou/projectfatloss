@@ -28,3 +28,13 @@
   gap: 12px;
   align-items: center;
 }
+
+.header-actions .MuiIconButton-root {
+  color: var(--primary-main);
+  transition: all 0.2s ease;
+}
+
+.header-actions .MuiIconButton-root:hover {
+  background-color: rgba(240, 61, 50, 0.1);
+  transform: scale(1.05);
+}

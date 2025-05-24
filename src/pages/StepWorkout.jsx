@@ -57,6 +57,11 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
     
     const timer = setInterval(() => {
       setTime((prevTime) => {
+        // Bip seulement dans les 4 dernières secondes
+        if (prevTime <= 4 && prevTime > 1) {
+          playBeep();
+        }
+        
         if (prevTime === 1) {
           clearInterval(timer);
           onEnd();
@@ -303,7 +308,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const handlePauseEnd = () => {
     setPause(false);
     setIsExerciseTransition(false);
-  
   };
   
   const handleSkipPause = () => {
@@ -611,6 +615,48 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   const [showOverlay, setShowOverlay] = useState(false);
   const [countdown, setCountdown] = useState(null); // null = pas de décompte, sinon 3,2,1
   const timerRef = useRef(null);
+
+  // Liste des exercices chrono (nom normalisé)
+  const chronoExercises = [
+    'Planche latérale',
+    'Planche lestée',
+    'Cardio au choix',
+    'Étirements complets',
+    'Mobilité articulaire',
+    'Vélo',
+    'Vélo d\'appartement',
+    'Vélo elliptique',
+    'Cardio',
+    'Cardio (30-45 min à intensité modérée)',
+    'Mountain climbers lestés',
+    'Extensions de hanche',
+    'Step-ups',
+    'Fentes avant alternées',
+    'Squats bulgares',
+    'Dead bug',
+  ];
+
+  // Exercices à faire sur chaque membre (nécessitant deux fois le rythme)
+  const doubleSidedExercises = [
+    'Planche latérale',
+    'Mountain climbers lestés',
+    'Extensions de hanche',
+    'Step-ups',
+    'Fentes avant alternées',
+    'Squats bulgares',
+    'Dead bug',
+  ];
+  
+  const isDoubleSided = doubleSidedExercises.some(name => exo.name && exo.name.toLowerCase().includes(name.toLowerCase()));
+  const isChrono = chronoExercises.some(name => exo.name && exo.name.toLowerCase().includes(name.toLowerCase()));
+  const [chrono, setChrono] = useState(0);
+  const [chronoRunning, setChronoRunning] = useState(false);
+  const [side, setSide] = useState(0); // 0: premier côté, 1: deuxième côté
+  const chronoInterval = useRef(null);
+  
+  // Détecter si l'exercice a un timer
+  const hasTimer = exo.timer || exo.sets?.toLowerCase().includes('sec') || exo.name?.toLowerCase().includes('planche');
+
   // Remise à zéro des états internes à chaque changement d'exercice ou de série
   useEffect(() => {
     setIsPulsing(false);
@@ -625,8 +671,10 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     // Fonctionnalité d'annonce vocale désactivée
   }, [exo, setNum, totalSets]);
 
-  // Lancer le décompte avant le rythme
+  // Lancer le décompte avant le rythme (désactivé pour les exercices chronométrés)
   const handlePulse = () => {
+    if (hasTimer || isChrono) return; // Désactiver le rythme pour les exercices chronométrés
+    
     if (!isPulsing && countdown === null) {
       setCountdown(3);
       setShowOverlay(true);
@@ -677,85 +725,14 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   }, [isPulsing, exo.nbRep]);
 
   useEffect(() => {
-    if (currentRep === exo.nbRep) {
+    if (currentRep === exo.nbRep && !hasTimer && !isChrono) {
       setShowOverlay(true);
       setIsPulsing(false);
     }
-  }, [currentRep, exo.nbRep]);
-
-  // Nouveau : bouton "Suivant" sur l'overlay OK
-  const handleNext = () => {
-    const calories = caloriesPerSet;
-    setCaloriesToShow(calories);
-    setShowCalories(true);
-    onCaloriesBurned(calories);
-    setTimeout(() => {
-      setShowCalories(false);
-      onDone();
-    }, 2000);
-  };
-  
-  // Ouvrir YouTube pour l'exercice actuel
-  const handleYouTube = () => {
-    const name = exo.name;
-    const searchQuery = encodeURIComponent(`exercice ${name} tutoriel`);
-    const searchPageUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
-    window.open(searchPageUrl, '_blank');
-  };
-
-  // Nouvelle fonction: Ouvrir la boîte de dialogue de confirmation
-  const handleBackConfirmation = () => {
-    setOpenConfirmDialog(true);
-  };
-
-  // Gérer la fermeture de la boîte de dialogue
-  const handleCloseConfirmDialog = () => {
-    setOpenConfirmDialog(false);
-  };
-
-  // Liste des exercices chrono (nom normalisé)
-  const chronoExercises = [
-    'Planche latérale',
-    'Planche lestée',
-    'Cardio au choix',
-    'Étirements complets',
-    'Mobilité articulaire',
-    'Vélo',
-    'Vélo d’appartement',
-    'Vélo elliptique',
-    'Cardio',
-    'Cardio (30-45 min à intensité modérée)',
-    'Mountain climbers lestés',
-    'Extensions de hanche',
-    'Step-ups',
-    'Fentes avant alternées',
-    'Squats bulgares',
-    'Dead bug',
-  ];
-
-  // Exercices à faire sur chaque membre (nécessitant deux fois le rythme)
-  const doubleSidedExercises = [
-    'Planche latérale',
-    'Mountain climbers lestés',
-    'Extensions de hanche',
-    'Step-ups',
-    'Fentes avant alternées',
-    'Squats bulgares',
-    'Dead bug',
-  ];
-  const isDoubleSided = doubleSidedExercises.some(name => exo.name && exo.name.toLowerCase().includes(name.toLowerCase()));
-  const isChrono = chronoExercises.some(name => exo.name && exo.name.toLowerCase().includes(name.toLowerCase()));
-  const [chrono, setChrono] = useState(0);
-  const [chronoRunning, setChronoRunning] = useState(false);
-  const [side, setSide] = useState(0); // 0: premier côté, 1: deuxième côté
-  const chronoInterval = useRef(null);
-  
-  // Détecter si l'exercice a un timer
-  const hasTimer = exo.timer || exo.sets?.toLowerCase().includes('sec') || exo.name?.toLowerCase().includes('planche');
+  }, [currentRep, exo.nbRep, hasTimer, isChrono]);
 
   // Gestion du chrono
   useEffect(() => {
-
     if (!isChrono) return;
     if (chronoRunning) {
       chronoInterval.current = setInterval(() => {
@@ -792,8 +769,41 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
 
   // Remise à zéro du timer à chaque changement de côté (pour double sided timer uniquement)
   useEffect(() => {
-    if (isDoubleSided) setChrono(0);
-  }, [side, isDoubleSided]);
+    if (isDoubleSided && (hasTimer || isChrono)) {
+      setChrono(0);
+      // Ne pas redémarrer automatiquement ici, laisser l'utilisateur contrôler
+    }
+  }, [side, isDoubleSided, hasTimer, isChrono]);
+
+  // Nouveau : bouton "Suivant" sur l'overlay OK
+  const handleNext = () => {
+    const calories = caloriesPerSet;
+    setCaloriesToShow(calories);
+    setShowCalories(true);
+    onCaloriesBurned(calories);
+    setTimeout(() => {
+      setShowCalories(false);
+      onDone();
+    }, 2000);
+  };
+  
+  // Ouvrir YouTube pour l'exercice actuel
+  const handleYouTube = () => {
+    const name = exo.name;
+    const searchQuery = encodeURIComponent(`exercice ${name} tutoriel`);
+    const searchPageUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
+    window.open(searchPageUrl, '_blank');
+  };
+
+  // Nouvelle fonction: Ouvrir la boîte de dialogue de confirmation
+  const handleBackConfirmation = () => {
+    setOpenConfirmDialog(true);
+  };
+
+  // Gérer la fermeture de la boîte de dialogue
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false);
+  };
 
   return (
     <Box sx={{ p: 2 }}>
@@ -811,7 +821,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
         }}
       >
         {/* Overlay OK désactivé pour les exercices chrono */}
-        {showOverlay && (
+        {showOverlay && !hasTimer && !isChrono && (
           <Box 
             sx={{
               position: 'absolute',
@@ -930,8 +940,8 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           {exo.desc}
         </Typography>
         
-        {/* Bloc chrono pour exercices spéciaux */}
-        {isChrono && !isDoubleSided ? (
+        {/* Bloc chrono pour exercices spéciaux et exercices en secondes */}
+        {(isChrono || hasTimer) && !isDoubleSided ? (
           <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
               Chronomètre
@@ -951,6 +961,54 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
               </Button>
             </Box>
           </Box>
+        ) : (isChrono || hasTimer) && isDoubleSided ? (
+          /* Bloc chrono spécial pour exercices à deux côtés comme la planche latérale */
+          <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Typography variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
+              Chronomètre - {side === 0 ? 'Côté Gauche' : 'Côté Droit'}
+            </Typography>
+            <Typography variant="h3" sx={{ mb: 2, fontFamily: 'monospace', letterSpacing: 2, color: side === 0 ? 'primary.main' : 'success.main' }}>
+              {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2, fontWeight: 'bold' }}>
+              Côté {side + 1} sur 2
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Button variant={chronoRunning ? 'outlined' : 'contained'} color="primary" onClick={() => setChronoRunning(r => !r)}>
+                {chronoRunning ? 'Pause' : (chrono === 0 ? 'Démarrer' : 'Reprendre')}
+              </Button>
+              <Button variant="outlined" color="secondary" onClick={() => { setChrono(0); setChronoRunning(false); }} disabled={chrono === 0}>
+                Réinitialiser
+              </Button>
+              {side === 0 ? (
+                <Button 
+                  variant="contained" 
+                  color="info" 
+                  onClick={() => { 
+                    setChronoRunning(false); 
+                    setSide(1); 
+                    setChrono(0); 
+                    setTimeout(() => setChronoRunning(true), 1000);
+                  }} 
+                  sx={{ ml: 1 }}
+                >
+                  Côté Suivant
+                </Button>
+              ) : (
+                <Button 
+                  variant="contained" 
+                  color="success" 
+                  onClick={() => { 
+                    setChronoRunning(false); 
+                    onDone(); 
+                  }} 
+                  sx={{ ml: 1 }}
+                >
+                  Terminer
+                </Button>
+              )}
+            </Box>
+          </Box>
         ) : (
           <>
             <Typography variant="body1" color="text.secondary">
@@ -964,7 +1022,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
         {/* Boutons flottants pour toutes les actions */}
         <FloatingButtons 
           onYouTube={handleYouTube}
-          onToggleRhythm={handlePulse}
+          onToggleRhythm={!hasTimer && !isChrono ? handlePulse : null} // Masquer le rythme pour les exercices avec timer
           onNext={() => {
             // Vérifie si l'overlay n'est pas déjà affiché pour éviter de compléter deux fois
             if (!showOverlay) {
@@ -1046,5 +1104,3 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     </Box>
   );
 }
-
-// Fonction d'annonce vocale supprimée

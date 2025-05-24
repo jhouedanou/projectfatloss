@@ -8,7 +8,9 @@
   "nav": {
     "workout": "Workout",
     "history": "History",
-    "weight": "Weight"
+    "weight": "Weight",
+    "historyDisabled": "History unavailable during workout",
+    "weightDisabled": "Weight tracking unavailable during workout"
   },
   "workout": {
     "start": "Start workout",
