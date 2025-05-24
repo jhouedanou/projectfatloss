@@ -199,15 +199,21 @@ export function initNotificationService() {
 /**
  * Affiche une notification de test
  */
-export function showTestNotification() {
-  if (Notification.permission === 'granted') {
+export async function showTestNotification() {
+  // D'abord vérifier si on a la permission
+  const hasPermission = await requestNotificationPermission();
+  
+  if (hasPermission && Notification.permission === 'granted') {
     new Notification("Test de notification", {
-      body: "Les notifications fonctionnent correctement !",
-      icon: '/favicon.ico'
+      body: "Les notifications fonctionnent correctement ! 🎉",
+      icon: '/favicon.ico',
+      tag: 'test-notification'
     });
     return true;
+  } else {
+    console.warn('Permission de notification refusée ou non disponible');
+    return false;
   }
-  return false;
 }
 
 /**

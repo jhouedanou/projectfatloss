@@ -1,0 +1,130 @@
+/* Styles pour le composant PreWorkout */
+
+.preworkout-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.preworkout-button {
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 15px 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.preworkout-button:hover {
+  background: linear-gradient(45deg, #FF5252, #26C6DA);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.preworkout-timer {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 3rem;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.preworkout-timer.warning {
+  color: #FFD700;
+  animation: pulse 1s infinite;
+}
+
+.preworkout-progress {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.3);
+  margin: 20px 0;
+}
+
+.preworkout-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD700, #FF6B6B);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.motivation-text {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  margin: 15px 0;
+  font-style: italic;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.preworkout-controls {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.preworkout-controls button {
+  min-width: 120px;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.preworkout-dialog-content {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .preworkout-timer {
+    font-size: 2.5rem;
+  }
+  
+  .preworkout-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .preworkout-controls button {
+    width: 100%;
+    max-width: 200px;
+  }
+} 

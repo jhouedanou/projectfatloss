@@ -27,7 +27,7 @@ export const createAppTheme = (darkMode) => createTheme({
       dark: '#B71C1C', // Rouge foncé
     },
     background: {
-      default: darkMode ? '#121212' : '#FDF6F0', // seashell en mode clair
+      default: darkMode ? '#000000' : '#FDF6F0', // Noir en mode sombre, seashell en mode clair
       paper: darkMode ? '#1e1e30' : '#FFFFFF',
     },
     text: {

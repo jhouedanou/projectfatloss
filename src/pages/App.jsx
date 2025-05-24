@@ -11,6 +11,7 @@ import WeightTracker from '../components/WeightTracker';
 import LanguageSelector from '../components/LanguageSelector';
 import WorkoutCustomizer from '../components/WorkoutCustomizer'; 
 import NotificationSettingsDialog from '../components/NotificationSettingsDialog';
+import PreWorkout from '../components/PreWorkout';
 import { initNotificationService } from '../services/NotificationService';
 // Import de la synthèse vocale supprimé
 import { days as initialWorkoutPlan } from '../data'; 
@@ -37,8 +38,6 @@ export default function App() {
     const savedPref = localStorage.getItem('showLanguageSelector');
     return false;
   });
-  
-  const [fatBurnerMode, setFatBurnerMode] = useState(false);
   
   const [workoutPlan, setWorkoutPlan] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -136,10 +135,6 @@ export default function App() {
     setShowLanguageSelector(prev => !prev);
   };
   
-  const toggleFatBurnerMode = () => {
-    setFatBurnerMode(prev => !prev);
-  };
-  
   const moveToNextDay = () => {
     if (workoutPlan && workoutPlan.length > 0) {
       setCurrent(prev => (prev + 1) % workoutPlan.length);
@@ -225,14 +220,6 @@ export default function App() {
           <div className="settings-bar">
             
             <button 
-              className={`settings-button ${fatBurnerMode ? 'active-mode' : ''}`}
-              onClick={toggleFatBurnerMode}
-              title={t('settings.fatBurnerMode')}
-            >
-              {t('settings.fatBurner')} 🔥
-            </button>
-            
-            <button 
               className="settings-button"
               onClick={() => setShowCustomizer(true)}
               title={t('settings.customizeProgram')}
@@ -255,15 +242,18 @@ export default function App() {
                         <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
                       </div>
                       <h2 style={{ fontSize: '1.1rem', marginBottom: 16 }}>{workoutPlan[current].title}</h2>
-                      {fatBurnerMode && (
-                        <div className="fat-burner-banner">
-                          <span className="fat-burner-icon">🔥</span>
-                          <span className="fat-burner-text">{t('mode.fatBurner')}</span>
-                        </div>
-                      )}
-                      <button className="timer-btn" style={{marginBottom:16}} onClick={()=>setStepMode(true)}>
-                        {t('workout.start')}
-                      </button>
+                      
+                      {/* Boutons de démarrage */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: 16 }}>
+                        <button className="timer-btn" onClick={()=>setStepMode(true)}>
+                          {t('workout.start')}
+                        </button>
+                        <PreWorkout 
+                          onStartWorkout={() => setStepMode(true)}
+                          onClose={() => {}}
+                        />
+                      </div>
+                      
                       <div className="exercise-list">
                         {workoutPlan[current].exercises.map((exo, index) => (
                           <div key={index} className="exercise-item">
@@ -284,7 +274,6 @@ export default function App() {
                       dayIndex={current} 
                       onBack={()=>setStepMode(false)}
                       onComplete={handleWorkoutComplete}
-                      fatBurnerMode={fatBurnerMode}
                     />
                   )}
                 </>

@@ -41,13 +41,13 @@
 
   /* Variables pour le thème sombre */
   --background-dark: #000000;
-  --background-paper: #121212;
+  --background-paper: #000000;
   --text-primary-dark: #FFFFFF;
   --text-secondary-dark: #F03D32;
 }
 
 .dark-theme {
-  --bg-primary: #121212;
+  --bg-primary: #000000;
   --text-primary: var(--seashell);
   --header-bg: #1a1a2e;
   --header-text: var(--seashell);
@@ -63,16 +63,16 @@
   --button-text: var(--seashell);
   --button-active: var(--rosewood);
   --series-text: #82B1FF; /* Bleu indigo clair */
-  background-color: #121212; /* Assurer que le fond est bien foncé */
+  background-color: #000000; /* Assurer que le fond est bien noir */
 }
 
 /* S'assurer que tous les éléments du corps en mode sombre ont un fond cohérent */
 .dark-theme .app {
-  background-color: #121212;
+  background-color: #000000;
 }
 
 .dark-theme .day-content {
-  background-color: #121212;
+  background-color: #000000;
 }
 
 /* Transitions */
@@ -82,7 +82,7 @@
 
 html.dark-theme, 
 body.dark-theme {
-  background-color: #121212;
+  background-color: #000000;
   color: var(--seashell);
 }
 

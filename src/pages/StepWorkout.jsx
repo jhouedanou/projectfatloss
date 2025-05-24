@@ -46,7 +46,7 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
   const isLastSet = setNum === totalSets - 1;
   
-  // Synthèse vocale désactivée
+  // Synthèse vocale réactivée uniquement pour les exercices
   // Aucune annonce vocale pendant la pause
   
   useEffect(() => {
@@ -57,7 +57,7 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
     
     const timer = setInterval(() => {
       setTime((prevTime) => {
-        // Bip seulement dans les 4 dernières secondes
+        // Bip seulement dans les 4 dernières secondes (pas au début)
         if (prevTime <= 4 && prevTime > 1) {
           playBeep();
         }
@@ -65,7 +65,7 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
         if (prevTime === 1) {
           clearInterval(timer);
           onEnd();
-          // Fonctionnalité d'annonce vocale supprimée
+          // Fonctionnalité d'annonce vocale désactivée pour les pauses
         }
         return prevTime - 1;
       });
@@ -135,7 +135,7 @@ function CalorieDisplay({ calories, visible }) {
   );
 }
 
-function FloatingCalorieCounter({ calories, exerciseCompleted, fatBurnerMode }) {
+function FloatingCalorieCounter({ calories, exerciseCompleted }) {
   const [pulse, setPulse] = useState(false);
   
   useEffect(() => {
@@ -154,7 +154,7 @@ function FloatingCalorieCounter({ calories, exerciseCompleted, fatBurnerMode }) 
   );
 }
 
-function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMode }) {
+function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
   function calculateWeight(equipment) {
     const match = equipment && equipment.match(/(\d+)\s*kg/i);
     return match ? parseInt(match[1], 10) : 0;
@@ -187,7 +187,6 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
         sets: parseSets(exercise.sets),
         weightLifted: calculateWeight(exercise.equip)
       })),
-      fatBurnerMode: fatBurnerMode,
       duration: day.exercises.length * 180 // Estimation de la durée : 3 minutes par exercice
     };
     
@@ -220,7 +219,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout, fatBurnerMo
   );
 }
 
-export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, fatBurnerMode }) {
+export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete }) {
   const [dayIndex, setDayIndex] = useState(initialDayIndex || 0);
   const [step, setStep] = useState(0);
   const [pause, setPause] = useState(false);
@@ -230,7 +229,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
   const [autoMode, setAutoMode] = useState(false); // Mode automatique pour les pauses
-  // Synthèse vocale désactivée
+  const [showPreWorkout, setShowPreWorkout] = useState(false);
+  // Synthèse vocale réactivée pour les exercices
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState({
     title: '',
@@ -247,7 +247,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const total = day?.exercises?.length || 0;
   const exo = day?.exercises?.[step];
   const totalSets = exo
-    ? (fatBurnerMode 
+    ? (autoMode 
         ? Math.max(1, Math.floor(parseSets(exo.sets) / 2))
         : parseSets(exo.sets))
     : 1;
@@ -261,6 +261,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       </div>
     );
   }
+
+  // Initialiser la synthèse vocale au démarrage
+  useEffect(() => {
+    initSpeechService();
+  }, []);
   
   useEffect(()=>{
     setStep(0);
@@ -270,40 +275,23 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     setTotalCaloriesBurned(0);
   },[dayIndex]);
   
-  // Annoncer l'exercice uniquement au début de chaque série
-  const prevSetNumRef = useRef(setNum);
+  // Annoncer l'exercice uniquement au début de chaque nouvel exercice
   const prevStepRef = useRef(step);
   
   useEffect(() => {
-    // Vérifier si c'est le début d'une nouvelle série ou d'un nouvel exercice
-    const isNewSet = prevSetNumRef.current !== setNum || prevStepRef.current !== step;
+    // Vérifier si c'est un nouvel exercice
+    const isNewExercise = prevStepRef.current !== step;
     
-    if (isNewSet && exo && !isFirstRender.current) {
-      // Annoncer l'exercice uniquement au début de la première série
+    if (isNewExercise && exo && !isFirstRender.current && !pause) {
+      // Annoncer uniquement au début du premier exercice de la série
       if (setNum === 0) {
-        // Fonctionnalité d'annonce vocale supprimée
+        announceExercise(exo, setNum, totalSets, pause);
       }
     }
     
-    // Mettre à jour les références
-    prevSetNumRef.current = setNum;
+    // Mettre à jour la référence
     prevStepRef.current = step;
-  }, [exo, setNum, step, totalSets, pause]);
-  
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    
-    if (step > 0 || setNum > 0) {
-      try {
-        playBeep();
-      } catch (error) {
-        console.error("Erreur lors de la lecture du son :", error);
-      }
-    }
-  }, [step, setNum]);
+  }, [exo, step, setNum, totalSets, pause]);
   
   const handlePauseEnd = () => {
     setPause(false);
@@ -352,15 +340,15 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     if (setNum < totalSets - 1) {
       setSetNum(s => s + 1);
       setPause(true);
-      setIsExerciseTransition(fatBurnerMode ? true : false);
+      setIsExerciseTransition(autoMode ? true : false);
     } else if (step < total - 1) {
       setPause(true);
       setIsExerciseTransition(true);
       setSetNum(0);
       setStep(s => s + 1);
       
-      // Play initial beep
-      playBeep();
+      // Enlever le bip automatique
+      // playBeep();
     } else {
       setWorkoutCompleted(true);
     }
@@ -379,11 +367,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const handleSaveWorkout = (workoutData) => {
     const workoutDataWithMode = {
       ...workoutData,
-      fatBurnerMode: fatBurnerMode
+      fatBurnerMode: autoMode
     };
     
-    // Synthèse vocale désactivée
-    // Aucune annonce vocale à la fin de l'entraînement
+    // Synthèse vocale pour la fin d'entraînement
+    announceWorkoutComplete({ calories: workoutDataWithMode.calories });
     
     onComplete && onComplete(workoutDataWithMode);
     
@@ -449,7 +437,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
               sets: parseSets(exercise.sets),
               weightLifted: calculateWeight(exercise.equip)
             })),
-            fatBurnerMode: fatBurnerMode
+            fatBurnerMode: autoMode
           };
           
           // Sauvegarder d'abord localement
@@ -467,6 +455,21 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       }
     );
   };
+
+  const handleStartWorkout = () => {
+    setShowPreWorkout(false);
+    // L'entraînement se lance automatiquement
+  };
+
+  // Si on veut afficher le pre-workout, on l'affiche en premier
+  if (showPreWorkout) {
+    return (
+      <PreWorkout 
+        onStartWorkout={handleStartWorkout}
+        onClose={() => setShowPreWorkout(false)}
+      />
+    );
+  }
 
   return (
     <div 
@@ -486,16 +489,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       <h2 style={{fontSize:'1.1rem',marginBottom:8}}>{day.title}</h2>
       
-      {fatBurnerMode && (
-        <div className="fat-burner-indicator">
-          🔥 Mode Fat Burner actif ! 🔥
-        </div>
-      )}
-      
-      {/* Contrôles de synthèse vocale supprimés */}
-      
-      {/* DayPills supprimés de la page StepWorkout - uniquement sur page d'accueil */}
-      
       <>
         <ProgressTracker 
           currentExercise={step + 1}
@@ -503,7 +496,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           currentSet={setNum + 1}
           totalSets={totalSets}
           calories={totalCaloriesBurned}
-          fatBurnerMode={fatBurnerMode}
         />
 
         {!pause ? (
@@ -514,7 +506,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             onDone={handleSetComplete}
             onCaloriesBurned={handleCaloriesBurned}
             onExerciseCompleted={handleExerciseCompleted}
-            fatBurnerMode={fatBurnerMode}
             isPaused={pause}
           />
         ) : (
@@ -522,7 +513,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             onEnd={handlePauseEnd} 
             onSkip={handleSkipPause} 
             isExerciseTransition={isExerciseTransition}
-            reducedTime={fatBurnerMode}
+            reducedTime={autoMode}
             day={day}
             step={step}
             total={total}
@@ -543,7 +534,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           <FloatingCalorieCounter 
             calories={totalCaloriesBurned} 
             exerciseCompleted={exerciseCompleted} 
-            fatBurnerMode={fatBurnerMode}
           />
         </Box>
       </>
@@ -554,7 +544,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           totalCalories={totalCaloriesBurned} 
           onClose={handleCloseEndOfDayModal}
           onSaveWorkout={handleSaveWorkout}
-          fatBurnerMode={fatBurnerMode}
         />
       )}
       
@@ -584,7 +573,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, fatBurnerMode, isPaused }) {
+function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused }) {
   const [timer, setTimer] = useState(() => {
     if (exo.timer) {
       return exo.duration || 30;
@@ -731,12 +720,27 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     }
   }, [currentRep, exo.nbRep, hasTimer, isChrono]);
 
-  // Gestion du chrono
+  // Gestion du chrono avec arrêt automatique
   useEffect(() => {
     if (!isChrono) return;
     if (chronoRunning) {
       chronoInterval.current = setInterval(() => {
-        setChrono(prev => prev + 1);
+        setChrono(prev => {
+          const newTime = prev + 1;
+          
+          // Arrêt automatique après 5 minutes (300 secondes) pour la sécurité
+          const maxDuration = 300; // 5 minutes maximum
+          if (newTime >= maxDuration) {
+            setChronoRunning(false);
+            // Jouer un son pour indiquer l'arrêt automatique
+            playBeep();
+            setTimeout(() => playBeep(), 200);
+            setTimeout(() => playBeep(), 400);
+            return maxDuration;
+          }
+          
+          return newTime;
+        });
       }, 1000);
     } else if (chronoInterval.current) {
       clearInterval(chronoInterval.current);
@@ -792,7 +796,18 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     const name = exo.name;
     const searchQuery = encodeURIComponent(`exercice ${name} tutoriel`);
     const searchPageUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
-    window.open(searchPageUrl, '_blank');
+    
+    // Ouvrir dans une popup au lieu d'un nouvel onglet
+    const popup = window.open(
+      searchPageUrl, 
+      'youtube_popup',
+      'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
+    );
+    
+    // Focus sur la popup si elle est bloquée
+    if (popup) {
+      popup.focus();
+    }
   };
 
   // Nouvelle fonction: Ouvrir la boîte de dialogue de confirmation
@@ -946,9 +961,19 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
             <Typography variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
               Chronomètre
             </Typography>
-            <Typography variant="h3" sx={{ mb: 2, fontFamily: 'monospace', letterSpacing: 2 }}>
+            <Typography variant="h3" sx={{ 
+              mb: 2, 
+              fontFamily: 'monospace', 
+              letterSpacing: 2,
+              color: chrono >= 300 ? '#FF5252' : 'inherit' // Rouge quand durée maximale atteinte
+            }}>
               {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
             </Typography>
+            {chrono >= 300 && (
+              <Typography variant="body2" sx={{ mb: 1, color: '#FF5252', fontWeight: 'bold' }}>
+                ⚠️ Durée maximale atteinte (5 min)
+              </Typography>
+            )}
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Button variant={chronoRunning ? 'outlined' : 'contained'} color="primary" onClick={() => setChronoRunning(r => !r)}>
                 {chronoRunning ? 'Pause' : (chrono === 0 ? 'Démarrer' : 'Reprendre')}
@@ -967,9 +992,19 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
             <Typography variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
               Chronomètre - {side === 0 ? 'Côté Gauche' : 'Côté Droit'}
             </Typography>
-            <Typography variant="h3" sx={{ mb: 2, fontFamily: 'monospace', letterSpacing: 2, color: side === 0 ? 'primary.main' : 'success.main' }}>
+            <Typography variant="h3" sx={{ 
+              mb: 2, 
+              fontFamily: 'monospace', 
+              letterSpacing: 2, 
+              color: chrono >= 300 ? '#FF5252' : (side === 0 ? 'primary.main' : 'success.main')
+            }}>
               {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
             </Typography>
+            {chrono >= 300 && (
+              <Typography variant="body2" sx={{ mb: 1, color: '#FF5252', fontWeight: 'bold' }}>
+                ⚠️ Durée maximale atteinte (5 min)
+              </Typography>
+            )}
             <Typography variant="body1" sx={{ mb: 2, fontWeight: 'bold' }}>
               Côté {side + 1} sur 2
             </Typography>

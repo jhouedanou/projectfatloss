@@ -3,16 +3,16 @@
  * Utilise l'API Web Speech de Google intégrée dans les navigateurs modernes
  */
 
-// Configuration initiale de la voix - DÉSACTIVÉE
+// Configuration initiale de la voix - RÉACTIVÉE POUR LES EXERCICES
 let voiceConfig = {
-  enabled: false,          // Désactivée par défaut
-  volume: 1.0,             // Volume (0 à 1)
+  enabled: true,           // Activée par défaut
+  volume: 0.8,             // Volume (0 à 1)
   rate: 1.0,               // Vitesse de parole (0.1 à 10)
   pitch: 1.0,              // Tonalité (0 à 2)
   lang: 'fr-FR',           // Langue par défaut
   voice: null,             // Voix spécifique (sera définie automatiquement)
   countdownEnabled: false,  // Ne pas annoncer les décomptes
-  exerciseEnabled: false,   // Ne pas annoncer les exercices
+  exerciseEnabled: true,    // Annoncer uniquement les exercices
   pauseEnabled: false       // Ne pas annoncer les pauses
 };
 
@@ -65,18 +65,38 @@ function initSpeechService() {
  * @returns {Promise} Une promesse résolue lorsque l'énoncé est terminé
  */
 function speak(text, options = {}) {
-  // Fonction désactivée - ne prononce plus aucun texte
   return new Promise((resolve) => {
-    // Résout immédiatement sans prononcer de texte
-    resolve();
+    // Vérifier si la synthèse vocale est activée
+    if (!voiceConfig.enabled || !window.speechSynthesis) {
+      resolve();
+      return;
+    }
+
+    // Annuler toute annonce en cours
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
     
-    // Annuler toute annonce en cours au cas où
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    // Configurer la voix
+    if (voiceConfig.voice) {
+      utterance.voice = voiceConfig.voice;
     }
     
-    // Log pour le débogage (optionnel)
-    // console.log("Synthèse vocale désactivée, texte ignoré:", text);
+    // Appliquer les paramètres personnalisés
+    utterance.volume = options.volume !== undefined ? options.volume : voiceConfig.volume;
+    utterance.rate = options.rate !== undefined ? options.rate : voiceConfig.rate;
+    utterance.pitch = options.pitch !== undefined ? options.pitch : voiceConfig.pitch;
+    utterance.lang = options.lang || voiceConfig.lang;
+    
+    // Gérer les événements
+    utterance.onend = () => resolve();
+    utterance.onerror = (error) => {
+      console.error('Erreur de synthèse vocale:', error);
+      resolve();
+    };
+    
+    // Démarrer la synthèse
+    window.speechSynthesis.speak(utterance);
   });
 }
 
@@ -127,65 +147,46 @@ function announceExercise(exercise, setNum = 0, totalSets = 1, isPaused = false)
 
   // Extraire les informations de l'exercice
   const name = exercise.name || '';
-  const equipment = exercise.equip || '';
   
   // Construire le texte à annoncer - simplifié selon la demande
   let text = `${name}.`;
   
-  if (equipment) {
-    text += ` Matériel: ${equipment}.`;
+  // Ajouter l'information sur la série en cours seulement si c'est la première série
+  if (setNum === 0 && totalSets > 1) {
+    text += ` ${totalSets} séries à effectuer.`;
   }
-  
-  // Ajouter l'information sur la série en cours
-  text += ` Série ${setNum + 1} sur ${totalSets}.`;
   
   speak(text);
 }
 
 /**
- * Annonce une pause
+ * Annonce une pause - DÉSACTIVÉE
  * @param {number} duration - Durée de la pause en secondes
  * @param {boolean} isTransition - Indique s'il s'agit d'une transition entre exercices
  * @param {Object} nextExercise - Exercice suivant (si en transition)
  */
 function announcePause(duration, isTransition, nextExercise) {
-  if (!voiceConfig.enabled || !voiceConfig.pauseEnabled) return;
-  
-  let text = `Pause: ${duration} secondes.`;
-  if (isTransition && nextExercise) {
-    text += ` Prochain exercice: ${nextExercise.name}.`;
-  }
-  
-  speak(text);
+  // Désactivé - plus d'annonces de pause
+  return;
 }
 
 /**
- * Annonce un décompte
+ * Annonce un décompte - DÉSACTIVÉE
  * @param {number} count - Le nombre à annoncer
  */
 function announceCount(count) {
-  if (!voiceConfig.enabled || !voiceConfig.countdownEnabled) return;
-  
-  speak(`${count}`, { rate: 1.2 });
+  // Désactivé - plus d'annonces de décompte
+  return;
 }
 
 /**
- * Annonce une répétition d'exercice
+ * Annonce une répétition d'exercice - DÉSACTIVÉE
  * @param {number} rep - Numéro de la répétition actuelle
  * @param {number} total - Nombre total de répétitions
  */
 function announceRepetition(rep, total) {
-  // Désactivé pour limiter les annonces au début de chaque série
+  // Désactivé - plus d'annonces de répétitions
   return;
-  
-  /* Ancien code conservé en commentaire pour référence
-  if (!voiceConfig.enabled || !voiceConfig.countdownEnabled) return;
-  
-  // Annoncer uniquement certaines répétitions pour ne pas trop submerger l'utilisateur
-  if (rep === 1 || rep === Math.floor(total / 2) || rep === total) {
-    speak(`Répétition ${rep}`, { rate: 1.2 });
-  }
-  */
 }
 
 /**

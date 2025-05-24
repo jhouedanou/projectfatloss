@@ -12,6 +12,20 @@ function YouTubeButton({ exercise, exerciseName }) {
   const embedUrl = `https://www.youtube.com/embed?listType=search&list=${searchQuery}`;
   const searchPageUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
 
+  const handleYouTubeOpen = () => {
+    // Ouvrir dans une popup au lieu d'un nouvel onglet
+    const popup = window.open(
+      searchPageUrl, 
+      'youtube_popup',
+      'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
+    );
+    
+    // Focus sur la popup si elle est bloquée
+    if (popup) {
+      popup.focus();
+    }
+  };
+
   return (
     <>
       {/* <Button
@@ -24,16 +38,12 @@ function YouTubeButton({ exercise, exerciseName }) {
         Tutoriel
       </Button> */}
       <Button
-      
         variant="outlined"
         color="error"
         size="small"
         sx={{ ml: 1 }}
         startIcon={<YouTubeIcon />}
-        component="a"
-        href={searchPageUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+        onClick={handleYouTubeOpen}
       >
         Voir sur YouTube
       </Button>

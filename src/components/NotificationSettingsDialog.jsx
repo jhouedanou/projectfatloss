@@ -62,10 +62,15 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
     updateNotificationSettings(newSettings);
   };
 
-  const handleTestNotification = () => {
-    const success = showTestNotification();
-    if (!success) {
-      alert('Impossible d\'afficher la notification. Vérifiez les permissions.');
+  const handleTestNotification = async () => {
+    try {
+      const success = await showTestNotification();
+      if (!success) {
+        alert('Impossible d\'afficher la notification. Vérifiez les permissions.');
+      }
+    } catch (error) {
+      console.error('Erreur lors du test de notification:', error);
+      alert('Erreur lors du test de notification.');
     }
   };
 
