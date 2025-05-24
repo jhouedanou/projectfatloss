@@ -1,7 +1,10 @@
 /**
  * Service de notifications pour l'application
  * Gère les notifications quotidiennes et les préférences utilisateur
+ * Intégré avec OneSignal pour les notifications push
  */
+
+import oneSignalService from './OneSignalService.js';
 
 const NOTIFICATION_SETTINGS_KEY = 'notification_settings';
 const DEFAULT_TIME = '16:00'; // 4h par défaut
@@ -15,7 +18,8 @@ export function getNotificationSettings() {
   return settings ? JSON.parse(settings) : {
     enabled: true,
     time: DEFAULT_TIME,
-    permission: false
+    permission: false,
+    useOneSignal: true
   };
 }
 
@@ -29,6 +33,13 @@ export function updateNotificationSettings(settings) {
   const newSettings = { ...currentSettings, ...settings };
   localStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify(newSettings));
   
+  // Mettre à jour OneSignal si disponible
+  if (newSettings.useOneSignal && oneSignalService.isAvailable()) {
+    oneSignalService.updateNotificationPreferences(newSettings).catch(error => {
+      console.error('Erreur mise à jour OneSignal:', error);
+    });
+  }
+  
   // Reprogrammer les notifications avec les nouveaux paramètres
   scheduleWorkoutNotifications();
   
@@ -40,13 +51,37 @@ export function updateNotificationSettings(settings) {
  * @returns {Promise<boolean>} - True si la permission est accordée
  */
 export async function requestNotificationPermission() {
+  const settings = getNotificationSettings();
+  
+  // Essayer d'abord OneSignal si activé
+  if (settings.useOneSignal && oneSignalService.isAvailable()) {
+    try {
+      const granted = await oneSignalService.requestPermission();
+      if (granted) {
+        updateNotificationSettings({ ...settings, permission: true });
+        
+        // Définir des tags utilisateur pour la segmentation
+        await oneSignalService.setUserTags({
+          app: 'PFL',
+          language: 'fr',
+          notifications_enabled: true,
+          notification_time: settings.time
+        });
+        
+        return true;
+      }
+    } catch (error) {
+      console.error('Erreur OneSignal, fallback vers notifications standard:', error);
+    }
+  }
+  
+  // Fallback vers les notifications standard
   if (!('Notification' in window)) {
     console.warn('Ce navigateur ne supporte pas les notifications');
     return false;
   }
 
   if (Notification.permission === 'granted') {
-    const settings = getNotificationSettings();
     updateNotificationSettings({ ...settings, permission: true });
     return true;
   }
@@ -55,7 +90,6 @@ export async function requestNotificationPermission() {
     const permission = await Notification.requestPermission();
     const granted = permission === 'granted';
     
-    const settings = getNotificationSettings();
     updateNotificationSettings({ ...settings, permission: granted });
     
     return granted;
@@ -178,6 +212,13 @@ function showWorkoutNotification() {
  * Initialise le service de notifications
  */
 export function initNotificationService() {
+  // Initialiser OneSignal
+  oneSignalService.init().then(() => {
+    console.log('Service de notifications initialisé avec OneSignal');
+  }).catch(error => {
+    console.error('Erreur initialisation OneSignal:', error);
+  });
+  
   // Vérifier et demander les permissions si nécessaire
   requestNotificationPermission().then(granted => {
     if (granted) {
@@ -200,20 +241,71 @@ export function initNotificationService() {
  * Affiche une notification de test
  */
 export async function showTestNotification() {
-  // D'abord vérifier si on a la permission
+  const settings = getNotificationSettings();
+  
+  // Essayer d'abord OneSignal si activé
+  if (settings.useOneSignal && oneSignalService.isAvailable()) {
+    try {
+      const success = await oneSignalService.sendTestNotification();
+      if (success) {
+        return true;
+      }
+    } catch (error) {
+      console.error('Erreur test OneSignal, fallback vers notification standard:', error);
+    }
+  }
+  
+  // Fallback vers notification standard
   const hasPermission = await requestNotificationPermission();
   
   if (hasPermission && Notification.permission === 'granted') {
-    new Notification("Test de notification", {
-      body: "Les notifications fonctionnent correctement ! 🎉",
-      icon: '/favicon.ico',
-      tag: 'test-notification'
-    });
-    return true;
+    try {
+      const notification = new Notification("🏋️ Test PFL", {
+        body: "Les notifications fonctionnent correctement ! 🎉",
+        icon: '/favicon.ico',
+        tag: 'test-notification',
+        requireInteraction: false
+      });
+      
+      // Fermer automatiquement après 4 secondes
+      setTimeout(() => {
+        notification.close();
+      }, 4000);
+      
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de la création de la notification:', error);
+      return false;
+    }
   } else {
     console.warn('Permission de notification refusée ou non disponible');
     return false;
   }
+}
+
+/**
+ * Obtient le statut actuel des permissions
+ * @returns {Promise<string>} - 'granted', 'denied', ou 'default'
+ */
+export async function getNotificationPermissionStatus() {
+  const settings = getNotificationSettings();
+  
+  // Vérifier OneSignal d'abord si activé
+  if (settings.useOneSignal && oneSignalService.isAvailable()) {
+    try {
+      const status = await oneSignalService.getPermissionStatus();
+      return status;
+    } catch (error) {
+      console.error('Erreur lors de la vérification du statut OneSignal:', error);
+    }
+  }
+  
+  // Fallback vers API standard
+  if ('Notification' in window) {
+    return Notification.permission;
+  }
+  
+  return 'default';
 }
 
 /**

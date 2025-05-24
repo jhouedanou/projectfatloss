@@ -20,22 +20,29 @@ import {
   updateNotificationSettings, 
   requestNotificationPermission,
   getAvailableNotificationTimes,
-  showTestNotification
+  showTestNotification,
+  getNotificationPermissionStatus
 } from '../services/NotificationService';
 
 const NotificationSettingsDialog = ({ open, onClose }) => {
   const [settings, setSettings] = useState({
     enabled: true,
     time: '16:00',
-    permission: false
+    permission: false,
+    useOneSignal: true
   });
   const [permissionStatus, setPermissionStatus] = useState('default');
+  const [testResult, setTestResult] = useState('');
 
   useEffect(() => {
     if (open) {
       const currentSettings = getNotificationSettings();
       setSettings(currentSettings);
-      setPermissionStatus(Notification.permission);
+      
+      // Vérifier le statut des permissions de manière asynchrone
+      getNotificationPermissionStatus().then(status => {
+        setPermissionStatus(status);
+      });
     }
   }, [open]);
 
@@ -64,22 +71,40 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
 
   const handleTestNotification = async () => {
     try {
+      setTestResult('🔄 Test en cours...');
+      
       const success = await showTestNotification();
-      if (!success) {
-        alert('Impossible d\'afficher la notification. Vérifiez les permissions.');
+      if (success) {
+        setTestResult('✅ Notification envoyée avec succès !');
+      } else {
+        setTestResult('❌ Impossible d\'envoyer la notification. Vérifiez les permissions.');
       }
+      
+      // Effacer le message après 5 secondes
+      setTimeout(() => setTestResult(''), 5000);
+      
     } catch (error) {
       console.error('Erreur lors du test de notification:', error);
-      alert('Erreur lors du test de notification.');
+      setTestResult('❌ Erreur lors du test de notification.');
+      setTimeout(() => setTestResult(''), 5000);
     }
   };
 
   const handleRequestPermission = async () => {
+    setTestResult('🔄 Demande de permission...');
+    
     const granted = await requestNotificationPermission();
-    setPermissionStatus(granted ? 'granted' : 'denied');
+    
     if (granted) {
+      setPermissionStatus('granted');
       setSettings(prev => ({ ...prev, permission: true }));
+      setTestResult('✅ Permissions accordées !');
+    } else {
+      setPermissionStatus('denied');
+      setTestResult('❌ Permission refusée');
     }
+    
+    setTimeout(() => setTestResult(''), 3000);
   };
 
   const availableTimes = getAvailableNotificationTimes();
@@ -91,6 +116,10 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
         <Box sx={{ mb: 3 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Recevez une notification quotidienne pour vous rappeler de faire votre entraînement.
+            <br />
+            <Typography variant="caption" color="primary">
+              🚀 Powered by OneSignal - Notifications push fiables
+            </Typography>
           </Typography>
           
           {permissionStatus === 'denied' && (
@@ -101,9 +130,26 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
           
           {permissionStatus === 'default' && (
             <Alert severity="info" sx={{ mb: 2 }}>
-              <Button size="small" onClick={handleRequestPermission} sx={{ mt: 1 }}>
-                Autoriser les notifications
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Activez les notifications pour ne jamais manquer votre entraînement !
+              </Typography>
+              <Button 
+                size="small" 
+                onClick={handleRequestPermission} 
+                variant="contained"
+                sx={{ mt: 1 }}
+              >
+                🔔 Autoriser les notifications
               </Button>
+            </Alert>
+          )}
+          
+          {testResult && (
+            <Alert 
+              severity={testResult.includes('✅') ? 'success' : testResult.includes('🔄') ? 'info' : 'error'} 
+              sx={{ mb: 2 }}
+            >
+              {testResult}
             </Alert>
           )}
           
@@ -148,9 +194,15 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
               variant="outlined" 
               onClick={handleTestNotification}
               size="small"
+              disabled={testResult.includes('🔄')}
+              startIcon={testResult.includes('🔄') ? '🔄' : '🧪'}
             >
-              Tester la notification
+              {testResult.includes('🔄') ? 'Test en cours...' : 'Tester la notification'}
             </Button>
+            
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              Utilisez ce bouton pour vérifier que les notifications fonctionnent correctement.
+            </Typography>
           </Box>
         )}
       </DialogContent>

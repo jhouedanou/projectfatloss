@@ -11,6 +11,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import './i18n';
 import { registerSW } from 'virtual:pwa-register';
+import { initNotificationService } from './services/NotificationService';
 
 // Enregistrement du service worker avec mise à jour automatique
 const updateSW = registerSW({
@@ -27,6 +28,9 @@ const updateSW = registerSW({
 // Récupérer le thème initial depuis le localStorage
 const initialDarkMode = localStorage.getItem('theme') !== 'light';
 const theme = createAppTheme(initialDarkMode);
+
+// Initialiser le service de notifications
+initNotificationService();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
