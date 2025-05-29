@@ -20,6 +20,7 @@ import '../components/WorkoutCustomizer.css';
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
 import DayPills from '../components/DayPills';
 import Header from '../components/Header/Header';
+import PWAInstallPrompt from '../components/PWAInstallPrompt';
 
 const NOTIFICATION_DURATION = 3000; 
 
@@ -318,6 +319,9 @@ export default function App() {
           onClose={() => setShowNotificationSettings(false)}
         />
       </div>
+      
+      {/* Composant de configuration PWA Android */}
+      <PWAInstallPrompt />
     </ThemeProvider>
   );
 }
