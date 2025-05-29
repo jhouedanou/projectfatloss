@@ -2,12 +2,30 @@
  * Service de notifications pour l'application
  * Gère les notifications quotidiennes et les préférences utilisateur
  * Intégré avec OneSignal pour les notifications push
+ * Optimisé pour Android et iOS
  */
 
 import oneSignalService from './OneSignalService.js';
 
 const NOTIFICATION_SETTINGS_KEY = 'notification_settings';
 const DEFAULT_TIME = '16:00'; // 4h par défaut
+
+/**
+ * Détecte le type de plateforme et navigateur
+ */
+function getPlatformInfo() {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  
+  return {
+    isAndroid: /android/i.test(userAgent),
+    isIOS: /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream,
+    isChrome: /Chrome/.test(userAgent) && /Google Inc/.test(navigator.vendor),
+    isFirefox: /Firefox/.test(userAgent),
+    isSamsung: /SamsungBrowser/.test(userAgent),
+    isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
+    isPWA: window.matchMedia('(display-mode: standalone)').matches
+  };
+}
 
 /**
  * Obtient les paramètres de notification
@@ -19,7 +37,9 @@ export function getNotificationSettings() {
     enabled: true,
     time: DEFAULT_TIME,
     permission: false,
-    useOneSignal: true
+    useOneSignal: true,
+    androidFallback: true,
+    lastPermissionRequest: 0
   };
 }
 
@@ -47,22 +67,173 @@ export function updateNotificationSettings(settings) {
 }
 
 /**
- * Demande la permission pour les notifications
+ * Demande la permission pour les notifications avec gestion spéciale Android
  * @returns {Promise<boolean>} - True si la permission est accordée
  */
 export async function requestNotificationPermission() {
   const settings = getNotificationSettings();
+  const platform = getPlatformInfo();
   
-  // Essayer d'abord OneSignal si activé
+  // Éviter les demandes trop fréquentes (Android limite les demandes)
+  const now = Date.now();
+  const timeSinceLastRequest = now - (settings.lastPermissionRequest || 0);
+  const minInterval = 60000; // 1 minute minimum entre les demandes
+  
+  if (timeSinceLastRequest < minInterval) {
+    console.log('Permission demandée trop récemment, attendre...');
+    return false;
+  }
+  
+  updateNotificationSettings({ lastPermissionRequest: now });
+
+  // Stratégie spéciale pour Android
+  if (platform.isAndroid) {
+    return await requestAndroidNotificationPermission(settings, platform);
+  }
+  
+  // Stratégie pour iOS
+  if (platform.isIOS) {
+    return await requestIOSNotificationPermission(settings);
+  }
+  
+  // Fallback pour autres plateformes
+  return await requestStandardNotificationPermission(settings);
+}
+
+/**
+ * Gestion spécifique des permissions Android
+ */
+async function requestAndroidNotificationPermission(settings, platform) {
+  console.log('Demande de permission Android:', platform);
+  
+  // 1. Essayer OneSignal en premier (plus fiable sur Android)
+  if (settings.useOneSignal && oneSignalService.isAvailable()) {
+    try {
+      console.log('Tentative OneSignal pour Android...');
+      const granted = await oneSignalService.requestPermission();
+      if (granted) {
+        updateNotificationSettings({ ...settings, permission: true });
+        
+        await oneSignalService.setUserTags({
+          app: 'PFL',
+          platform: 'android',
+          browser: platform.isChrome ? 'chrome' : (platform.isSamsung ? 'samsung' : 'other'),
+          language: 'fr',
+          notifications_enabled: true,
+          notification_time: settings.time
+        });
+        
+        console.log('OneSignal configuré avec succès sur Android');
+        return true;
+      }
+    } catch (error) {
+      console.error('Erreur OneSignal Android:', error);
+    }
+  }
+  
+  // 2. Fallback vers notifications natives Android
+  return await requestAndroidNativeNotifications(settings, platform);
+}
+
+/**
+ * Notifications natives pour Android
+ */
+async function requestAndroidNativeNotifications(settings, platform) {
+  if (!('Notification' in window)) {
+    console.warn('Notifications non supportées sur ce navigateur Android');
+    return false;
+  }
+
+  // Vérifier si déjà accordé
+  if (Notification.permission === 'granted') {
+    updateNotificationSettings({ ...settings, permission: true });
+    return true;
+  }
+
+  // Sur Android, il faut parfois attendre que l'utilisateur interagisse
+  if (Notification.permission === 'default') {
+    try {
+      // Afficher un message explicatif pour Android
+      const shouldRequest = await showAndroidPermissionDialog();
+      
+      if (shouldRequest) {
+        const permission = await Notification.requestPermission();
+        const granted = permission === 'granted';
+        
+        updateNotificationSettings({ ...settings, permission: granted });
+        
+        if (granted) {
+          console.log('Permission native accordée sur Android');
+          // Enregistrer le service worker pour Android
+          await registerAndroidServiceWorker();
+        }
+        
+        return granted;
+      }
+    } catch (error) {
+      console.error('Erreur permission native Android:', error);
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Affiche un dialog explicatif pour Android
+ */
+function showAndroidPermissionDialog() {
+  return new Promise((resolve) => {
+    // Créer un dialog natif avec explanation
+    const message = `
+Pour recevoir vos rappels d'entraînement quotidiens, 
+autorisez les notifications.
+
+Sur Android:
+• Appuyez sur "Autoriser" dans la popup
+• Si elle n'apparaît pas, vérifiez les paramètres de votre navigateur
+• Vous pouvez aussi ajouter cette app à votre écran d'accueil
+    `;
+    
+    const result = confirm(message);
+    resolve(result);
+  });
+}
+
+/**
+ * Enregistre le service worker spécifiquement pour Android
+ */
+async function registerAndroidServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/'
+      });
+      
+      // Attendre que le service worker soit prêt
+      await navigator.serviceWorker.ready;
+      
+      console.log('Service Worker enregistré pour Android:', registration);
+      return registration;
+    } catch (error) {
+      console.error('Erreur enregistrement Service Worker Android:', error);
+    }
+  }
+}
+
+/**
+ * Gestion spécifique des permissions iOS
+ */
+async function requestIOSNotificationPermission(settings) {
+  // Sur iOS, OneSignal fonctionne généralement bien
   if (settings.useOneSignal && oneSignalService.isAvailable()) {
     try {
       const granted = await oneSignalService.requestPermission();
       if (granted) {
         updateNotificationSettings({ ...settings, permission: true });
         
-        // Définir des tags utilisateur pour la segmentation
         await oneSignalService.setUserTags({
           app: 'PFL',
+          platform: 'ios',
           language: 'fr',
           notifications_enabled: true,
           notification_time: settings.time
@@ -71,11 +242,18 @@ export async function requestNotificationPermission() {
         return true;
       }
     } catch (error) {
-      console.error('Erreur OneSignal, fallback vers notifications standard:', error);
+      console.error('Erreur OneSignal iOS:', error);
     }
   }
   
-  // Fallback vers les notifications standard
+  // Fallback vers notifications standard iOS
+  return await requestStandardNotificationPermission(settings);
+}
+
+/**
+ * Demande de permission standard
+ */
+async function requestStandardNotificationPermission(settings) {
   if (!('Notification' in window)) {
     console.warn('Ce navigateur ne supporte pas les notifications');
     return false;
@@ -320,3 +498,4 @@ export function getAvailableNotificationTimes() {
   }
   return times;
 }
+
