@@ -255,11 +255,9 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // Utiliser totalSets de l'exercice en priorité, sinon calculer
   const baseTotalSets = exo?.totalSets ?? parseSets(exo?.sets || '1');
   
-  const totalSets = exo
-    ? (autoMode 
-        ? Math.max(1, Math.floor(baseTotalSets / 2))
-        : baseTotalSets)
-    : 1;
+  // En mode automatique, conserver le nombre original de sets
+  // mais utiliser les vraies valeurs de nbRep du data.js
+  const totalSets = exo ? baseTotalSets : 1;
 
   // Ajout d'une vérification pour éviter le crash si les données ne sont pas prêtes
   if (!workoutPlan || !day || !exo) {
@@ -517,7 +515,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           <StepSet 
             exo={day.exercises[step]}
             setNum={setNum}
-            totalSets={day.exercises[step]?.sets || 1}
+            totalSets={totalSets}
             onDone={handleSetComplete}
             onCaloriesBurned={handleCaloriesBurned}
             onExerciseCompleted={handleExerciseCompleted}
