@@ -30,6 +30,7 @@ export default function App() {
     return savedDay !== null ? parseInt(savedDay, 10) : 0;
   });
   const [stepMode, setStepMode] = useState(false);
+  const [autoMode, setAutoMode] = useState(false);
   const [viewMode, setViewMode] = useState('workout'); 
   const [darkTheme, setDarkTheme] = useState(
     localStorage.getItem('theme') !== 'light' 
@@ -250,6 +251,10 @@ export default function App() {
                         </button>
                         <PreWorkout 
                           onStartWorkout={() => setStepMode(true)}
+                          onStartAutoMode={() => {
+                            setAutoMode(true);
+                            setStepMode(true);
+                          }}
                           onClose={() => {}}
                         />
                       </div>
@@ -272,8 +277,12 @@ export default function App() {
                   ) : (
                     <StepWorkout 
                       dayIndex={current} 
-                      onBack={()=>setStepMode(false)}
+                      onBack={() => {
+                        setStepMode(false);
+                        setAutoMode(false); // Réinitialiser le mode auto
+                      }}
                       onComplete={handleWorkoutComplete}
+                      autoMode={autoMode}
                     />
                   )}
                 </>

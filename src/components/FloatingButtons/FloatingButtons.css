@@ -19,13 +19,14 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  background-color: var(--button-bg);
+  background-color: #F03D32; /* Rouge par défaut */
   color: white;
 }
 
 .floating-button:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background-color: #D32F2F; /* Rouge plus sombre au hover */
 }
 
 .floating-button:active {
@@ -33,29 +34,49 @@
 }
 
 .youtube-button {
-  background-color: #FF0000;
+  background-color: #F03D32;
+}
+
+.youtube-button:hover {
+  background-color: #D32F2F;
 }
 
 .rhythm-button {
-  background-color: var(--vermilion);
+  background-color: #F03D32;
+}
+
+.rhythm-button:hover {
+  background-color: #D32F2F;
 }
 
 .rhythm-button.active {
-  background-color: var(--vermilion-dark);
+  background-color: #B71C1C;
 }
 
 .next-button {
-  background-color: var(--success);
+  background-color: #F03D32;
+}
+
+.next-button:hover {
+  background-color: #D32F2F;
 }
 
 .back-button {
-  background-color: var(--error);
+  background-color: #F03D32;
+}
+
+.back-button:hover {
+  background-color: #D32F2F;
 }
 
 .skip-button {
-  background-color: var(--vermilion);
+  background-color: #F03D32;
   width: 60px;
   height: 60px;
+}
+
+.skip-button:hover {
+  background-color: #D32F2F;
 }
 
 .skip-button svg {

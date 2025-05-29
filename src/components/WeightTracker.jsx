@@ -13,6 +13,70 @@ import {
   getWeightStats
 } from '../services/WeightStorage';
 
+// Composant Popup d'encouragement
+function EncouragementModal({ isOpen, onClose, weightIncrease }) {
+  const encouragementMessages = [
+    {
+      title: "💪 Restez Motivé(e) !",
+      message: "Chaque petit pas compte ! Les fluctuations de poids sont normales. Continuez vos efforts, les résultats viendront !",
+      tips: ["Gardez une alimentation équilibrée", "Maintenez votre routine d'exercice", "Le muscle pèse plus que la graisse"]
+    },
+    {
+      title: "🔥 Ne Lâchez Rien !",
+      message: "Rome ne s'est pas construite en un jour ! Votre parcours de transformation demande de la patience et de la persévérance.",
+      tips: ["Concentrez-vous sur vos sensations", "Mesurez vos progrès autrement", "Prenez des photos pour voir l'évolution"]
+    },
+    {
+      title: "🎯 Vous Êtes Sur la Bonne Voie !",
+      message: "Les résultats durables prennent du temps. Votre corps s'adapte et se renforce chaque jour !",
+      tips: ["Buvez plus d'eau", "Dormez suffisamment", "Soyez fier(e) de vos efforts"]
+    }
+  ];
+
+  const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="encouragement-modal-overlay">
+      <div className="encouragement-modal">
+        <div className="encouragement-header">
+          <h3>{randomMessage.title}</h3>
+          <button className="close-modal" onClick={onClose}>×</button>
+        </div>
+        
+        <div className="encouragement-content">
+          <div className="weight-change-info">
+            <span className="weight-increase">+{weightIncrease.toFixed(1)} kg</span>
+            <p>depuis votre dernière pesée</p>
+          </div>
+          
+          <p className="encouragement-message">{randomMessage.message}</p>
+          
+          <div className="encouragement-tips">
+            <h4>💡 Conseils pour continuer :</h4>
+            <ul>
+              {randomMessage.tips.map((tip, index) => (
+                <li key={index}>{tip}</li>
+              ))}
+            </ul>
+          </div>
+          
+          <div className="encouragement-reminder">
+            <p><strong>Rappel :</strong> Votre valeur ne se mesure pas sur une balance ! 💚</p>
+          </div>
+        </div>
+        
+        <div className="encouragement-actions">
+          <button className="continue-btn" onClick={onClose}>
+            💪 Continuer Mon Parcours !
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WeightTracker() {
   const { t, i18n } = useTranslation();
   const [weightRecords, setWeightRecords] = useState([]);
@@ -21,6 +85,8 @@ function WeightTracker() {
   const [stats, setStats] = useState({});
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showEncouragement, setShowEncouragement] = useState(false);
+  const [weightIncrease, setWeightIncrease] = useState(0);
   
   // Charger les données au démarrage
   useEffect(() => {
@@ -51,8 +117,22 @@ function WeightTracker() {
         return;
       }
       
+      // Obtenir le dernier poids avant d'ajouter le nouveau
+      const currentHistory = getWeightHistory();
+      const lastWeight = currentHistory.length > 0 ? currentHistory[currentHistory.length - 1].weight : null;
+      
       // Ajouter l'enregistrement
       addWeightRecord(weightValue, null, notes);
+      
+      // Vérifier si le poids a augmenté et afficher le popup d'encouragement
+      if (lastWeight && weightValue > lastWeight) {
+        const increase = weightValue - lastWeight;
+        // Afficher le popup seulement si l'augmentation est significative (plus de 0.2 kg)
+        if (increase >= 0.2) {
+          setWeightIncrease(increase);
+          setShowEncouragement(true);
+        }
+      }
       
       // Recharger les données
       loadWeightData();
@@ -231,6 +311,13 @@ function WeightTracker() {
           </div>
         </div>
       )}
+      
+      {/* Popup d'encouragement */}
+      <EncouragementModal 
+        isOpen={showEncouragement}
+        onClose={() => setShowEncouragement(false)}
+        weightIncrease={weightIncrease}
+      />
     </div>
   );
 }

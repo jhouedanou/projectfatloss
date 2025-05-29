@@ -6,6 +6,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
 import beepSound from '../../public/beep.mp3';
 import { showTestNotification } from '../services/NotificationService';
 import './PreWorkout.css';
@@ -16,7 +17,7 @@ function playBeep() {
   beep.play().catch(err => console.error("Erreur de lecture audio:", err));
 }
 
-export default function PreWorkout({ onStartWorkout, onClose }) {
+export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose }) {
   const [isOpen, setIsOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes en secondes
   const [isRunning, setIsRunning] = useState(false);
@@ -158,6 +159,28 @@ export default function PreWorkout({ onStartWorkout, onClose }) {
         }}
       >
         Démarrer Pre-Workout (30 min)
+      </Button>
+
+      {/* Bouton pour le mode automatique */}
+      <Button
+        variant="contained"
+        color="secondary"
+        size="large"
+        startIcon={<FlashOnIcon />}
+        onClick={() => onStartAutoMode && onStartAutoMode()}
+        sx={{
+          minHeight: 60,
+          fontSize: '1.1rem',
+          fontWeight: 'bold',
+          mb: 2,
+          width: '100%',
+          background: 'linear-gradient(45deg, #F03D32, #FF6B6B)',
+          '&:hover': {
+            background: 'linear-gradient(45deg, #D32F2F, #FF5252)',
+          }
+        }}
+      >
+        🚀 Mode Auto - Entraînement Automatisé
       </Button>
 
       {/* Dialog du pre-workout */}

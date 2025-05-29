@@ -277,3 +277,218 @@
     margin: 5px 0;
   }
 }
+
+/* Popup d'encouragement */
+.encouragement-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.encouragement-modal {
+  background: var(--card-bg);
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.encouragement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 0;
+  border-bottom: 1px solid rgba(240, 61, 50, 0.2);
+  margin-bottom: 20px;
+}
+
+.encouragement-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+  background-color: var(--card-shadow);
+  color: var(--text-primary);
+}
+
+.encouragement-content {
+  padding: 0 20px 20px;
+}
+
+.weight-change-info {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, #FF6B6B, #F03D32);
+  border-radius: 12px;
+  color: white;
+}
+
+.weight-increase {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.weight-change-info p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.encouragement-message {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.encouragement-tips {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.encouragement-tips h4 {
+  color: var(--text-primary);
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+}
+
+.encouragement-tips ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+}
+
+.encouragement-tips li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.encouragement-reminder {
+  text-align: center;
+  padding: 15px;
+  background: linear-gradient(135deg, #4ECDC4, #2E7D32);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.encouragement-reminder p {
+  margin: 0;
+  color: white;
+  font-size: 1rem;
+}
+
+.encouragement-actions {
+  padding: 0 20px 20px;
+  text-align: center;
+}
+
+.continue-btn {
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  width: 100%;
+  max-width: 300px;
+}
+
+.continue-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  background: linear-gradient(135deg, #45a049, #2E7D32);
+}
+
+.continue-btn:active {
+  transform: translateY(0);
+}
+
+/* Mode sombre */
+html.dark-theme .encouragement-modal,
+body.dark-theme .encouragement-modal {
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark-theme .encouragement-tips,
+body.dark-theme .encouragement-tips {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive pour le popup */
+@media (max-width: 600px) {
+  .encouragement-modal-overlay {
+    padding: 10px;
+  }
+  
+  .encouragement-modal {
+    max-height: 95vh;
+  }
+  
+  .encouragement-header {
+    padding: 15px 15px 0;
+  }
+  
+  .encouragement-content {
+    padding: 0 15px 15px;
+  }
+  
+  .encouragement-actions {
+    padding: 0 15px 15px;
+  }
+  
+  .weight-increase {
+    font-size: 1.5rem;
+  }
+  
+  .encouragement-message {
+    font-size: 1rem;
+  }
+}

@@ -68,7 +68,8 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   
   useEffect(() => {
     if (autoMode && time === defaultTime) {
-      setTime(Math.ceil(defaultTime / 2));
+      // Mode automatique : pause de 20 secondes
+      setTime(20);
     }
     
     const timer = setInterval(() => {
@@ -217,7 +218,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
   );
 }
 
-export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete }) {
+export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, autoMode: initialAutoMode }) {
   const [dayIndex, setDayIndex] = useState(initialDayIndex || 0);
   const [step, setStep] = useState(0);
   const [pause, setPause] = useState(false);
@@ -226,7 +227,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
-  const [autoMode, setAutoMode] = useState(false); // Mode automatique pour les pauses
+  const [autoMode, setAutoMode] = useState(initialAutoMode || false); // Mode automatique pour les pauses
   const [showPreWorkout, setShowPreWorkout] = useState(false);
   // Synthèse vocale réactivée pour les exercices
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -491,6 +492,12 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       <h2 style={{fontSize:'1.1rem',marginBottom:8}}>{day.title}</h2>
       
+      {autoMode && (
+        <div className="auto-mode-indicator">
+          🚀 Mode Automatique Activé ! 🚀
+        </div>
+      )}
+      
       <>
         <ProgressTracker 
           currentExercise={step + 1}
@@ -510,6 +517,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             onExerciseCompleted={handleExerciseCompleted}
             isPaused={pause}
             dayIndex={dayIndex}
+            autoMode={autoMode}
           />
         ) : (
           <Pause 
@@ -576,7 +584,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex }) {
+function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode }) {
   const [timer, setTimer] = useState(() => {
     if (exo.timer) {
       return exo.duration || 30;
@@ -865,6 +873,35 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   const handleCloseConfirmDialog = () => {
     setOpenConfirmDialog(false);
   };
+
+  // Mode automatique: démarrer automatiquement le rythme si pas de timer/chrono
+  useEffect(() => {
+    if (autoMode && !hasTimer && !isChrono && !isPaused) {
+      // Démarrer automatiquement le rythme après 2 secondes
+      const autoStartTimer = setTimeout(() => {
+        if (!isPulsing && countdown === null) {
+          setCountdown(3);
+          setShowOverlay(true);
+        }
+      }, 2000);
+      
+      return () => clearTimeout(autoStartTimer);
+    }
+  }, [autoMode, hasTimer, isChrono, isPaused, isPulsing, countdown]);
+
+  // Mode automatique: terminer automatiquement l'exercice après les répétitions
+  useEffect(() => {
+    if (autoMode && currentRep === exo.nbRep && !hasTimer && !isChrono) {
+      // Attendre 1 seconde puis terminer automatiquement
+      const autoFinishTimer = setTimeout(() => {
+        const calories = caloriesPerSet;
+        onCaloriesBurned(calories);
+        onDone();
+      }, 1000);
+      
+      return () => clearTimeout(autoFinishTimer);
+    }
+  }, [autoMode, currentRep, exo.nbRep, hasTimer, isChrono, caloriesPerSet, onCaloriesBurned, onDone]);
 
   return (
     <Box sx={{ p: 2 }}>
