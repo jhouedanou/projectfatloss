@@ -246,10 +246,15 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const day = workoutPlan?.[dayIndex];
   const total = day?.exercises?.length || 0;
   const exo = day?.exercises?.[step];
+  
+  // Détecter si l'exercice se termine par "/côté"
+  const isSidedExercise = exo?.sets?.includes('/côté') || exo?.sets?.includes('/jambe');
+  const adjustedSets = isSidedExercise ? parseSets(exo.sets) * 2 : parseSets(exo.sets);
+  
   const totalSets = exo
     ? (autoMode 
-        ? Math.max(1, Math.floor(parseSets(exo.sets) / 2))
-        : parseSets(exo.sets))
+        ? Math.max(1, Math.floor(adjustedSets / 2))
+        : adjustedSets)
     : 1;
 
   // Ajout d'une vérification pour éviter le crash si les données ne sont pas prêtes
@@ -507,6 +512,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             onCaloriesBurned={handleCaloriesBurned}
             onExerciseCompleted={handleExerciseCompleted}
             isPaused={pause}
+            dayIndex={dayIndex}
           />
         ) : (
           <Pause 
@@ -573,7 +579,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused }) {
+function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex }) {
   const [timer, setTimer] = useState(() => {
     if (exo.timer) {
       return exo.duration || 30;
@@ -605,46 +611,53 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   const [countdown, setCountdown] = useState(null); // null = pas de décompte, sinon 3,2,1
   const timerRef = useRef(null);
 
-  // Liste des exercices chrono (nom normalisé)
-  const chronoExercises = [
-    'Planche latérale',
-    'Planche lestée',
-    'Cardio au choix',
-    'Étirements complets',
-    'Mobilité articulaire',
+  // Nouvelle logique pour déterminer quels exercices utilisent le chronomètre
+  // Jour 7 (index 6) OU exercices avec nbRep: 0 OU timer: true
+  const isDaySevenCardio = dayIndex === 6; // Jour 7 (cardio & récupération)
+  const hasTimerProperty = exo.timer === true;
+  const hasZeroReps = exo.nbRep === 0;
+  
+  // Exercices du jour 7 qui utilisent le chrono
+  const day7ChronoExercises = [
     'Vélo',
-    'Vélo d\'appartement',
-    'Vélo elliptique',
-    'Cardio',
-    'Cardio (30-45 min à intensité modérée)',
-    'Mountain climbers lestés',
-    'Extensions de hanche',
-    'Step-ups',
-    'Fentes avant alternées',
-    'Squats bulgares',
-    'Dead bug',
+    'Cardio au choix', 
+    'Étirements complets',
+    'Mobilité articulaire'
   ];
+  
+  const isDay7ChronoExercise = isDaySevenCardio && day7ChronoExercises.some(name => 
+    exo.name && exo.name.toLowerCase().includes(name.toLowerCase())
+  );
+  
+  // Détecter si l'exercice utilise le chronomètre
+  const isChrono = isDay7ChronoExercise || hasTimerProperty || hasZeroReps;
 
   // Exercices à faire sur chaque membre (nécessitant deux fois le rythme)
   const doubleSidedExercises = [
     'Planche latérale',
     'Mountain climbers lestés',
     'Extensions de hanche',
-    'Step-ups',
-    'Fentes avant alternées',
-    'Squats bulgares',
-    'Dead bug',
+    'Step-ups'
   ];
   
-  const isDoubleSided = doubleSidedExercises.some(name => exo.name && exo.name.toLowerCase().includes(name.toLowerCase()));
-  const isChrono = chronoExercises.some(name => exo.name && exo.name.toLowerCase().includes(name.toLowerCase()));
+  // Détecter les exercices "/côté" depuis les données
+  const isSidedExercise = exo.sets && (exo.sets.includes('/côté') || exo.sets.includes('/jambe'));
+  const isDoubleSided = isSidedExercise || doubleSidedExercises.some(name => 
+    exo.name && exo.name.toLowerCase().includes(name.toLowerCase())
+  );
+  
   const [chrono, setChrono] = useState(0);
   const [chronoRunning, setChronoRunning] = useState(false);
   const [side, setSide] = useState(0); // 0: premier côté, 1: deuxième côté
   const chronoInterval = useRef(null);
   
-  // Détecter si l'exercice a un timer
-  const hasTimer = exo.timer || exo.sets?.toLowerCase().includes('sec') || exo.name?.toLowerCase().includes('planche');
+  // Timer pour exercices avec duration
+  const [exerciseTimer, setExerciseTimer] = useState(exo.duration || 0);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const exerciseTimerRef = useRef(null);
+  
+  // Détecter si l'exercice a un timer basé sur les nouvelles règles
+  const hasTimer = isChrono || exo.sets?.toLowerCase().includes('sec');
 
   // Remise à zéro des états internes à chaque changement d'exercice ou de série
   useEffect(() => {
@@ -657,8 +670,44 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
       timerRef.current = null;
     }
     
+    // Réinitialiser le timer d'exercice
+    setExerciseTimer(exo.duration || 0);
+    setTimerRunning(false);
+    if (exerciseTimerRef.current) {
+      clearInterval(exerciseTimerRef.current);
+      exerciseTimerRef.current = null;
+    }
+    
     // Fonctionnalité d'annonce vocale désactivée
   }, [exo, setNum, totalSets]);
+
+  // Timer dégressif pour exercices avec duration spécifique
+  useEffect(() => {
+    if (exo.duration && timerRunning) {
+      exerciseTimerRef.current = setInterval(() => {
+        setExerciseTimer(prev => {
+          if (prev <= 1) {
+            setTimerRunning(false);
+            // Sons pour signaler la fin
+            playBeep();
+            setTimeout(() => playBeep(), 200);
+            setTimeout(() => playBeep(), 400);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else if (exerciseTimerRef.current) {
+      clearInterval(exerciseTimerRef.current);
+      exerciseTimerRef.current = null;
+    }
+    return () => {
+      if (exerciseTimerRef.current) {
+        clearInterval(exerciseTimerRef.current);
+        exerciseTimerRef.current = null;
+      }
+    };
+  }, [timerRunning, exo.duration]);
 
   // Lancer le décompte avant le rythme (désactivé pour les exercices chronométrés)
   const handlePulse = () => {
@@ -955,8 +1004,40 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           {exo.desc}
         </Typography>
         
-        {/* Bloc chrono pour exercices spéciaux et exercices en secondes */}
-        {(isChrono || hasTimer) && !isDoubleSided ? (
+        {/* Timer spécial pour exercices avec duration fixe */}
+        {exo.duration && !isChrono ? (
+          <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Typography variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
+              Timer - {Math.floor(exo.duration / 60)}:{(exo.duration % 60).toString().padStart(2, '0')}
+            </Typography>
+            <Typography variant="h3" sx={{ 
+              mb: 2, 
+              fontFamily: 'monospace', 
+              letterSpacing: 2,
+              color: exerciseTimer <= 10 ? '#FF5252' : (timerRunning ? 'success.main' : 'text.primary')
+            }}>
+              {Math.floor(exerciseTimer / 60).toString().padStart(2, '0')}:{(exerciseTimer % 60).toString().padStart(2, '0')}
+            </Typography>
+            {exerciseTimer <= 10 && exerciseTimer > 0 && (
+              <Typography variant="body2" sx={{ mb: 1, color: '#FF5252', fontWeight: 'bold' }}>
+                ⚠️ Plus que {exerciseTimer} secondes !
+              </Typography>
+            )}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button variant={timerRunning ? 'outlined' : 'contained'} color="primary" onClick={() => setTimerRunning(r => !r)}>
+                {timerRunning ? 'Pause' : (exerciseTimer === exo.duration ? 'Démarrer' : 'Reprendre')}
+              </Button>
+              <Button variant="outlined" color="secondary" onClick={() => { setExerciseTimer(exo.duration); setTimerRunning(false); }} disabled={exerciseTimer === exo.duration}>
+                Réinitialiser
+              </Button>
+              <Button variant="contained" color="success" onClick={() => { setTimerRunning(false); onDone(); }} sx={{ ml: 2 }}>
+                Terminer
+              </Button>
+            </Box>
+          </Box>
+        ) : 
+        /* Bloc chrono pour exercices spéciaux et exercices en secondes */
+        (isChrono || hasTimer) && !isDoubleSided ? (
           <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
               Chronomètre
