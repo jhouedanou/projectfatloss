@@ -92,7 +92,7 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   return (
     <div className="pause-screen">
       <div className="pause-header">
-        <h2 className="pause-title">Pause {reducedTime && "Rapide"}</h2>
+        <h2 className="pause-title">Pause {autoMode ? "Auto" : (reducedTime && "Rapide")}</h2>
         <div className="pause-timer">{time}s</div>
       </div>
       
