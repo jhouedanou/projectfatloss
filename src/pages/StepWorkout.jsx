@@ -61,17 +61,22 @@ function calculateWeight(equipment) {
 
 function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode }) {
   const defaultTime = reducedTime ? 10 : 15;
-  const [time, setTime] = useState(defaultTime);
+  const autoTime = 20; // Temps pour le mode automatique
+  
+  // Initialiser le temps selon le mode
+  const initialTime = autoMode ? autoTime : defaultTime;
+  const [time, setTime] = useState(initialTime);
+  
   const currentExercise = day.exercises[step];
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
   const isLastSet = setNum === totalSets - 1;
   
   useEffect(() => {
-    if (autoMode && time === defaultTime) {
-      // Mode automatique : pause de 20 secondes
-      setTime(20);
-    }
-    
+    // Réinitialiser le temps si le mode change
+    setTime(autoMode ? autoTime : defaultTime);
+  }, [autoMode, defaultTime, autoTime]);
+  
+  useEffect(() => {
     const timer = setInterval(() => {
       setTime((prevTime) => {
         if (prevTime <= 4 && prevTime > 1) {
@@ -81,13 +86,14 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
         if (prevTime === 1) {
           clearInterval(timer);
           onEnd();
+          return 0;
         }
         return prevTime - 1;
       });
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [time, onEnd, nextExercise, isLastSet]);
+  }, [onEnd]); // Retirer 'time' des dépendances pour éviter le redémarrage
 
   return (
     <div className="pause-screen">
