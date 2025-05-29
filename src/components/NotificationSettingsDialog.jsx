@@ -13,7 +13,8 @@ import {
   InputLabel, 
   Box, 
   Typography,
-  Alert
+  Alert,
+  Divider
 } from '@mui/material';
 import { 
   getNotificationSettings, 
@@ -23,6 +24,7 @@ import {
   showTestNotification,
   getNotificationPermissionStatus
 } from '../services/NotificationService';
+import NotificationTestDialog from './NotificationTestDialog';
 
 const NotificationSettingsDialog = ({ open, onClose }) => {
   const [settings, setSettings] = useState({
@@ -33,6 +35,7 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
   });
   const [permissionStatus, setPermissionStatus] = useState('default');
   const [testResult, setTestResult] = useState('');
+  const [showAdvancedTest, setShowAdvancedTest] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -199,17 +202,46 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
             >
               {testResult.includes('🔄') ? 'Test en cours...' : 'Tester la notification'}
             </Button>
-            
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              Utilisez ce bouton pour vérifier que les notifications fonctionnent correctement.
-            </Typography>
           </Box>
         )}
+
+        {/* Section diagnostic avancé */}
+        <Divider sx={{ my: 3 }} />
+        
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            🔧 Diagnostic Avancé
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Si les notifications ne fonctionnent pas sur Android, utilisez notre outil de diagnostic.
+          </Typography>
+          
+          <Button 
+            variant="contained"
+            color="info"
+            onClick={() => setShowAdvancedTest(true)}
+            size="small"
+            startIcon="🔍"
+            sx={{ mr: 1 }}
+          >
+            Diagnostic Complet
+          </Button>
+          
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            Détecte automatiquement les problèmes Android et propose des solutions
+          </Typography>
+        </Box>
       </DialogContent>
       
       <DialogActions>
         <Button onClick={onClose}>Fermer</Button>
       </DialogActions>
+      
+      {/* Dialog de diagnostic avancé */}
+      <NotificationTestDialog 
+        open={showAdvancedTest}
+        onClose={() => setShowAdvancedTest(false)}
+      />
     </Dialog>
   );
 };
