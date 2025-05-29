@@ -1,62 +1,87 @@
 import React from 'react';
+import { Box } from '@mui/material';
 import './FloatingButtons.css';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import StopIcon from '@mui/icons-material/Stop';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import PauseIcon from '@mui/icons-material/Pause';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-const FloatingButtons = ({ 
+function FloatingButtons({ 
   onYouTube, 
   onToggleRhythm, 
   onNext, 
-  onBack,
+  onBack, 
+  onSkip,
   isRhythmActive,
+  isPause,
   exerciseName 
-}) => {
+}) {
   return (
-    <div className="floating-buttons-container">
-      {onBack && (
-        <button 
-          className="floating-button back-btn"
-          onClick={onBack}
-          title="Retour au menu"
+    <Box
+      sx={{
+        position: 'fixed',
+        bottom: 20,
+        right: 20,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1,
+        zIndex: 1000
+      }}
+    >
+      {isPause ? (
+        <button
+          className="floating-button skip-button"
+          onClick={onSkip}
+          aria-label="Passer la pause"
         >
-          <ArrowBackIcon />
+          <SkipNextIcon />
         </button>
+      ) : (
+        <>
+          {onYouTube && (
+            <button
+              className="floating-button youtube-button"
+              onClick={onYouTube}
+              aria-label="Voir la vidéo YouTube"
+            >
+              <YouTubeIcon />
+            </button>
+          )}
+          
+          {onToggleRhythm && (
+            <button
+              className={`floating-button rhythm-button ${isRhythmActive ? 'active' : ''}`}
+              onClick={onToggleRhythm}
+              aria-label={isRhythmActive ? "Arrêter le rythme" : "Démarrer le rythme"}
+            >
+              {isRhythmActive ? <PauseIcon /> : <PlayArrowIcon />}
+            </button>
+          )}
+          
+          {onNext && (
+            <button
+              className="floating-button next-button"
+              onClick={onNext}
+              aria-label="Exercice suivant"
+            >
+              <SkipNextIcon />
+            </button>
+          )}
+          
+          {onBack && (
+            <button
+              className="floating-button back-button"
+              onClick={onBack}
+              aria-label="Retour"
+            >
+              <ArrowBackIcon />
+            </button>
+          )}
+        </>
       )}
-      
-      {onYouTube && (
-        <button 
-          className="floating-button youtube-btn"
-          onClick={onYouTube}
-          title={`Voir des tutoriels pour ${exerciseName}`}
-        >
-          <YouTubeIcon />
-        </button>
-      )}
-      
-      {onToggleRhythm && (
-        <button 
-          className="floating-button rhythm-btn"
-          onClick={onToggleRhythm}
-          title={isRhythmActive ? "Arrêter le rythme" : "Démarrer le rythme"}
-        >
-          {isRhythmActive ? <StopIcon /> : <PlayArrowIcon />}
-        </button>
-      )}
-      
-      {onNext && (
-        <button 
-          className="floating-button next-btn"
-          onClick={onNext}
-          title="Exercice suivant"
-        >
-          <NavigateNextIcon />
-        </button>
-      )}
-    </div>
+    </Box>
   );
-};
+}
 
 export default FloatingButtons;

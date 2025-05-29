@@ -23,10 +23,30 @@ const WorkoutContext = createContext({
   autoMode: false,
 });
 
+// Créer un contexte audio unique pour toute l'application
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
 function playBeep() {
-  const beep = new Audio(beepSound);
-  beep.volume = 1.0;
-  beep.play().catch(err => console.error("Erreur de lecture audio:", err));
+  try {
+    // Créer un oscillateur pour générer le son
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    // Connecter les nœuds
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Configurer le son
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    
+    // Jouer le son
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.1);
+  } catch (error) {
+    console.error("Erreur lors de la lecture du son:", error);
+  }
 }
 
 function parseSets(sets) {
@@ -46,18 +66,13 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
   const isLastSet = setNum === totalSets - 1;
   
-  // Synthèse vocale réactivée uniquement pour les exercices
-  // Aucune annonce vocale pendant la pause
-  
   useEffect(() => {
-    // Si mode automatique activé, réduire le temps de pause de moitié
     if (autoMode && time === defaultTime) {
       setTime(Math.ceil(defaultTime / 2));
     }
     
     const timer = setInterval(() => {
       setTime((prevTime) => {
-        // Bip seulement dans les 4 dernières secondes (pas au début)
         if (prevTime <= 4 && prevTime > 1) {
           playBeep();
         }
@@ -65,7 +80,6 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
         if (prevTime === 1) {
           clearInterval(timer);
           onEnd();
-          // Fonctionnalité d'annonce vocale désactivée pour les pauses
         }
         return prevTime - 1;
       });
@@ -102,27 +116,11 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
         </div>
       )}
       
-      {/* Afficher le bouton pour passer la pause */}
-      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
-        <button 
-          onClick={onSkip}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: 'var(--button-bg)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '20px',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: 500,
-            transition: 'background-color 0.2s, transform 0.2s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--button-active)'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--button-bg)'}
-        >
-          Passer la pause
-        </button>
-      </div>
+      {/* Bouton flottant pour passer la pause */}
+      <FloatingButtons 
+        onSkip={onSkip}
+        isPause={true}
+      />
     </div>
   );
 }
@@ -247,14 +245,13 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const total = day?.exercises?.length || 0;
   const exo = day?.exercises?.[step];
   
-  // Détecter si l'exercice se termine par "/côté"
-  const isSidedExercise = exo?.sets?.includes('/côté') || exo?.sets?.includes('/jambe');
-  const adjustedSets = isSidedExercise ? parseSets(exo.sets) * 2 : parseSets(exo.sets);
+  // Utiliser totalSets de l'exercice en priorité, sinon calculer
+  const baseTotalSets = exo?.totalSets ?? parseSets(exo?.sets || '1');
   
   const totalSets = exo
     ? (autoMode 
-        ? Math.max(1, Math.floor(adjustedSets / 2))
-        : adjustedSets)
+        ? Math.max(1, Math.floor(baseTotalSets / 2))
+        : baseTotalSets)
     : 1;
 
   // Ajout d'une vérification pour éviter le crash si les données ne sont pas prêtes

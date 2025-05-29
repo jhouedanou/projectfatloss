@@ -260,7 +260,7 @@ export const days = [
         equip: 'Haltères 15 kg',
         desc: "Un pas en avant, haltères en main, fléchissez les genoux pour descendre, puis remontez. Cible quadriceps, fessiers et équilibre.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 8,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -288,7 +288,7 @@ export const days = [
         equip: 'Haltères 10 kg',
         desc: "Montez sur une marche/banc avec un pied, puis l'autre. Alternative aux extensions de jambes.",
         caloriesPerSet: [10, 12],
-        totalSets: 3,
+        totalSets: 6,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -568,7 +568,7 @@ export const days = [
         timer: true,
         duration: 30,
         caloriesPerSet: [4, 6],
-        totalSets: 3,
+        totalSets: 6,
         nbRep: 0,
         googleFitActivity: {
           type: 'strength_training',
@@ -615,7 +615,7 @@ export const days = [
         equip: 'Haltères 15 kg',
         desc: "Écartez une jambe sur le côté, fléchissez puis revenez. Cible particulièrement les adducteurs.",
         caloriesPerSet: [12, 15],
-        totalSets: 3,
+        totalSets: 6,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -643,7 +643,7 @@ export const days = [
         equip: 'Haltère 10 kg (derrière le genou)',
         desc: "À quatre pattes, étendez une jambe vers l'arrière et le haut. Cible les fessiers et les lombaires.",
         caloriesPerSet: [10, 12],
-        totalSets: 3,
+        totalSets: 6,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -657,7 +657,7 @@ export const days = [
         equip: 'Haltères 10 kg',
         desc: "Pied arrière sur un banc, descendez en fente. Alternative au good morning, cible les quadriceps et les fessiers.",
         caloriesPerSet: [12, 15],
-        totalSets: 3,
+        totalSets: 6,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -699,7 +699,7 @@ export const days = [
         equip: 'Lesté avec haltère 10 kg',
         desc: "Allongé, bras et jambes en l'air, descendez le bras et la jambe opposés. Excellent pour la stabilité du core.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
+        totalSets: 6,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
