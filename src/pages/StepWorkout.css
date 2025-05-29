@@ -308,19 +308,39 @@ body.dark-theme .timer-value {
 }
 
 .auto-mode-indicator {
-  background: linear-gradient(45deg, #F03D32, #FF6B6B);
+  background: linear-gradient(45deg, #FF6B35, #F7931E);
   color: white;
-  text-align: center;
   padding: 8px 16px;
-  border-radius: 8px;
-  margin: 8px 0;
+  border-radius: 25px;
+  text-align: center;
   font-weight: bold;
   font-size: 0.9rem;
-  box-shadow: 0 2px 4px rgba(240, 61, 50, 0.3);
-  animation: pulse 2s infinite;
+  margin: 8px 0;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+  animation: pulse-auto 2s infinite;
 }
 
-@keyframes pulse {
+/* Indicateur de notification active */
+.notification-indicator {
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.8rem;
+  margin: 6px 0;
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+  animation: fadeInOut 3s ease-in-out infinite;
+  opacity: 0.9;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes pulse-auto {
   0% {
     transform: scale(1);
     opacity: 1;

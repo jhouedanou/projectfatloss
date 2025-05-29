@@ -13,6 +13,7 @@ import DayPills from '../components/DayPills';
 import { getWorkoutPlan } from '../services/WorkoutCustomization';
 import { initSpeechService, announceExercise, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
+import notificationService from '../services/NotificationService';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -408,7 +409,10 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     showConfirmDialog(
       "Quitter l'entraînement ?",
       "Voulez-vous vraiment quitter ? Votre progression sera perdue.",
-      () => onBack(),
+      () => {
+        notificationService.clearCurrentExercise();
+        onBack();
+      },
       () => {}
     );
   };
@@ -453,6 +457,9 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           // Informer le parent que l'entraînement a été sauvegardé
           onComplete && onComplete(savedWorkout);
           
+          // Supprimer la notification
+          notificationService.clearCurrentExercise();
+          
           // Fermer la page
           onBack();
         } catch (error) {
@@ -478,6 +485,36 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     );
   }
 
+  // Gestion des notifications d'exercice en cours
+  useEffect(() => {
+    if (exo && !pause && !workoutCompleted) {
+      // Afficher/mettre à jour la notification avec l'exercice en cours
+      const exerciseData = {
+        name: exo.name,
+        currentSet: setNum + 1,
+        totalSets: totalSets,
+        dayTitle: day.title,
+        currentExercise: step + 1,
+        totalExercises: total,
+        autoMode: autoMode
+      };
+      
+      notificationService.updateCurrentExercise(exerciseData);
+    }
+  }, [exo, setNum, totalSets, day.title, step, total, autoMode, pause, workoutCompleted]);
+  
+  // Supprimer la notification à la fin de l'entraînement ou en quittant
+  useEffect(() => {
+    if (workoutCompleted) {
+      notificationService.clearCurrentExercise();
+    }
+    
+    // Cleanup au démontage du composant
+    return () => {
+      notificationService.clearCurrentExercise();
+    };
+  }, [workoutCompleted]);
+
   return (
     <div 
       className="day-content" 
@@ -499,6 +536,13 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       {autoMode && (
         <div className="auto-mode-indicator">
           🚀 Mode Automatique Activé ! 🚀
+        </div>
+      )}
+      
+      {/* Indicateur de notification active */}
+      {!pause && !workoutCompleted && (
+        <div className="notification-indicator">
+          🔔 Exercice affiché sur l'écran de verrouillage
         </div>
       )}
       

@@ -70,6 +70,18 @@ self.addEventListener('message', event => {
   if (event.data && event.data.type === 'TEST_NOTIFICATION') {
     showWorkoutNotification(event.data.payload);
   }
+  
+  if (event.data && event.data.type === 'CURRENT_EXERCISE_NOTIFICATION') {
+    showCurrentExerciseNotification(event.data.payload);
+  }
+  
+  if (event.data && event.data.type === 'UPDATE_EXERCISE_NOTIFICATION') {
+    updateCurrentExerciseNotification(event.data.payload);
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_EXERCISE_NOTIFICATION') {
+    clearCurrentExerciseNotification();
+  }
 });
 
 // Gestion des clics sur les notifications
@@ -79,47 +91,85 @@ self.addEventListener('notificationclick', event => {
   // Fermer la notification
   event.notification.close();
   
-  // Traitement des actions
-  if (event.action === 'start') {
-    // Ouvrir l'app et démarrer l'entraînement
-    event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true })
-        .then(clientList => {
-          // Chercher une fenêtre ouverte existante
+  // Traitement selon le type de notification
+  const notificationData = event.notification.data || {};
+  
+  if (event.notification.tag === 'pfl-current-exercise') {
+    // Gestion des notifications d'exercice en cours
+    if (event.action === 'open-app' || !event.action) {
+      // Ouvrir l'app ou retourner au workout
+      event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true })
+          .then(clientList => {
+            // Chercher une fenêtre ouverte existante
+            for (const client of clientList) {
+              if (client.url.includes(self.location.origin) && 'focus' in client) {
+                client.postMessage({ type: 'FOCUS_WORKOUT' });
+                return client.focus();
+              }
+            }
+            
+            // Ouvrir une nouvelle fenêtre si aucune trouvée
+            if (clients.openWindow) {
+              return clients.openWindow('/');
+            }
+          })
+      );
+    } else if (event.action === 'pause') {
+      // Envoyer un message à l'app pour mettre en pause
+      event.waitUntil(
+        clients.matchAll({ type: 'window' }).then(clientList => {
+          clientList.forEach(client => {
+            if (client.url.includes(self.location.origin)) {
+              client.postMessage({ type: 'PAUSE_WORKOUT' });
+            }
+          });
+        })
+      );
+    }
+  } else {
+    // Gestion des notifications d'entraînement classiques
+    if (event.action === 'start') {
+      // Ouvrir l'app et démarrer l'entraînement
+      event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true })
+          .then(clientList => {
+            // Chercher une fenêtre ouverte existante
+            for (const client of clientList) {
+              if (client.url.includes(self.location.origin) && 'focus' in client) {
+                client.postMessage({ type: 'START_WORKOUT' });
+                return client.focus();
+              }
+            }
+            
+            // Ouvrir une nouvelle fenêtre si aucune trouvée
+            if (clients.openWindow) {
+              return clients.openWindow('/?start=true');
+            }
+          })
+      );
+    } else if (event.action === 'later') {
+      // Reporter de 1 heure
+      scheduleDelayedNotification(3600000); // 1 heure en ms
+    } else {
+      // Clic sans action - ouvrir l'app
+      event.waitUntil(
+        clients.matchAll({ type: 'window' }).then(clientList => {
           for (const client of clientList) {
             if (client.url.includes(self.location.origin) && 'focus' in client) {
-              client.postMessage({ type: 'START_WORKOUT' });
               return client.focus();
             }
           }
-          
-          // Ouvrir une nouvelle fenêtre si aucune trouvée
           if (clients.openWindow) {
-            return clients.openWindow('/?start=true');
+            return clients.openWindow('/');
           }
         })
-    );
-  } else if (event.action === 'later') {
-    // Reporter de 1 heure
-    scheduleDelayedNotification(3600000); // 1 heure en ms
-  } else {
-    // Clic sans action - ouvrir l'app
-    event.waitUntil(
-      clients.matchAll({ type: 'window' }).then(clientList => {
-        for (const client of clientList) {
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        if (clients.openWindow) {
-          return clients.openWindow('/');
-        }
-      })
-    );
+      );
+    }
   }
   
   // Envoyer des analytics (optionnel)
-  sendNotificationAnalytics(event.action || 'open', event.notification.data);
+  sendNotificationAnalytics(event.action || 'open', notificationData);
 });
 
 // Gestion de la fermeture des notifications
@@ -333,6 +383,100 @@ function scheduleWorkoutNotification(config = {}) {
 // Détection de la plateforme pour le SW
 function isAndroidPlatform() {
   return /Android/i.test(navigator.userAgent || '');
+}
+
+// =================== NOTIFICATIONS D'EXERCICE EN COURS ===================
+
+// Afficher une notification avec l'exercice en cours
+async function showCurrentExerciseNotification(payload) {
+  const { 
+    exerciseName, 
+    setNum, 
+    totalSets, 
+    dayTitle, 
+    currentExercise, 
+    totalExercises,
+    autoMode = false 
+  } = payload;
+  
+  const title = `🏋️ ${exerciseName}`;
+  const body = `Série ${setNum}/${totalSets} • Exercice ${currentExercise}/${totalExercises}${autoMode ? ' • Mode Auto' : ''}`;
+  const subtext = dayTitle || "Entraînement en cours";
+  
+  const options = {
+    body: body,
+    icon: '/android/android-launchericon-192-192.png',
+    badge: '/android/android-launchericon-96-96.png',
+    tag: 'pfl-current-exercise',
+    requireInteraction: false, // Ne pas bloquer l'écran
+    renotify: true,
+    silent: true, // Pas de son pour les mises à jour
+    timestamp: Date.now(),
+    data: {
+      type: 'current-exercise',
+      exerciseName,
+      setNum,
+      totalSets,
+      timestamp: Date.now()
+    },
+    actions: [
+      {
+        action: 'open-app',
+        title: '📱 Ouvrir',
+        icon: '/android/android-launchericon-48-48.png'
+      },
+      {
+        action: 'pause',
+        title: '⏸️ Pause',
+        icon: '/android/android-launchericon-48-48.png'
+      }
+    ]
+  };
+
+  // Configuration spécifique selon la plateforme
+  const isAndroid = /Android/i.test(navigator.userAgent || '');
+  
+  if (isAndroid) {
+    options.color = '#F03D32';
+    options.sticky = true;
+    options.ongoing = true; // Notification persistante sur Android
+    
+    // Ajout du sous-titre pour Android
+    if (subtext) {
+      options.data.subtext = subtext;
+    }
+  }
+
+  try {
+    // Fermer toute notification d'exercice existante
+    await clearCurrentExerciseNotification();
+    
+    // Afficher la nouvelle notification
+    await self.registration.showNotification(title, options);
+    console.log('SW: Notification exercice en cours affichée:', exerciseName);
+    
+  } catch (error) {
+    console.error('SW: Erreur notification exercice:', error);
+  }
+}
+
+// Mettre à jour la notification d'exercice en cours
+async function updateCurrentExerciseNotification(payload) {
+  // Simplement créer une nouvelle notification (ferme automatiquement l'ancienne avec le même tag)
+  await showCurrentExerciseNotification(payload);
+}
+
+// Supprimer la notification d'exercice en cours
+async function clearCurrentExerciseNotification() {
+  try {
+    const notifications = await self.registration.getNotifications({ tag: 'pfl-current-exercise' });
+    notifications.forEach(notification => {
+      console.log('SW: Fermeture notification exercice:', notification.tag);
+      notification.close();
+    });
+  } catch (error) {
+    console.error('SW: Erreur suppression notification exercice:', error);
+  }
 }
 
 console.log('SW: Service Worker PFL chargé - Android:', isAndroidPlatform());

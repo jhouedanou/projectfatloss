@@ -499,3 +499,166 @@ export function getAvailableNotificationTimes() {
   return times;
 }
 
+// Service de notification pour l'exercice en cours
+// Gère l'affichage persistant sur l'écran de verrouillage
+
+class NotificationService {
+  constructor() {
+    this.isSupported = 'serviceWorker' in navigator && 'Notification' in window;
+    this.permission = Notification.permission;
+    this.serviceWorker = null;
+    this.currentExerciseNotificationShown = false;
+    
+    this.init();
+  }
+
+  async init() {
+    if (!this.isSupported) {
+      console.warn('Notifications non supportées sur ce navigateur');
+      return;
+    }
+
+    try {
+      // Enregistrer le service worker si pas déjà fait
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        this.serviceWorker = registration;
+        console.log('NotificationService: Service Worker enregistré');
+      }
+    } catch (error) {
+      console.error('NotificationService: Erreur enregistrement SW:', error);
+    }
+  }
+
+  // Demander la permission pour les notifications
+  async requestPermission() {
+    if (!this.isSupported) {
+      return false;
+    }
+
+    if (this.permission === 'granted') {
+      return true;
+    }
+
+    if (this.permission === 'denied') {
+      console.warn('NotificationService: Permission refusée par l\'utilisateur');
+      return false;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      this.permission = permission;
+      
+      if (permission === 'granted') {
+        console.log('NotificationService: Permission accordée');
+        return true;
+      } else {
+        console.warn('NotificationService: Permission refusée');
+        return false;
+      }
+    } catch (error) {
+      console.error('NotificationService: Erreur demande permission:', error);
+      return false;
+    }
+  }
+
+  // Afficher une notification avec l'exercice en cours
+  async showCurrentExercise(exerciseData) {
+    const hasPermission = await this.requestPermission();
+    if (!hasPermission) {
+      console.warn('NotificationService: Pas de permission pour les notifications');
+      return;
+    }
+
+    const payload = {
+      exerciseName: exerciseData.name,
+      setNum: exerciseData.currentSet,
+      totalSets: exerciseData.totalSets,
+      dayTitle: exerciseData.dayTitle,
+      currentExercise: exerciseData.currentExercise,
+      totalExercises: exerciseData.totalExercises,
+      autoMode: exerciseData.autoMode || false
+    };
+
+    try {
+      if (this.serviceWorker && this.serviceWorker.active) {
+        this.serviceWorker.active.postMessage({
+          type: 'CURRENT_EXERCISE_NOTIFICATION',
+          payload: payload
+        });
+        
+        this.currentExerciseNotificationShown = true;
+        console.log('NotificationService: Notification exercice envoyée', payload);
+      }
+    } catch (error) {
+      console.error('NotificationService: Erreur envoi notification:', error);
+    }
+  }
+
+  // Mettre à jour la notification d'exercice
+  async updateCurrentExercise(exerciseData) {
+    if (!this.currentExerciseNotificationShown) {
+      // Si aucune notification n'est affichée, en créer une
+      return this.showCurrentExercise(exerciseData);
+    }
+
+    const payload = {
+      exerciseName: exerciseData.name,
+      setNum: exerciseData.currentSet,
+      totalSets: exerciseData.totalSets,
+      dayTitle: exerciseData.dayTitle,
+      currentExercise: exerciseData.currentExercise,
+      totalExercises: exerciseData.totalExercises,
+      autoMode: exerciseData.autoMode || false
+    };
+
+    try {
+      if (this.serviceWorker && this.serviceWorker.active) {
+        this.serviceWorker.active.postMessage({
+          type: 'UPDATE_EXERCISE_NOTIFICATION',
+          payload: payload
+        });
+        
+        console.log('NotificationService: Notification exercice mise à jour', payload);
+      }
+    } catch (error) {
+      console.error('NotificationService: Erreur mise à jour notification:', error);
+    }
+  }
+
+  // Supprimer la notification d'exercice en cours
+  async clearCurrentExercise() {
+    try {
+      if (this.serviceWorker && this.serviceWorker.active) {
+        this.serviceWorker.active.postMessage({
+          type: 'CLEAR_EXERCISE_NOTIFICATION'
+        });
+        
+        this.currentExerciseNotificationShown = false;
+        console.log('NotificationService: Notification exercice supprimée');
+      }
+    } catch (error) {
+      console.error('NotificationService: Erreur suppression notification:', error);
+    }
+  }
+
+  // Vérifier si les notifications sont supportées et autorisées
+  isEnabled() {
+    return this.isSupported && this.permission === 'granted';
+  }
+
+  // Obtenir le statut des permissions
+  getPermissionStatus() {
+    return {
+      supported: this.isSupported,
+      permission: this.permission,
+      enabled: this.isEnabled()
+    };
+  }
+}
+
+// Instance singleton
+const notificationService = new NotificationService();
+
+export default notificationService;
+
