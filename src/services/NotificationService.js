@@ -283,9 +283,46 @@ function scheduleNextNotification() {
  * Affiche la notification d'exercice quotidien
  */
 function showWorkoutNotification() {
-  const settings = getNotificationSettings();
-  
-  if (!settings.enabled || !settings.permission) {
+  try {
+    // Vérifier si l'API Notification est supportée
+    if (typeof Notification === 'undefined') {
+      console.warn('API Notification non supportée sur ce navigateur');
+      return;
+    }
+    
+    const settings = getNotificationSettings();
+    
+    // Vérifier si les notifications sont activées
+    if (!settings.enabled) {
+      console.log('Notifications désactivées dans les paramètres');
+      return;
+    }
+    
+    // Détection d'iOS pour traitement spécial
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    // Forcer la vérification des permissions
+    if (Notification.permission !== 'granted') {
+      console.log('Permission de notification non accordée, tentative de demande...');
+      // Sur iOS, la demande de permission doit être déclenchée par une action utilisateur
+      if (isIOS) {
+        console.log('Sur iOS, l\'utilisateur doit autoriser manuellement les notifications');
+        return;
+      }
+      
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          updateNotificationSettings({...settings, permission: true});
+          // Afficher la notification après avoir obtenu la permission
+          _showActualNotification();
+        }
+      }).catch(error => {
+        console.error('Erreur lors de la demande de permission:', error);
+      });
+      return;
+    }
+  } catch (error) {
+    console.error('Erreur dans showWorkoutNotification:', error);
     return;
   }
 
@@ -299,63 +336,148 @@ function showWorkoutNotification() {
   
   const randomMessage = messages[Math.floor(Math.random() * messages.length)];
   
-  if ('serviceWorker' in navigator && 'showNotification' in ServiceWorkerRegistration.prototype) {
-    // Notification via Service Worker (persiste même si l'app est fermée)
-    navigator.serviceWorker.ready.then(registration => {
-      registration.showNotification("Project Fat Loss", {
+  // Fonction interne pour afficher la notification
+  function _showActualNotification() {
+    console.log('Affichage effectif de la notification...');
+    
+    // Détection d'iOS pour traitement spécial
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (!isIOS && 'serviceWorker' in navigator && 'showNotification' in ServiceWorkerRegistration.prototype) {
+      // Notification via Service Worker (persiste même si l'app est fermée)
+      // Ne pas utiliser cette méthode sur iOS car cela peut causer des problèmes
+      navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification("Project Fat Loss", {
+          body: randomMessage,
+          icon: '/favicon.ico',
+          badge: '/icon-192x192.png',
+          tag: 'daily-workout',
+          requireInteraction: !isIOS, // Pas d'interaction requise sur iOS
+          actions: !isIOS ? [
+            {
+              action: 'start',
+              title: 'Commencer'
+            },
+            {
+              action: 'later',
+              title: 'Plus tard'
+            }
+          ] : [], // Pas d'actions sur iOS
+          data: {
+            type: 'daily-workout',
+            url: window.location.origin
+          }
+        });
+        console.log('Notification envoyée via Service Worker');
+      }).catch(error => {
+        console.error('Erreur Service Worker:', error);
+        // Fallback en cas d'erreur avec le service worker
+        _showBasicNotification();
+      });
+    } else {
+      _showBasicNotification();
+    }
+  }
+  
+  // Notification basique en fallback
+  function _showBasicNotification() {
+    try {
+      // Utiliser l'API Notification de base - plus fiable sur iOS
+      new Notification("Project Fat Loss", {
         body: randomMessage,
         icon: '/favicon.ico',
-        badge: '/icon-192x192.png',
-        tag: 'daily-workout',
-        requireInteraction: true,
-        actions: [
-          {
-            action: 'start',
-            title: 'Commencer'
-          },
-          {
-            action: 'later',
-            title: 'Plus tard'
-          }
-        ],
-        data: {
-          type: 'daily-workout',
-          url: window.location.origin
-        }
+        tag: 'daily-workout'
       });
-    });
-  } else {
-    // Notification basique
-    new Notification("Project Fat Loss", {
-      body: randomMessage,
-      icon: '/favicon.ico',
-      tag: 'daily-workout'
-    });
+      console.log('Notification basique envoyée');
+    } catch (error) {
+      console.error('Erreur notification basique:', error);
+      // Derniere tentative: alerter l'utilisateur si tout échoue sur iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        console.log('Tentative d\'alerte simple sur iOS');
+        // Sur iOS, nous pourrions utiliser une simple alerte
+        // Ceci est désactivé pour ne pas perturber l'utilisateur
+        // alert("C'est l'heure de votre entraînement quotidien !");
+      }
+    }
   }
+  
+  // Exécuter l'affichage
+  _showActualNotification();
 }
 
 /**
  * Initialise le service de notifications
  */
-export function initNotificationService() {
-  // Service de notifications initialisé
-  console.log('Service de notifications initialisé');
-  
-  // Vérifier et demander les permissions si nécessaire
-  requestNotificationPermission().then(granted => {
-    if (granted) {
-      scheduleWorkoutNotifications();
+export async function initNotificationService() {
+  try {
+    // Vérifier si l'API Notification est supportée
+    if (typeof Notification === 'undefined') {
+      console.warn('API Notification non supportée sur ce navigateur');
+      return false;
     }
-  });
-  
-  // Écouter les clics sur les notifications
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', event => {
-      if (event.data && event.data.type === 'notification-click') {
-        // L'utilisateur a cliqué sur la notification
-        window.focus();
+    
+    // Service de notifications initialisé
+    console.log('Service de notifications initialisé');
+    
+    // Vérifier le statut actuel des permissions
+    const currentPermission = Notification.permission;
+    console.log('Statut actuel des permissions de notification:', currentPermission);
+    
+    // Mettre à jour les paramètres locaux avec le statut réel
+    const settings = getNotificationSettings();
+    if (currentPermission === 'granted' && !settings.permission) {
+      updateNotificationSettings({...settings, permission: true});
+    }
+    
+    // Détection d'iOS pour traitement spécial
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      console.log('Plateforme iOS détectée, ajustement des fonctionnalités');
+      // Sur iOS, on ne fait pas de demande proactive de permission
+      // et on ne tente pas d'enregistrer le service worker qui pourrait causer des problèmes
+      scheduleWorkoutNotifications();
+      return true;
+    }
+    
+    // Pour les autres plateformes, on continue normalement
+    try {
+      // Vérifier et demander les permissions si nécessaire
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        console.log('Permissions accordées, programmation des notifications');
+        // Montrer une notification de test pour confirmer que tout fonctionne
+        // mais seulement si ce n'est pas iOS
+        setTimeout(() => {
+          showTestNotification().then(success => {
+            console.log('Test de notification:', success ? 'réussi' : 'échoué');
+          }).catch(e => console.error('Erreur test notification:', e));
+        }, 2000); // Attendre 2 secondes pour être sûr que tout est initialisé
+        
+        scheduleWorkoutNotifications();
+      } else {
+        console.warn('Permissions refusées, pas de notifications programmées');
       }
-    });
+    } catch (permError) {
+      console.error('Erreur lors de la demande de permission:', permError);
+      // Continuer malgré l'erreur
+    }
+    
+    // Enregistrer le service worker si disponible
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('Service Worker enregistré avec succès');
+      } catch (swError) {
+        console.error('Erreur d\'enregistrement Service Worker:', swError);
+        // Continuer malgré l'erreur
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Erreur critique dans initNotificationService:', error);
+    return false;
   }
 }
 

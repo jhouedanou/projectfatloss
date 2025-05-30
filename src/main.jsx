@@ -29,8 +29,17 @@ const updateSW = registerSW({
 const initialDarkMode = localStorage.getItem('theme') !== 'light';
 const theme = createAppTheme(initialDarkMode);
 
-// Initialiser le service de notifications
-initNotificationService();
+// Initialiser le service de notifications avec gestion d'erreur
+try {
+  // Retarder l'initialisation des notifications pour ne pas bloquer le rendu
+  setTimeout(() => {
+    initNotificationService().catch(error => {
+      console.error('Erreur initialisation notifications:', error);
+    });
+  }, 1500);
+} catch (error) {
+  console.error('Erreur critique service notification:', error);
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
