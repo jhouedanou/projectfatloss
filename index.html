@@ -3,6 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.ico" />
+    <!-- Script pour gérer les chemins base en production -->
+    <script>
+      // Déterminer la base URL pour les ressources statiques
+      (function() {
+        window.BASE_URL = '';
+        // Vérifier si nous sommes en production sur GitHub Pages
+        if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')) {
+          // Extraire le chemin de base depuis l'URL actuelle (ex: /projectfatloss/)
+          const pathArray = window.location.pathname.split('/');
+          if (pathArray.length > 1) {
+            window.BASE_URL = '/' + pathArray[1]; // ex: /projectfatloss
+          }
+          console.log('Base URL détectée:', window.BASE_URL);
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#22223b" />
     <meta name="description" content="Application de suivi d'entraînement avec calcul des calories brûlées" />

@@ -466,7 +466,15 @@ export async function initNotificationService() {
     // Enregistrer le service worker si disponible
     if ('serviceWorker' in navigator) {
       try {
-        const registration = await navigator.serviceWorker.register('/sw.js');
+        // Déterminer le chemin correct du service worker en fonction de l'environnement
+        const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+        const swPath = isProduction 
+          ? (new URL('./sw.js', window.location.href)).pathname // Chemin relatif pour la production
+          : '/sw.js'; // Chemin absolu pour le développement
+          
+        console.log('Tentative d\'enregistrement du Service Worker avec le chemin:', swPath);
+        
+        const registration = await navigator.serviceWorker.register(swPath);
         console.log('Service Worker enregistré avec succès');
       } catch (swError) {
         console.error('Erreur d\'enregistrement Service Worker:', swError);

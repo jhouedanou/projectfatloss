@@ -11,6 +11,15 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/bicep.svg'],
+      // Configurer explicitement le chemin du service worker pour GitHub Pages
+      filename: 'sw.js',
+      strategies: 'injectManifest',
+      injectManifest: {
+        swSrc: './public/sw-template.js',
+        swDest: 'sw.js',
+        globDirectory: 'dist',
+        maximumFileSizeToCacheInBytes: 3000000,
+      },
       manifest: {
         name: 'Project Fatloss',
         short_name: 'Fatloss',
