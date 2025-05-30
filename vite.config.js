@@ -11,14 +11,36 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/bicep.svg'],
-      // Configurer explicitement le chemin du service worker pour GitHub Pages
-      filename: 'sw.js',
-      strategies: 'injectManifest',
-      injectManifest: {
-        swSrc: './public/sw-template.js',
-        swDest: 'sw.js',
-        globDirectory: 'dist',
-        maximumFileSizeToCacheInBytes: 3000000,
+      // Utiliser generateSW au lieu de injectManifest pour plus de simplicité
+      strategies: 'generateSW',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
+        // Personnaliser le service worker généré
+        navigateFallback: null,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 an
+              }
+            }
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 jours
+              }
+            }
+          }
+        ]
       },
       manifest: {
         name: 'Project Fatloss',
