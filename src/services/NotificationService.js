@@ -1,11 +1,8 @@
 /**
  * Service de notifications pour l'application
  * Gère les notifications quotidiennes et les préférences utilisateur
- * Intégré avec OneSignal pour les notifications push
  * Optimisé pour Android et iOS
  */
-
-import oneSignalService from './OneSignalService.js';
 
 const NOTIFICATION_SETTINGS_KEY = 'notification_settings';
 const DEFAULT_TIME = '16:00'; // 4h par défaut
@@ -37,7 +34,6 @@ export function getNotificationSettings() {
     enabled: true,
     time: DEFAULT_TIME,
     permission: false,
-    useOneSignal: true,
     androidFallback: true,
     lastPermissionRequest: 0
   };
@@ -53,12 +49,7 @@ export function updateNotificationSettings(settings) {
   const newSettings = { ...currentSettings, ...settings };
   localStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify(newSettings));
   
-  // Mettre à jour OneSignal si disponible
-  if (newSettings.useOneSignal && oneSignalService.isAvailable()) {
-    oneSignalService.updateNotificationPreferences(newSettings).catch(error => {
-      console.error('Erreur mise à jour OneSignal:', error);
-    });
-  }
+  // Notification service mis à jour
   
   // Reprogrammer les notifications avec les nouveaux paramètres
   scheduleWorkoutNotifications();
@@ -106,30 +97,7 @@ export async function requestNotificationPermission() {
 async function requestAndroidNotificationPermission(settings, platform) {
   console.log('Demande de permission Android:', platform);
   
-  // 1. Essayer OneSignal en premier (plus fiable sur Android)
-  if (settings.useOneSignal && oneSignalService.isAvailable()) {
-    try {
-      console.log('Tentative OneSignal pour Android...');
-      const granted = await oneSignalService.requestPermission();
-      if (granted) {
-        updateNotificationSettings({ ...settings, permission: true });
-        
-        await oneSignalService.setUserTags({
-          app: 'PFL',
-          platform: 'android',
-          browser: platform.isChrome ? 'chrome' : (platform.isSamsung ? 'samsung' : 'other'),
-          language: 'fr',
-          notifications_enabled: true,
-          notification_time: settings.time
-        });
-        
-        console.log('OneSignal configuré avec succès sur Android');
-        return true;
-      }
-    } catch (error) {
-      console.error('Erreur OneSignal Android:', error);
-    }
-  }
+  // Utiliser les notifications natives Android
   
   // 2. Fallback vers notifications natives Android
   return await requestAndroidNativeNotifications(settings, platform);
@@ -224,27 +192,7 @@ async function registerAndroidServiceWorker() {
  * Gestion spécifique des permissions iOS
  */
 async function requestIOSNotificationPermission(settings) {
-  // Sur iOS, OneSignal fonctionne généralement bien
-  if (settings.useOneSignal && oneSignalService.isAvailable()) {
-    try {
-      const granted = await oneSignalService.requestPermission();
-      if (granted) {
-        updateNotificationSettings({ ...settings, permission: true });
-        
-        await oneSignalService.setUserTags({
-          app: 'PFL',
-          platform: 'ios',
-          language: 'fr',
-          notifications_enabled: true,
-          notification_time: settings.time
-        });
-        
-        return true;
-      }
-    } catch (error) {
-      console.error('Erreur OneSignal iOS:', error);
-    }
-  }
+  // Utiliser les notifications natives iOS
   
   // Fallback vers notifications standard iOS
   return await requestStandardNotificationPermission(settings);
@@ -390,12 +338,8 @@ function showWorkoutNotification() {
  * Initialise le service de notifications
  */
 export function initNotificationService() {
-  // Initialiser OneSignal
-  oneSignalService.init().then(() => {
-    console.log('Service de notifications initialisé avec OneSignal');
-  }).catch(error => {
-    console.error('Erreur initialisation OneSignal:', error);
-  });
+  // Service de notifications initialisé
+  console.log('Service de notifications initialisé');
   
   // Vérifier et demander les permissions si nécessaire
   requestNotificationPermission().then(granted => {
@@ -421,17 +365,7 @@ export function initNotificationService() {
 export async function showTestNotification() {
   const settings = getNotificationSettings();
   
-  // Essayer d'abord OneSignal si activé
-  if (settings.useOneSignal && oneSignalService.isAvailable()) {
-    try {
-      const success = await oneSignalService.sendTestNotification();
-      if (success) {
-        return true;
-      }
-    } catch (error) {
-      console.error('Erreur test OneSignal, fallback vers notification standard:', error);
-    }
-  }
+  // Utiliser uniquement les notifications standard
   
   // Fallback vers notification standard
   const hasPermission = await requestNotificationPermission();
@@ -468,15 +402,7 @@ export async function showTestNotification() {
 export async function getNotificationPermissionStatus() {
   const settings = getNotificationSettings();
   
-  // Vérifier OneSignal d'abord si activé
-  if (settings.useOneSignal && oneSignalService.isAvailable()) {
-    try {
-      const status = await oneSignalService.getPermissionStatus();
-      return status;
-    } catch (error) {
-      console.error('Erreur lors de la vérification du statut OneSignal:', error);
-    }
-  }
+  // Vérifier le statut des notifications natives
   
   // Fallback vers API standard
   if ('Notification' in window) {
