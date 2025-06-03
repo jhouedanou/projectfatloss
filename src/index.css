@@ -1071,3 +1071,36 @@ gap:1rem;
 .action-buttons {
   width: 80vw;
 }
+
+/* Styles pour le mode automatique - Banner fixe en bas */
+.auto-mode-indicator {
+  position: fixed !important;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(45deg, #FF6B35, #F7931E);
+  color: white;
+  padding: 12px;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  animation: pulse-auto 2s infinite;
+  z-index: 1001;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auto-mode-indicator:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.6);
+}
+
+.auto-mode-indicator::before {
+  content: "🚀";
+  font-size: 1.8rem;
+}

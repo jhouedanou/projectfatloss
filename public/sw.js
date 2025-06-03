@@ -1,19 +1,33 @@
 // Service Worker pour les notifications Project Fat Loss
 // Optimisé pour Android et iOS
-const CACHE_NAME = 'project-fat-loss-v3';
+const CACHE_NAME = 'project-fat-loss-v4';
 const NOTIFICATION_TAG = 'pfl-workout';
 
-// Configuration spécifique Android
+// Configuration spécifique Android améliorée
 const ANDROID_CONFIG = {
-  vibrationPattern: [200, 100, 200, 100, 200],
+  vibrationPattern: [200, 100, 200, 100, 200, 300, 200],
   silentHours: { start: 22, end: 7 }, // 22h à 7h
-  maxRetries: 3,
-  retryInterval: 300000 // 5 minutes
+  maxRetries: 5,
+  retryInterval: 300000, // 5 minutes
+  androidSpecificOptions: {
+    requireInteraction: true,
+    persistent: true,
+    renotify: true,
+    showTrigger: true
+  }
 };
+
+// Détection améliorée de la plateforme Android
+function isAndroidDevice() {
+  const userAgent = self.navigator.userAgent || '';
+  return /android/i.test(userAgent) || 
+         /linux.*mobile/i.test(userAgent) ||
+         /samsung/i.test(userAgent);
+}
 
 // Installation du service worker
 self.addEventListener('install', event => {
-  console.log('Service Worker PFL installé - Version 3');
+  console.log('Service Worker PFL installé - Version 4 (Android optimisé)');
   
   // Forcer la mise à jour immédiate
   self.skipWaiting();
@@ -24,8 +38,8 @@ self.addEventListener('install', event => {
       return cache.addAll([
         '/',
         '/manifest.json',
-        '/icon-192x192.png',
-        '/icon-512x512.png'
+        '/android/android-launchericon-192-192.png',
+        '/android/android-launchericon-512-512.png'
       ]).catch(err => {
         console.warn('Erreur mise en cache:', err);
       });
@@ -185,14 +199,14 @@ async function showWorkoutNotification(payload = {}) {
   const title = payload.title || "Project Fat Loss";
   const body = payload.body || "C'est l'heure de votre entraînement quotidien ! 💪";
   
-  // Détecter si c'est Android
-  const isAndroid = payload.isAndroid || false;
+  // Détecter si c'est Android avec une méthode améliorée
+  const isAndroid = isAndroidDevice() || payload.isAndroid || false;
   
   // Configuration de base
   const options = {
     body: body,
-    icon: '/android/android-launchericon-192-192.png',
-    badge: '/android/android-launchericon-96-96.png',
+    icon: isAndroid ? '/android/android-launchericon-192-192.png' : '/icons/icon-192x192.png',
+    badge: isAndroid ? '/android/android-launchericon-96-96.png' : '/icons/icon-96x96.png',
     tag: NOTIFICATION_TAG,
     requireInteraction: true,
     renotify: true,
@@ -208,19 +222,22 @@ async function showWorkoutNotification(payload = {}) {
       {
         action: 'start',
         title: '🏋️ Commencer',
-        icon: '/android/android-launchericon-48-48.png'
+        icon: isAndroid ? '/android/android-launchericon-48-48.png' : '/icons/icon-48x48.png'
       },
       {
         action: 'later',
         title: '⏰ Plus tard (1h)',
-        icon: '/android/android-launchericon-48-48.png'
+        icon: isAndroid ? '/android/android-launchericon-48-48.png' : '/icons/icon-48x48.png'
       }
     ]
   };
 
-  // Options spécifiques Android
+  // Options spécifiques Android avec configuration étendue
   if (isAndroid) {
-    // Vibration plus longue pour Android
+    // Appliquer toutes les options Android
+    Object.assign(options, ANDROID_CONFIG.androidSpecificOptions);
+    
+    // Vibration optimisée pour Android
     options.vibrate = ANDROID_CONFIG.vibrationPattern;
     
     // Image de notification sur Android
@@ -228,16 +245,21 @@ async function showWorkoutNotification(payload = {}) {
       options.image = payload.image;
     }
     
-    // Son personnalisé (si supporté)
+    // Son non silencieux pour Android
     options.silent = false;
     
     // Couleur de notification sur Android
     options.color = '#F03D32';
     
-    // Sticky notification pour Android
-    options.sticky = true;
+    // Direction du texte pour langues RTL
+    options.dir = 'ltr';
+    
+    // Language pour Android
+    options.lang = 'fr-FR';
+    
+    console.log('SW: Configuration Android appliquée:', options);
   } else {
-    // Vibration plus douce pour autres plateformes
+    // Vibration plus douce pour autres plateformes (iOS, etc.)
     options.vibrate = [200, 100, 200];
   }
   
@@ -252,39 +274,57 @@ async function showWorkoutNotification(payload = {}) {
       return;
     }
     
-    // Annuler les notifications existantes du même type
+    // Annuler les notifications existantes du même type pour éviter les doublons
     const notifications = await self.registration.getNotifications({ tag: NOTIFICATION_TAG });
     notifications.forEach(notification => notification.close());
     
     // Afficher la nouvelle notification
     await self.registration.showNotification(title, options);
-    console.log('SW: Notification affichée avec succès');
+    console.log('SW: Notification Android affichée avec succès');
     
     // Programmer un rappel si pas d'interaction après 10 minutes
     setTimeout(async () => {
       const activeNotifications = await self.registration.getNotifications({ tag: NOTIFICATION_TAG });
       if (activeNotifications.length > 0) {
-        // La notification est toujours là, programmer un rappel
+        console.log('SW: Notification toujours active, programmation rappel');
         scheduleDelayedNotification(10 * 60 * 1000); // 10 minutes
       }
     }, 10 * 60 * 1000);
     
   } catch (error) {
-    console.error('SW: Erreur affichage notification:', error);
+    console.error('SW: Erreur affichage notification Android:', error);
     
-    // Retry avec options simplifiées
+    // Retry avec options simplifiées pour la compatibilité Android
     try {
       const simpleOptions = {
         body: body,
-        icon: '/icon-192x192.png',
+        icon: isAndroid ? '/android/android-launchericon-192-192.png' : '/icons/icon-192x192.png',
         tag: NOTIFICATION_TAG + '-simple',
-        data: options.data
+        data: options.data,
+        requireInteraction: true,
+        renotify: true
       };
       
+      // Pour Android, ajouter au moins la vibration
+      if (isAndroid) {
+        simpleOptions.vibrate = [200, 100, 200];
+      }
+      
       await self.registration.showNotification(title, simpleOptions);
-      console.log('SW: Notification simple affichée en fallback');
+      console.log('SW: Notification Android simple affichée en fallback');
     } catch (fallbackError) {
-      console.error('SW: Erreur fallback notification:', fallbackError);
+      console.error('SW: Erreur fallback notification Android:', fallbackError);
+      
+      // Dernier recours : notification minimale
+      try {
+        await self.registration.showNotification(title, {
+          body: body,
+          tag: NOTIFICATION_TAG + '-minimal'
+        });
+        console.log('SW: Notification minimale affichée');
+      } catch (minimalError) {
+        console.error('SW: Impossible d\'afficher une notification:', minimalError);
+      }
     }
   }
 }

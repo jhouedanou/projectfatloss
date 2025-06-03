@@ -136,7 +136,7 @@ async function requestAndroidNotificationPermission(settings, platform) {
 }
 
 /**
- * Notifications natives pour Android
+ * Notifications natives pour Android avec gestion améliorée
  */
 async function requestAndroidNativeNotifications(settings, platform) {
   if (!('Notification' in window)) {
@@ -147,6 +147,8 @@ async function requestAndroidNativeNotifications(settings, platform) {
   // Vérifier si déjà accordé
   if (Notification.permission === 'granted') {
     updateNotificationSettings({ ...settings, permission: true });
+    // Tester immédiatement les notifications sur Android
+    await testAndroidNotification();
     return true;
   }
 
@@ -166,32 +168,106 @@ async function requestAndroidNativeNotifications(settings, platform) {
           console.log('Permission native accordée sur Android');
           // Enregistrer le service worker pour Android
           await registerAndroidServiceWorker();
+          // Tester immédiatement les notifications
+          await testAndroidNotification();
+        } else {
+          console.log('Permission Android refusée, affichage des instructions');
+          showAndroidPermissionInstructions();
         }
         
         return granted;
       }
     } catch (error) {
       console.error('Erreur permission native Android:', error);
+      // Fallback vers instructions manuelles
+      showAndroidPermissionInstructions();
     }
+  } else if (Notification.permission === 'denied') {
+    console.log('Notifications bloquées sur Android, affichage instructions');
+    showAndroidPermissionInstructions();
   }
 
   return false;
 }
 
 /**
- * Affiche un dialog explicatif pour Android
+ * Teste les notifications Android immédiatement après l'autorisation
+ */
+async function testAndroidNotification() {
+  try {
+    // Attendre que le service worker soit prêt
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      
+      // Envoyer une notification de test via le service worker
+      registration.active.postMessage({
+        type: 'TEST_NOTIFICATION',
+        payload: {
+          title: 'Test Project Fat Loss',
+          body: 'Notifications configurées avec succès sur Android ! 🎉',
+          isAndroid: true
+        }
+      });
+    } else {
+      // Fallback : notification directe
+      new Notification('Test Project Fat Loss', {
+        body: 'Notifications configurées avec succès ! 🎉',
+        icon: '/android/android-launchericon-192-192.png',
+        vibrate: [200, 100, 200]
+      });
+    }
+    
+    console.log('Test de notification Android envoyé');
+  } catch (error) {
+    console.error('Erreur test notification Android:', error);
+  }
+}
+
+/**
+ * Affiche les instructions pour débloquer les notifications sur Android
+ */
+function showAndroidPermissionInstructions() {
+  const instructions = `
+🔔 Notifications bloquées sur Android
+
+Pour activer les notifications :
+
+1. Dans Chrome/Samsung Browser :
+   • Menu (⋮) → Paramètres → Paramètres du site → Notifications
+   • Trouvez ce site et autorisez les notifications
+
+2. Si vous utilisez la PWA :
+   • Paramètres Android → Applications
+   • Trouvez "Project Fat Loss"
+   • Notifications → Autoriser
+
+3. Désactivez l'optimisation de batterie :
+   • Paramètres → Batterie → Optimisation batterie
+   • Trouvez votre navigateur → "Ne pas optimiser"
+
+Rechargez la page après avoir modifié ces paramètres.
+  `;
+  
+  alert(instructions);
+}
+
+/**
+ * Affiche un dialog explicatif pour Android avec plus de détails
  */
 function showAndroidPermissionDialog() {
   return new Promise((resolve) => {
-    // Créer un dialog natif avec explanation
     const message = `
-Pour recevoir vos rappels d'entraînement quotidiens, 
-autorisez les notifications.
+🏋️ Project Fat Loss - Notifications d'entraînement
 
-Sur Android:
-• Appuyez sur "Autoriser" dans la popup
-• Si elle n'apparaît pas, vérifiez les paramètres de votre navigateur
-• Vous pouvez aussi ajouter cette app à votre écran d'accueil
+Pour recevoir vos rappels quotidiens :
+
+✅ Autorisez les notifications dans la popup qui va apparaître
+✅ Si aucune popup : vérifiez les paramètres de votre navigateur
+✅ Optionnel : installez l'app sur votre écran d'accueil
+
+Sur Android, les notifications peuvent être bloquées par l'optimisation de batterie. Nous vous guiderons pour les configurer correctement.
+
+Voulez-vous continuer ?
     `;
     
     const result = confirm(message);
@@ -498,10 +574,94 @@ function showWorkoutNotification() {
 }
 
 /**
- * Initialise le service de notifications
+ * Initialise le service de notification avec optimisations Android
  */
 export async function initNotificationService() {
+  console.log('Initialisation du service de notification...');
+  
+  const platform = getPlatformInfo();
+  console.log('Plateforme détectée:', platform);
+  
+  // Enregistrement du service worker avec gestion d'erreur améliorée
+  if ('serviceWorker' in navigator) {
+    try {
+      // Vérifier s'il y a déjà un service worker actif
+      const existingRegistration = await navigator.serviceWorker.getRegistration();
+      
+      if (existingRegistration) {
+        console.log('Service Worker déjà enregistré:', existingRegistration);
+        
+        // Forcer la mise à jour si nécessaire
+        if (existingRegistration.waiting) {
+          existingRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+        
+        // Vérifier s'il est mis à jour
+        await existingRegistration.update();
+      } else {
+        // Enregistrer un nouveau service worker
+        const registration = await navigator.serviceWorker.register('/sw.js', {
+          scope: '/',
+          updateViaCache: 'none' // Toujours vérifier les mises à jour
+        });
+        console.log('Nouveau Service Worker enregistré:', registration);
+      }
+      
+      // Attendre que le service worker soit prêt
+      const registration = await navigator.serviceWorker.ready;
+      console.log('Service Worker prêt:', registration);
+      
+      // Configuration spéciale pour Android
+      if (platform.isAndroid) {
+        console.log('Configuration Android spéciale...');
+        
+        // Envoyer les informations de plateforme au service worker
+        if (registration.active) {
+          registration.active.postMessage({
+            type: 'PLATFORM_INFO',
+            payload: {
+              isAndroid: true,
+              browser: platform.isChrome ? 'chrome' : (platform.isSamsung ? 'samsung' : 'other'),
+              isPWA: platform.isPWA,
+              userAgent: navigator.userAgent
+            }
+          });
+        }
+        
+        // Test de connectivité pour les notifications Android
+        await testAndroidNotificationSupport();
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Erreur initialisation service worker:', error);
+      
+      // Fallback pour Android sans service worker
+      if (platform.isAndroid) {
+        console.log('Fallback Android sans service worker');
+        return await initAndroidFallbackNotifications();
+      }
+      
+      return false;
+    }
+  } else {
+    console.warn('Service Worker non supporté');
+    
+    // Fallback pour navigateurs anciens sur Android
+    if (platform.isAndroid) {
+      return await initAndroidFallbackNotifications();
+    }
+    
+    return false;
+  }
+}
+
+/**
+ * Test du support des notifications sur Android
+ */
+async function testAndroidNotificationSupport() {
   try {
+<<<<<<< Updated upstream
     // Check OneSignal status
     if (window.OneSignal && typeof OneSignal.isInitialized === 'function' && OneSignal.isInitialized()) {
       console.log('OneSignal is initialized.');
@@ -523,22 +683,26 @@ export async function initNotificationService() {
     // Vérifier si l'API Notification est supportée
     if (typeof Notification === 'undefined' && !(window.OneSignal && OneSignal.Notifications.isSupported())) {
       console.warn('Native Notification API not supported and OneSignal notifications not supported/available.');
+=======
+    if (!('Notification' in window)) {
+      console.warn('API Notification non disponible sur Android');
+>>>>>>> Stashed changes
       return false;
     }
     
-    // Service de notifications initialisé
-    console.log('Service de notifications initialisé');
+    console.log('Permission actuelle:', Notification.permission);
     
-    // Vérifier le statut actuel des permissions
-    const currentPermission = Notification.permission;
-    console.log('Statut actuel des permissions de notification:', currentPermission);
+    // Test des capacités
+    const capabilities = {
+      vibration: 'vibrate' in navigator,
+      serviceWorker: 'serviceWorker' in navigator,
+      push: 'PushManager' in window,
+      backgroundSync: 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype
+    };
     
-    // Mettre à jour les paramètres locaux avec le statut réel
-    const settings = getNotificationSettings();
-    if (currentPermission === 'granted' && !settings.permission) {
-      updateNotificationSettings({...settings, permission: true});
-    }
+    console.log('Capacités Android détectées:', capabilities);
     
+<<<<<<< Updated upstream
     // Détection d'iOS pour traitement spécial
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     if (isIOS) {
@@ -586,8 +750,43 @@ export async function initNotificationService() {
     }
     
     return true;
+=======
+    return capabilities;
+>>>>>>> Stashed changes
   } catch (error) {
-    console.error('Erreur critique dans initNotificationService:', error);
+    console.error('Erreur test support Android:', error);
+    return false;
+  }
+}
+
+/**
+ * Initialisation fallback pour Android sans service worker
+ */
+async function initAndroidFallbackNotifications() {
+  console.log('Initialisation fallback Android...');
+  
+  try {
+    if ('Notification' in window) {
+      const permission = Notification.permission;
+      console.log('Permission fallback Android:', permission);
+      
+      if (permission === 'granted') {
+        // Tester une notification simple
+        const testNotification = new Notification('Project Fat Loss', {
+          body: 'Notifications configurées (mode de compatibilité Android)',
+          icon: '/android/android-launchericon-192-192.png',
+          vibrate: [200, 100, 200],
+          tag: 'test-fallback'
+        });
+        
+        setTimeout(() => testNotification.close(), 3000);
+        return true;
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Erreur fallback Android:', error);
     return false;
   }
 }

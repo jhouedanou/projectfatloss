@@ -538,6 +538,22 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       <h2 style={{fontSize:'1.1rem',marginBottom:8}}>{day.title}</h2>
       
+<<<<<<< Updated upstream
+=======
+      {autoMode && (
+        <div className="auto-mode-indicator" title="Mode Automatique Activé">
+          {/* L'icône 🚀 est maintenant affichée via CSS ::before */}
+        </div>
+      )}
+      
+      {/* Indicateur de notification active */}
+      {!pause && !workoutCompleted && (
+        <div className="notification-indicator">
+          🔔 Exercice affiché sur l'écran de verrouillage
+        </div>
+      )}
+      
+>>>>>>> Stashed changes
       <>
         <ProgressTracker 
           currentExercise={step + 1}

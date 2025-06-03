@@ -1,6 +1,11 @@
 import {
+<<<<<<< Updated upstream:.vite_cache/deps_temp_5eb1782b/@mui_icons-material.js
   SkipNext_default
 } from "./chunk-ZIFS2KKV.js";
+=======
+  Settings_default
+} from "./chunk-PROO2RFI.js";
+>>>>>>> Stashed changes:.vite_cache/deps/@mui_icons-material.js
 import {
   FlashOn_default
 } from "./chunk-U2VTE6E6.js";
@@ -8,9 +13,12 @@ import {
   LocalFireDepartment_default
 } from "./chunk-5VH6EZDI.js";
 import {
+<<<<<<< Updated upstream:.vite_cache/deps_temp_5eb1782b/@mui_icons-material.js
   Pause_default
 } from "./chunk-ANFPRNCS.js";
 import {
+=======
+>>>>>>> Stashed changes:.vite_cache/deps/@mui_icons-material.js
   Notifications_default
 } from "./chunk-RTFTZGMZ.js";
 import {
@@ -20,20 +28,23 @@ import {
   RestartAlt_default
 } from "./chunk-4H55FADR.js";
 import {
-  Settings_default
-} from "./chunk-PROO2RFI.js";
+  Pause_default
+} from "./chunk-ANFPRNCS.js";
 import {
   YouTube_default
 } from "./chunk-K3BZQ4ED.js";
 import {
-  ArrowBack_default
-} from "./chunk-GU3QZ3SL.js";
+  YouTube_default
+} from "./chunk-K3BZQ4ED.js";
 import {
   ArrowForward_default
 } from "./chunk-BGK56H6I.js";
 import {
   Close_default
 } from "./chunk-H4CKO2YB.js";
+import {
+  ArrowBack_default
+} from "./chunk-GU3QZ3SL.js";
 import {
   FitnessCenter_default
 } from "./chunk-4TMDRA2I.js";
