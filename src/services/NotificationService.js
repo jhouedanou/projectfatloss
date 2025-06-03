@@ -662,6 +662,7 @@ export async function initNotificationService() {
 async function testAndroidNotificationSupport() {
   try {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     // Check OneSignal status
     if (window.OneSignal && typeof OneSignal.isInitialized === 'function' && OneSignal.isInitialized()) {
       console.log('OneSignal is initialized.');
@@ -687,6 +688,10 @@ async function testAndroidNotificationSupport() {
     if (!('Notification' in window)) {
       console.warn('API Notification non disponible sur Android');
 >>>>>>> Stashed changes
+=======
+    if (!('Notification' in window)) {
+      console.warn('API Notification non disponible sur Android');
+>>>>>>> Stashed changes
       return false;
     }
     
@@ -702,6 +707,7 @@ async function testAndroidNotificationSupport() {
     
     console.log('Capacités Android détectées:', capabilities);
     
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
     // Détection d'iOS pour traitement spécial
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -750,6 +756,9 @@ async function testAndroidNotificationSupport() {
     }
     
     return true;
+=======
+    return capabilities;
+>>>>>>> Stashed changes
 =======
     return capabilities;
 >>>>>>> Stashed changes
