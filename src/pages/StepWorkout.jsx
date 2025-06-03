@@ -404,6 +404,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   };
   
   // Mode automatique désactivé
+  
+  // Fonction pour toggler le mode automatique
+  const handleToggleAutoMode = () => {
+    setAutoMode(prev => !prev);
+  };
 
   const handleBackClick = () => {
     showConfirmDialog(
@@ -524,13 +529,19 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         minHeight: '100vh',
       }}
     >
-      {autoMode && (
-        <div className="auto-mode-indicator">
-          🚀 Mode Automatique Activé ! 🚀
-        </div>
-      )}
       <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor:'#2e2e3f' }}>
         <button className="timer-btn" onClick={handleBackClick}>Retour</button>
+        <button 
+          className={`timer-btn ${autoMode ? 'active' : ''}`} 
+          onClick={handleToggleAutoMode}
+          title={autoMode ? "Désactiver le mode automatique" : "Activer le mode automatique"}
+          style={{ 
+            background: autoMode ? '#FF6B35' : '#6c757d',
+            minWidth: '50px'
+          }}
+        >
+          🚀
+        </button>
         <button className="timer-btn save-btn" onClick={handleSaveAndExit}>
           Sauvegarder et quitter
         </button>
@@ -538,22 +549,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       <h2 style={{fontSize:'1.1rem',marginBottom:8}}>{day.title}</h2>
       
-<<<<<<< Updated upstream
-=======
-      {autoMode && (
-        <div className="auto-mode-indicator" title="Mode Automatique Activé">
-          {/* L'icône 🚀 est maintenant affichée via CSS ::before */}
-        </div>
-      )}
-      
-      {/* Indicateur de notification active */}
-      {!pause && !workoutCompleted && (
-        <div className="notification-indicator">
-          🔔 Exercice affiché sur l'écran de verrouillage
-        </div>
-      )}
-      
->>>>>>> Stashed changes
       <>
         <ProgressTracker 
           currentExercise={step + 1}

@@ -661,42 +661,8 @@ export async function initNotificationService() {
  */
 async function testAndroidNotificationSupport() {
   try {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    // Check OneSignal status
-    if (window.OneSignal && typeof OneSignal.isInitialized === 'function' && OneSignal.isInitialized()) {
-      console.log('OneSignal is initialized.');
-      // Potentially check OneSignal's own permission status here too
-      if (await OneSignal.isPushNotificationsEnabled()) {
-        console.log('OneSignal push notifications are already enabled.');
-        updateNotificationSettings({ permission: true, onesignal_enabled: true });
-      } else {
-         // If OneSignal is init but permission not granted, requestNotificationPermission will handle it.
-         console.log('OneSignal initialized, but push notifications not enabled yet.');
-      }
-    } else if (window.OneSignal) {
-      console.log('OneSignal is present but not fully initialized yet. SDK in index.html will handle it.');
-      // Listen for OneSignal initialization if needed, e.g., OneSignal.push(() => console.log("OneSignal JS SDK Initialized"));
-    } else {
-      console.log('OneSignal SDK not found. Native notifications will be used if available.');
-    }
-
-    // Vérifier si l'API Notification est supportée
-    if (typeof Notification === 'undefined' && !(window.OneSignal && OneSignal.Notifications.isSupported())) {
-      console.warn('Native Notification API not supported and OneSignal notifications not supported/available.');
-=======
     if (!('Notification' in window)) {
       console.warn('API Notification non disponible sur Android');
->>>>>>> Stashed changes
-=======
-    if (!('Notification' in window)) {
-      console.warn('API Notification non disponible sur Android');
->>>>>>> Stashed changes
-=======
-    if (!('Notification' in window)) {
-      console.warn('API Notification non disponible sur Android');
->>>>>>> Stashed changes
       return false;
     }
     
@@ -712,65 +678,7 @@ async function testAndroidNotificationSupport() {
     
     console.log('Capacités Android détectées:', capabilities);
     
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    // Détection d'iOS pour traitement spécial
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (isIOS) {
-      console.log('Plateforme iOS détectée, ajustement des fonctionnalités');
-      // Sur iOS, on ne fait pas de demande proactive de permission
-      // et on ne tente pas d'enregistrer le service worker qui pourrait causer des problèmes
-      scheduleWorkoutNotifications();
-      return true;
-    }
-    
-    // Pour les autres plateformes, on continue normalement
-    try {
-      // Vérifier et demander les permissions si nécessaire
-      const granted = await requestNotificationPermission();
-      if (granted) {
-        console.log('Permissions accordées, programmation des notifications');
-        // Notification de test supprimée - plus d'affichage automatique au lancement
-        
-        scheduleWorkoutNotifications();
-      } else {
-        console.warn('Permissions refusées, pas de notifications programmées');
-      }
-    } catch (permError) {
-      console.error('Erreur lors de la demande de permission:', permError);
-      // Continuer malgré l'erreur
-    }
-    
-    // Enregistrer le service worker si disponible
-    if ('serviceWorker' in navigator) {
-      try {
-        // Déterminer le chemin correct du service worker en fonction de l'environnement
-        const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
-        const swPath = isProduction 
-          ? (new URL('./sw.js', window.location.href)).pathname // Chemin relatif pour la production
-          : '/sw.js'; // Chemin absolu pour le développement
-          
-        console.log('Tentative d\'enregistrement du Service Worker avec le chemin:', swPath);
-        
-        const registration = await navigator.serviceWorker.register(swPath);
-        console.log('Service Worker enregistré avec succès');
-      } catch (swError) {
-        console.error('Erreur d\'enregistrement Service Worker:', swError);
-        // Continuer malgré l'erreur
-      }
-    }
-    
-    return true;
-=======
     return capabilities;
->>>>>>> Stashed changes
-=======
-    return capabilities;
->>>>>>> Stashed changes
-=======
-    return capabilities;
->>>>>>> Stashed changes
   } catch (error) {
     console.error('Erreur test support Android:', error);
     return false;
