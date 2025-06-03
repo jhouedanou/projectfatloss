@@ -62,6 +62,37 @@ export function updateNotificationSettings(settings) {
  * @returns {Promise<boolean>} - True si la permission est accordée
  */
 export async function requestNotificationPermission() {
+  // Try OneSignal first
+  if (window.OneSignal && typeof OneSignal.Notifications?.requestPermission === 'function') {
+    try {
+      console.log('Attempting to request permission via OneSignal.');
+      // Note: OneSignal.Notifications.requestPermission() often doesn't return a direct boolean
+      // It triggers a prompt and state changes are observed via listeners or status properties.
+      // We will rely on checking status after attempting.
+      await OneSignal.Notifications.requestPermission();
+
+      // Check if permission was granted after the request
+      // OneSignal.isPushNotificationsEnabled() is a good check but might not be synchronous after request.
+      // A more reliable way is to use OneSignal.Notifications.permission
+      if (OneSignal.Notifications.permission === 'granted') {
+        console.log('Permission granted via OneSignal.');
+        updateNotificationSettings({ permission: true, onesignal_enabled: true });
+        return true;
+      } else if (OneSignal.Notifications.permission === 'denied') {
+        console.log('Permission denied via OneSignal.');
+        updateNotificationSettings({ permission: false, onesignal_enabled: false });
+        return false;
+      }
+      // If 'default', it means the user closed the prompt or it wasn't shown. Fallback.
+      console.log('OneSignal permission state is default, proceeding to fallback.');
+    } catch (error) {
+      console.error('Error requesting permission via OneSignal:', error);
+      // Fallback to native methods if OneSignal errors
+    }
+  } else {
+    console.log('OneSignal SDK not available or requestPermission not found, using native fallback.');
+  }
+
   const settings = getNotificationSettings();
   const platform = getPlatformInfo();
   
@@ -90,6 +121,7 @@ export async function requestNotificationPermission() {
   // Fallback pour autres plateformes
   return await requestStandardNotificationPermission(settings);
 }
+
 
 /**
  * Gestion spécifique des permissions Android
@@ -245,10 +277,21 @@ export function scheduleWorkoutNotifications() {
   const settings = getNotificationSettings();
   
   if (!settings.enabled || !settings.permission) {
+    console.log('scheduleWorkoutNotifications: Notifications disabled or permission not granted.');
     return;
   }
 
-  // Programmer la prochaine notification
+  if (settings.onesignal_enabled && window.OneSignal && OneSignal.Notifications.permission === 'granted') {
+    console.log('scheduleWorkoutNotifications: OneSignal is active. Scheduling would be handled by OneSignal (likely server-side). Skipping local scheduling.');
+    // Potentially trigger a sync with backend or use OneSignal's client-side scheduling if available/suitable.
+    // For now, we are assuming OneSignal handles scheduling elsewhere or this function's role changes.
+    // If client-side scheduling with OneSignal is needed, it would be implemented here.
+    // OneSignal.sendTag("last_app_open_time", Math.floor(Date.now() / 1000)); // Example: update tags
+    return; // Exit if OneSignal is primary, to avoid duplicate native scheduling
+  }
+
+  // Programmer la prochaine notification (fallback to native)
+  console.log('scheduleWorkoutNotifications: Using native scheduling.');
   scheduleNextNotification();
 }
 
@@ -283,21 +326,76 @@ function scheduleNextNotification() {
  * Affiche la notification d'exercice quotidien
  */
 function showWorkoutNotification() {
+  const settings = getNotificationSettings();
+
+  if (!settings.enabled) {
+    console.log('showWorkoutNotification: Notifications disabled in settings.');
+    return;
+  }
+
+  if (settings.onesignal_enabled && window.OneSignal && OneSignal.Notifications.permission === 'granted') {
+    console.log('showWorkoutNotification: OneSignal is active. Notification would be displayed via OneSignal.');
+    // Example for testing (local notification, not a true push):
+    // OneSignal.sendSelfNotification(
+    //   "Project Fat Loss (OneSignal)",
+    //   messages[Math.floor(Math.random() * messages.length)],
+    //   window.location.origin, // URL
+    //   '/icon-192x192.png', // Icon
+    //   {
+    //     notificationType: 'daily-workout-os'
+    //   }
+    // );
+    // For now, we will let it fall through to native to ensure user still gets something
+    // if full OneSignal display isn't implemented here yet.
+    // In a full implementation, you might 'return' here.
+    // --- MODIFICATION: Now actually sending and returning ---
+    const messages = [ // Define messages array here as it's used by OneSignal path too
+      "C'est l'heure de votre entraînement quotidien ! 💪",
+      "Votre corps vous attend ! Il est temps de s'entraîner 🏋️‍♂️",
+      "L'excellence commence par l'action ! Prêt pour votre séance ? 🔥",
+      "Chaque jour compte ! Votre entraînement vous attend ⭐",
+      "Transformez votre journée avec un bon workout ! 💯"
+    ];
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+    try {
+      OneSignal.sendSelfNotification(
+        "Project Fat Loss", // Title
+        randomMessage,      // Body
+        window.location.origin, // URL to open
+        '/icon-192x192.png', // Icon, consider matching sw.js or OneSignal dashboard
+        {
+          notificationType: 'daily-workout-onesignal',
+          tag: 'pfl-workout' // Use the same tag as native for consistency if desired, or a new one
+        }
+      );
+      console.log('showWorkoutNotification: OneSignal self-notification sent for daily workout.');
+      return; // IMPORTANT: Return here to prevent native fallback
+    } catch (osError) {
+      console.error('showWorkoutNotification: Error sending OneSignal self-notification:', osError);
+      // If OneSignal fails, could fall through to native as a last resort.
+      // For now, if onesignal_enabled is true, we expect it to work or fail clearly.
+    }
+  }
+
+  // Native fallback logic starts here if OneSignal wasn't used or failed and fell through
+  const messagesForNative = [ // Re-define if not already defined above for OneSignal path
+      "C'est l'heure de votre entraînement quotidien ! 💪",
+      "Votre corps vous attend ! Il est temps de s'entraîner 🏋️‍♂️",
+      "L'excellence commence par l'action ! Prêt pour votre séance ? 🔥",
+      "Chaque jour compte ! Votre entraînement vous attend ⭐",
+      "Transformez votre journée avec un bon workout ! 💯"
+  ];
+  const randomMessageForNative = messagesForNative[Math.floor(Math.random() * messagesForNative.length)];
+
+
   try {
-    // Vérifier si l'API Notification est supportée
+    // Vérifier si l'API Notification est supportée (native fallback)
     if (typeof Notification === 'undefined') {
-      console.warn('API Notification non supportée sur ce navigateur');
+      console.warn('showWorkoutNotification: Native Notification API not supported on this browser.');
       return;
     }
-    
-    const settings = getNotificationSettings();
-    
-    // Vérifier si les notifications sont activées
-    if (!settings.enabled) {
-      console.log('Notifications désactivées dans les paramètres');
-      return;
-    }
-    
+
     // Détection d'iOS pour traitement spécial
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
@@ -326,19 +424,12 @@ function showWorkoutNotification() {
     return;
   }
 
-  const messages = [
-    "C'est l'heure de votre entraînement quotidien ! 💪",
-    "Votre corps vous attend ! Il est temps de s'entraîner 🏋️‍♂️",
-    "L'excellence commence par l'action ! Prêt pour votre séance ? 🔥",
-    "Chaque jour compte ! Votre entraînement vous attend ⭐",
-    "Transformez votre journée avec un bon workout ! 💯"
-  ];
-  
-  const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+  // const messages = [...] // This is now defined above or as messagesForNative
+  // const randomMessage = messages[Math.floor(Math.random() * messages.length)]; // This is now randomMessageForNative
   
   // Fonction interne pour afficher la notification
   function _showActualNotification() {
-    console.log('Affichage effectif de la notification...');
+    console.log('Affichage effectif de la notification (native fallback)...');
     
     // Détection d'iOS pour traitement spécial
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -348,10 +439,10 @@ function showWorkoutNotification() {
       // Ne pas utiliser cette méthode sur iOS car cela peut causer des problèmes
       navigator.serviceWorker.ready.then(registration => {
         registration.showNotification("Project Fat Loss", {
-          body: randomMessage,
-          icon: '/favicon.ico',
-          badge: '/icon-192x192.png',
-          tag: 'daily-workout',
+          body: randomMessageForNative, // Use randomMessageForNative
+          icon: '/favicon.ico', // Consider using icons consistent with sw.js like '/android/android-launchericon-192-192.png'
+          badge: '/icon-192x192.png', // Consider using badges consistent with sw.js like '/android/android-launchericon-96-96.png'
+          tag: 'pfl-workout', // Changed from 'daily-workout' to match sw.js NOTIFICATION_TAG
           requireInteraction: !isIOS, // Pas d'interaction requise sur iOS
           actions: !isIOS ? [
             {
@@ -384,11 +475,11 @@ function showWorkoutNotification() {
     try {
       // Utiliser l'API Notification de base - plus fiable sur iOS
       new Notification("Project Fat Loss", {
-        body: randomMessage,
-        icon: '/favicon.ico',
-        tag: 'daily-workout'
+        body: randomMessageForNative, // Use randomMessageForNative
+        icon: '/favicon.ico', // Consistent icon
+        tag: 'pfl-workout' // Changed from 'daily-workout'
       });
-      console.log('Notification basique envoyée');
+      console.log('Notification basique envoyée (native fallback)');
     } catch (error) {
       console.error('Erreur notification basique:', error);
       // Derniere tentative: alerter l'utilisateur si tout échoue sur iOS
@@ -411,9 +502,27 @@ function showWorkoutNotification() {
  */
 export async function initNotificationService() {
   try {
+    // Check OneSignal status
+    if (window.OneSignal && typeof OneSignal.isInitialized === 'function' && OneSignal.isInitialized()) {
+      console.log('OneSignal is initialized.');
+      // Potentially check OneSignal's own permission status here too
+      if (await OneSignal.isPushNotificationsEnabled()) {
+        console.log('OneSignal push notifications are already enabled.');
+        updateNotificationSettings({ permission: true, onesignal_enabled: true });
+      } else {
+         // If OneSignal is init but permission not granted, requestNotificationPermission will handle it.
+         console.log('OneSignal initialized, but push notifications not enabled yet.');
+      }
+    } else if (window.OneSignal) {
+      console.log('OneSignal is present but not fully initialized yet. SDK in index.html will handle it.');
+      // Listen for OneSignal initialization if needed, e.g., OneSignal.push(() => console.log("OneSignal JS SDK Initialized"));
+    } else {
+      console.log('OneSignal SDK not found. Native notifications will be used if available.');
+    }
+
     // Vérifier si l'API Notification est supportée
-    if (typeof Notification === 'undefined') {
-      console.warn('API Notification non supportée sur ce navigateur');
+    if (typeof Notification === 'undefined' && !(window.OneSignal && OneSignal.Notifications.isSupported())) {
+      console.warn('Native Notification API not supported and OneSignal notifications not supported/available.');
       return false;
     }
     
@@ -494,33 +603,61 @@ export async function initNotificationService() {
  */
 export async function showTestNotification() {
   const settings = getNotificationSettings();
-  
-  // Utiliser uniquement les notifications standard
-  
-  // Fallback vers notification standard
+
+  // Ensure permission is first requested and hopefully granted.
+  // This call will attempt OneSignal first if available.
   const hasPermission = await requestNotificationPermission();
-  
-  if (hasPermission && Notification.permission === 'granted') {
+
+  if (!hasPermission) {
+    console.warn('showTestNotification: Permission de notification refusée ou non disponible.');
+    return false;
+  }
+
+  // Check if OneSignal should be used
+  if (settings.onesignal_enabled && window.OneSignal && OneSignal.Notifications.permission === 'granted') {
+    console.log('showTestNotification: Attempting to send test notification via OneSignal.');
     try {
-      const notification = new Notification("🏋️ Test PFL", {
-        body: "Les notifications fonctionnent correctement ! 🎉",
+      await window.OneSignal.sendSelfNotification(
+        "🏋️ Test PFL (OneSignal)",
+        "Les notifications OneSignal fonctionnent correctement ! 🎉",
+        window.location.origin, // URL to open when clicked
+        '/icon-192x192.png',    // Icon
+        {
+          notificationType: 'onesignal-test-notification',
+          tag: 'onesignal-test-notification' // Keep it distinct from other test tags
+        }
+      );
+      console.log('showTestNotification: OneSignal self-notification sent.');
+      return true;
+    } catch (error) {
+      console.error('showTestNotification: Erreur lors de l\'envoi de la notification test OneSignal:', error);
+      // Fallback to native if OneSignal send fails? Or just return false?
+      // For a test function, perhaps returning false is better to indicate the OneSignal part failed.
+      return false;
+    }
+  } else if (Notification.permission === 'granted') {
+    // Fallback to native notification
+    console.log('showTestNotification: Attempting to send test notification via native API.');
+    try {
+      const notification = new Notification("🏋️ Test PFL (Native)", {
+        body: "Les notifications natives fonctionnent correctement ! 🎉",
         icon: '/favicon.ico',
-        tag: 'test-notification',
+        tag: 'native-test-notification', // Distinct tag
         requireInteraction: false
       });
       
-      // Fermer automatiquement après 4 secondes
       setTimeout(() => {
         notification.close();
       }, 4000);
       
+      console.log('showTestNotification: Native test notification sent.');
       return true;
     } catch (error) {
-      console.error('Erreur lors de la création de la notification:', error);
+      console.error('showTestNotification: Erreur lors de la création de la notification native:', error);
       return false;
     }
   } else {
-    console.warn('Permission de notification refusée ou non disponible');
+    console.warn('showTestNotification: Permission status unclear or denied for native notifications after check.');
     return false;
   }
 }

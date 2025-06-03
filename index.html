@@ -51,13 +51,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
     <title>Project Fat Loss</title>
-    
-    <!-- OneSignal SDK a été supprimé -->
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+    <script>
+      window.OneSignal = window.OneSignal || [];
+      OneSignal.push(function() {
+        OneSignal.init({
+          appId: "4b3067b6-a9db-4e53-9e9a-2be01ed43805",
+          safari_web_id: "web.onesignal.auto.4f2f8c0c-7b89-4f8e-a2c7-3c73c2c652ac",
+          notifyButton: {
+            enable: false,
+          },
+          allowLocalhostAsSecureOrigin: true,
+        });
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="./src/main.jsx"></script>
-    
-    <!-- OneSignal Configuration a été supprimée -->
   </body>
 </html>
