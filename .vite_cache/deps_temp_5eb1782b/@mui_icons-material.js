@@ -1,6 +1,6 @@
 import {
-  YouTube_default
-} from "./chunk-K3BZQ4ED.js";
+  SkipNext_default
+} from "./chunk-ZIFS2KKV.js";
 import {
   FlashOn_default
 } from "./chunk-U2VTE6E6.js";
@@ -8,11 +8,11 @@ import {
   LocalFireDepartment_default
 } from "./chunk-5VH6EZDI.js";
 import {
-  Notifications_default
-} from "./chunk-RTFTZGMZ.js";
-import {
   Pause_default
 } from "./chunk-ANFPRNCS.js";
+import {
+  Notifications_default
+} from "./chunk-RTFTZGMZ.js";
 import {
   PlayArrow_default
 } from "./chunk-HHUG7OAO.js";
@@ -23,8 +23,8 @@ import {
   Settings_default
 } from "./chunk-PROO2RFI.js";
 import {
-  SkipNext_default
-} from "./chunk-ZIFS2KKV.js";
+  YouTube_default
+} from "./chunk-K3BZQ4ED.js";
 import {
   ArrowBack_default
 } from "./chunk-GU3QZ3SL.js";

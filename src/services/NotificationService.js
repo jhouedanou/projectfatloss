@@ -555,13 +555,7 @@ export async function initNotificationService() {
       const granted = await requestNotificationPermission();
       if (granted) {
         console.log('Permissions accordées, programmation des notifications');
-        // Montrer une notification de test pour confirmer que tout fonctionne
-        // mais seulement si ce n'est pas iOS
-        setTimeout(() => {
-          showTestNotification().then(success => {
-            console.log('Test de notification:', success ? 'réussi' : 'échoué');
-          }).catch(e => console.error('Erreur test notification:', e));
-        }, 2000); // Attendre 2 secondes pour être sûr que tout est initialisé
+        // Notification de test supprimée - plus d'affichage automatique au lancement
         
         scheduleWorkoutNotifications();
       } else {
