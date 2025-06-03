@@ -524,6 +524,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         minHeight: '100vh',
       }}
     >
+      {autoMode && (
+        <div className="auto-mode-indicator">
+          🚀 Mode Automatique Activé ! 🚀
+        </div>
+      )}
       <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor:'#2e2e3f' }}>
         <button className="timer-btn" onClick={handleBackClick}>Retour</button>
         <button className="timer-btn save-btn" onClick={handleSaveAndExit}>
@@ -532,12 +537,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       </div>
 
       <h2 style={{fontSize:'1.1rem',marginBottom:8}}>{day.title}</h2>
-      
-      {autoMode && (
-        <div className="auto-mode-indicator">
-          🚀 Mode Automatique Activé ! 🚀
-        </div>
-      )}
       
       {/* Indicateur de notification active */}
       {!pause && !workoutCompleted && (
