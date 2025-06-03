@@ -309,6 +309,7 @@ body.dark-theme .timer-value {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 .auto-mode-indicator {
   background: linear-gradient(45deg, #FF6B35, #F7931E);
   color: white;
@@ -321,6 +322,9 @@ body.dark-theme .timer-value {
   box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
   animation: pulse-auto 2s infinite;
 }
+=======
+/* L'ancien auto-mode-indicator a été supprimé - maintenant en position fixe dans index.css */
+>>>>>>> Stashed changes
 =======
 /* L'ancien auto-mode-indicator a été supprimé - maintenant en position fixe dans index.css */
 >>>>>>> Stashed changes
