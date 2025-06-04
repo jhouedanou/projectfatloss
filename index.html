@@ -53,17 +53,49 @@
     <title>Project Fat Loss</title>
     <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
     <script>
-      window.OneSignal = window.OneSignal || [];
-      OneSignal.push(function() {
-        OneSignal.init({
-          appId: "4b3067b6-a9db-4e53-9e9a-2be01ed43805",
-          safari_web_id: "web.onesignal.auto.4f2f8c0c-7b89-4f8e-a2c7-3c73c2c652ac",
-          notifyButton: {
-            enable: false,
-          },
-          allowLocalhostAsSecureOrigin: true,
+      // Déterminer si nous sommes en développement local
+      const isLocalhost = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname === '';
+      
+      if (!isLocalhost) {
+        // Initialiser OneSignal uniquement en production
+        window.OneSignal = window.OneSignal || [];
+        OneSignal.push(function() {
+          OneSignal.init({
+            appId: "4b3067b6-a9db-4e53-9e9a-2be01ed43805",
+            safari_web_id: "web.onesignal.auto.4f2f8c0c-7b89-4f8e-a2c7-3c73c2c652ac",
+            notifyButton: {
+              enable: false,
+            }
+          });
+          console.log('OneSignal: Configuration production activée');
         });
-      });
+      } else {
+        // En développement local, créer un stub OneSignal compatible
+        window.OneSignal = window.OneSignal || [];
+        
+        // Ajouter les méthodes nécessaires comme stub
+        if (!window.OneSignal.Notifications) {
+          window.OneSignal.Notifications = {
+            permission: 'default',
+            requestPermission: function() {
+              console.log('OneSignal: Stub - requestPermission appelé');
+              return Promise.resolve();
+            }
+          };
+        }
+        
+        // S'assurer que push fonctionne comme un vrai tableau
+        if (typeof window.OneSignal.push !== 'function') {
+          window.OneSignal.push = function(callback) {
+            console.log('OneSignal: Stub - push appelé, callback ignoré en développement');
+            // Ne pas exécuter le callback en développement pour éviter les erreurs
+          };
+        }
+        
+        console.log('OneSignal: Mode développement local - stub compatible activé');
+      }
     </script>
   </head>
   <body>

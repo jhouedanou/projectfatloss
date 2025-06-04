@@ -1,14 +1,39 @@
 // Service Worker pour les notifications Project Fat Loss
-// Optimisé pour Android et iOS
-const CACHE_NAME = 'project-fat-loss-v4';
+// Optimisé pour Android 15 et notifications persistantes
+const CACHE_NAME = 'project-fat-loss-v5';
 const NOTIFICATION_TAG = 'pfl-workout';
+const EXERCISE_NOTIFICATION_TAG = 'pfl-current-exercise';
 
-// Configuration spécifique Android améliorée
-const ANDROID_CONFIG = {
+// Configuration Android 15 améliorée
+const ANDROID15_CONFIG = {
   vibrationPattern: [200, 100, 200, 100, 200, 300, 200],
   silentHours: { start: 22, end: 7 }, // 22h à 7h
   maxRetries: 5,
   retryInterval: 300000, // 5 minutes
+  persistentOptions: {
+    requireInteraction: false, // Important pour Android 15
+    persistent: true,
+    renotify: true,
+    showTrigger: true,
+    sticky: true,
+    ongoing: true, // Notification persistante
+    silent: false, // Permettre les sons
+    timestamp: () => Date.now()
+  },
+  exerciseOptions: {
+    requireInteraction: false,
+    persistent: true,
+    renotify: true,
+    ongoing: true,
+    sticky: true,
+    silent: true, // Pas de son pour les mises à jour
+    timestamp: () => Date.now()
+  }
+};
+
+// Configuration de base pour compatibilité
+const BASE_CONFIG = {
+  vibrationPattern: [200, 100, 200],
   androidSpecificOptions: {
     requireInteraction: true,
     persistent: true,
@@ -17,17 +42,28 @@ const ANDROID_CONFIG = {
   }
 };
 
-// Détection améliorée de la plateforme Android
-function isAndroidDevice() {
+// Détection améliorée de la plateforme Android avec version
+function getAndroidInfo() {
   const userAgent = self.navigator.userAgent || '';
-  return /android/i.test(userAgent) || 
-         /linux.*mobile/i.test(userAgent) ||
-         /samsung/i.test(userAgent);
+  const androidMatch = userAgent.match(/Android (\d+)/);
+  const androidVersion = androidMatch ? parseInt(androidMatch[1], 10) : 0;
+  
+  return {
+    isAndroid: /android/i.test(userAgent) || /linux.*mobile/i.test(userAgent) || /samsung/i.test(userAgent),
+    version: androidVersion,
+    isAndroid15Plus: androidVersion >= 15,
+    isChrome: /Chrome/.test(userAgent),
+    isSamsung: /SamsungBrowser/.test(userAgent)
+  };
 }
+
+// Variable globale pour le timer de notification d'exercice
+let exerciseNotificationTimer = null;
+let currentExerciseData = null;
 
 // Installation du service worker
 self.addEventListener('install', event => {
-  console.log('Service Worker PFL installé - Version 4 (Android optimisé)');
+  console.log('Service Worker PFL installé - Version 5 (Android 15 optimisé)');
   
   // Forcer la mise à jour immédiate
   self.skipWaiting();
@@ -73,6 +109,27 @@ self.addEventListener('activate', event => {
 self.addEventListener('message', event => {
   console.log('SW: Message reçu:', event.data);
   
+  if (event.data && event.data.type === 'CONFIGURE_ANDROID15') {
+    configureForAndroid15(event.data.payload);
+  }
+  
+  if (event.data && event.data.type === 'TEST_ANDROID15_NOTIFICATION') {
+    showAndroid15TestNotification(event.data.payload);
+  }
+  
+  if (event.data && event.data.type === 'CURRENT_EXERCISE_NOTIFICATION_ANDROID15') {
+    showCurrentExerciseNotificationAndroid15(event.data.payload);
+  }
+  
+  if (event.data && event.data.type === 'UPDATE_EXERCISE_NOTIFICATION_ANDROID15') {
+    updateCurrentExerciseNotificationAndroid15(event.data.payload);
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_EXERCISE_NOTIFICATION_ANDROID15') {
+    clearCurrentExerciseNotificationAndroid15();
+  }
+  
+  // Messages existants
   if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
     scheduleWorkoutNotification(event.data.payload);
   }
@@ -96,339 +153,158 @@ self.addEventListener('message', event => {
   if (event.data && event.data.type === 'CLEAR_EXERCISE_NOTIFICATION') {
     clearCurrentExerciseNotification();
   }
-});
-
-// Gestion des clics sur les notifications
-self.addEventListener('notificationclick', event => {
-  console.log('SW: Clic sur notification:', event.notification.tag, event.action);
   
-  // Fermer la notification
-  event.notification.close();
-  
-  // Traitement selon le type de notification
-  const notificationData = event.notification.data || {};
-  
-  if (event.notification.tag === 'pfl-current-exercise') {
-    // Gestion des notifications d'exercice en cours
-    if (event.action === 'open-app' || !event.action) {
-      // Ouvrir l'app ou retourner au workout
-      event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true })
-          .then(clientList => {
-            // Chercher une fenêtre ouverte existante
-            for (const client of clientList) {
-              if (client.url.includes(self.location.origin) && 'focus' in client) {
-                client.postMessage({ type: 'FOCUS_WORKOUT' });
-                return client.focus();
-              }
-            }
-            
-            // Ouvrir une nouvelle fenêtre si aucune trouvée
-            if (clients.openWindow) {
-              return clients.openWindow('/');
-            }
-          })
-      );
-    } else if (event.action === 'pause') {
-      // Envoyer un message à l'app pour mettre en pause
-      event.waitUntil(
-        clients.matchAll({ type: 'window' }).then(clientList => {
-          clientList.forEach(client => {
-            if (client.url.includes(self.location.origin)) {
-              client.postMessage({ type: 'PAUSE_WORKOUT' });
-            }
-          });
-        })
-      );
-    }
-  } else {
-    // Gestion des notifications d'entraînement classiques
-    if (event.action === 'start') {
-      // Ouvrir l'app et démarrer l'entraînement
-      event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true })
-          .then(clientList => {
-            // Chercher une fenêtre ouverte existante
-            for (const client of clientList) {
-              if (client.url.includes(self.location.origin) && 'focus' in client) {
-                client.postMessage({ type: 'START_WORKOUT' });
-                return client.focus();
-              }
-            }
-            
-            // Ouvrir une nouvelle fenêtre si aucune trouvée
-            if (clients.openWindow) {
-              return clients.openWindow('/?start=true');
-            }
-          })
-      );
-    } else if (event.action === 'later') {
-      // Reporter de 1 heure
-      scheduleDelayedNotification(3600000); // 1 heure en ms
-    } else {
-      // Clic sans action - ouvrir l'app
-      event.waitUntil(
-        clients.matchAll({ type: 'window' }).then(clientList => {
-          for (const client of clientList) {
-            if (client.url.includes(self.location.origin) && 'focus' in client) {
-              return client.focus();
-            }
-          }
-          if (clients.openWindow) {
-            return clients.openWindow('/');
-          }
-        })
-      );
-    }
+  if (event.data && event.data.type === 'PAUSE_NOTIFICATION') {
+    showPauseNotification(event.data.payload);
   }
-  
-  // Envoyer des analytics (optionnel)
-  sendNotificationAnalytics(event.action || 'open', notificationData);
 });
 
-// Gestion de la fermeture des notifications
-self.addEventListener('notificationclose', event => {
-  console.log('SW: Notification fermée:', event.notification.tag);
-  
-  // Analytics pour les fermetures
-  sendNotificationAnalytics('close', event.notification.data);
-});
+// Configuration pour Android 15
+function configureForAndroid15(config) {
+  console.log('SW: Configuration Android 15:', config);
+  // Configuration globale pour Android 15
+  if (config.persistentNotifications) {
+    console.log('SW: Notifications persistantes activées pour Android 15');
+  }
+  if (config.workoutMode) {
+    console.log('SW: Mode entraînement activé pour Android 15');
+  }
+}
 
-// Fonction pour afficher une notification d'entraînement optimisée Android
-async function showWorkoutNotification(payload = {}) {
-  const title = payload.title || "Project Fat Loss";
-  const body = payload.body || "C'est l'heure de votre entraînement quotidien ! 💪";
-  
-  // Détecter si c'est Android avec une méthode améliorée
-  const isAndroid = isAndroidDevice() || payload.isAndroid || false;
-  
-  // Configuration de base
+// =================== NOTIFICATIONS DE TEST ET WORKOUT ===================
+
+// Fonction de notification de test/workout
+async function showWorkoutNotification(payload) {
+  const { title = 'Test Notification ✅', body = 'Vos notifications fonctionnent parfaitement ! 🎉', tag = 'test-notification' } = payload;
+
   const options = {
     body: body,
-    icon: isAndroid ? '/android/android-launchericon-192-192.png' : '/icons/icon-192x192.png',
-    badge: isAndroid ? '/android/android-launchericon-96-96.png' : '/icons/icon-96x96.png',
-    tag: NOTIFICATION_TAG,
-    requireInteraction: true,
-    renotify: true,
-    timestamp: Date.now(),
+    icon: '/android/android-launchericon-192-192.png',
+    badge: '/android/android-launchericon-96-96.png',
+    tag: tag,
+    vibrate: [200, 100, 200],
+    color: '#F03D32',
     data: {
-      type: 'workout-reminder',
-      timestamp: Date.now(),
-      url: '/',
-      platform: isAndroid ? 'android' : 'other',
-      ...payload.data
-    },
-    actions: [
-      {
-        action: 'start',
-        title: '🏋️ Commencer',
-        icon: isAndroid ? '/android/android-launchericon-48-48.png' : '/icons/icon-48x48.png'
-      },
-      {
-        action: 'later',
-        title: '⏰ Plus tard (1h)',
-        icon: isAndroid ? '/android/android-launchericon-48-48.png' : '/icons/icon-48x48.png'
-      }
-    ]
+      type: 'test-workout',
+      timestamp: Date.now()
+    }
   };
 
-  // Options spécifiques Android avec configuration étendue
-  if (isAndroid) {
-    // Appliquer toutes les options Android
-    Object.assign(options, ANDROID_CONFIG.androidSpecificOptions);
-    
-    // Vibration optimisée pour Android
-    options.vibrate = ANDROID_CONFIG.vibrationPattern;
-    
-    // Image de notification sur Android
-    if (payload.image) {
-      options.image = payload.image;
+  try {
+    await self.registration.showNotification(title, options);
+    console.log('SW: Notification test/workout affichée');
+  } catch (error) {
+    console.error('SW: Erreur notification test/workout:', error);
+  }
+}
+
+// Test de notification pour Android 15
+async function showAndroid15TestNotification(payload) {
+  const androidInfo = getAndroidInfo();
+  
+  const options = {
+    body: payload.body || 'Test réussi pour Android 15 ! 🎉',
+    icon: '/android/android-launchericon-192-192.png',
+    badge: '/android/android-launchericon-96-96.png',
+    tag: 'android15-test',
+    ...ANDROID15_CONFIG.persistentOptions,
+    vibrate: ANDROID15_CONFIG.vibrationPattern,
+    color: '#F03D32',
+    data: {
+      type: 'android15-test',
+      timestamp: Date.now(),
+      platform: 'android15'
     }
-    
-    // Son non silencieux pour Android
-    options.silent = false;
-    
-    // Couleur de notification sur Android
-    options.color = '#F03D32';
-    
-    // Direction du texte pour langues RTL
-    options.dir = 'ltr';
-    
-    // Language pour Android
-    options.lang = 'fr-FR';
-    
-    console.log('SW: Configuration Android appliquée:', options);
-  } else {
-    // Vibration plus douce pour autres plateformes (iOS, etc.)
-    options.vibrate = [200, 100, 200];
+  };
+
+  try {
+    await self.registration.showNotification(payload.title || 'Test Android 15 ✅', options);
+    console.log('SW: Notification test Android 15 affichée');
+  } catch (error) {
+    console.error('SW: Erreur notification test Android 15:', error);
+  }
+}
+
+// =================== NOTIFICATIONS D'EXERCICE STANDARD ===================
+
+// Fonction de notification d'exercice standard
+async function showCurrentExerciseNotification(payload) {
+  const androidInfo = getAndroidInfo();
+  
+  // Utiliser la version Android 15 si disponible
+  if (androidInfo.isAndroid15Plus) {
+    return await showCurrentExerciseNotificationAndroid15(payload);
   }
   
+  // Version standard pour autres plateformes
+  const { exerciseName, setNum, totalSets, dayTitle, currentExercise, totalExercises, autoMode = false } = payload;
+  
+  const title = `🏋️ ${exerciseName}`;
+  const body = `Série ${setNum}/${totalSets} • Exercice ${currentExercise}/${totalExercises}${autoMode ? ' • Mode Auto 🚀' : ''}`;
+
+  const options = {
+    body: body,
+    icon: '/android/android-launchericon-192-192.png',
+    badge: '/android/android-launchericon-96-96.png',
+    tag: EXERCISE_NOTIFICATION_TAG,
+    ...BASE_CONFIG.androidSpecificOptions,
+    vibrate: BASE_CONFIG.vibrationPattern,
+    color: '#F03D32',
+    data: {
+      type: 'current-exercise',
+      exerciseName,
+      setNum,
+      totalSets,
+      timestamp: Date.now()
+    }
+  };
+
   try {
-    // Vérifier l'heure silencieuse
-    const now = new Date();
-    const hour = now.getHours();
-    
-    if (hour >= ANDROID_CONFIG.silentHours.start || hour < ANDROID_CONFIG.silentHours.end) {
-      console.log('SW: Heure silencieuse, notification reportée');
-      scheduleDelayedNotification(30 * 60 * 1000); // Reporter de 30 minutes
-      return;
-    }
-    
-    // Annuler les notifications existantes du même type pour éviter les doublons
-    const notifications = await self.registration.getNotifications({ tag: NOTIFICATION_TAG });
-    notifications.forEach(notification => notification.close());
-    
-    // Afficher la nouvelle notification
     await self.registration.showNotification(title, options);
-    console.log('SW: Notification Android affichée avec succès');
-    
-    // Programmer un rappel si pas d'interaction après 10 minutes
-    setTimeout(async () => {
-      const activeNotifications = await self.registration.getNotifications({ tag: NOTIFICATION_TAG });
-      if (activeNotifications.length > 0) {
-        console.log('SW: Notification toujours active, programmation rappel');
-        scheduleDelayedNotification(10 * 60 * 1000); // 10 minutes
-      }
-    }, 10 * 60 * 1000);
-    
+    console.log('SW: Notification exercice standard affichée:', exerciseName);
   } catch (error) {
-    console.error('SW: Erreur affichage notification Android:', error);
-    
-    // Retry avec options simplifiées pour la compatibilité Android
-    try {
-      const simpleOptions = {
-        body: body,
-        icon: isAndroid ? '/android/android-launchericon-192-192.png' : '/icons/icon-192x192.png',
-        tag: NOTIFICATION_TAG + '-simple',
-        data: options.data,
-        requireInteraction: true,
-        renotify: true
-      };
-      
-      // Pour Android, ajouter au moins la vibration
-      if (isAndroid) {
-        simpleOptions.vibrate = [200, 100, 200];
-      }
-      
-      await self.registration.showNotification(title, simpleOptions);
-      console.log('SW: Notification Android simple affichée en fallback');
-    } catch (fallbackError) {
-      console.error('SW: Erreur fallback notification Android:', fallbackError);
-      
-      // Dernier recours : notification minimale
-      try {
-        await self.registration.showNotification(title, {
-          body: body,
-          tag: NOTIFICATION_TAG + '-minimal'
-        });
-        console.log('SW: Notification minimale affichée');
-      } catch (minimalError) {
-        console.error('SW: Impossible d\'afficher une notification:', minimalError);
-      }
-    }
+    console.error('SW: Erreur notification exercice standard:', error);
   }
 }
 
-// Programmer une notification différée
-function scheduleDelayedNotification(delay) {
-  setTimeout(() => {
-    showWorkoutNotification({
-      body: "N'oubliez pas votre entraînement ! 🔔",
-      isAndroid: true
-    });
-  }, delay);
+// Mettre à jour la notification d'exercice
+async function updateCurrentExerciseNotification(payload) {
+  const androidInfo = getAndroidInfo();
+  
+  // Utiliser la version Android 15 si disponible
+  if (androidInfo.isAndroid15Plus) {
+    return await updateCurrentExerciseNotificationAndroid15(payload);
+  }
+  
+  // Pour les autres plateformes, simplement réafficher
+  await showCurrentExerciseNotification(payload);
 }
 
-// Annuler toutes les notifications
-async function cancelAllNotifications() {
+// Supprimer la notification d'exercice
+async function clearCurrentExerciseNotification() {
+  const androidInfo = getAndroidInfo();
+  
+  // Utiliser la version Android 15 si disponible
+  if (androidInfo.isAndroid15Plus) {
+    return await clearCurrentExerciseNotificationAndroid15();
+  }
+  
+  // Version standard
   try {
-    const notifications = await self.registration.getNotifications();
+    const notifications = await self.registration.getNotifications({ tag: EXERCISE_NOTIFICATION_TAG });
     notifications.forEach(notification => {
-      console.log('SW: Annulation notification:', notification.tag);
+      console.log('SW: Fermeture notification exercice standard:', notification.tag);
       notification.close();
     });
   } catch (error) {
-    console.error('SW: Erreur annulation notifications:', error);
+    console.error('SW: Erreur suppression notification exercice standard:', error);
   }
 }
 
-// Envoyer des analytics de notification (optionnel)
-function sendNotificationAnalytics(action, data) {
-  // Envoyer à un service d'analytics si configuré
-  console.log('SW: Analytics notification:', { action, data });
-  
-  // Exemple: envoyer à Google Analytics, Mixpanel, etc.
-  // fetch('/api/analytics', { ... });
-}
+// =================== NOTIFICATIONS D'EXERCICE ANDROID 15 ===================
 
-// Gestion du background sync pour Android
-self.addEventListener('sync', event => {
-  console.log('SW: Background sync:', event.tag);
-  
-  if (event.tag === 'workout-reminder') {
-    event.waitUntil(
-      showWorkoutNotification({
-        body: "Rappel d'entraînement en arrière-plan 🏃‍♂️",
-        isAndroid: true
-      })
-    );
-  }
-});
-
-// Programmation initiale des notifications (si appelé directement)
-function scheduleWorkoutNotification(config = {}) {
-  const defaultConfig = {
-    time: '16:00', // 16h par défaut
-    enabled: true,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-  };
-  
-  const settings = { ...defaultConfig, ...config };
-  
-  if (!settings.enabled) {
-    console.log('SW: Notifications désactivées');
-    return;
-  }
-  
-  console.log('SW: Programmation notification pour', settings.time);
-  
-  // Calculer le délai jusqu'à la prochaine notification
-  const now = new Date();
-  const [hours, minutes] = settings.time.split(':').map(Number);
-  
-  const nextNotification = new Date();
-  nextNotification.setHours(hours, minutes, 0, 0);
-  
-  // Si l'heure est déjà passée aujourd'hui, programmer pour demain
-  if (nextNotification <= now) {
-    nextNotification.setDate(nextNotification.getDate() + 1);
-  }
-  
-  const delay = nextNotification.getTime() - now.getTime();
-  
-  console.log('SW: Prochaine notification dans', Math.round(delay / 1000 / 60), 'minutes');
-  
-  // Programmer la notification
-  setTimeout(() => {
-    showWorkoutNotification({
-      body: "C'est l'heure de votre entraînement quotidien ! 💪",
-      isAndroid: /Android/i.test(navigator.userAgent || '')
-    });
-    
-    // Programmer la suivante (récursif)
-    scheduleWorkoutNotification(settings);
-  }, delay);
-}
-
-// Détection de la plateforme pour le SW
-function isAndroidPlatform() {
-  return /Android/i.test(navigator.userAgent || '');
-}
-
-// =================== NOTIFICATIONS D'EXERCICE EN COURS ===================
-
-// Afficher une notification avec l'exercice en cours
-async function showCurrentExerciseNotification(payload) {
+// Afficher une notification d'exercice persistante pour Android 15
+async function showCurrentExerciseNotificationAndroid15(payload) {
   const { 
     exerciseName, 
     setNum, 
@@ -436,87 +312,327 @@ async function showCurrentExerciseNotification(payload) {
     dayTitle, 
     currentExercise, 
     totalExercises,
-    autoMode = false 
+    autoMode = false,
+    remainingTime,
+    exerciseType,
+    isPaused = false,
+    calories = 0
   } = payload;
   
-  const title = `🏋️ ${exerciseName}`;
-  const body = `Série ${setNum}/${totalSets} • Exercice ${currentExercise}/${totalExercises}${autoMode ? ' • Mode Auto' : ''}`;
-  const subtext = dayTitle || "Entraînement en cours";
+  // Stocker les données pour les mises à jour
+  currentExerciseData = payload;
   
+  const title = `🏋️ ${exerciseName}`;
+  let body = `Série ${setNum}/${totalSets} • Exercice ${currentExercise}/${totalExercises}`;
+  
+  // Ajouter le timer si disponible
+  if (remainingTime && exerciseType === 'timer') {
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    body += ` • ${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+  
+  if (autoMode) {
+    body += ' • Mode Auto 🚀';
+  }
+  
+  if (isPaused) {
+    body += ' • ⏸️ PAUSE';
+  }
+  
+  if (calories > 0) {
+    body += ` • ${calories} cal`;
+  }
+
   const options = {
     body: body,
     icon: '/android/android-launchericon-192-192.png',
     badge: '/android/android-launchericon-96-96.png',
-    tag: 'pfl-current-exercise',
-    requireInteraction: false, // Ne pas bloquer l'écran
-    renotify: true,
-    silent: true, // Pas de son pour les mises à jour
-    timestamp: Date.now(),
+    tag: EXERCISE_NOTIFICATION_TAG,
+    ...ANDROID15_CONFIG.exerciseOptions,
+    color: isPaused ? '#FF9800' : '#F03D32',
     data: {
-      type: 'current-exercise',
+      type: 'current-exercise-android15',
       exerciseName,
       setNum,
       totalSets,
+      remainingTime,
+      exerciseType,
+      isPaused,
+      calories,
       timestamp: Date.now()
     },
     actions: [
       {
         action: 'open-app',
-        title: '📱 Ouvrir',
+        title: '📱 Ouvrir App',
         icon: '/android/android-launchericon-48-48.png'
       },
       {
-        action: 'pause',
-        title: '⏸️ Pause',
+        action: isPaused ? 'resume' : 'pause',
+        title: isPaused ? '▶️ Reprendre' : '⏸️ Pause',
+        icon: '/android/android-launchericon-48-48.png'
+      },
+      {
+        action: 'next',
+        title: '⏭️ Suivant',
         icon: '/android/android-launchericon-48-48.png'
       }
     ]
   };
 
-  // Configuration spécifique selon la plateforme
-  const isAndroid = /Android/i.test(navigator.userAgent || '');
-  
-  if (isAndroid) {
-    options.color = '#F03D32';
-    options.sticky = true;
-    options.ongoing = true; // Notification persistante sur Android
-    
-    // Ajout du sous-titre pour Android
-    if (subtext) {
-      options.data.subtext = subtext;
-    }
-  }
-
   try {
     // Fermer toute notification d'exercice existante
-    await clearCurrentExerciseNotification();
+    await clearCurrentExerciseNotificationAndroid15();
     
     // Afficher la nouvelle notification
     await self.registration.showNotification(title, options);
-    console.log('SW: Notification exercice en cours affichée:', exerciseName);
+    console.log('SW: Notification exercice Android 15 affichée:', exerciseName);
+    
+    // Démarrer le timer de mise à jour pour les exercices chronométrés
+    if (exerciseType === 'timer' && remainingTime > 0 && !isPaused) {
+      startExerciseTimer();
+    }
     
   } catch (error) {
-    console.error('SW: Erreur notification exercice:', error);
+    console.error('SW: Erreur notification exercice Android 15:', error);
   }
 }
 
-// Mettre à jour la notification d'exercice en cours
-async function updateCurrentExerciseNotification(payload) {
-  // Simplement créer une nouvelle notification (ferme automatiquement l'ancienne avec le même tag)
-  await showCurrentExerciseNotification(payload);
+// Mettre à jour la notification d'exercice pour Android 15
+async function updateCurrentExerciseNotificationAndroid15(payload) {
+  // Mettre à jour les données stockées
+  currentExerciseData = { ...currentExerciseData, ...payload };
+  
+  // Réafficher la notification avec les nouvelles données
+  await showCurrentExerciseNotificationAndroid15(currentExerciseData);
 }
 
-// Supprimer la notification d'exercice en cours
-async function clearCurrentExerciseNotification() {
+// Supprimer la notification d'exercice Android 15
+async function clearCurrentExerciseNotificationAndroid15() {
   try {
-    const notifications = await self.registration.getNotifications({ tag: 'pfl-current-exercise' });
+    // Arrêter le timer
+    stopExerciseTimer();
+    
+    // Fermer la notification
+    const notifications = await self.registration.getNotifications({ tag: EXERCISE_NOTIFICATION_TAG });
     notifications.forEach(notification => {
-      console.log('SW: Fermeture notification exercice:', notification.tag);
+      console.log('SW: Fermeture notification exercice Android 15:', notification.tag);
       notification.close();
     });
+    
+    // Réinitialiser les données
+    currentExerciseData = null;
   } catch (error) {
-    console.error('SW: Erreur suppression notification exercice:', error);
+    console.error('SW: Erreur suppression notification exercice Android 15:', error);
   }
 }
 
-console.log('SW: Service Worker PFL chargé - Android:', isAndroidPlatform());
+// Démarrer le timer pour les mises à jour automatiques
+function startExerciseTimer() {
+  stopExerciseTimer(); // S'assurer qu'il n'y a pas de timer existant
+  
+  exerciseNotificationTimer = setInterval(async () => {
+    if (currentExerciseData && currentExerciseData.remainingTime > 0 && !currentExerciseData.isPaused) {
+      // Décrémenter le temps restant
+      currentExerciseData.remainingTime -= 1;
+      
+      // Mettre à jour la notification
+      await updateCurrentExerciseNotificationAndroid15(currentExerciseData);
+      
+      // Arrêter quand le temps est écoulé
+      if (currentExerciseData.remainingTime <= 0) {
+        stopExerciseTimer();
+        
+        // Vibration de fin d'exercice
+        if ('vibrate' in navigator) {
+          navigator.vibrate([300, 100, 300, 100, 300]);
+        }
+      }
+    } else {
+      stopExerciseTimer();
+    }
+  }, 1000); // Mise à jour chaque seconde
+  
+  console.log('SW: Timer de notification exercice démarré');
+}
+
+// Arrêter le timer
+function stopExerciseTimer() {
+  if (exerciseNotificationTimer) {
+    clearInterval(exerciseNotificationTimer);
+    exerciseNotificationTimer = null;
+    console.log('SW: Timer de notification exercice arrêté');
+  }
+}
+
+// Notification de pause avec timer
+async function showPauseNotification(payload) {
+  const { remainingTime, nextExercise, currentSet, totalSets, autoMode } = payload;
+  
+  const minutes = Math.floor(remainingTime / 60);
+  const seconds = remainingTime % 60;
+  
+  const title = `⏸️ Pause ${autoMode ? 'Auto' : ''}`;
+  const body = `${minutes}:${seconds.toString().padStart(2, '0')} restantes`;
+  
+  const options = {
+    body: body,
+    icon: '/android/android-launchericon-192-192.png',
+    badge: '/android/android-launchericon-96-96.png',
+    tag: 'pfl-pause',
+    ...ANDROID15_CONFIG.exerciseOptions,
+    color: '#FF9800',
+    data: {
+      type: 'pause',
+      remainingTime,
+      timestamp: Date.now()
+    },
+    actions: [
+      {
+        action: 'skip-pause',
+        title: '⏭️ Passer',
+        icon: '/android/android-launchericon-48-48.png'
+      },
+      {
+        action: 'open-app',
+        title: '📱 Ouvrir',
+        icon: '/android/android-launchericon-48-48.png'
+      }
+    ]
+  };
+
+  try {
+    await self.registration.showNotification(title, options);
+    console.log('SW: Notification pause affichée');
+  } catch (error) {
+    console.error('SW: Erreur notification pause:', error);
+  }
+}
+
+// Gestion des clics sur les notifications - Version étendue
+self.addEventListener('notificationclick', event => {
+  console.log('SW: Clic sur notification:', event.notification.tag, event.action);
+  
+  // Fermer la notification
+  event.notification.close();
+  
+  // Traitement selon le type de notification et l'action
+  const notificationData = event.notification.data || {};
+  
+  if (event.notification.tag === EXERCISE_NOTIFICATION_TAG) {
+    // Gestion des notifications d'exercice en cours
+    handleExerciseNotificationClick(event.action, notificationData);
+  } else if (event.notification.tag === 'pfl-pause') {
+    // Gestion des notifications de pause
+    handlePauseNotificationClick(event.action, notificationData);
+  } else {
+    // Gestion des notifications d'entraînement classiques
+    handleWorkoutNotificationClick(event.action, notificationData);
+  }
+});
+
+// Gestion des clics sur notifications d'exercice
+function handleExerciseNotificationClick(action, data) {
+  if (action === 'open-app' || !action) {
+    // Ouvrir l'app ou retourner au workout
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then(clientList => {
+        // Chercher une fenêtre ouverte existante
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            client.postMessage({ type: 'FOCUS_WORKOUT' });
+            return client.focus();
+          }
+        }
+        
+        // Ouvrir une nouvelle fenêtre si aucune trouvée
+        if (clients.openWindow) {
+          return clients.openWindow('/');
+        }
+      });
+  } else if (action === 'pause' || action === 'resume') {
+    // Envoyer un message à l'app pour pause/reprise
+    clients.matchAll({ type: 'window' }).then(clientList => {
+      clientList.forEach(client => {
+        if (client.url.includes(self.location.origin)) {
+          client.postMessage({ 
+            type: action === 'pause' ? 'PAUSE_WORKOUT' : 'RESUME_WORKOUT' 
+          });
+        }
+      });
+    });
+  } else if (action === 'next') {
+    // Envoyer un message à l'app pour passer au suivant
+    clients.matchAll({ type: 'window' }).then(clientList => {
+      clientList.forEach(client => {
+        if (client.url.includes(self.location.origin)) {
+          client.postMessage({ type: 'NEXT_EXERCISE' });
+        }
+      });
+    });
+  }
+}
+
+// Gestion des clics sur notifications de pause
+function handlePauseNotificationClick(action, data) {
+  if (action === 'skip-pause') {
+    // Passer la pause
+    clients.matchAll({ type: 'window' }).then(clientList => {
+      clientList.forEach(client => {
+        if (client.url.includes(self.location.origin)) {
+          client.postMessage({ type: 'SKIP_PAUSE' });
+        }
+      });
+    });
+  } else if (action === 'open-app' || !action) {
+    // Ouvrir l'app
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then(clientList => {
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow('/');
+        }
+      });
+  }
+}
+
+// Gestion des clics sur notifications d'entraînement
+function handleWorkoutNotificationClick(action, data) {
+  if (action === 'start') {
+    // Ouvrir l'app et démarrer l'entraînement
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then(clientList => {
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            client.postMessage({ type: 'START_WORKOUT' });
+            return client.focus();
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow('/?start=true');
+        }
+      });
+  } else if (action === 'later') {
+    // Reporter de 1 heure
+    scheduleDelayedNotification(3600000); // 1 heure en ms
+  } else {
+    // Clic sans action - ouvrir l'app
+    clients.matchAll({ type: 'window' }).then(clientList => {
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
+    });
+  }
+}
+
+// ...existing code for workout notifications...

@@ -1,6 +1,10 @@
 {
   "app": {
     "title": "Project Fat Loss",
+    "loading": "Chargement en cours...",
+    "planError": "Erreur de chargement du plan",
+    "planErrorDetails": "Une erreur est survenue lors du chargement du plan d'entraînement",
+    "reload": "Recharger",
     "tabs": {
       "day": "Jour"
     }

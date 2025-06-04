@@ -46,8 +46,31 @@
   "permissions": [
     "notifications",
     "background-sync",
-    "persistent-storage"
+    "persistent-storage",
+    "background-processing",
+    "vibration",
+    "wake-lock"
   ],
+  "background_sync": [
+    "workout-sync",
+    "notification-sync"
+  ],
+  "notification_permission": {
+    "default": "ask",
+    "types": [
+      "basic",
+      "progress",
+      "actionable"
+    ]
+  },
+  "display_override": [
+    "window-controls-overlay",
+    "minimal-ui",
+    "browser"
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "icons": [
     {
       "src": "ios/72.png",

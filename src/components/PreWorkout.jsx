@@ -7,9 +7,10 @@ import PauseIcon from '@mui/icons-material/Pause';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
-import beepSound from '../../public/beep.mp3';
 import { showTestNotification } from '../services/NotificationService';
 import './PreWorkout.css';
+
+const beepSound = '/beep.mp3';
 
 function playBeep() {
   const beep = new Audio(beepSound);
@@ -376,4 +377,4 @@ export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose })
       </Dialog>
     </>
   );
-} 
+}

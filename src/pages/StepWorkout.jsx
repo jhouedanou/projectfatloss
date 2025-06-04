@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, createContext } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import SettingsIcon from '@mui/icons-material/Settings';
-import beepSound from '../../public/beep.mp3';
+const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon from '../components/ExoIcon';
 import FloatingButtons from '../components/FloatingButtons/FloatingButtons';
@@ -17,7 +17,18 @@ import notificationService from '../services/NotificationService';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
-import iconsMap from '../../public/exo-icons.json';
+
+// Correction de l'import du fichier JSON
+// import iconsMap from '../../public/exo-icons.json'; // ❌ Incorrect
+
+// ✅ Utilisation d'un fetch dynamique ou import direct depuis src
+const iconsMap = {}; // Temporaire - sera chargé dynamiquement
+
+// Chargement dynamique des icônes
+fetch('/exo-icons.json')
+  .then(response => response.json())
+  .then(data => Object.assign(iconsMap, data))
+  .catch(error => console.warn('Erreur chargement icônes:', error));
 
 // Créer un contexte pour partager le mode automatique entre composants
 const WorkoutContext = createContext({
@@ -507,19 +518,55 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       notificationService.updateCurrentExercise(exerciseData);
     }
   }, [exo, setNum, totalSets, day.title, step, total, autoMode, pause, workoutCompleted]);
-  
-  // Supprimer la notification à la fin de l'entraînement ou en quittant
-  useEffect(() => {
-    if (workoutCompleted) {
-      notificationService.clearCurrentExercise();
-    }
-    
-    // Cleanup au démontage du composant
-    return () => {
-      notificationService.clearCurrentExercise();
-    };
-  }, [workoutCompleted]);
 
+  // Gestion des notifications d'exercice en cours avec plus de données
+  useEffect(() => {
+    if (exo && !pause && !workoutCompleted) {
+      // Déterminer le type d'exercice pour les notifications
+      let exerciseType = 'reps';
+      let remainingTime = null;
+      
+      // Simplifier - utiliser des valeurs par défaut pour les variables inaccessibles
+      // Les variables exerciseTimer, chrono, isChrono, hasTimer sont dans StepSet, pas ici
+      
+      // Afficher/mettre à jour la notification avec l'exercice en cours
+      const exerciseData = {
+        name: exo.name,
+        currentSet: setNum + 1,
+        totalSets: totalSets,
+        dayTitle: day.title,
+        currentExercise: step + 1,
+        totalExercises: total,
+        autoMode: autoMode,
+        // Données simplifiées pour éviter les erreurs de portée
+        exerciseType: exo.timer ? 'timer' : 'reps',
+        remainingTime: exo.duration || null,
+        currentRep: 0, // Valeur par défaut
+        totalReps: exo.nbRep || 0,
+        isPaused: pause,
+        calories: totalCaloriesBurned,
+        progress: 0 // Progression par défaut
+      };
+      
+      notificationService.updateCurrentExercise(exerciseData);
+    }
+  }, [exo, setNum, totalSets, day.title, step, total, autoMode, pause, workoutCompleted, totalCaloriesBurned]);
+
+  // Gestion des notifications de pause avec timer
+  useEffect(() => {
+    if (pause && !workoutCompleted) {
+      const pauseData = {
+        remainingTime: autoMode ? 20 : 15, // Temps de pause
+        nextExercise: step < total - 1 ? day.exercises[step + 1] : null,
+        currentSet: setNum + 1,
+        totalSets: totalSets,
+        autoMode: autoMode
+      };
+      
+      notificationService.showPauseNotification(pauseData);
+    }
+  }, [pause, workoutCompleted, autoMode, step, total, day.exercises, setNum, totalSets]);
+  
   return (
     <div 
       className="day-content" 

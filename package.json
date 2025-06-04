@@ -3,8 +3,7 @@
   "version": "2.5.0",
   "private": true,
   "homepage": "https://jhouedanou.github.io/projectfatloss",
-
-  "description": "Application d'entraînement musculaire", 
+  "description": "Application d'entraînement musculaire",
   "author": "Jhouedanou",
   "license": "MIT",
   "keywords": [
@@ -15,7 +14,6 @@
     "fitness",
     "workout"
   ],
-  
   "scripts": {
     "dev": "vite --force",
     "start": "vite --force",
@@ -23,7 +21,12 @@
     "preview": "vite preview",
     "predeploy": "node scripts/generate-icons.js && vite build",
     "deploy": "gh-pages -d dist",
-    "generate-icons": "node scripts/generate-icons.js"
+    "generate-icons": "node scripts/generate-icons.js",
+    "mobile": "vite --host 0.0.0.0 --port 3000",
+    "mobile-sync": "browser-sync start --proxy 'localhost:3000' --files 'src/**/*' --port 3001 --ui-port 3002",
+    "bs": "browser-sync start --proxy 'localhost:5173' --files 'src/**/*,public/**/*,index.html' --port 3000 --ui-port 3001 --no-open",
+    "dev:sync": "concurrently \"npm run dev\" \"npm run bs\" --names \"VITE,BS\" --prefix-colors \"blue,green\"",
+    "dev:full": "concurrently \"npm run dev\" \"npm run bs\" --names \"VITE,BROWSERSYNC\" --prefix-colors \"blue,green\" --kill-others-on-fail"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -42,6 +45,8 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",
+    "browser-sync": "^3.0.4",
+    "concurrently": "^9.1.2",
     "gh-pages": "^6.0.0",
     "sharp": "^0.34.1",
     "vite": "^4.0.0",
