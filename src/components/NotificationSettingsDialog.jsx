@@ -113,9 +113,35 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
   const availableTimes = getAvailableNotificationTimes();
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Paramètres de notification</DialogTitle>
-      <DialogContent>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      sx={{
+        '& .MuiDialog-paper': {
+          maxHeight: '90vh',
+          margin: { xs: '16px', sm: '32px' },
+          maxWidth: { xs: 'calc(100vw - 32px)', sm: '600px' },
+        },
+      }}
+    >
+      <DialogTitle sx={{ pb: 1 }}>
+        Paramètres de notification
+      </DialogTitle>
+      <DialogContent sx={{ 
+        pb: 2,
+        '&::-webkit-scrollbar': {
+          width: '6px',
+        },
+        '&::-webkit-scrollbar-track': {
+          backgroundColor: 'rgba(0,0,0,0.1)',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          borderRadius: '3px',
+        },
+      }}>
         <Box sx={{ mb: 3 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Recevez une notification quotidienne pour vous rappeler de faire votre entraînement.

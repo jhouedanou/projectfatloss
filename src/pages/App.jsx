@@ -184,7 +184,6 @@ export default function App() {
             <button className="theme-toggle" onClick={toggleTheme} title={darkTheme ? t('theme.light') : t('theme.dark')}>
               {darkTheme ? '☀️' : '🌙'}
             </button>
-            <span className="header-title">{t('app.title')}</span>
             <div className="header-controls">
               <button 
                 className={`view-toggle ${viewMode === 'workout' ? 'active' : ''}`}
@@ -239,12 +238,27 @@ export default function App() {
                       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
                         <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
                       </div>
-                      <h2 style={{ fontSize: '1.1rem', marginBottom: 16 }}>{workoutPlan[current].title}</h2>
+                      <h2 style={{ fontSize: '1.1rem', marginBottom: 16, color: 'var(--text-primary)' }}>{workoutPlan[current].title}</h2>
                       
                       {/* Boutons de démarrage */}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: 16 }}>
-                        <button className="timer-btn" onClick={()=>setStepMode(true)}>
-                          {t('workout.start')}
+                        <button 
+                          className="timer-btn" 
+                          onClick={() => setStepMode(true)}
+                          style={{
+                            minHeight: '60px',
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                            background: 'linear-gradient(45deg, #F03D32 30%, #FF6B35 90%)',
+                            border: 'none',
+                            borderRadius: '12px',
+                            color: 'white',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            boxShadow: '0 4px 15px rgba(240, 61, 50, 0.3)',
+                          }}
+                        >
+                          💪 {t('workout.start')}
                         </button>
                         <PreWorkout 
                           onStartWorkout={() => setStepMode(true)}

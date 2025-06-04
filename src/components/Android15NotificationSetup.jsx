@@ -408,8 +408,8 @@ Revenez ensuite à l'application.
   }
 
   return (
-    <Container maxWidth="md">
-      <Box py={4}>
+    <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
+      <Box py={{ xs: 2, sm: 4 }} sx={{ maxHeight: '100vh', overflow: 'auto' }}>
         <Card 
           elevation={0}
           sx={{
@@ -421,9 +421,11 @@ Revenez ensuite à l'application.
             border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
             backdropFilter: 'blur(10px)',
             overflow: 'visible',
+            maxWidth: { xs: 'calc(100vw - 32px)', sm: 'none' },
+            mx: 'auto',
           }}
         >
-          <CardContent sx={{ p: 4 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
             
             {/* Header avec design amélioré */}
             <Box textAlign="center" mb={4}>

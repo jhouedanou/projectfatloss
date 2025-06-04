@@ -577,7 +577,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       }}
     >
       <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor:'#2e2e3f' }}>
-        <button className="timer-btn" onClick={handleBackClick}>Retour</button>
+        <button className="timer-btn" onClick={handleBackClick}>⬅️</button>
         <button 
           className={`timer-btn ${autoMode ? 'active' : ''}`} 
           onClick={handleToggleAutoMode}
@@ -590,11 +590,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           🚀
         </button>
         <button className="timer-btn save-btn" onClick={handleSaveAndExit}>
-          Sauvegarder et quitter
+          💾
         </button>
       </div>
 
-      <h2 style={{fontSize:'1.1rem',marginBottom:8}}>{day.title}</h2>
+      <h2 style={{fontSize:'1.1rem',marginBottom:8}}> {day.title}</h2>
       
       <>
         <ProgressTracker 

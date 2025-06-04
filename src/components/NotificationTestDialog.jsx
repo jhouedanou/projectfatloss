@@ -204,7 +204,19 @@ export default function NotificationTestDialog({ open, onClose }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      sx={{
+        '& .MuiDialog-paper': {
+          maxHeight: '90vh',
+          margin: { xs: '16px', sm: '32px' },
+          maxWidth: { xs: 'calc(100vw - 32px)', sm: '600px' },
+        },
+      }}
+    >
       <DialogTitle>
         <Box display="flex" alignItems="center" gap={1}>
           <NotificationsIcon />
@@ -213,7 +225,18 @@ export default function NotificationTestDialog({ open, onClose }) {
         </Box>
       </DialogTitle>
       
-      <DialogContent>
+      <DialogContent sx={{
+        '&::-webkit-scrollbar': {
+          width: '6px',
+        },
+        '&::-webkit-scrollbar-track': {
+          backgroundColor: 'rgba(0,0,0,0.1)',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          borderRadius: '3px',
+        },
+      }}>
         <Box mb={2}>
           <Typography variant="body2" color="textSecondary" gutterBottom>
             Diagnostiquez les problèmes de notifications sur votre appareil

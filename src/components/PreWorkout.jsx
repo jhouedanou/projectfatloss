@@ -149,17 +149,24 @@ export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose })
         startIcon={<FitnessCenterIcon />}
         onClick={handleOpen}
         sx={{
-          minHeight: 60,
+          minHeight: '60px',
           fontSize: '1.1rem',
           fontWeight: 'bold',
-          mb: 2,
-          background: 'linear-gradient(45deg, #FF6B6B, #4ECDC4)',
+          mb: 1.5,
+          width: '100%',
+          background: 'linear-gradient(45deg, #4ECDC4 30%, #44A08D 90%)',
+          border: 'none',
+          borderRadius: '12px',
+          color: 'white',
+          boxShadow: '0 4px 15px rgba(78, 205, 196, 0.3)',
           '&:hover': {
-            background: 'linear-gradient(45deg, #FF5252, #26C6DA)',
+            background: 'linear-gradient(45deg, #26C6DA 30%, #00695C 90%)',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 20px rgba(78, 205, 196, 0.4)',
           }
         }}
       >
-        Démarrer Pre-Workout (30 min)
+        Pre-Workout
       </Button>
 
       {/* Bouton pour le mode automatique */}
@@ -170,18 +177,24 @@ export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose })
         startIcon={<FlashOnIcon />}
         onClick={() => onStartAutoMode && onStartAutoMode()}
         sx={{
-          minHeight: 60,
+          minHeight: '60px',
           fontSize: '1.1rem',
           fontWeight: 'bold',
-          mb: 2,
+          mb: 1.5,
           width: '100%',
-          background: 'linear-gradient(45deg, #F03D32, #FF6B6B)',
+          background: 'linear-gradient(45deg, #FF6B35 30%, #F7931E 90%)',
+          border: 'none',
+          borderRadius: '12px',
+          color: 'white',
+          boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
           '&:hover': {
-            background: 'linear-gradient(45deg, #D32F2F, #FF5252)',
+            background: 'linear-gradient(45deg, #FF5722 30%, #E65100 90%)',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 20px rgba(255, 107, 53, 0.4)',
           }
         }}
       >
-        🚀 Mode Auto - Entraînement Automatisé
+        Mode Auto
       </Button>
 
       {/* Dialog du pre-workout */}
