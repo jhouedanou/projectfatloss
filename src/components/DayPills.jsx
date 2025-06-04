@@ -1,49 +1,19 @@
 import React, { useState, useRef } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { 
+  Box, 
+  Button, 
+  Typography, 
+  Chip,
+  useTheme,
+  alpha
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
-
-const styles = {
-  pillContainer: {
-    display: 'flex',
-    overflowX: 'visible',  // Changé pour éviter le conflit de scroll
-    flexWrap: 'wrap', // Pour éviter le débordement sur petits écrans
-    justifyContent: 'center', // Centrer les pills
-    padding: '10px 5px',
-    gap: '10px',
-    backgroundColor: 'var(--background-dark)',
-    borderRadius: '8px',
-    margin: '10px 0',
-    width: '100%', // S'assurer que le conteneur prend toute la largeur
-    boxSizing: 'border-box',
-    '::-webkit-scrollbar': {
-      display: 'none'
-    }
-  },
-  pill: {
-    padding: '10px 20px',
-    borderRadius: '20px',
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-    transition: 'all 0.3s ease',
-    backgroundColor: '#121212',
-    color: '#FFFFFF',
-    border: '1px solid #F03D32',
-    flexShrink: 0,
-  },
-  activePill: {
-    backgroundColor: '#F03D32',
-    color: '#FFFFFF',
-    boxShadow: '0 2px 4px rgba(240, 61, 50, 0.3)',
-  },
-  completedPill: {
-    backgroundColor: '#6A1D1C',
-    borderColor: '#6A1D1C',
-    color: '#FFFFFF',
-  }
-};
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 function DayPills({ days, current, setCurrent, setStepMode }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [isSwiping, setIsSwiping] = useState(false);
@@ -114,40 +84,153 @@ function DayPills({ days, current, setCurrent, setStepMode }) {
 
   return (
     <Box sx={{ mb: 4, width: '100%' }}>
-      <Typography variant="h6" gutterBottom>
-        Sélectionner un jour
+      {/* Titre avec gradient */}
+      <Typography 
+        variant="h5" 
+        gutterBottom
+        sx={{
+          fontWeight: 700,
+          background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          textAlign: 'center',
+          mb: 3,
+        }}
+      >
+        📅 Choisissez votre jour d'entraînement
       </Typography>
+      
+      {/* Conteneur des pills avec design amélioré */}
       <Box 
         ref={containerRef}
         sx={{
-          ...styles.pillContainer,
+          display: 'flex',
+          overflowX: 'auto',
+          gap: 2,
+          padding: '16px',
+          borderRadius: '16px',
+          background: `linear-gradient(135deg, 
+            ${alpha(theme.palette.primary.main, 0.05)} 0%, 
+            ${alpha(theme.palette.secondary.main, 0.05)} 100%
+          )`,
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+          backdropFilter: 'blur(10px)',
           transition: !isSwiping ? 'transform 0.3s ease' : 'none',
-          position: 'relative',
-          padding: '10px 5px',
-          touchAction: 'pan-y', // Permettre le scroll vertical normal
-          maxWidth: '100%', // S'assurer que la largeur est limitée
+          touchAction: 'pan-y',
+          // Masquer la scrollbar
+          '&::-webkit-scrollbar': {
+            height: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: alpha(theme.palette.grey[300], 0.3),
+            borderRadius: '2px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+            borderRadius: '2px',
+          },
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchCancel}
       >
-        {days.map((day, index) => (
-          <Button
-            key={index}
-            variant="outlined"
-            size="small"
-            onClick={() => handleDayClick(index)}
-            sx={{
-              ...styles.pill,
-              ...(current === index ? styles.activePill : {}),
-              minWidth: '80px', // Largeur minimale fixe
-              margin: '3px',   // Espacement uniforme
-            }}
-          >
-            {t('app.tabs.day')} {index + 1}
-          </Button>
-        ))}
+        {days.map((day, index) => {
+          const isActive = current === index;
+          const isCompleted = index < current; // Logique simple pour "terminé"
+          
+          return (
+            <Chip
+              key={index}
+              label={
+                <Box display="flex" alignItems="center" gap={1}>
+                  {isCompleted ? (
+                    <CheckCircleIcon sx={{ fontSize: '1rem' }} />
+                  ) : (
+                    <FitnessCenterIcon sx={{ fontSize: '1rem' }} />
+                  )}
+                  <Typography variant="body2" fontWeight={600}>
+                    Jour {index + 1}
+                  </Typography>
+                </Box>
+              }
+              clickable
+              onClick={() => handleDayClick(index)}
+              variant={isActive ? 'filled' : 'outlined'}
+              sx={{
+                minWidth: '100px',
+                height: '48px',
+                borderRadius: '24px',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                cursor: 'pointer',
+                flexShrink: 0,
+                
+                // Style pour le jour actif
+                ...(isActive && {
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
+                  color: 'white',
+                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}`,
+                  transform: 'scale(1.05)',
+                  '&:hover': {
+                    background: `linear-gradient(45deg, ${theme.palette.primary.dark} 30%, ${theme.palette.secondary.dark} 90%)`,
+                    transform: 'scale(1.08)',
+                    boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.5)}`,
+                  },
+                }),
+                
+                // Style pour les jours terminés
+                ...(isCompleted && !isActive && {
+                  backgroundColor: alpha(theme.palette.success.main, 0.1),
+                  borderColor: theme.palette.success.main,
+                  color: theme.palette.success.main,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.success.main, 0.2),
+                    transform: 'scale(1.02)',
+                  },
+                }),
+                
+                // Style pour les jours non commencés
+                ...(!isActive && !isCompleted && {
+                  backgroundColor: 'transparent',
+                  borderColor: alpha(theme.palette.primary.main, 0.3),
+                  color: theme.palette.text.primary,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                    borderColor: theme.palette.primary.main,
+                    transform: 'scale(1.02)',
+                  },
+                }),
+                
+                '&:active': {
+                  transform: isActive ? 'scale(1.02)' : 'scale(0.98)',
+                },
+              }}
+            />
+          );
+        })}
+      </Box>
+      
+      {/* Indicateur de swipe sur mobile */}
+      <Box
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          textAlign: 'center',
+          mt: 2,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            color: alpha(theme.palette.text.secondary, 0.7),
+            fontSize: '0.75rem',
+            fontStyle: 'italic',
+          }}
+        >
+          👆 Glissez pour naviguer entre les jours
+        </Typography>
       </Box>
     </Box>
   );

@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Button,
   Container,
   Stack,
   Alert,
@@ -13,8 +12,9 @@ import {
   StepLabel,
   StepContent,
   Chip,
-  LinearProgress,
-  CircularProgress
+  CircularProgress,
+  useTheme,
+  alpha
 } from '@mui/material';
 import {
   Android as AndroidIcon,
@@ -23,9 +23,11 @@ import {
   Error as ErrorIcon,
   Settings as SettingsIcon
 } from '@mui/icons-material';
+import GradientButton from './GradientButton';
 import { requestNotificationPermission, testAndroid15GitHubPagesNotification } from '../services/NotificationService';
 
 const Android15NotificationSetup = ({ onComplete, onSkip }) => {
+  const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const [permission, setPermission] = useState('default');
   const [isAndroid15, setIsAndroid15] = useState(false);
@@ -148,25 +150,36 @@ Revenez ensuite à l'application.
           </Typography>
           
           {isAndroid15 && (
-            <Alert severity="info" sx={{ mt: 2 }}>
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mt: 2,
+                borderRadius: '12px',
+                background: `linear-gradient(135deg, 
+                  ${alpha(theme.palette.info.main, 0.1)} 0%, 
+                  ${alpha(theme.palette.primary.main, 0.05)} 100%
+                )`,
+                border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+              }}
+            >
               <Typography variant="body2">
-                <strong>Optimisations Android 15 :</strong><br />
-                • Notifications persistantes<br />
-                • Vibrations améliorées<br />
-                • Actions rapides<br />
-                • Contrôles d'exercice
+                <strong>🚀 Optimisations Android 15 :</strong><br />
+                • Notifications persistantes avec contrôles<br />
+                • Vibrations personnalisées<br />
+                • Actions rapides d'entraînement<br />
+                • Interface optimisée pour le fitness
               </Typography>
             </Alert>
           )}
           
-          <Button
-            variant="contained"
+          <GradientButton
             onClick={() => setActiveStep(1)}
             sx={{ mt: 2 }}
             fullWidth
+            size="large"
           >
-            Continuer
-          </Button>
+            🔥 Continuer la Configuration
+          </GradientButton>
         </Box>
       )
     },
@@ -174,55 +187,106 @@ Revenez ensuite à l'application.
       label: 'Demande de permission',
       content: (
         <Box>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Autorisez les notifications pour recevoir :
+          <Typography variant="body2" sx={{ mb: 2, color: theme.palette.text.primary }}>
+            🔔 Autorisez les notifications pour recevoir :
           </Typography>
           
           <Stack spacing={1} sx={{ mb: 3 }}>
-            <Chip icon="🏋️" label="Rappels d'entraînement" size="small" />
-            <Chip icon="⏰" label="Notifications de pause" size="small" />
-            <Chip icon="🔥" label="Suivi d'exercices en cours" size="small" />
-            <Chip icon="📊" label="Statistiques de progression" size="small" />
+            <Chip 
+              icon="🏋️" 
+              label="Rappels d'entraînement quotidiens" 
+              size="small"
+              sx={{ 
+                background: alpha(theme.palette.primary.main, 0.1),
+                color: theme.palette.primary.main,
+                fontWeight: 500
+              }}
+            />
+            <Chip 
+              icon="⏰" 
+              label="Minuteurs de pause et exercices" 
+              size="small"
+              sx={{ 
+                background: alpha(theme.palette.secondary.main, 0.1),
+                color: theme.palette.secondary.main,
+                fontWeight: 500
+              }}
+            />
+            <Chip 
+              icon="🔥" 
+              label="Suivi d'exercices en temps réel" 
+              size="small"
+              sx={{ 
+                background: alpha(theme.palette.warning.main, 0.1),
+                color: theme.palette.warning.main,
+                fontWeight: 500
+              }}
+            />
+            <Chip 
+              icon="📊" 
+              label="Statistiques et progression" 
+              size="small"
+              sx={{ 
+                background: alpha(theme.palette.success.main, 0.1),
+                color: theme.palette.success.main,
+                fontWeight: 500
+              }}
+            />
           </Stack>
 
           {permission === 'denied' && (
-            <Alert severity="warning" sx={{ mb: 2 }}>
+            <Alert 
+              severity="warning" 
+              sx={{ 
+                mb: 2,
+                borderRadius: '12px',
+                background: `linear-gradient(135deg, 
+                  ${alpha(theme.palette.warning.main, 0.1)} 0%, 
+                  ${alpha(theme.palette.error.main, 0.05)} 100%
+                )`,
+                border: `1px solid ${alpha(theme.palette.warning.main, 0.3)}`,
+              }}
+            >
               <Typography variant="body2">
-                <strong>Permission bloquée</strong><br />
-                Cliquez sur "Paramètres Android" pour débloquer manuellement.
+                <strong>⚠️ Permission bloquée</strong><br />
+                Cliquez sur "Paramètres Android" pour débloquer manuellement les notifications.
               </Typography>
             </Alert>
           )}
 
           <Stack spacing={2}>
-            <Button
-              variant="contained"
+            <GradientButton
               onClick={handleRequestPermission}
               disabled={isLoading || permission === 'granted'}
-              startIcon={isLoading ? <CircularProgress size={20} /> : <NotificationsActiveIcon />}
+              startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <NotificationsActiveIcon />}
               fullWidth
+              size="large"
             >
-              {permission === 'granted' ? 'Permission accordée ✅' : 
+              {permission === 'granted' ? '✅ Permission Accordée' : 
                isLoading ? 'Demande en cours...' : 
-               'Autoriser les Notifications'}
-            </Button>
+               '🔔 Autoriser les Notifications'}
+            </GradientButton>
             
             {permission === 'denied' && (
-              <Button
+              <GradientButton
                 variant="outlined"
                 onClick={openAndroidSettings}
                 startIcon={<SettingsIcon />}
                 fullWidth
               >
-                Paramètres Android
-              </Button>
+                ⚙️ Ouvrir Paramètres Android
+              </GradientButton>
             )}
           </Stack>
           
           {testResult && (
             <Alert 
               severity={testResult.includes('✅') ? 'success' : 'error'} 
-              sx={{ mt: 2 }}
+              sx={{ 
+                mt: 2,
+                borderRadius: '12px',
+                fontWeight: 500
+              }}
             >
               {testResult}
             </Alert>
@@ -235,34 +299,49 @@ Revenez ensuite à l'application.
       content: (
         <Box>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            Testons maintenant le système de notifications :
+            🧪 Testons maintenant votre système de notifications :
           </Typography>
           
-          <Alert severity="info" sx={{ mb: 3 }}>
+          <Alert 
+            severity="info" 
+            sx={{ 
+              mb: 3,
+              borderRadius: '12px',
+              background: `linear-gradient(135deg, 
+                ${alpha(theme.palette.info.main, 0.1)} 0%, 
+                ${alpha(theme.palette.primary.main, 0.05)} 100%
+              )`,
+              border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+            }}
+          >
             <Typography variant="body2">
-              <strong>Ce qui va être testé :</strong><br />
-              • Affichage de la notification<br />
-              • Son et vibration<br />
-              • Icône et badge<br />
-              {isAndroid15 && '• Fonctionnalités Android 15'}
+              <strong>🔍 Test complet :</strong><br />
+              • Affichage de la notification push<br />
+              • Vibration et son personnalisés<br />
+              • Icône et badge Project Fat Loss<br />
+              {isAndroid15 && '• 🚀 Fonctionnalités avancées Android 15'}
             </Typography>
           </Alert>
           
-          <Button
-            variant="contained"
+          <GradientButton
             onClick={handleTestNotification}
             disabled={isLoading || permission !== 'granted'}
-            startIcon={isLoading ? <CircularProgress size={20} /> : '🧪'}
+            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : '🧪'}
             fullWidth
+            size="large"
             sx={{ mb: 2 }}
           >
-            {isLoading ? 'Test en cours...' : 'Tester les Notifications'}
-          </Button>
+            {isLoading ? 'Test en cours...' : '🔥 Tester les Notifications'}
+          </GradientButton>
           
           {testResult && (
             <Alert 
               severity={testResult.includes('✅') ? 'success' : 'error'} 
-              sx={{ mt: 2 }}
+              sx={{ 
+                mt: 2,
+                borderRadius: '12px',
+                fontWeight: 500
+              }}
             >
               {testResult}
             </Alert>
@@ -276,27 +355,33 @@ Revenez ensuite à l'application.
         <Box textAlign="center">
           <CheckCircleIcon 
             color="success" 
-            sx={{ fontSize: 60, mb: 2 }} 
+            sx={{ fontSize: 80, mb: 2 }} 
           />
-          <Typography variant="h6" gutterBottom color="success.main">
-            Configuration réussie ! 🎉
+          <Typography variant="h5" gutterBottom sx={{ 
+            fontWeight: 700,
+            background: `linear-gradient(45deg, ${theme.palette.success.main} 30%, ${theme.palette.primary.main} 90%)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}>
+            🎉 Configuration Réussie ! 
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             Vos notifications sont maintenant configurées{isAndroid15 ? ' avec les optimisations Android 15' : ''}.
-            Vous êtes prêt à commencer vos entraînements !
+            <br />💪 Vous êtes prêt à transformer votre corps !
           </Typography>
           
-          <Button
-            variant="contained"
+          <GradientButton
             onClick={() => onComplete?.({
               permission: 'granted',
               android15: isAndroid15,
               tested: true
             })}
             size="large"
+            sx={{ minWidth: '200px' }}
           >
-            Commencer l'Entraînement 🚀
-          </Button>
+            🚀 Commencer l'Entraînement
+          </GradientButton>
         </Box>
       )
     }
@@ -307,11 +392,16 @@ Revenez ensuite à l'application.
       <Container maxWidth="sm">
         <Box 
           display="flex" 
+          flexDirection="column"
           justifyContent="center" 
           alignItems="center" 
           minHeight="100vh"
+          gap={3}
         >
-          <CircularProgress />
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Détection de votre appareil...
+          </Typography>
         </Box>
       </Container>
     );
@@ -320,53 +410,112 @@ Revenez ensuite à l'application.
   return (
     <Container maxWidth="md">
       <Box py={4}>
-        <Card elevation={3}>
+        <Card 
+          elevation={0}
+          sx={{
+            borderRadius: '24px',
+            background: `linear-gradient(135deg, 
+              ${alpha(theme.palette.background.paper, 0.9)} 0%, 
+              ${alpha(theme.palette.primary.main, 0.02)} 100%
+            )`,
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+            backdropFilter: 'blur(10px)',
+            overflow: 'visible',
+          }}
+        >
           <CardContent sx={{ p: 4 }}>
             
-            {/* Header */}
+            {/* Header avec design amélioré */}
             <Box textAlign="center" mb={4}>
-              <AndroidIcon 
-                color="primary" 
-                sx={{ fontSize: 50, mb: 2 }} 
-              />
-              <Typography variant="h5" gutterBottom>
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  p: 2,
+                  borderRadius: '50%',
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
+                  mb: 2,
+                  boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
+                }}
+              >
+                <AndroidIcon 
+                  sx={{ fontSize: 40, color: 'white' }}
+                />
+              </Box>
+              <Typography 
+                variant="h4" 
+                gutterBottom
+                sx={{
+                  fontWeight: 700,
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
                 Configuration Android{isAndroid15 ? ' 15' : ''}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Optimisation des notifications pour votre appareil
+              <Typography variant="body1" color="text.secondary">
+                🚀 Optimisation des notifications pour votre entraînement
               </Typography>
             </Box>
 
-            {/* Stepper */}
-            <Stepper activeStep={activeStep} orientation="vertical">
+            {/* Stepper avec styles améliorés */}
+            <Stepper 
+              activeStep={activeStep} 
+              orientation="vertical"
+              sx={{
+                '& .MuiStepLabel-root': {
+                  '& .MuiStepLabel-iconContainer': {
+                    '& .Mui-active': {
+                      color: theme.palette.primary.main,
+                    },
+                    '& .Mui-completed': {
+                      color: theme.palette.success.main,
+                    },
+                  },
+                },
+                '& .MuiStepContent-root': {
+                  borderLeft: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                  ml: 1,
+                },
+              }}
+            >
               {steps.map((step, index) => (
                 <Step key={step.label}>
                   <StepLabel>
-                    <Typography variant="body1" fontWeight="medium">
+                    <Typography variant="h6" fontWeight={600}>
                       {step.label}
                     </Typography>
                   </StepLabel>
                   <StepContent>
-                    {step.content}
+                    <Box py={2}>
+                      {step.content}
+                    </Box>
                   </StepContent>
                 </Step>
               ))}
             </Stepper>
 
             {/* Actions Footer */}
-            <Box mt={4} display="flex" justifyContent="space-between">
-              <Button
+            <Box mt={4} display="flex" justifyContent="space-between" alignItems="center">
+              <GradientButton
                 variant="text"
                 onClick={() => onSkip?.()}
-                color="text.secondary"
+                size="small"
               >
-                Passer pour l'instant
-              </Button>
+                ⏭️ Passer pour l'instant
+              </GradientButton>
               
               <Chip 
-                label={`Android ${isAndroid15 ? '15+' : 'Standard'}`}
-                color={isAndroid15 ? 'success' : 'primary'}
-                size="small"
+                label={`📱 Android ${isAndroid15 ? '15+' : 'Standard'}`}
+                sx={{
+                  background: isAndroid15 ? 
+                    `linear-gradient(45deg, ${theme.palette.success.main} 30%, ${theme.palette.primary.main} 90%)` :
+                    `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                }}
               />
             </Box>
 
