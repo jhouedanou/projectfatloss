@@ -204,8 +204,8 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
                 label="Heure de notification"
               >
                 {availableTimes.map((time) => (
-                  <MenuItem key={time} value={time}>
-                    {time}
+                  <MenuItem key={time.value} value={time.value}>
+                    {time.label}
                   </MenuItem>
                 ))}
               </Select>

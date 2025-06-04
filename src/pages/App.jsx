@@ -19,6 +19,7 @@ import '../components/WorkoutCustomizer.css';
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
 import DayPills from '../components/DayPills';
 import Header from '../components/Header/Header';
+import { getServiceWorkerPath, getAssetPath } from '../utils/paths';
 
 const NOTIFICATION_DURATION = 3000; 
 
@@ -65,7 +66,7 @@ export default function App() {
       
       // Enregistrer le service worker pour les notifications
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register(getServiceWorkerPath())
           .then(registration => {
             console.log('Service Worker enregistré avec succès:', registration);
           })
@@ -148,7 +149,7 @@ export default function App() {
     if ("Notification" in window && Notification.permission === "granted" && workoutPlan && workoutPlan.length > 0) {
       new Notification(t('notifications.workoutComplete'), {
         body: t('notifications.nextDay', { day: (current + 1) % workoutPlan.length + 1 }),
-        icon: '/favicon.ico'
+        icon: getAssetPath('/favicon.ico')
       });
     }
     

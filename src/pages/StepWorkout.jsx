@@ -1,8 +1,13 @@
 // Correction des bugs liés à pause/isPaused - v1.0.1
-import React, { useState, useEffect, useRef, createContext } from 'react';
+import React, { useState, useEffect, useRef, createContext, useCallback } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PauseIcon from '@mui/icons-material/Pause';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
+import StopIcon from '@mui/icons-material/Stop';
 const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon from '../components/ExoIcon';
@@ -14,9 +19,19 @@ import { getWorkoutPlan } from '../services/WorkoutCustomization';
 import { initSpeechService, announceExercise, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
+import { useTranslation } from 'react-i18next';
+import YouTube from 'react-youtube';
+import { getExerciseIconsPath } from '../utils/paths';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
+
+// Fonction utilitaire simple pour formater le temps
+const formatTime = (seconds) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
 
 // Correction de l'import du fichier JSON
 // import iconsMap from '../../public/exo-icons.json'; // ❌ Incorrect
@@ -25,10 +40,10 @@ import './StepWorkout.css';
 const iconsMap = {}; // Temporaire - sera chargé dynamiquement
 
 // Chargement dynamique des icônes
-fetch('/exo-icons.json')
+fetch(getExerciseIconsPath())
   .then(response => response.json())
   .then(data => Object.assign(iconsMap, data))
-  .catch(error => console.warn('Erreur chargement icônes:', error));
+  .catch(error => console.error('Erreur chargement icônes:', error));
 
 // Créer un contexte pour partager le mode automatique entre composants
 const WorkoutContext = createContext({
