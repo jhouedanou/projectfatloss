@@ -11,7 +11,6 @@ import WeightTracker from '../components/WeightTracker';
 import LanguageSelector from '../components/LanguageSelector';
 import WorkoutCustomizer from '../components/WorkoutCustomizer'; 
 import NotificationSettingsDialog from '../components/NotificationSettingsDialog';
-import PreWorkout from '../components/PreWorkout';
 import { initNotificationService } from '../services/NotificationService';
 // Import de la synthèse vocale supprimé
 import { days as initialWorkoutPlan } from '../data'; 
@@ -177,9 +176,18 @@ export default function App() {
 
   return (
     <ThemeProvider theme={appTheme}>
-      <div className="app">
+      <div className="app" style={{ 
+        width: '100%', 
+        overflowX: 'hidden', 
+        position: 'relative',
+        minHeight: '100vh'
+      }}>
         <Header onNotificationSettings={() => setShowNotificationSettings(true)} />
-        <div>
+        <div style={{ 
+          width: '100%', 
+          overflowX: 'hidden',
+          position: 'relative'
+        }}>
           <header className="app-header">
             <button className="theme-toggle" onClick={toggleTheme} title={darkTheme ? t('theme.light') : t('theme.dark')}>
               {darkTheme ? '☀️' : '🌙'}
@@ -213,17 +221,6 @@ export default function App() {
               </button>
             </div>
           </header>
-          
-          <div className="settings-bar">
-            
-            <button 
-              className="settings-button"
-              onClick={() => setShowCustomizer(true)}
-              title={t('settings.customizeProgram')}
-            >
-              {t('settings.customize')} ⚙️
-            </button>
-          </div>
           
           {showLanguageSelector && <LanguageSelector />}
           
@@ -260,14 +257,6 @@ export default function App() {
                         >
                           💪 {t('workout.start')}
                         </button>
-                        <PreWorkout 
-                          onStartWorkout={() => setStepMode(true)}
-                          onStartAutoMode={() => {
-                            setAutoMode(true);
-                            setStepMode(true);
-                          }}
-                          onClose={() => {}}
-                        />
                       </div>
                       
                       <div className="exercise-list">
@@ -322,6 +311,45 @@ export default function App() {
             </div>
           )}
         </div>
+        
+        {/* Bouton flottant personnaliser - caché en mode exercices */}
+        {!stepMode && (
+          <button 
+            className="floating-customize-button"
+            onClick={() => setShowCustomizer(true)}
+            title={t('settings.customizeProgram')}
+            style={{
+              position: 'fixed',
+              bottom: '20px',
+              right: '20px',
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #F03D32 0%, #FF6B35 50%, #F7931E 100%)',
+              border: 'none',
+              color: 'white',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              boxShadow: '0 8px 20px rgba(240, 61, 50, 0.3)',
+              backdropFilter: 'blur(10px)',
+              transition: 'all 0.3s ease',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-3px) scale(1.1)';
+              e.target.style.boxShadow = '0 12px 25px rgba(240, 61, 50, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0) scale(1)';
+              e.target.style.boxShadow = '0 8px 20px rgba(240, 61, 50, 0.3)';
+            }}
+          >
+            ⚙️
+          </button>
+        )}
         
         {/* Boîte de dialogue des paramètres de notification */}
         <NotificationSettingsDialog 

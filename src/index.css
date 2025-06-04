@@ -124,11 +124,17 @@ h6 { font-size: 1rem; }
   display: flex;
   flex-direction: column;
   background-color: var(--bg-primary);
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
 }
 
 .app {
   background-color: var(--bg-primary);
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
 }
 
 /* Header et navigation */
