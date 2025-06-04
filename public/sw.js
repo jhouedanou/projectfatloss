@@ -1,6 +1,6 @@
 // Service Worker pour les notifications Project Fat Loss
 // Optimisé pour Android 15 et notifications persistantes
-const CACHE_NAME = 'project-fat-loss-v5';
+const CACHE_NAME = 'project-fat-loss-v6';
 const NOTIFICATION_TAG = 'pfl-workout';
 const EXERCISE_NOTIFICATION_TAG = 'pfl-current-exercise';
 
@@ -42,6 +42,38 @@ const BASE_CONFIG = {
   }
 };
 
+// Configuration spéciale Android 15 pour GitHub Pages
+const GITHUB_PAGES_CONFIG = {
+  serviceWorkerScope: '/',
+  notificationOptions: {
+    requireInteraction: true,
+    persistent: true,
+    renotify: true,
+    vibrate: [200, 100, 200, 100, 200],
+    badge: '/android/android-launchericon-96-96.png',
+    icon: '/android/android-launchericon-192-192.png'
+  },
+  android15Options: {
+    showTrigger: true,
+    sticky: true,
+    ongoing: true,
+    silent: false,
+    timestamp: () => Date.now(),
+    actions: [
+      {
+        action: 'open',
+        title: '📱 Ouvrir App',
+        icon: '/android/android-launchericon-48-48.png'
+      },
+      {
+        action: 'dismiss',
+        title: '❌ Fermer',
+        icon: '/android/android-launchericon-48-48.png'
+      }
+    ]
+  }
+};
+
 // Détection améliorée de la plateforme Android avec version
 function getAndroidInfo() {
   const userAgent = self.navigator.userAgent || '';
@@ -63,7 +95,7 @@ let currentExerciseData = null;
 
 // Installation du service worker
 self.addEventListener('install', event => {
-  console.log('Service Worker PFL installé - Version 5 (Android 15 optimisé)');
+  console.log('Service Worker PFL installé - Version 6 (Android 15 optimisé)');
   
   // Forcer la mise à jour immédiate
   self.skipWaiting();
@@ -109,6 +141,16 @@ self.addEventListener('activate', event => {
 self.addEventListener('message', event => {
   console.log('SW: Message reçu:', event.data);
   
+  // Nouveaux messages Android 15 GitHub Pages
+  if (event.data && event.data.type === 'TEST_ANDROID15_GITHUB_PAGES') {
+    testAndroid15GitHubPagesNotification(event.data.payload);
+  }
+  
+  if (event.data && event.data.type === 'SCHEDULE_WORKOUT_GITHUB_PAGES') {
+    scheduleWorkoutNotification(event.data.payload);
+  }
+  
+  // Messages existants
   if (event.data && event.data.type === 'CONFIGURE_ANDROID15') {
     configureForAndroid15(event.data.payload);
   }
@@ -129,7 +171,6 @@ self.addEventListener('message', event => {
     clearCurrentExerciseNotificationAndroid15();
   }
   
-  // Messages existants
   if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
     scheduleWorkoutNotification(event.data.payload);
   }
@@ -635,4 +676,100 @@ function handleWorkoutNotificationClick(action, data) {
   }
 }
 
-// ...existing code for workout notifications...
+// =================== FONCTION SPÉCIALE ANDROID 15 GITHUB PAGES ===================
+
+/**
+ * Test de notification optimisé pour Android 15 sur GitHub Pages
+ */
+async function testAndroid15GitHubPagesNotification(payload) {
+  const androidInfo = getAndroidInfo();
+  
+  console.log('SW: Test notification Android 15 GitHub Pages:', { androidInfo, payload });
+  
+  const options = {
+    ...GITHUB_PAGES_CONFIG.notificationOptions,
+    body: payload.body || 'Test réussi sur Android 15 ! 🎉\nNotifications push activées avec succès.',
+    tag: 'android15-github-test',
+    data: {
+      type: 'android15-github-test',
+      timestamp: Date.now(),
+      android15: androidInfo.isAndroid15Plus,
+      chrome: androidInfo.isChrome
+    }
+  };
+  
+  // Ajouter les options spéciales Android 15
+  if (androidInfo.isAndroid15Plus) {
+    Object.assign(options, GITHUB_PAGES_CONFIG.android15Options);
+    options.body += '\n\n✨ Optimisations Android 15 activées';
+  }
+  
+  try {
+    await self.registration.showNotification(
+      payload.title || '✅ Project Fat Loss - Android 15',
+      options
+    );
+    
+    console.log('SW: Notification Android 15 GitHub Pages envoyée avec succès');
+    return true;
+  } catch (error) {
+    console.error('SW: Erreur notification Android 15 GitHub Pages:', error);
+    return false;
+  }
+}
+
+/**
+ * Planifier une notification de rappel quotidien (GitHub Pages compatible)
+ */
+async function scheduleWorkoutNotification(payload) {
+  console.log('SW: Programmation notification quotidienne GitHub Pages:', payload);
+  
+  const androidInfo = getAndroidInfo();
+  
+  const options = {
+    ...GITHUB_PAGES_CONFIG.notificationOptions,
+    body: payload.body || 'Il est temps de s\'entraîner ! 💪\nVotre corps vous attend, restez motivé !',
+    tag: payload.tag || 'daily-workout-reminder',
+    data: {
+      type: 'daily-reminder',
+      timestamp: Date.now(),
+      url: '/',
+      action: 'start-workout'
+    }
+  };
+  
+  // Actions spéciales pour Android 15
+  if (androidInfo.isAndroid15Plus && payload.actions) {
+    options.actions = payload.actions;
+  }
+  
+  try {
+    // Sur GitHub Pages, utiliser showNotification directement
+    await self.registration.showNotification(
+      payload.title || '🏋️ Rappel d\'Entraînement',
+      options
+    );
+    
+    console.log('SW: Notification quotidienne programmée');
+    return true;
+  } catch (error) {
+    console.error('SW: Erreur programmation notification:', error);
+    return false;
+  }
+}
+
+/**
+ * Annuler toutes les notifications
+ */
+async function cancelAllNotifications() {
+  try {
+    const notifications = await self.registration.getNotifications();
+    notifications.forEach(notification => {
+      console.log('SW: Fermeture notification:', notification.tag);
+      notification.close();
+    });
+    console.log('SW: Toutes les notifications fermées');
+  } catch (error) {
+    console.error('SW: Erreur fermeture notifications:', error);
+  }
+}

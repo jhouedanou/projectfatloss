@@ -684,3 +684,76 @@ export async function initNotificationService() {
   }
 }
 
+/**
+ * Test spécial pour Android 15 sur GitHub Pages
+ */
+export async function testAndroid15GitHubPagesNotification() {
+  try {
+    console.log('🔧 Test notification Android 15 GitHub Pages');
+    
+    // Vérifier les permissions
+    if (Notification.permission !== 'granted') {
+      console.log('Permission nécessaire pour le test');
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        return false;
+      }
+    }
+    
+    // Détecter Android 15
+    const platform = getPlatformInfo();
+    console.log('Platform info:', platform);
+    
+    // Utiliser le Service Worker si disponible
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        
+        if (registration.active) {
+          registration.active.postMessage({
+            type: 'TEST_ANDROID15_GITHUB_PAGES',
+            payload: {
+              title: `✅ Test Android ${platform.androidVersion || 'Standard'}`,
+              body: `Notification push fonctionnelle ! 🎉\n${platform.isAndroid15Plus ? 'Optimisations Android 15 activées' : 'Configuration standard'}`,
+              android15: platform.isAndroid15Plus,
+              chrome: platform.isChrome
+            }
+          });
+          
+          console.log('✅ Test envoyé via Service Worker');
+          return true;
+        }
+      } catch (swError) {
+        console.warn('Service Worker non disponible, fallback direct:', swError);
+      }
+    }
+    
+    // Fallback : notification directe
+    try {
+      new Notification(`✅ Test Android ${platform.androidVersion || 'Standard'}`, {
+        body: `Notification push fonctionnelle ! 🎉\n${platform.isAndroid15Plus ? 'Optimisations Android 15 activées' : 'Configuration standard'}`,
+        icon: '/android/android-launchericon-192-192.png',
+        badge: '/android/android-launchericon-96-96.png',
+        vibrate: platform.isAndroid15Plus ? [200, 100, 200, 100, 200] : [200, 100, 200],
+        tag: 'android15-github-test',
+        requireInteraction: true,
+        silent: false,
+        data: {
+          type: 'android15-github-test',
+          timestamp: Date.now()
+        }
+      });
+      
+      console.log('✅ Test envoyé directement');
+      return true;
+    } catch (directError) {
+      console.error('❌ Erreur notification directe:', directError);
+      return false;
+    }
+    
+  } catch (error) {
+    console.error('❌ Erreur test Android 15 GitHub Pages:', error);
+    return false;
+  }
+}
+
