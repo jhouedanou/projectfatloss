@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import '../services/preferences_service.dart';
+import 'haptic_service.dart';
 
 /// Service de gestion audio pour reproduire les sons de la PWA
 class AudioService {
@@ -25,7 +26,7 @@ class AudioService {
       await _audioPlayer.play(AssetSource('sounds/workout_start.mp3'));
     } catch (e) {
       // Fallback vers un son système si le fichier n'existe pas
-      HapticFeedback.mediumImpact();
+      HapticService.mediumImpact();
     }
   }
 
@@ -37,7 +38,7 @@ class AudioService {
       await _audioPlayer.play(AssetSource('sounds/workout_complete.mp3'));
     } catch (e) {
       // Fallback vers un son système
-      HapticFeedback.heavyImpact();
+      HapticService.workoutComplete();
     }
   }
 
@@ -49,7 +50,7 @@ class AudioService {
       await _audioPlayer.play(AssetSource('sounds/transition.mp3'));
     } catch (e) {
       // Fallback vers un son système
-      HapticFeedback.lightImpact();
+      HapticService.lightImpact();
     }
   }
 
@@ -61,7 +62,7 @@ class AudioService {
       await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
     } catch (e) {
       // Fallback vers un son système
-      HapticFeedback.selectionClick();
+      HapticService.notification();
     }
   }
 
@@ -73,7 +74,7 @@ class AudioService {
       await _audioPlayer.play(AssetSource('sounds/success.mp3'));
     } catch (e) {
       // Fallback vers un son système
-      HapticFeedback.lightImpact();
+      HapticService.success();
     }
   }
 
@@ -85,7 +86,7 @@ class AudioService {
       await _audioPlayer.play(AssetSource('sounds/error.mp3'));
     } catch (e) {
       // Fallback vers un son système
-      HapticFeedback.heavyImpact();
+      HapticService.error();
     }
   }
 
@@ -97,7 +98,7 @@ class AudioService {
       await _audioPlayer.play(AssetSource('sounds/click.mp3'));
     } catch (e) {
       // Fallback vers un son système
-      HapticFeedback.selectionClick();
+      HapticService.buttonPress();
     }
   }
 

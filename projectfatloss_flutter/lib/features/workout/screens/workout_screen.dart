@@ -113,7 +113,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     _timerController.repeat();
 
     // Haptic feedback
-    HapticFeedback.mediumImpact();
+    HapticService.mediumImpact();
   }
 
   /// Met en pause l'entraînement
@@ -122,7 +122,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
       _isWorkoutPaused = true;
     });
     _timerController.stop();
-    HapticFeedback.lightImpact();
+    HapticService.lightImpact();
   }
 
   /// Reprend l'entraînement
@@ -131,7 +131,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
       _isWorkoutPaused = false;
     });
     _timerController.repeat();
-    HapticFeedback.lightImpact();
+    HapticService.lightImpact();
   }
 
   /// Termine l'entraînement
@@ -176,7 +176,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     );
 
     // Haptic feedback
-    HapticFeedback.heavyImpact();
+    HapticService.workoutComplete();
 
     // Animation de progression
     _progressController.forward();
@@ -199,7 +199,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
       setState(() {
         _currentExerciseIndex++;
       });
-      HapticFeedback.selectionClick();
+      HapticService.exerciseComplete();
     } else {
       _completeWorkout();
     }
@@ -211,7 +211,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
       setState(() {
         _currentExerciseIndex--;
       });
-      HapticFeedback.selectionClick();
+      HapticService.exerciseComplete();
     }
   }
 
