@@ -173,6 +173,14 @@ class _FadeInUpAnimationState extends State<FadeInUpAnimation>
     super.dispose();
   }
 
+  void start() {
+    if (mounted) _controller.forward();
+  }
+
+  void reset() {
+    if (mounted) _controller.reset();
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
