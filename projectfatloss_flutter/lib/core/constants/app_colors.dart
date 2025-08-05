@@ -111,9 +111,9 @@ class AppColors {
   static const Color dividerDark = Color(0xFF424242);     // #424242
 
   // Gradients reproductants les CSS
-  static const List<Color> primaryGradient = [vermilion, secondary['500']!]; // 30% à 90%
-  static const List<Color> secondaryGradient = [secondary['400']!, primary['600']!]; // 0% à 100%
-  static const List<Color> successGradient = [success['500']!, success['600']!]; // 30% à 90%
+  static const List<Color> primaryGradient = [vermilion, Color(0xFFFF6B35)]; // 30% à 90%
+  static const List<Color> secondaryGradient = [Color(0xFFFF9147), Color(0xFFE02A1F)]; // 0% à 100%
+  static const List<Color> successGradient = [Color(0xFF4CAF50), Color(0xFF43A047)]; // 30% à 90%
 
   // Header gradient exact de la PWA
   static const List<Color> headerGradient = [

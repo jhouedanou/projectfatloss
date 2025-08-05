@@ -307,7 +307,7 @@ class CustomAppHeader extends StatelessWidget implements PreferredSizeWidget {
             const SizedBox(width: AppDimensions.spacingSmall),
             Text(
               option.label,
-              style: AppTypography.tabLabel.copyWith(
+              style: AppTypography.body2.copyWith(
                 color: Colors.white,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
@@ -347,7 +347,7 @@ class _HeaderActionButtonState extends State<HeaderActionButton>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: AnimationConstants.buttonPressDuration,
+      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
     _scaleAnimation = Tween<double>(
