@@ -50,8 +50,8 @@ dependencies:
   # Audio pour les sons
   audioplayers: ^5.2.1
   
-  # Haptic feedback
-  flutter_haptic: ^0.0.3
+  # Haptic feedback (remplacé par flutter/services)
+  # flutter_haptic: ^0.0.3
   
   # Charts pour les statistiques
   fl_chart: ^0.66.2

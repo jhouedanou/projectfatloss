@@ -11,6 +11,7 @@ import '../../../shared/models/workout_model.dart';
 import '../../../shared/services/workout_data_service.dart';
 import '../../../shared/services/audio_service.dart';
 import '../../../shared/services/notification_service.dart';
+import '../../../shared/services/haptic_service.dart';
 import '../widgets/exercise_card.dart';
 import '../widgets/workout_progress.dart';
 import '../widgets/timer_widget.dart';

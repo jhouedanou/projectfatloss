@@ -6,6 +6,7 @@ import '../../../core/widgets/animations/fade_animations.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../workout/screens/workout_screen.dart';
+import '../../stats/screens/stats_screen.dart';
 
 /// Écran d'accueil reproduisant la PWA Project Fat Loss
 class HomeScreen extends StatefulWidget {
@@ -344,10 +345,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _viewStats(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Affichage des statistiques...'),
-        behavior: SnackBarBehavior.floating,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => StatsScreen(
+          isDarkMode: widget.isDarkMode,
+          onThemeToggle: widget.onThemeToggle,
+        ),
       ),
     );
   }

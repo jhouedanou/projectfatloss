@@ -7,6 +7,7 @@ import 'shared/services/preferences_service.dart';
 import 'shared/services/notification_service.dart';
 import 'shared/services/audio_service.dart';
 import 'shared/services/database_service.dart';
+import 'shared/services/haptic_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,9 @@ Future<void> _initializeServices() async {
     
     // Initialiser l'audio
     await AudioService.init();
+    
+    // Initialiser le haptic feedback
+    await HapticService.init();
     
     print('✅ Tous les services ont été initialisés avec succès');
   } catch (e) {
