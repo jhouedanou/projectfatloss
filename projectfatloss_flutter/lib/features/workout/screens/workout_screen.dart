@@ -59,8 +59,8 @@ class _WorkoutScreenState extends State<WorkoutScreen>
   }
 
   /// Charge les données du jour d'entraînement
-  void _loadWorkoutDay() {
-    final workoutDay = WorkoutDataService.getWorkoutDay(widget.dayId);
+  Future<void> _loadWorkoutDay() async {
+    final workoutDay = await WorkoutDataService.getWorkoutDay(widget.dayId);
     if (workoutDay != null) {
       setState(() {
         _workoutDay = workoutDay;
@@ -145,6 +145,26 @@ class _WorkoutScreenState extends State<WorkoutScreen>
 
     _timerController.stop();
 
+    // Enregistrer la session dans la base de données
+    await WorkoutDataService.recordWorkoutSession(
+      dayId: _workoutDay!.id,
+      startTime: DateTime.now().subtract(Duration(seconds: _elapsedTime)),
+      endTime: DateTime.now(),
+      duration: _elapsedTime,
+      caloriesBurned: _calculateCaloriesBurned(),
+      exercisesCompleted: _workoutDay!.exercises.length,
+      totalExercises: _workoutDay!.exercises.length,
+      notes: 'Entraînement terminé avec succès',
+    );
+
+    // Mettre à jour le jour d'entraînement comme terminé
+    final updatedDay = _workoutDay!.copyWith(
+      isCompleted: true,
+      completedAt: DateTime.now(),
+      caloriesBurned: _calculateCaloriesBurned(),
+    );
+    await WorkoutDataService.updateWorkoutDay(updatedDay);
+
     // Jouer le son de fin
     await AudioService.playWorkoutCompleteSound();
 
@@ -159,6 +179,15 @@ class _WorkoutScreenState extends State<WorkoutScreen>
 
     // Animation de progression
     _progressController.forward();
+  }
+
+  /// Calcule les calories brûlées
+  int _calculateCaloriesBurned() {
+    if (_workoutDay == null) return 0;
+    
+    // Estimation basée sur la durée et l'intensité
+    const weight = 70; // Poids moyen en kg
+    return WorkoutDataService.calculateDayCalories(_workoutDay!, weight);
   }
 
   /// Passe à l'exercice suivant

@@ -38,6 +38,9 @@ Future<void> _initializeServices() async {
     // Initialiser les préférences
     await PreferencesService.init();
     
+    // Initialiser la base de données
+    await DatabaseService.init();
+    
     // Initialiser les notifications
     await NotificationService.init();
     
