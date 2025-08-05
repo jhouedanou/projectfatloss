@@ -241,7 +241,7 @@ class _SequentialFadeInAnimationState extends State<SequentialFadeInAnimation> {
         Duration(milliseconds: widget.itemDelay.inMilliseconds * i),
         () {
           if (mounted && _keys[i].currentState != null) {
-            _keys[i].currentState!.start();
+            _keys[i].currentState?.start();
           }
         },
       );

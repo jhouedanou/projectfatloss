@@ -37,7 +37,11 @@ class WorkoutProgress extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppDimensions.borderRadiusSmall),
-              gradient: AppColors.primaryGradient,
+              gradient: LinearGradient(
+                colors: AppColors.primaryGradient,
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
             ),
           ),
           

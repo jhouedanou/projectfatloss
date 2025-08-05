@@ -118,7 +118,7 @@ class AppColors {
   // Header gradient exact de la PWA
   static const List<Color> headerGradient = [
     vermilion,              // #F03D32 à 0%
-    secondary['500']!,      // #FF6B35 à 50%
+    Color(0xFFFF6B35),      // #FF6B35 à 50%
     Color(0xFFF7931E),      // #F7931E à 100%
   ];
 
@@ -129,7 +129,7 @@ class AppColors {
   ];
 
   static const List<Color> autoModeGradient = [
-    secondary['500']!,      // #FF6B35
+    Color(0xFFFF6B35),      // #FF6B35
     Color(0xFFF7931E),      // #F7931E
   ];
 

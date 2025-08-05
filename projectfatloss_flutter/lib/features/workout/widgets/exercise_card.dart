@@ -69,7 +69,11 @@ class ExerciseCard extends StatelessWidget {
           height: isCompact ? 40 : 60,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
-            gradient: AppColors.primaryGradient,
+            gradient: LinearGradient(
+              colors: AppColors.primaryGradient,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             boxShadow: [
               BoxShadow(
                 color: AppColors.primaryWithOpacity(0.3),

@@ -12,7 +12,7 @@ import '../../../shared/services/workout_data_service.dart';
 import '../../../shared/services/audio_service.dart';
 import '../../../shared/services/notification_service.dart';
 import '../../../shared/services/haptic_service.dart';
-import '../widgets/exercise_card.dart';
+import '../widgets/exercise_card.dart' as workout_widgets;
 import '../widgets/workout_progress.dart';
 import '../widgets/timer_widget.dart';
 
@@ -266,7 +266,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
                   const SizedBox(height: AppDimensions.spacingLarge),
                   
                   // Carte de l'exercice actuel
-                  ExerciseCard(
+                  workout_widgets.ExerciseCard(
                     exercise: currentExercise,
                     isActive: _isWorkoutStarted && !_isWorkoutPaused,
                     isCompleted: _isWorkoutCompleted,
@@ -295,7 +295,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
       return CustomGradientButton(
         onPressed: () => Navigator.of(context).pop(),
         text: 'Retour à l\'accueil',
-        gradient: AppColors.successGradient,
+        gradientColors: AppColors.successGradient,
       );
     }
 
@@ -307,7 +307,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
             child: CustomGradientButton(
               onPressed: _previousExercise,
               text: 'Précédent',
-              gradient: AppColors.secondaryGradient,
+              gradientColors: AppColors.secondaryGradient,
             ),
           ),
         
@@ -315,16 +315,16 @@ class _WorkoutScreenState extends State<WorkoutScreen>
           const SizedBox(width: AppDimensions.spacingMedium),
         
         // Bouton principal
-        Expanded(
-          flex: 2,
-          child: _isWorkoutStarted
-              ? _buildMainControlButton()
-              : CustomGradientButton(
-                  onPressed: _startWorkout,
-                  text: 'Commencer',
-                  gradient: AppColors.primaryGradient,
-                ),
-        ),
+                  Expanded(
+            flex: 2,
+            child: _isWorkoutStarted
+                ? _buildMainControlButton()
+                : CustomGradientButton(
+                    onPressed: _startWorkout,
+                    text: 'Commencer',
+                    gradientColors: AppColors.primaryGradient,
+                  ),
+          ),
         
         // Bouton suivant
         if (_currentExerciseIndex < _workoutDay!.exercises.length - 1) ...[
@@ -333,7 +333,7 @@ class _WorkoutScreenState extends State<WorkoutScreen>
             child: CustomGradientButton(
               onPressed: _nextExercise,
               text: 'Suivant',
-              gradient: AppColors.secondaryGradient,
+              gradientColors: AppColors.secondaryGradient,
             ),
           ),
         ],
@@ -345,9 +345,9 @@ class _WorkoutScreenState extends State<WorkoutScreen>
     return CustomGradientButton(
       onPressed: _isWorkoutPaused ? _resumeWorkout : _pauseWorkout,
       text: _isWorkoutPaused ? 'Reprendre' : 'Pause',
-      gradient: _isWorkoutPaused 
+      gradientColors: _isWorkoutPaused 
           ? AppColors.successGradient 
-          : AppColors.warningGradient,
+          : [AppColors.warning['500']!, AppColors.warning['600']!],
     );
   }
 
@@ -368,15 +368,15 @@ class _WorkoutScreenState extends State<WorkoutScreen>
           final isCurrent = index == _currentExerciseIndex;
           final isCompleted = index < _currentExerciseIndex;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppDimensions.spacingSmall),
-            child: ExerciseCard(
-              exercise: exercise,
-              isActive: isCurrent && _isWorkoutStarted && !_isWorkoutPaused,
-              isCompleted: isCompleted,
-              isCompact: true,
-            ),
-          );
+                      return Padding(
+              padding: const EdgeInsets.only(bottom: AppDimensions.spacingSmall),
+              child: workout_widgets.ExerciseCard(
+                exercise: exercise,
+                isActive: isCurrent && _isWorkoutStarted && !_isWorkoutPaused,
+                isCompleted: isCompleted,
+                isCompact: true,
+              ),
+            );
         }).toList(),
       ],
     );
