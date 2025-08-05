@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'core/theme/app_theme.dart';
+import 'core/constants/app_colors.dart';
+import 'core/constants/app_typography.dart';
 import 'features/home/screens/home_screen.dart';
 import 'shared/services/preferences_service.dart';
 import 'shared/services/notification_service.dart';

@@ -186,7 +186,7 @@ class AppTheme {
       ),
       
       // Cards avec styles exacts de la PWA  
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: AppDimensions.elevation2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.cardBorderRadius),
@@ -254,9 +254,8 @@ class AppTheme {
       ),
       
       // Tab Bar
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         indicatorColor: Colors.white,
-        indicatorWeight: 2,
         labelStyle: AppTypography.body2.copyWith(
           fontWeight: FontWeight.w600,
           color: Colors.white,
@@ -286,7 +285,7 @@ class AppTheme {
       ),
       
       // Dialog
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.modalBorderRadius),
