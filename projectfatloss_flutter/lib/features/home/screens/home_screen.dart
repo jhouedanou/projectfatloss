@@ -5,6 +5,7 @@ import '../../../core/widgets/custom_card.dart';
 import '../../../core/widgets/animations/fade_animations.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
+import '../../workout/screens/workout_screen.dart';
 
 /// Écran d'accueil reproduisant la PWA Project Fat Loss
 class HomeScreen extends StatefulWidget {
@@ -304,10 +305,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _startWorkout(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Démarrage de l\'entraînement...'),
-        behavior: SnackBarBehavior.floating,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => WorkoutScreen(
+          dayId: 'day1',
+          isDarkMode: widget.isDarkMode,
+          onThemeToggle: widget.onThemeToggle,
+        ),
       ),
     );
   }
