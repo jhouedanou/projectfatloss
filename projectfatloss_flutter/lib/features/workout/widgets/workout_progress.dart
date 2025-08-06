@@ -4,115 +4,139 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/constants/app_typography.dart';
 
-/// Widget de progression d'entraînement reproduisant le design de la PWA
-class WorkoutProgress extends StatelessWidget {
-  final double progress;
-  final int elapsedTime;
-  final int totalTime;
-  final bool isPaused;
+/// Widget pour afficher la progression de l'entraînement
+class WorkoutProgressWidget extends StatelessWidget {
+  final int currentExercise;
+  final int totalExercises;
+  final int currentSet;
+  final int totalSets;
+  final int calories;
 
-  const WorkoutProgress({
+  const WorkoutProgressWidget({
     Key? key,
-    required this.progress,
-    required this.elapsedTime,
-    required this.totalTime,
-    this.isPaused = false,
+    required this.currentExercise,
+    required this.totalExercises,
+    required this.currentSet,
+    required this.totalSets,
+    required this.calories,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final exerciseProgress = currentExercise / totalExercises;
+    final setProgress = currentSet / totalSets;
+
     return Container(
-      height: 8,
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.paddingLarge,
-        vertical: AppDimensions.spacingMedium,
-      ),
+      padding: const EdgeInsets.all(AppDimensions.paddingMedium),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusSmall),
-        color: Colors.white.withOpacity(0.1),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
-      child: Stack(
+      child: Column(
         children: [
-          // Barre de progression de base
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppDimensions.borderRadiusSmall),
-              gradient: LinearGradient(
-                colors: AppColors.primaryGradient,
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-          ),
-          
-          // Barre de progression animée
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: MediaQuery.of(context).size.width * progress,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppDimensions.borderRadiusSmall),
-              gradient: _getProgressGradient(),
-              boxShadow: _getProgressShadow(),
-            ),
-          ),
-          
-          // Indicateur de pause
-          if (isPaused)
-            Positioned(
-              right: 0,
-              top: 0,
-              bottom: 0,
-              child: Container(
-                width: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.warning['500']!,
-                  borderRadius: BorderRadius.circular(2),
+          // Progression générale
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Progression',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.spacingSmall),
+                    LinearProgressIndicator(
+                      value: exerciseProgress,
+                      backgroundColor: theme.colorScheme.surfaceVariant,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.vermilion,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.spacingSmall),
+                    Text(
+                      'Exercice $currentExercise/$totalExercises',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-              ).animate(onPlay: (controller) => controller.repeat())
-                .shimmer(duration: 1.seconds, delay: 200.milliseconds),
-            ),
+              ),
+              const SizedBox(width: AppDimensions.spacingLarge),
+              // Calories
+              Container(
+                padding: const EdgeInsets.all(AppDimensions.paddingSmall),
+                decoration: BoxDecoration(
+                  color: AppColors.vermilion.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.borderRadiusSmall,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '$calories',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.vermilion,
+                      ),
+                    ),
+                    Text(
+                      'CALORIES',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.vermilion,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppDimensions.spacingMedium),
+
+          // Progression de la série
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Série actuelle',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.spacingSmall),
+                    LinearProgressIndicator(
+                      value: setProgress,
+                      backgroundColor: theme.colorScheme.surfaceVariant,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.blueIndigo,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.spacingSmall),
+                    Text(
+                      'Série $currentSet/$totalSets',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
-  }
-
-  LinearGradient _getProgressGradient() {
-    if (isPaused) {
-      return LinearGradient(
-        colors: [
-          AppColors.warning['400']!,
-          AppColors.warning['500']!,
-        ],
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-      );
-    }
-
-    return LinearGradient(
-      colors: AppColors.primaryGradient,
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-    );
-  }
-
-  List<BoxShadow> _getProgressShadow() {
-    if (isPaused) {
-      return [
-        BoxShadow(
-          color: AppColors.warning['500']!.withOpacity(0.5),
-          blurRadius: 4,
-          offset: const Offset(0, 1),
-        ),
-      ];
-    }
-
-    return [
-      BoxShadow(
-        color: AppColors.primaryWithOpacity(0.3),
-        blurRadius: 4,
-        offset: const Offset(0, 1),
-      ),
-    ];
   }
 }
 
@@ -152,7 +176,7 @@ class CircularProgressWidget extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Cercle de progression
           SizedBox(
             width: size,
@@ -166,7 +190,7 @@ class CircularProgressWidget extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Texte de pourcentage
           if (showPercentage)
             Text(
@@ -204,13 +228,13 @@ class StepProgressWidget extends StatelessWidget {
           children: List.generate(totalSteps, (index) {
             final isCompleted = index < currentStep;
             final isCurrent = index == currentStep;
-            
+
             return Expanded(
               child: Container(
                 height: 4,
                 margin: EdgeInsets.only(
-                  right: index < totalSteps - 1 
-                      ? AppDimensions.spacingSmall 
+                  right: index < totalSteps - 1
+                      ? AppDimensions.spacingSmall
                       : 0,
                 ),
                 decoration: BoxDecoration(
@@ -221,7 +245,7 @@ class StepProgressWidget extends StatelessWidget {
             );
           }),
         ),
-        
+
         // Labels des étapes
         if (stepLabels.isNotEmpty) ...[
           const SizedBox(height: AppDimensions.spacingMedium),
@@ -229,10 +253,10 @@ class StepProgressWidget extends StatelessWidget {
             children: List.generate(totalSteps, (index) {
               final isCompleted = index < currentStep;
               final isCurrent = index == currentStep;
-              final label = index < stepLabels.length 
-                  ? stepLabels[index] 
+              final label = index < stepLabels.length
+                  ? stepLabels[index]
                   : 'Étape ${index + 1}';
-              
+
               return Expanded(
                 child: Text(
                   label,
@@ -254,11 +278,11 @@ class StepProgressWidget extends StatelessWidget {
     if (isCompleted) {
       return AppColors.success['500']!;
     }
-    
+
     if (isCurrent) {
       return AppColors.vermilion;
     }
-    
+
     return Colors.white.withOpacity(0.3);
   }
 
@@ -266,7 +290,7 @@ class StepProgressWidget extends StatelessWidget {
     if (isCompleted || isCurrent) {
       return Colors.white;
     }
-    
+
     return Colors.white.withOpacity(0.6);
   }
-} 
+}

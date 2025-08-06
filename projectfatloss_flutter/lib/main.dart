@@ -8,12 +8,12 @@ import 'features/home/screens/home_screen.dart';
 import 'shared/services/preferences_service.dart';
 import 'shared/services/notification_service.dart';
 import 'shared/services/audio_service.dart';
-import 'shared/services/database_service.dart';
+import 'shared/services/workout_service.dart';
 import 'shared/services/haptic_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Configuration de l'orientation
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -40,19 +40,19 @@ Future<void> _initializeServices() async {
   try {
     // Initialiser les préférences
     await PreferencesService.init();
-    
-    // Initialiser la base de données
-    await DatabaseService.init();
-    
+
+    // Initialiser le service d'entraînement
+    await WorkoutService.instance.getWorkoutPlan();
+
     // Initialiser les notifications
     await NotificationService.init();
-    
+
     // Initialiser l'audio
     await AudioService.init();
-    
+
     // Initialiser le haptic feedback
     await HapticService.init();
-    
+
     print('✅ Tous les services ont été initialisés avec succès');
   } catch (e) {
     print('❌ Erreur lors de l\'initialisation des services: $e');
@@ -97,7 +97,7 @@ class _ProjectFatLossAppState extends State<ProjectFatLossApp> {
     setState(() {
       _isDarkMode = !_isDarkMode;
     });
-    
+
     try {
       await PreferencesService.setDarkMode(_isDarkMode);
     } catch (e) {
@@ -170,12 +170,12 @@ class _ProjectFatLossAppState extends State<ProjectFatLossApp> {
     return MaterialApp(
       title: 'Project Fat Loss',
       debugShowCheckedModeBanner: false,
-      
+
       // Thème reproduisant pixel-perfect la PWA
       theme: AppTheme.createTheme(false),
       darkTheme: AppTheme.createTheme(true),
       themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      
+
       // Configuration Material 3
       builder: (context, child) {
         return MediaQuery(
@@ -185,11 +185,8 @@ class _ProjectFatLossAppState extends State<ProjectFatLossApp> {
           child: child!,
         );
       },
-      
-      home: HomeScreen(
-        isDarkMode: _isDarkMode,
-        onThemeToggle: _toggleTheme,
-      ),
+
+      home: HomeScreen(isDarkMode: _isDarkMode, onThemeToggle: _toggleTheme),
     );
   }
 }

@@ -2,277 +2,277 @@ import 'package:flutter/material.dart';
 
 /// Modèle représentant un exercice
 class Exercise {
-  final String id;
   final String name;
-  final String description;
-  final String imageUrl;
-  final String videoUrl;
-  final int duration; // en secondes
-  final int sets;
-  final int reps;
-  final String category;
-  final String difficulty;
-  final List<String> muscles;
-  final String instructions;
-  final bool isCompleted;
+  final String sets;
+  final String? equip;
+  final String? desc;
+  final List<int>? caloriesPerSet;
+  final int totalSets;
+  final int nbRep;
+  final bool? timer;
+  final int? duration;
+  final GoogleFitActivity? googleFitActivity;
 
-  const Exercise({
-    required this.id,
+  Exercise({
     required this.name,
-    required this.description,
-    required this.imageUrl,
-    required this.videoUrl,
-    required this.duration,
     required this.sets,
-    required this.reps,
-    required this.category,
-    required this.difficulty,
-    required this.muscles,
-    required this.instructions,
-    this.isCompleted = false,
+    this.equip,
+    this.desc,
+    this.caloriesPerSet,
+    required this.totalSets,
+    required this.nbRep,
+    this.timer,
+    this.duration,
+    this.googleFitActivity,
   });
 
-  Exercise copyWith({
-    String? id,
-    String? name,
-    String? description,
-    String? imageUrl,
-    String? videoUrl,
-    int? duration,
-    int? sets,
-    int? reps,
-    String? category,
-    String? difficulty,
-    List<String>? muscles,
-    String? instructions,
-    bool? isCompleted,
-  }) {
+  factory Exercise.fromJson(Map<String, dynamic> json) {
     return Exercise(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      imageUrl: imageUrl ?? this.imageUrl,
-      videoUrl: videoUrl ?? this.videoUrl,
-      duration: duration ?? this.duration,
-      sets: sets ?? this.sets,
-      reps: reps ?? this.reps,
-      category: category ?? this.category,
-      difficulty: difficulty ?? this.difficulty,
-      muscles: muscles ?? this.muscles,
-      instructions: instructions ?? this.instructions,
-      isCompleted: isCompleted ?? this.isCompleted,
+      name: json['name'] ?? '',
+      sets: json['sets'] ?? '',
+      equip: json['equip'],
+      desc: json['desc'],
+      caloriesPerSet: json['caloriesPerSet'] != null
+          ? List<int>.from(json['caloriesPerSet'])
+          : null,
+      totalSets: json['totalSets'] ?? 1,
+      nbRep: json['nbRep'] ?? 0,
+      timer: json['timer'],
+      duration: json['duration'],
+      googleFitActivity: json['googleFitActivity'] != null
+          ? GoogleFitActivity.fromJson(json['googleFitActivity'])
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'name': name,
-      'description': description,
-      'imageUrl': imageUrl,
-      'videoUrl': videoUrl,
-      'duration': duration,
       'sets': sets,
-      'reps': reps,
-      'category': category,
-      'difficulty': difficulty,
-      'muscles': muscles,
-      'instructions': instructions,
-      'isCompleted': isCompleted,
+      'equip': equip,
+      'desc': desc,
+      'caloriesPerSet': caloriesPerSet,
+      'totalSets': totalSets,
+      'nbRep': nbRep,
+      'timer': timer,
+      'duration': duration,
+      'googleFitActivity': googleFitActivity?.toJson(),
     };
   }
 
-  factory Exercise.fromJson(Map<String, dynamic> json) {
+  Exercise copyWith({
+    String? name,
+    String? sets,
+    String? equip,
+    String? desc,
+    List<int>? caloriesPerSet,
+    int? totalSets,
+    int? nbRep,
+    bool? timer,
+    int? duration,
+    GoogleFitActivity? googleFitActivity,
+  }) {
     return Exercise(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      imageUrl: json['imageUrl'] as String,
-      videoUrl: json['videoUrl'] as String,
-      duration: json['duration'] as int,
-      sets: json['sets'] as int,
-      reps: json['reps'] as int,
-      category: json['category'] as String,
-      difficulty: json['difficulty'] as String,
-      muscles: List<String>.from(json['muscles']),
-      instructions: json['instructions'] as String,
-      isCompleted: json['isCompleted'] as bool? ?? false,
+      name: name ?? this.name,
+      sets: sets ?? this.sets,
+      equip: equip ?? this.equip,
+      desc: desc ?? this.desc,
+      caloriesPerSet: caloriesPerSet ?? this.caloriesPerSet,
+      totalSets: totalSets ?? this.totalSets,
+      nbRep: nbRep ?? this.nbRep,
+      timer: timer ?? this.timer,
+      duration: duration ?? this.duration,
+      googleFitActivity: googleFitActivity ?? this.googleFitActivity,
     );
+  }
+}
+
+class GoogleFitActivity {
+  final String type;
+  final String name;
+  final List<String> muscleGroups;
+
+  GoogleFitActivity({
+    required this.type,
+    required this.name,
+    required this.muscleGroups,
+  });
+
+  factory GoogleFitActivity.fromJson(Map<String, dynamic> json) {
+    return GoogleFitActivity(
+      type: json['type'] ?? '',
+      name: json['name'] ?? '',
+      muscleGroups: List<String>.from(json['muscleGroups'] ?? []),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'type': type, 'name': name, 'muscleGroups': muscleGroups};
   }
 }
 
 /// Modèle représentant un jour d'entraînement
 class WorkoutDay {
-  final String id;
-  final String name;
-  final String description;
+  final String title;
   final List<Exercise> exercises;
-  final int totalDuration; // en secondes
-  final String difficulty;
-  final String category;
-  final bool isCompleted;
-  final DateTime? completedAt;
-  final int caloriesBurned;
 
-  const WorkoutDay({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.exercises,
-    required this.totalDuration,
-    required this.difficulty,
-    required this.category,
-    this.isCompleted = false,
-    this.completedAt,
-    this.caloriesBurned = 0,
-  });
+  WorkoutDay({required this.title, required this.exercises});
 
-  WorkoutDay copyWith({
-    String? id,
-    String? name,
-    String? description,
-    List<Exercise>? exercises,
-    int? totalDuration,
-    String? difficulty,
-    String? category,
-    bool? isCompleted,
-    DateTime? completedAt,
-    int? caloriesBurned,
-  }) {
+  factory WorkoutDay.fromJson(Map<String, dynamic> json) {
     return WorkoutDay(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      exercises: exercises ?? this.exercises,
-      totalDuration: totalDuration ?? this.totalDuration,
-      difficulty: difficulty ?? this.difficulty,
-      category: category ?? this.category,
-      isCompleted: isCompleted ?? this.isCompleted,
-      completedAt: completedAt ?? this.completedAt,
-      caloriesBurned: caloriesBurned ?? this.caloriesBurned,
+      title: json['title'] ?? '',
+      exercises:
+          (json['exercises'] as List<dynamic>?)
+              ?.map((e) => Exercise.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
-      'description': description,
+      'title': title,
       'exercises': exercises.map((e) => e.toJson()).toList(),
-      'totalDuration': totalDuration,
-      'difficulty': difficulty,
-      'category': category,
-      'isCompleted': isCompleted,
-      'completedAt': completedAt?.toIso8601String(),
-      'caloriesBurned': caloriesBurned,
     };
   }
 
-  factory WorkoutDay.fromJson(Map<String, dynamic> json) {
+  WorkoutDay copyWith({String? title, List<Exercise>? exercises}) {
     return WorkoutDay(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      exercises: (json['exercises'] as List)
-          .map((e) => Exercise.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      totalDuration: json['totalDuration'] as int,
-      difficulty: json['difficulty'] as String,
-      category: json['category'] as String,
-      isCompleted: json['isCompleted'] as bool? ?? false,
-      completedAt: json['completedAt'] != null
-          ? DateTime.parse(json['completedAt'] as String)
-          : null,
-      caloriesBurned: json['caloriesBurned'] as int? ?? 0,
+      title: title ?? this.title,
+      exercises: exercises ?? this.exercises,
     );
   }
 }
 
 /// Modèle représentant un plan d'entraînement complet
 class WorkoutPlan {
-  final String id;
-  final String name;
-  final String description;
   final List<WorkoutDay> days;
-  final int totalDays;
-  final int completedDays;
-  final DateTime startDate;
-  final DateTime? endDate;
-  final String difficulty;
-  final int totalCaloriesBurned;
 
-  const WorkoutPlan({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.days,
-    required this.totalDays,
-    this.completedDays = 0,
-    required this.startDate,
-    this.endDate,
-    required this.difficulty,
-    this.totalCaloriesBurned = 0,
-  });
+  WorkoutPlan({required this.days});
 
-  WorkoutPlan copyWith({
-    String? id,
-    String? name,
-    String? description,
-    List<WorkoutDay>? days,
-    int? totalDays,
-    int? completedDays,
-    DateTime? startDate,
-    DateTime? endDate,
-    String? difficulty,
-    int? totalCaloriesBurned,
-  }) {
+  factory WorkoutPlan.fromJson(Map<String, dynamic> json) {
     return WorkoutPlan(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      days: days ?? this.days,
-      totalDays: totalDays ?? this.totalDays,
-      completedDays: completedDays ?? this.completedDays,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
-      difficulty: difficulty ?? this.difficulty,
-      totalCaloriesBurned: totalCaloriesBurned ?? this.totalCaloriesBurned,
+      days:
+          (json['days'] as List<dynamic>?)
+              ?.map((e) => WorkoutDay.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 
-  double get progressPercentage => totalDays > 0 ? completedDays / totalDays : 0.0;
+  Map<String, dynamic> toJson() {
+    return {'days': days.map((e) => e.toJson()).toList()};
+  }
+}
+
+class WorkoutSession {
+  final String id;
+  final String title;
+  final DateTime date;
+  final int calories;
+  final int weightLifted;
+  final int exerciseCount;
+  final List<WorkoutExercise> exercises;
+  final int duration;
+  final bool fatBurnerMode;
+
+  WorkoutSession({
+    required this.id,
+    required this.title,
+    required this.date,
+    required this.calories,
+    required this.weightLifted,
+    required this.exerciseCount,
+    required this.exercises,
+    required this.duration,
+    this.fatBurnerMode = false,
+  });
+
+  factory WorkoutSession.fromJson(Map<String, dynamic> json) {
+    return WorkoutSession(
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      date: DateTime.parse(json['date']),
+      calories: json['calories'] ?? 0,
+      weightLifted: json['weightLifted'] ?? 0,
+      exerciseCount: json['exerciseCount'] ?? 0,
+      exercises:
+          (json['exercises'] as List<dynamic>?)
+              ?.map((e) => WorkoutExercise.fromJson(e))
+              .toList() ??
+          [],
+      duration: json['duration'] ?? 0,
+      fatBurnerMode: json['fatBurnerMode'] ?? false,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'description': description,
-      'days': days.map((d) => d.toJson()).toList(),
-      'totalDays': totalDays,
-      'completedDays': completedDays,
-      'startDate': startDate.toIso8601String(),
-      'endDate': endDate?.toIso8601String(),
-      'difficulty': difficulty,
-      'totalCaloriesBurned': totalCaloriesBurned,
+      'title': title,
+      'date': date.toIso8601String(),
+      'calories': calories,
+      'weightLifted': weightLifted,
+      'exerciseCount': exerciseCount,
+      'exercises': exercises.map((e) => e.toJson()).toList(),
+      'duration': duration,
+      'fatBurnerMode': fatBurnerMode,
     };
   }
+}
 
-  factory WorkoutPlan.fromJson(Map<String, dynamic> json) {
-    return WorkoutPlan(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      days: (json['days'] as List)
-          .map((d) => WorkoutDay.fromJson(d as Map<String, dynamic>))
-          .toList(),
-      totalDays: json['totalDays'] as int,
-      completedDays: json['completedDays'] as int? ?? 0,
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: json['endDate'] != null
-          ? DateTime.parse(json['endDate'] as String)
-          : null,
-      difficulty: json['difficulty'] as String,
-      totalCaloriesBurned: json['totalCaloriesBurned'] as int? ?? 0,
+class WorkoutExercise {
+  final String name;
+  final int sets;
+  final int weightLifted;
+
+  WorkoutExercise({
+    required this.name,
+    required this.sets,
+    required this.weightLifted,
+  });
+
+  factory WorkoutExercise.fromJson(Map<String, dynamic> json) {
+    return WorkoutExercise(
+      name: json['name'] ?? '',
+      sets: json['sets'] ?? 0,
+      weightLifted: json['weightLifted'] ?? 0,
     );
   }
-} 
+
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'sets': sets, 'weightLifted': weightLifted};
+  }
+}
+
+class WeightEntry {
+  final String id;
+  final double weight;
+  final DateTime date;
+  final String? notes;
+
+  WeightEntry({
+    required this.id,
+    required this.weight,
+    required this.date,
+    this.notes,
+  });
+
+  factory WeightEntry.fromJson(Map<String, dynamic> json) {
+    return WeightEntry(
+      id: json['id'] ?? '',
+      weight: (json['weight'] ?? 0).toDouble(),
+      date: DateTime.parse(json['date']),
+      notes: json['notes'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'weight': weight,
+      'date': date.toIso8601String(),
+      'notes': notes,
+    };
+  }
+}

@@ -1,339 +1,178 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
-import '../../../core/constants/app_typography.dart';
+import '../../../shared/models/workout_model.dart';
 
-/// Widget de chronomètre reproduisant le design de la PWA
-class TimerWidget extends StatelessWidget {
-  final int remainingTime;
-  final bool isPaused;
-  final bool isCompleted;
+/// Widget pour afficher un timer de pause
+class TimerWidget extends StatefulWidget {
+  final int duration;
+  final VoidCallback onComplete;
+  final VoidCallback onSkip;
+  final Exercise? nextExercise;
 
   const TimerWidget({
     Key? key,
-    required this.remainingTime,
-    this.isPaused = false,
-    this.isCompleted = false,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.paddingLarge),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
-        gradient: _getTimerGradient(),
-        boxShadow: _getTimerShadow(),
-      ),
-      child: Column(
-        children: [
-          // Icône du timer
-          _buildTimerIcon(),
-          
-          const SizedBox(height: AppDimensions.spacingMedium),
-          
-          // Affichage du temps
-          _buildTimeDisplay(),
-          
-          const SizedBox(height: AppDimensions.spacingSmall),
-          
-          // Statut du timer
-          _buildTimerStatus(),
-        ],
-      ),
-    ).animate().fadeIn(
-      duration: 600.milliseconds,
-      curve: Curves.easeOut,
-    ).scale(
-      begin: const Offset(0.8, 0.8),
-      duration: 600.milliseconds,
-      curve: Curves.elasticOut,
-    );
-  }
-
-  Widget _buildTimerIcon() {
-    IconData icon;
-    Color iconColor;
-    
-    if (isCompleted) {
-      icon = Icons.check_circle;
-      iconColor = AppColors.success['500']!;
-    } else if (isPaused) {
-      icon = Icons.pause_circle;
-      iconColor = AppColors.warning['500']!;
-    } else {
-      icon = Icons.timer;
-      iconColor = Colors.white;
-    }
-
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        color: iconColor.withOpacity(0.2),
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: iconColor.withOpacity(0.5),
-          width: 2,
-        ),
-      ),
-      child: Icon(
-        icon,
-        color: iconColor,
-        size: 32,
-      ),
-    ).animate(onPlay: (controller) {
-      if (isPaused) controller.repeat();
-    }).shimmer(
-      duration: 2.seconds,
-      delay: 1.seconds,
-    );
-  }
-
-  Widget _buildTimeDisplay() {
-    final minutes = remainingTime ~/ 60;
-    final seconds = remainingTime % 60;
-    final timeString = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-
-    return Text(
-      timeString,
-      style: AppTypography.h1.copyWith(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-        fontSize: 48,
-        letterSpacing: 2,
-      ),
-    ).animate(onPlay: (controller) {
-      if (!isPaused && !isCompleted) controller.repeat();
-    }).shimmer(
-      duration: 1.seconds,
-      delay: 500.milliseconds,
-    );
-  }
-
-  Widget _buildTimerStatus() {
-    String statusText;
-    Color statusColor;
-    
-    if (isCompleted) {
-      statusText = 'Terminé !';
-      statusColor = AppColors.success['500']!;
-    } else if (isPaused) {
-      statusText = 'En pause';
-      statusColor = AppColors.warning['500']!;
-    } else {
-      statusText = 'En cours...';
-      statusColor = Colors.white;
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (!isCompleted && !isPaused)
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: statusColor,
-              shape: BoxShape.circle,
-            ),
-          ).animate(onPlay: (controller) => controller.repeat())
-            .shimmer(duration: 1.seconds, delay: 200.milliseconds),
-        
-        if (!isCompleted && !isPaused)
-          const SizedBox(width: AppDimensions.spacingSmall),
-        
-        Text(
-          statusText,
-          style: AppTypography.body1.copyWith(
-            color: statusColor,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  LinearGradient _getTimerGradient() {
-    if (isCompleted) {
-      return LinearGradient(
-        colors: AppColors.successGradient,
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      );
-    }
-
-    if (isPaused) {
-      return LinearGradient(
-        colors: [
-          AppColors.warning['600']!,
-          AppColors.warning['700']!,
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      );
-    }
-
-    return LinearGradient(
-      colors: AppColors.primaryGradient,
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
-  }
-
-  List<BoxShadow> _getTimerShadow() {
-    if (isCompleted) {
-      return [
-        BoxShadow(
-          color: AppColors.success['500']!.withOpacity(0.4),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
-        ),
-      ];
-    }
-
-    if (isPaused) {
-      return [
-        BoxShadow(
-          color: AppColors.warning['500']!.withOpacity(0.4),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
-        ),
-      ];
-    }
-
-    return [
-      BoxShadow(
-        color: AppColors.primaryWithOpacity(0.4),
-        blurRadius: 12,
-        offset: const Offset(0, 4),
-      ),
-    ];
-  }
-}
-
-/// Widget de compte à rebours pour les exercices
-class CountdownWidget extends StatefulWidget {
-  final int duration;
-  final VoidCallback? onComplete;
-  final bool isActive;
-
-  const CountdownWidget({
-    Key? key,
     required this.duration,
-    this.onComplete,
-    this.isActive = false,
+    required this.onComplete,
+    required this.onSkip,
+    this.nextExercise,
   }) : super(key: key);
 
   @override
-  State<CountdownWidget> createState() => _CountdownWidgetState();
+  State<TimerWidget> createState() => _TimerWidgetState();
 }
 
-class _CountdownWidgetState extends State<CountdownWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-  int _remainingTime = 0;
+class _TimerWidgetState extends State<TimerWidget> {
+  late int _remainingTime;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _remainingTime = widget.duration;
-    _initializeAnimation();
-  }
-
-  @override
-  void didUpdateWidget(CountdownWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isActive && !oldWidget.isActive) {
-      _startCountdown();
-    } else if (!widget.isActive && oldWidget.isActive) {
-      _stopCountdown();
-    }
+    _startTimer();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
-  void _initializeAnimation() {
-    _animationController = AnimationController(
-      duration: Duration(seconds: widget.duration),
-      vsync: this,
-    );
-
-    _animation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.linear,
-    ));
-
-    _animationController.addListener(() {
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
-        _remainingTime = (widget.duration * _animation.value).round();
+        if (_remainingTime > 0) {
+          _remainingTime--;
+        } else {
+          timer.cancel();
+          widget.onComplete();
+        }
       });
-
-      if (_animation.value == 0.0) {
-        widget.onComplete?.call();
-      }
     });
   }
 
-  void _startCountdown() {
-    _animationController.forward();
-  }
-
-  void _stopCountdown() {
-    _animationController.stop();
+  String _formatTime(int seconds) {
+    final mins = seconds ~/ 60;
+    final secs = seconds % 60;
+    return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final progress = _animation.value;
-    final minutes = _remainingTime ~/ 60;
-    final seconds = _remainingTime % 60;
-    final timeString = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final theme = Theme.of(context);
 
     return Container(
-      width: 120,
-      height: 120,
-      child: Stack(
-        alignment: Alignment.center,
+      padding: const EdgeInsets.all(AppDimensions.paddingLarge),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+        border: Border.all(
+          color: AppColors.vermilion.withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: Column(
         children: [
-          // Cercle de progression
-          SizedBox(
-            width: 120,
-            height: 120,
-            child: CircularProgressIndicator(
-              value: progress,
-              strokeWidth: 8,
-              backgroundColor: Colors.white.withOpacity(0.2),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                widget.isActive ? AppColors.vermilion : Colors.white.withOpacity(0.5),
-              ),
+          // Titre
+          Text(
+            'Pause',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.vermilion,
             ),
           ),
-          
-          // Texte du temps
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                timeString,
-                style: AppTypography.h3.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+
+          const SizedBox(height: AppDimensions.spacingLarge),
+
+          // Timer principal
+          Text(
+            _formatTime(_remainingTime),
+            style: theme.textTheme.displayMedium?.copyWith(
+              fontFamily: 'monospace',
+              fontWeight: FontWeight.bold,
+              color: _remainingTime <= 5
+                  ? AppColors.vermilion
+                  : theme.colorScheme.onSurface,
+            ),
+          ),
+
+          const SizedBox(height: AppDimensions.spacingLarge),
+
+          // Prochain exercice si disponible
+          if (widget.nextExercise != null) ...[
+            Container(
+              padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(
+                  AppDimensions.borderRadiusMedium,
                 ),
               ),
-              Text(
-                'secondes',
-                style: AppTypography.caption.copyWith(
-                  color: Colors.white.withOpacity(0.8),
+              child: Column(
+                children: [
+                  Text(
+                    'Prochain exercice:',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.spacingSmall),
+                  Text(
+                    widget.nextExercise!.name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.vermilion,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (widget.nextExercise!.equip != null) ...[
+                    const SizedBox(height: AppDimensions.spacingSmall),
+                    Text(
+                      widget.nextExercise!.equip!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingLarge),
+          ],
+
+          // Boutons
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: widget.onSkip,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.surfaceVariant,
+                    foregroundColor: theme.colorScheme.onSurfaceVariant,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppDimensions.paddingMedium,
+                    ),
+                  ),
+                  child: const Text('Passer'),
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spacingMedium),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _timer?.cancel();
+                    widget.onComplete();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.vermilion,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppDimensions.paddingMedium,
+                    ),
+                  ),
+                  child: const Text('Terminer'),
                 ),
               ),
             ],
@@ -342,4 +181,4 @@ class _CountdownWidgetState extends State<CountdownWidget>
       ),
     );
   }
-} 
+}

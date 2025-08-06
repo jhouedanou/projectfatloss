@@ -6,7 +6,8 @@ import '../../../core/constants/app_dimensions.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/widgets/app_header.dart';
 import '../../../core/widgets/custom_card.dart';
-import '../../../shared/services/workout_data_service.dart';
+import '../../../shared/services/workout_service.dart';
+import '../../../shared/models/workout_model.dart';
 
 /// Écran de statistiques affichant les données d'entraînement
 class StatsScreen extends StatefulWidget {
@@ -41,8 +42,14 @@ class _StatsScreenState extends State<StatsScreen> {
         _isLoading = true;
       });
 
-      final globalStats = await WorkoutDataService.getGlobalStats();
-      final weeklyStats = await WorkoutDataService.getWeeklyStats();
+      // TODO: Implémenter les statistiques avec WorkoutService
+      final globalStats = <String, dynamic>{
+        'total_sessions': 0,
+        'total_calories': 0,
+        'total_duration': 0,
+        'average_calories': 0,
+      };
+      final weeklyStats = <Map<String, dynamic>>[];
 
       setState(() {
         _globalStats = globalStats;
@@ -61,10 +68,7 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppHeader(
-        title: 'Statistiques',
-        showBackButton: true,
-      ),
+      appBar: AppHeader(title: 'Statistiques', showBackButton: true),
       body: _isLoading
           ? _buildLoadingState()
           : RefreshIndicator(
@@ -91,9 +95,7 @@ class _StatsScreenState extends State<StatsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            color: AppColors.vermilion,
-          ),
+          CircularProgressIndicator(color: AppColors.vermilion),
           const SizedBox(height: AppDimensions.spacingMedium),
           Text(
             'Chargement des statistiques...',
@@ -145,7 +147,8 @@ class _StatsScreenState extends State<StatsScreen> {
             Expanded(
               child: _buildStatCard(
                 title: 'Durée (min)',
-                value: '${((_globalStats['total_duration'] ?? 0) / 60).round()}',
+                value:
+                    '${((_globalStats['total_duration'] ?? 0) / 60).round()}',
                 icon: Icons.timer,
                 color: AppColors.blueIndigo,
               ),
@@ -172,50 +175,44 @@ class _StatsScreenState extends State<StatsScreen> {
     required Color color,
   }) {
     return CustomCard(
-      child: Container(
-        padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
-          gradient: LinearGradient(
-            colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+          child: Container(
+            padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                AppDimensions.borderRadiusMedium,
+              ),
+              gradient: LinearGradient(
+                colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(icon, color: color, size: 32),
+                const SizedBox(height: AppDimensions.spacingSmall),
+                Text(
+                  value,
+                  style: AppTypography.h2.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.spacingSmall),
+                Text(
+                  title,
+                  style: AppTypography.caption.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: color,
-              size: 32,
-            ),
-            const SizedBox(height: AppDimensions.spacingSmall),
-            Text(
-              value,
-              style: AppTypography.h2.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingSmall),
-            Text(
-              title,
-              style: AppTypography.caption.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(
-      duration: 400.milliseconds,
-      curve: Curves.easeOut,
-    ).slideY(
-      begin: 0.2,
-      duration: 400.milliseconds,
-      curve: Curves.easeOut,
-    );
+        )
+        .animate()
+        .fadeIn(duration: 400.milliseconds, curve: Curves.easeOut)
+        .slideY(begin: 0.2, duration: 400.milliseconds, curve: Curves.easeOut);
   }
 
   Widget _buildWeeklyChart() {
@@ -279,11 +276,14 @@ class _StatsScreenState extends State<StatsScreen> {
                           if (value.toInt() >= _weeklyStats.length) {
                             return const Text('');
                           }
-                          final week = _weeklyStats[value.toInt()]['week'] as String;
+                          final week =
+                              _weeklyStats[value.toInt()]['week'] as String;
                           return Text(
                             'S${week.split('-').last}',
                             style: AppTypography.caption.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           );
                         },
@@ -297,7 +297,9 @@ class _StatsScreenState extends State<StatsScreen> {
                           return Text(
                             '${value.toInt()}',
                             style: AppTypography.caption.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           );
                         },
@@ -311,7 +313,9 @@ class _StatsScreenState extends State<StatsScreen> {
                     horizontalInterval: 1,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.2),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.2),
                         strokeWidth: 1,
                       );
                     },
@@ -322,44 +326,38 @@ class _StatsScreenState extends State<StatsScreen> {
           ],
         ),
       ),
-    ).animate().fadeIn(
-      duration: 600.milliseconds,
-      delay: 200.milliseconds,
-    );
+    ).animate().fadeIn(duration: 600.milliseconds, delay: 200.milliseconds);
   }
 
   List<BarChartGroupData> _buildBarGroups() {
-    return List.generate(
-      _weeklyStats.length,
-      (index) {
-        final data = _weeklyStats[index];
-        final calories = data['calories'] as int? ?? 0;
-        
-        return BarChartGroupData(
-          x: index,
-          barRods: [
-            BarChartRodData(
-              toY: calories.toDouble(),
-              color: AppColors.primaryGradient.first,
-              width: 20,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(4),
-                topRight: Radius.circular(4),
-              ),
+    return List.generate(_weeklyStats.length, (index) {
+      final data = _weeklyStats[index];
+      final calories = data['calories'] as int? ?? 0;
+
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(
+            toY: calories.toDouble(),
+            color: AppColors.primaryGradient.first,
+            width: 20,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(4),
+              topRight: Radius.circular(4),
             ),
-          ],
-        );
-      },
-    );
+          ),
+        ],
+      );
+    });
   }
 
   double _getMaxCalories() {
     if (_weeklyStats.isEmpty) return 100;
-    
+
     final maxCalories = _weeklyStats
         .map((data) => data['calories'] as int? ?? 0)
         .reduce((a, b) => a > b ? a : b);
-    
+
     return (maxCalories * 1.2).toDouble();
   }
 
@@ -375,14 +373,16 @@ class _StatsScreenState extends State<StatsScreen> {
           ),
         ),
         const SizedBox(height: AppDimensions.spacingMedium),
-        FutureBuilder<List<Map<String, dynamic>>>(
-          future: WorkoutDataService.getWorkoutHistory(limit: 10),
+        FutureBuilder<List<WorkoutSession>>(
+          future: WorkoutService.instance.getWorkoutHistory(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            if (snapshot.hasError ||
+                !snapshot.hasData ||
+                snapshot.data!.isEmpty) {
               return CustomCard(
                 child: Container(
                   padding: const EdgeInsets.all(AppDimensions.paddingLarge),
@@ -409,10 +409,6 @@ class _StatsScreenState extends State<StatsScreen> {
             final sessions = snapshot.data!;
             return Column(
               children: sessions.map((session) {
-                final startTime = DateTime.parse(session['start_time']);
-                final duration = session['duration'] as int;
-                final calories = session['calories_burned'] as int;
-                
                 return CustomCard(
                   child: ListTile(
                     leading: CircleAvatar(
@@ -423,13 +419,13 @@ class _StatsScreenState extends State<StatsScreen> {
                       ),
                     ),
                     title: Text(
-                      'Session du ${_formatDate(startTime)}',
+                      'Session du ${_formatDate(session.date)}',
                       style: AppTypography.body1.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     subtitle: Text(
-                      '${(duration / 60).round()} min • $calories calories',
+                      '${(session.duration / 60).round()} min • ${session.calories} calories',
                       style: AppTypography.caption.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -445,13 +441,10 @@ class _StatsScreenState extends State<StatsScreen> {
           },
         ),
       ],
-    ).animate().fadeIn(
-      duration: 800.milliseconds,
-      delay: 400.milliseconds,
-    );
+    ).animate().fadeIn(duration: 800.milliseconds, delay: 400.milliseconds);
   }
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-} 
+}
