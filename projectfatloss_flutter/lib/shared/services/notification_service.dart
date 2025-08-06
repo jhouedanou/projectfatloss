@@ -6,9 +6,9 @@ import '../services/preferences_service.dart';
 
 /// Service de gestion des notifications
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin _notifications = 
+  static final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
-  
+
   static bool _initialized = false;
 
   /// Initialise le service de notifications
@@ -16,8 +16,10 @@ class NotificationService {
     if (_initialized) return;
 
     // Configuration pour Android
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
+
     // Configuration pour iOS
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -46,8 +48,12 @@ class NotificationService {
 
   /// Vérifie si les notifications sont activées
   static Future<bool> areNotificationsEnabled() async {
-    return await _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()?.areNotificationsEnabled() ?? false;
+    return await _notifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.areNotificationsEnabled() ??
+        false;
   }
 
   /// Affiche une notification de démarrage d'entraînement
@@ -79,12 +85,7 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _notifications.show(
-      0,
-      title,
-      body,
-      details,
-    );
+    await _notifications.show(0, title, body, details);
   }
 
   /// Affiche une notification de fin d'entraînement
@@ -116,12 +117,7 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _notifications.show(
-      1,
-      title,
-      body,
-      details,
-    );
+    await _notifications.show(1, title, body, details);
   }
 
   /// Affiche une notification de rappel
@@ -153,12 +149,7 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _notifications.show(
-      2,
-      title,
-      body,
-      details,
-    );
+    await _notifications.show(2, title, body, details);
   }
 
   /// Programme une notification de rappel
@@ -198,9 +189,7 @@ class NotificationService {
       body,
       tz.TZDateTime.from(scheduledDate, tz.local),
       details,
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
 
@@ -229,4 +218,4 @@ class NotificationService {
         break;
     }
   }
-} 
+}

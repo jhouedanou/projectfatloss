@@ -4,12 +4,13 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../shared/models/workout_model.dart';
 
-/// Widget pour afficher un timer de pause
+/// Widget pour afficher un timer de pause avec contrôles comme la PWA
 class TimerWidget extends StatefulWidget {
   final int duration;
   final VoidCallback onComplete;
   final VoidCallback onSkip;
   final Exercise? nextExercise;
+  final bool autoStart;
 
   const TimerWidget({
     Key? key,
@@ -17,6 +18,7 @@ class TimerWidget extends StatefulWidget {
     required this.onComplete,
     required this.onSkip,
     this.nextExercise,
+    this.autoStart = true,
   }) : super(key: key);
 
   @override
@@ -26,12 +28,15 @@ class TimerWidget extends StatefulWidget {
 class _TimerWidgetState extends State<TimerWidget> {
   late int _remainingTime;
   Timer? _timer;
+  bool _isRunning = false;
 
   @override
   void initState() {
     super.initState();
     _remainingTime = widget.duration;
-    _startTimer();
+    if (widget.autoStart) {
+      _startTimer();
+    }
   }
 
   @override
@@ -41,15 +46,36 @@ class _TimerWidgetState extends State<TimerWidget> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    if (!_isRunning) {
       setState(() {
-        if (_remainingTime > 0) {
-          _remainingTime--;
-        } else {
-          timer.cancel();
-          widget.onComplete();
-        }
+        _isRunning = true;
       });
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          if (_remainingTime > 0) {
+            _remainingTime--;
+          } else {
+            timer.cancel();
+            _isRunning = false;
+            widget.onComplete();
+          }
+        });
+      });
+    }
+  }
+
+  void _pauseTimer() {
+    _timer?.cancel();
+    setState(() {
+      _isRunning = false;
+    });
+  }
+
+  void _resetTimer() {
+    _timer?.cancel();
+    setState(() {
+      _remainingTime = widget.duration;
+      _isRunning = false;
     });
   }
 
@@ -105,7 +131,7 @@ class _TimerWidgetState extends State<TimerWidget> {
             Container(
               padding: const EdgeInsets.all(AppDimensions.paddingMedium),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant,
+                color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(
                   AppDimensions.borderRadiusMedium,
                 ),
@@ -142,14 +168,51 @@ class _TimerWidgetState extends State<TimerWidget> {
             const SizedBox(height: AppDimensions.spacingLarge),
           ],
 
-          // Boutons
+          // Boutons de contrôle du timer
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: !_isRunning ? _startTimer : _pauseTimer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: !_isRunning ? AppColors.vermilion : theme.colorScheme.surfaceContainerHighest,
+                    foregroundColor: !_isRunning ? Colors.white : theme.colorScheme.onSurfaceVariant,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppDimensions.paddingMedium,
+                    ),
+                  ),
+                  icon: Icon(!_isRunning ? Icons.play_arrow : Icons.pause),
+                  label: Text(!_isRunning ? 'Démarrer' : 'Pause'),
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spacingSmall),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _resetTimer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    foregroundColor: theme.colorScheme.onSurfaceVariant,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppDimensions.paddingMedium,
+                    ),
+                  ),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reset'),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppDimensions.spacingMedium),
+
+          // Boutons d'action
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
                   onPressed: widget.onSkip,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.surfaceVariant,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
                     foregroundColor: theme.colorScheme.onSurfaceVariant,
                     padding: const EdgeInsets.symmetric(
                       vertical: AppDimensions.paddingMedium,

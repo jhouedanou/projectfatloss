@@ -1,4 +1,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permissions pour Google Fit -->
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.WRITE_ACTIVE_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
+    <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+    <uses-permission android:name="android.permission.health.WRITE_WEIGHT" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    
+    <!-- Permissions Google Fit legacy -->
+    <uses-permission android:name="com.google.android.gms.permission.FITNESS_ACTIVITY_READ" />
+    <uses-permission android:name="com.google.android.gms.permission.FITNESS_ACTIVITY_WRITE" />
+    <uses-permission android:name="com.google.android.gms.permission.FITNESS_BODY_READ" />
+    <uses-permission android:name="com.google.android.gms.permission.FITNESS_BODY_WRITE" />
+    
     <application
         android:label="project_fat_loss_flutter"
         android:name="${applicationName}"

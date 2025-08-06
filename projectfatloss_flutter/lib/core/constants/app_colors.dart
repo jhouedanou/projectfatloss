@@ -135,7 +135,7 @@ class AppColors {
 
   // Couleurs avec opacité pour les overlays
   static Color primaryWithOpacity(double opacity) => vermilion.withOpacity(opacity);
-  static Color secondaryWithOpacity(double opacity) => secondary['500']!.withOpacity(opacity);
+  static Color secondaryWithOpacity(double opacity) => (secondary['500'] ?? secondary['400']!).withOpacity(opacity);
   static Color blackWithOpacity(double opacity) => Colors.black.withOpacity(opacity);
   static Color whiteWithOpacity(double opacity) => Colors.white.withOpacity(opacity);
 

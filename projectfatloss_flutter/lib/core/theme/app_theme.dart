@@ -10,117 +10,139 @@ class AppTheme {
   static final ColorScheme _lightColorScheme = ColorScheme.light(
     primary: AppColors.vermilion,
     onPrimary: Colors.white,
-    primaryContainer: AppColors.primary['100']!,
-    onPrimaryContainer: AppColors.primary['900']!,
-    
-    secondary: AppColors.secondary['500']!,
+    primaryContainer: AppColors.primary['100'] ?? AppColors.primary['50']!,
+    onPrimaryContainer: AppColors.primary['900'] ?? AppColors.primary['800']!,
+
+    secondary: AppColors.secondary['500'] ?? AppColors.secondary['400']!,
     onSecondary: Colors.white,
-    secondaryContainer: AppColors.secondary['100']!,
-    onSecondaryContainer: AppColors.secondary['900']!,
-    
+    secondaryContainer: AppColors.secondary['100'] ?? AppColors.secondary['50']!,
+    onSecondaryContainer: AppColors.secondary['900'] ?? AppColors.secondary['800']!,
+
     tertiary: AppColors.blueIndigo,
     onTertiary: Colors.white,
-    
-    error: AppColors.error['500']!,
+
+    error: AppColors.error['500'] ?? AppColors.error['400']!,
     onError: Colors.white,
-    errorContainer: AppColors.error['100']!,
-    onErrorContainer: AppColors.error['700']!,
-    
+    errorContainer: AppColors.error['100'] ?? AppColors.error['50']!,
+    onErrorContainer: AppColors.error['700'] ?? AppColors.error['600']!,
+
     background: AppColors.backgroundLight,
     onBackground: AppColors.textPrimaryLight,
-    
+
     surface: AppColors.paperLight,
     onSurface: AppColors.textPrimaryLight,
-    surfaceVariant: AppColors.neutral['100']!,
+    surfaceVariant: AppColors.neutral['100'] ?? AppColors.neutral['50']!,
     onSurfaceVariant: AppColors.textSecondaryLight,
-    
+
     outline: AppColors.dividerLight,
-    outlineVariant: AppColors.neutral['200']!,
-    
+    outlineVariant: AppColors.neutral['200'] ?? AppColors.neutral['100']!,
+
     shadow: Colors.black,
     scrim: Colors.black54,
-    
+
     inverseSurface: AppColors.paperDark,
     onInverseSurface: AppColors.textPrimaryDark,
-    inversePrimary: AppColors.primary['200']!,
+    inversePrimary: AppColors.primary['200'] ?? AppColors.primary['100']!,
   );
 
   // Couleurs de thème pour mode sombre
   static final ColorScheme _darkColorScheme = ColorScheme.dark(
     primary: AppColors.vermilion,
     onPrimary: Colors.white,
-    primaryContainer: AppColors.primary['800']!,
-    onPrimaryContainer: AppColors.primary['200']!,
-    
-    secondary: AppColors.secondary['500']!,
+    primaryContainer: AppColors.primary['800'] ?? AppColors.primary['600']!,
+    onPrimaryContainer: AppColors.primary['200'] ?? AppColors.primary['100']!,
+
+    secondary: AppColors.secondary['500'] ?? AppColors.secondary['400']!,
     onSecondary: Colors.white,
-    secondaryContainer: AppColors.secondary['800']!,
-    onSecondaryContainer: AppColors.secondary['200']!,
-    
+    secondaryContainer:
+        AppColors.secondary['800'] ?? AppColors.secondary['700']!,
+    onSecondaryContainer:
+        AppColors.secondary['200'] ?? AppColors.secondary['100']!,
+
     tertiary: AppColors.blueIndigoLight,
     onTertiary: Colors.black,
-    
-    error: AppColors.error['400']!,
+
+    error: AppColors.error['400'] ?? AppColors.error['500']!,
     onError: Colors.black,
-    errorContainer: AppColors.error['800']!,
-    onErrorContainer: AppColors.error['200']!,
-    
+    errorContainer: AppColors.error['800'] ?? AppColors.error['700']!,
+    onErrorContainer: AppColors.error['200'] ?? AppColors.error['100']!,
+
     background: AppColors.backgroundDark,
     onBackground: AppColors.textPrimaryDark,
-    
+
     surface: AppColors.paperDark,
     onSurface: AppColors.textPrimaryDark,
     surfaceVariant: AppColors.secondaryBackgroundDark,
     onSurfaceVariant: AppColors.textSecondaryDark,
-    
+
     outline: AppColors.dividerDark,
-    outlineVariant: AppColors.neutral['700']!,
-    
+    outlineVariant: AppColors.neutral['700'] ?? AppColors.neutral['600']!,
+
     shadow: Colors.black,
     scrim: Colors.black87,
-    
+
     inverseSurface: AppColors.paperLight,
     onInverseSurface: AppColors.textPrimaryLight,
-    inversePrimary: AppColors.primary['600']!,
+    inversePrimary: AppColors.primary['600'] ?? AppColors.primary['500']!,
   );
 
   /// Crée le thème pour le mode spécifié
   static ThemeData createTheme(bool isDark) {
     final colorScheme = isDark ? _darkColorScheme : _lightColorScheme;
-    
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      
+
       // Typography basée sur la PWA
       textTheme: TextTheme(
-        displayLarge: AppTypography.h1.copyWith(color: colorScheme.onBackground),
-        displayMedium: AppTypography.h2.copyWith(color: colorScheme.onBackground),
-        displaySmall: AppTypography.h3.copyWith(color: colorScheme.onBackground),
-        headlineLarge: AppTypography.h4.copyWith(color: colorScheme.onBackground),
-        headlineMedium: AppTypography.h5.copyWith(color: colorScheme.onBackground),
-        headlineSmall: AppTypography.h6.copyWith(color: colorScheme.onBackground),
+        displayLarge: AppTypography.h1.copyWith(
+          color: colorScheme.onBackground,
+        ),
+        displayMedium: AppTypography.h2.copyWith(
+          color: colorScheme.onBackground,
+        ),
+        displaySmall: AppTypography.h3.copyWith(
+          color: colorScheme.onBackground,
+        ),
+        headlineLarge: AppTypography.h4.copyWith(
+          color: colorScheme.onBackground,
+        ),
+        headlineMedium: AppTypography.h5.copyWith(
+          color: colorScheme.onBackground,
+        ),
+        headlineSmall: AppTypography.h6.copyWith(
+          color: colorScheme.onBackground,
+        ),
         titleLarge: AppTypography.h5.copyWith(color: colorScheme.onBackground),
         titleMedium: AppTypography.h6.copyWith(color: colorScheme.onBackground),
         titleSmall: AppTypography.body1.copyWith(
           color: colorScheme.onBackground,
           fontWeight: FontWeight.w600,
         ),
-        bodyLarge: AppTypography.body1.copyWith(color: colorScheme.onBackground),
-        bodyMedium: AppTypography.body2.copyWith(color: colorScheme.onBackground),
-        bodySmall: AppTypography.caption.copyWith(color: colorScheme.onSurfaceVariant),
+        bodyLarge: AppTypography.body1.copyWith(
+          color: colorScheme.onBackground,
+        ),
+        bodyMedium: AppTypography.body2.copyWith(
+          color: colorScheme.onBackground,
+        ),
+        bodySmall: AppTypography.caption.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
         labelLarge: AppTypography.button.copyWith(color: colorScheme.onPrimary),
         labelMedium: AppTypography.button.copyWith(
           color: colorScheme.onSurfaceVariant,
           fontSize: 12,
         ),
-        labelSmall: AppTypography.overline.copyWith(color: colorScheme.onSurfaceVariant),
+        labelSmall: AppTypography.overline.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
       ),
-      
+
       // Configuration générale
       visualDensity: VisualDensity.adaptivePlatformDensity,
       fontFamily: AppTypography.fontFamily,
-      
+
       // AppBar avec gradient exact de la PWA
       appBarTheme: AppBarTheme(
         elevation: 0,
@@ -136,7 +158,7 @@ class AppTheme {
           statusBarIconBrightness: Brightness.light,
         ),
       ),
-      
+
       // Boutons avec styles exacts de la PWA
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -146,13 +168,15 @@ class AppTheme {
             vertical: AppDimensions.buttonPaddingVertical,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.buttonBorderRadius),
+            borderRadius: BorderRadius.circular(
+              AppDimensions.buttonBorderRadius,
+            ),
           ),
           textStyle: AppTypography.button,
           // Gradient sera appliqué via decoration dans le widget personnalisé
         ),
       ),
-      
+
       // Boutons outlined
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
@@ -161,16 +185,15 @@ class AppTheme {
             vertical: AppDimensions.buttonPaddingVertical,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.buttonBorderRadius),
+            borderRadius: BorderRadius.circular(
+              AppDimensions.buttonBorderRadius,
+            ),
           ),
-          side: BorderSide(
-            color: colorScheme.primary,
-            width: 2,
-          ),
+          side: BorderSide(color: colorScheme.primary, width: 2),
           textStyle: AppTypography.button,
         ),
       ),
-      
+
       // Boutons text
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
@@ -179,19 +202,23 @@ class AppTheme {
             vertical: AppDimensions.buttonPaddingVertical,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.buttonBorderRadius),
+            borderRadius: BorderRadius.circular(
+              AppDimensions.buttonBorderRadius,
+            ),
           ),
           textStyle: AppTypography.button,
         ),
       ),
-      
-      // Cards avec styles exacts de la PWA  
+
+      // Cards avec styles exacts de la PWA
       cardTheme: CardThemeData(
         elevation: AppDimensions.elevation2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.cardBorderRadius),
           side: BorderSide(
-            color: isDark ? AppColors.neutral['800']! : AppColors.neutral['200']!,
+            color: isDark
+                ? (AppColors.neutral['800'] ?? AppColors.neutral['700']!)
+                : (AppColors.neutral['200'] ?? AppColors.neutral['100']!),
             width: 1,
           ),
         ),
@@ -199,7 +226,7 @@ class AppTheme {
         color: colorScheme.surface,
         shadowColor: colorScheme.shadow,
       ),
-      
+
       // Chips avec styles personnalisés
       chipTheme: ChipThemeData(
         backgroundColor: colorScheme.surfaceVariant,
@@ -211,7 +238,7 @@ class AppTheme {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       ),
-      
+
       // Input decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -233,7 +260,7 @@ class AppTheme {
           vertical: AppDimensions.paddingMedium,
         ),
       ),
-      
+
       // Floating Action Button
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colorScheme.primary,
@@ -243,7 +270,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
         ),
       ),
-      
+
       // Navigation Bar (Bottom)
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: colorScheme.surface,
@@ -252,7 +279,7 @@ class AppTheme {
           AppTypography.caption.copyWith(color: colorScheme.onSurface),
         ),
       ),
-      
+
       // Tab Bar
       tabBarTheme: TabBarThemeData(
         indicatorColor: Colors.white,
@@ -265,14 +292,14 @@ class AppTheme {
         ),
         overlayColor: MaterialStateProperty.all(Colors.white12),
       ),
-      
+
       // Divider
       dividerTheme: DividerThemeData(
         color: colorScheme.outline,
         thickness: 1,
         space: 1,
       ),
-      
+
       // List Tile
       listTileTheme: ListTileThemeData(
         contentPadding: const EdgeInsets.symmetric(
@@ -283,7 +310,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
         ),
       ),
-      
+
       // Dialog
       dialogTheme: DialogThemeData(
         backgroundColor: colorScheme.surface,
@@ -291,9 +318,11 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppDimensions.modalBorderRadius),
         ),
         titleTextStyle: AppTypography.h6.copyWith(color: colorScheme.onSurface),
-        contentTextStyle: AppTypography.body2.copyWith(color: colorScheme.onSurface),
+        contentTextStyle: AppTypography.body2.copyWith(
+          color: colorScheme.onSurface,
+        ),
       ),
-      
+
       // Bottom Sheet
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colorScheme.surface,
@@ -303,7 +332,7 @@ class AppTheme {
           ),
         ),
       ),
-      
+
       // Switch
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((states) {
@@ -319,7 +348,7 @@ class AppTheme {
           return colorScheme.surfaceVariant;
         }),
       ),
-      
+
       // Slider
       sliderTheme: SliderThemeData(
         activeTrackColor: colorScheme.primary,
@@ -327,20 +356,20 @@ class AppTheme {
         thumbColor: colorScheme.primary,
         overlayColor: colorScheme.primary.withOpacity(0.12),
       ),
-      
+
       // Progress Indicator
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: colorScheme.primary,
         linearTrackColor: colorScheme.primary.withOpacity(0.3),
         circularTrackColor: colorScheme.primary.withOpacity(0.3),
       ),
-      
+
       // Icon Theme
       iconTheme: IconThemeData(
         color: colorScheme.onSurface,
         size: AppDimensions.iconMedium,
       ),
-      
+
       // Primary Icon Theme
       primaryIconTheme: IconThemeData(
         color: colorScheme.primary,
@@ -353,7 +382,7 @@ class AppTheme {
   static Map<String, Color> getCustomColors(bool isDark) {
     return {
       'gradient1': AppColors.vermilion,
-      'gradient2': AppColors.secondary['500']!,
+      'gradient2': AppColors.secondary['500'] ?? AppColors.secondary['400']!,
       'seriesText': AppColors.blueIndigo,
       'darkGreen': AppColors.darkGreen,
       'blueGrey': AppColors.blueGrey,

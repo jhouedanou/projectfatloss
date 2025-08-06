@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
@@ -6,21 +7,25 @@ import '../../../core/widgets/custom_card.dart' as custom_card;
 import '../../../core/widgets/custom_gradient_button.dart';
 import '../../../shared/models/workout_model.dart';
 import '../../../shared/services/workout_service.dart';
+import '../../../shared/services/google_fit_service.dart';
 import '../widgets/exercise_card.dart';
 import '../widgets/timer_widget.dart';
 import '../widgets/workout_progress.dart';
+import '../widgets/rhythm_counter.dart';
 
 /// Écran d'entraînement reproduisant la PWA
 class WorkoutScreen extends StatefulWidget {
   final String dayId;
   final bool isDarkMode;
   final VoidCallback onThemeToggle;
+  final String? initialMode;
 
   const WorkoutScreen({
     Key? key,
     required this.dayId,
     required this.isDarkMode,
     required this.onThemeToggle,
+    this.initialMode,
   }) : super(key: key);
 
   @override
@@ -33,12 +38,48 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   bool _isLoading = true;
   bool _stepMode = false;
   bool _autoMode = false;
+  bool _fatBurnerMode = false;
   String _viewMode = 'workout';
+  bool _googleFitConnected = false;
 
   @override
   void initState() {
     super.initState();
     _loadWorkoutPlan();
+    _initializeMode();
+    _initializeGoogleFit();
+  }
+
+  void _initializeMode() {
+    if (widget.initialMode != null) {
+      switch (widget.initialMode) {
+        case 'auto':
+          _autoMode = true;
+          _fatBurnerMode = false;
+          break;
+        case 'fatburner':
+          _fatBurnerMode = true;
+          _autoMode = false;
+          break;
+        default:
+          _autoMode = false;
+          _fatBurnerMode = false;
+      }
+    }
+  }
+
+  Future<void> _initializeGoogleFit() async {
+    try {
+      final connected = await GoogleFitService().initialize();
+      setState(() {
+        _googleFitConnected = connected;
+      });
+      if (connected) {
+        print('Google Fit / Apple Health connecté');
+      }
+    } catch (e) {
+      print('Erreur lors de la connexion Google Fit: $e');
+    }
   }
 
   Future<void> _loadWorkoutPlan() async {
@@ -75,11 +116,31 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     });
   }
 
-  void _handleWorkoutComplete(WorkoutSession workoutData) {
+  void _handleWorkoutComplete(WorkoutSession workoutData) async {
     print('Entraînement terminé: ${workoutData.calories} calories');
 
     // Sauvegarder la session
     WorkoutService.instance.saveWorkoutSession(workoutData);
+
+    // Exporter vers Google Fit si connecté
+    if (_googleFitConnected) {
+      final success = await GoogleFitService().exportWorkoutSession(workoutData);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Données exportées vers Google Fit / Apple Health'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Erreur lors de l\'export vers Google Fit'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
 
     _moveToNextDay();
     setState(() {
@@ -106,7 +167,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: theme.colorScheme.background,
+        backgroundColor: theme.colorScheme.surface,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -127,7 +188,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
     if (_workoutPlan == null || _workoutPlan!.days.isEmpty) {
       return Scaffold(
-        backgroundColor: theme.colorScheme.background,
+        backgroundColor: theme.colorScheme.surface,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -171,7 +232,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         _currentDayIndex < _workoutPlan!.days.length;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: Text(
           'PROJECT FAT LOSS',
@@ -184,6 +245,21 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          if (_googleFitConnected)
+            IconButton(
+              icon: const Icon(Icons.health_and_safety, color: Colors.green),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(Platform.isAndroid 
+                        ? 'Google Fit connecté' 
+                        : 'Apple Health connecté'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              tooltip: Platform.isAndroid ? 'Google Fit connecté' : 'Apple Health connecté',
+            ),
           IconButton(
             icon: Icon(widget.isDarkMode ? Icons.wb_sunny : Icons.nightlight),
             onPressed: widget.onThemeToggle,
@@ -240,6 +316,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return custom_card.CustomCard(
       child: Column(
         children: [
+          // Sélecteur de jour d'entraînement
+          if (_workoutPlan != null && _workoutPlan!.days.isNotEmpty) ...[
+            _buildDaySelector(context),
+            const SizedBox(height: AppDimensions.spacingMedium),
+          ],
           // Navigation des vues
           Row(
             children: [
@@ -281,6 +362,193 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     );
   }
 
+  Widget _buildDaySelector(BuildContext context) {
+    final theme = Theme.of(context);
+    final days = _workoutPlan!.days;
+
+    // Diviser les jours en deux rangées comme dans la PWA
+    final midPoint = (days.length / 2).ceil();
+    final firstRow = days.take(midPoint).toList();
+    final secondRow = days.skip(midPoint).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Jour d\'entraînement',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingMedium),
+        Container(
+          padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.vermilion.withValues(alpha:0.08),
+                AppColors.vermilion.withValues(alpha:0.04),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+            border: Border.all(
+              color: AppColors.vermilion.withValues(alpha:0.15),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Première rangée
+              _buildDayRow(context, firstRow, 0),
+              if (secondRow.isNotEmpty) ...[
+                const SizedBox(height: AppDimensions.spacingMedium),
+                // Deuxième rangée
+                _buildDayRow(context, secondRow, midPoint),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDayRow(BuildContext context, List<WorkoutDay> rowDays, int startIndex) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: rowDays.asMap().entries.map((entry) {
+        final index = startIndex + entry.key;
+        final day = entry.value;
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppDimensions.spacingSmall / 2),
+          child: _buildDayButton(context, day, index),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildDayButton(BuildContext context, WorkoutDay day, int index) {
+    final theme = Theme.of(context);
+    final isSelected = index == _currentDayIndex;
+    final isCompleted = index < _currentDayIndex; // Jours déjà terminés
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentDayIndex = index;
+        });
+        WorkoutService.instance.setCurrentDay(index);
+      },
+      child: Container(
+        width: 60,
+        height: 56,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.vermilion.withValues(alpha:0.15)
+              : isCompleted
+                  ? Colors.green.withValues(alpha:0.1)
+                  : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.vermilion
+                : isCompleted
+                    ? Colors.green
+                    : theme.colorScheme.outline.withValues(alpha:0.3),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.vermilion.withValues(alpha:0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isCompleted
+                  ? Icons.check_circle
+                  : Icons.fitness_center,
+              size: 16,
+              color: isSelected
+                  ? AppColors.vermilion
+                  : isCompleted
+                      ? Colors.green
+                      : theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'J${index + 1}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                color: isSelected
+                    ? AppColors.vermilion
+                    : isCompleted
+                        ? Colors.green
+                        : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModeToggle(
+    BuildContext context,
+    String label,
+    String icon,
+    bool isActive,
+    VoidCallback onTap,
+  ) {
+    final theme = Theme.of(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: AppDimensions.paddingSmall,
+          horizontal: AppDimensions.paddingSmall,
+        ),
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppColors.vermilion.withValues(alpha:0.15)
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusSmall),
+          border: Border.all(
+            color: isActive
+                ? AppColors.vermilion
+                : theme.colorScheme.outline.withValues(alpha:0.3),
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                color: isActive
+                    ? AppColors.vermilion
+                    : theme.colorScheme.onSurfaceVariant,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildViewToggle(
     BuildContext context,
     String value,
@@ -306,13 +574,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         ),
         decoration: BoxDecoration(
           color: isActive
-              ? AppColors.vermilion.withOpacity(0.1)
+              ? AppColors.vermilion.withValues(alpha:0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppDimensions.borderRadiusSmall),
           border: Border.all(
             color: isActive
                 ? AppColors.vermilion
-                : theme.colorScheme.outline.withOpacity(0.3),
+                : theme.colorScheme.outline.withValues(alpha:0.3),
           ),
         ),
         child: Column(
@@ -325,7 +593,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 color: isActive
                     ? AppColors.vermilion
                     : disabled
-                    ? theme.colorScheme.onSurface.withOpacity(0.38)
+                    ? theme.colorScheme.onSurface.withValues(alpha:0.38)
                     : theme.colorScheme.onSurface,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
@@ -353,9 +621,59 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
         const SizedBox(height: AppDimensions.spacingLarge),
 
+        // Options de mode
+        Row(
+          children: [
+            Expanded(
+              child: _buildModeToggle(
+                context,
+                'Mode Normal',
+                '🏋️',
+                !_autoMode && !_fatBurnerMode,
+                () => setState(() {
+                  _autoMode = false;
+                  _fatBurnerMode = false;
+                }),
+              ),
+            ),
+            const SizedBox(width: AppDimensions.spacingSmall),
+            Expanded(
+              child: _buildModeToggle(
+                context,
+                'Mode Auto',
+                '⚡',
+                _autoMode,
+                () => setState(() {
+                  _autoMode = !_autoMode;
+                  _fatBurnerMode = false;
+                }),
+              ),
+            ),
+            const SizedBox(width: AppDimensions.spacingSmall),
+            Expanded(
+              child: _buildModeToggle(
+                context,
+                'Fat Burner',
+                '🔥',
+                _fatBurnerMode,
+                () => setState(() {
+                  _fatBurnerMode = !_fatBurnerMode;
+                  _autoMode = false;
+                }),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: AppDimensions.spacingLarge),
+
         // Bouton de démarrage
         CustomGradientButton(
-          text: '💪 Commencer l\'entraînement',
+          text: _autoMode
+              ? '⚡ Commencer en mode Auto'
+              : _fatBurnerMode
+                  ? '🔥 Commencer Fat Burner'
+                  : '💪 Commencer l\'entraînement',
           onPressed: _startWorkout,
           isFullWidth: true,
           icon: Icons.fitness_center,
@@ -394,6 +712,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       onBack: _backToMenu,
       onComplete: _handleWorkoutComplete,
       autoMode: _autoMode,
+      fatBurnerMode: _fatBurnerMode,
     );
   }
 
@@ -540,14 +859,16 @@ class StepWorkoutWidget extends StatefulWidget {
   final VoidCallback onBack;
   final Function(WorkoutSession) onComplete;
   final bool autoMode;
+  final bool fatBurnerMode;
 
   const StepWorkoutWidget({
-    Key? key,
+    super.key,
     required this.day,
     required this.onBack,
     required this.onComplete,
     this.autoMode = false,
-  }) : super(key: key);
+    this.fatBurnerMode = false,
+  });
 
   @override
   State<StepWorkoutWidget> createState() => _StepWorkoutWidgetState();
@@ -558,9 +879,16 @@ class _StepWorkoutWidgetState extends State<StepWorkoutWidget> {
   int _currentSetIndex = 0;
   bool _isPaused = false;
   int _totalCalories = 0;
-  bool _workoutCompleted = false;
+  bool _showRhythmCounter = false;
+  DateTime? _workoutStartTime;
 
   Exercise get currentExercise => widget.day.exercises[_currentExerciseIndex];
+
+  @override
+  void initState() {
+    super.initState();
+    _workoutStartTime = DateTime.now();
+  }
 
   void _nextSet() {
     if (_currentSetIndex < currentExercise.totalSets - 1) {
@@ -586,10 +914,15 @@ class _StepWorkoutWidgetState extends State<StepWorkoutWidget> {
   }
 
   void _completeWorkout() {
+    final endTime = DateTime.now();
+    final actualDuration = _workoutStartTime != null 
+        ? endTime.difference(_workoutStartTime!).inSeconds
+        : widget.day.exercises.length * 180;
+    
     final session = WorkoutSession(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: widget.day.title,
-      date: DateTime.now(),
+      date: _workoutStartTime ?? DateTime.now(),
       calories: _totalCalories,
       weightLifted: _calculateTotalWeight(),
       exerciseCount: widget.day.exercises.length,
@@ -602,8 +935,8 @@ class _StepWorkoutWidgetState extends State<StepWorkoutWidget> {
             ),
           )
           .toList(),
-      duration: widget.day.exercises.length * 180, // Estimation
-      fatBurnerMode: widget.autoMode,
+      duration: actualDuration,
+      fatBurnerMode: widget.fatBurnerMode || widget.autoMode,
     );
 
     widget.onComplete(session);
@@ -642,6 +975,53 @@ class _StepWorkoutWidgetState extends State<StepWorkoutWidget> {
 
         // Contenu de l'exercice
         if (!_isPaused) ...[
+          // Bouton pour afficher/masquer le compteur de rythme
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppDimensions.spacingMedium),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _showRhythmCounter = !_showRhythmCounter;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _showRhythmCounter 
+                          ? AppColors.vermilion 
+                          : theme.colorScheme.surfaceContainerHighest,
+                      foregroundColor: _showRhythmCounter 
+                          ? Colors.white 
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    icon: Icon(_showRhythmCounter ? Icons.music_off : Icons.music_note),
+                    label: Text(_showRhythmCounter ? 'Masquer compteur' : 'Compteur de rythme'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Compteur de rythme si activé
+          if (_showRhythmCounter) ...[
+            RhythmCounter(
+              targetReps: currentExercise.nbRep,
+              tempo: widget.fatBurnerMode ? 80 : 60, // BPM plus rapide en fat burner
+              onComplete: () {
+                final calories = currentExercise.caloriesPerSet != null
+                    ? (currentExercise.caloriesPerSet![0] +
+                              currentExercise.caloriesPerSet![1]) ~/
+                          2
+                    : 10;
+                _addCalories(calories);
+                _nextSet();
+              },
+            ),
+            const SizedBox(height: AppDimensions.spacingMedium),
+          ],
+          
+          // Carte d'exercice classique
           ExerciseCard(
             exercise: currentExercise,
             isActive: true,
@@ -660,7 +1040,12 @@ class _StepWorkoutWidgetState extends State<StepWorkoutWidget> {
         ] else ...[
           // Écran de pause
           TimerWidget(
-            duration: widget.autoMode ? 20 : 15,
+            duration: widget.fatBurnerMode 
+                ? 10 
+                : widget.autoMode 
+                  ? 20 
+                  : 15,
+            autoStart: widget.autoMode || widget.fatBurnerMode,
             onComplete: () {
               setState(() {
                 _isPaused = false;

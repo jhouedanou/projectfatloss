@@ -25,6 +25,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _currentView = 'workout';
+  String _selectedMode = 'normal';
+  int _currentDayIndex = 0;
   
   final List<ViewOption> _viewOptions = [
     ViewOption(
@@ -78,6 +80,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   _buildWelcomeCard(context),
                   const SizedBox(height: AppDimensions.spacingLarge),
+                  _buildDaySelector(context),
+                  const SizedBox(height: AppDimensions.spacingLarge),
+                  _buildModeSelector(context),
+                  const SizedBox(height: AppDimensions.spacingLarge),
                   _buildQuickStats(context),
                   const SizedBox(height: AppDimensions.spacingLarge),
                   _buildTodayWorkout(context),
@@ -96,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppColors.vermilion,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.play_arrow),
-        label: const Text('Commencer'),
+        label: Text(_getModeButtonText()),
       ),
     );
   }
@@ -305,13 +311,270 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildDaySelector(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return CustomCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                color: theme.colorScheme.primary,
+                size: AppDimensions.iconMedium,
+              ),
+              const SizedBox(width: AppDimensions.spacingMedium),
+              Text(
+                'Jour d\'entraînement',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppDimensions.spacingMedium),
+          Container(
+            padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.vermilion.withValues(alpha: 0.08),
+                  AppColors.vermilion.withValues(alpha: 0.04),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(AppDimensions.borderRadiusLarge),
+              border: Border.all(
+                color: AppColors.vermilion.withValues(alpha: 0.15),
+              ),
+            ),
+            child: Wrap(
+              spacing: AppDimensions.spacingSmall,
+              runSpacing: AppDimensions.spacingSmall,
+              children: List.generate(14, (index) {
+                return _buildDayButton(context, index);
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDayButton(BuildContext context, int index) {
+    final theme = Theme.of(context);
+    final isSelected = index == _currentDayIndex;
+    final isCompleted = index < _currentDayIndex;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentDayIndex = index;
+        });
+      },
+      child: Container(
+        width: 50,
+        height: 48,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.vermilion.withValues(alpha: 0.15)
+              : isCompleted
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusMedium),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.vermilion
+                : isCompleted
+                    ? Colors.green
+                    : theme.colorScheme.outline.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.vermilion.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isCompleted
+                  ? Icons.check_circle
+                  : Icons.fitness_center,
+              size: 14,
+              color: isSelected
+                  ? AppColors.vermilion
+                  : isCompleted
+                      ? Colors.green
+                      : theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'J${index + 1}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: isSelected
+                    ? AppColors.vermilion
+                    : isCompleted
+                        ? Colors.green
+                        : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModeSelector(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return CustomCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.speed,
+                color: theme.colorScheme.primary,
+                size: AppDimensions.iconMedium,
+              ),
+              const SizedBox(width: AppDimensions.spacingMedium),
+              Text(
+                'Mode d\'entraînement',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppDimensions.spacingMedium),
+          Row(
+            children: [
+              Expanded(
+                child: _buildModeToggle(
+                  context,
+                  'normal',
+                  'Mode Normal',
+                  '🏋️',
+                  'Timer 15s',
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spacingSmall),
+              Expanded(
+                child: _buildModeToggle(
+                  context,
+                  'auto',
+                  'Mode Auto',
+                  '⚡',
+                  'Timer 20s',
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spacingSmall),
+              Expanded(
+                child: _buildModeToggle(
+                  context,
+                  'fatburner',
+                  'Fat Burner',
+                  '🔥',
+                  'Timer 10s',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModeToggle(
+    BuildContext context,
+    String value,
+    String label,
+    String icon,
+    String description,
+  ) {
+    final theme = Theme.of(context);
+    final isActive = _selectedMode == value;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedMode = value;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(AppDimensions.paddingSmall),
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppColors.vermilion.withValues(alpha: 0.15)
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadiusSmall),
+          border: Border.all(
+            color: isActive
+                ? AppColors.vermilion
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                color: isActive
+                    ? AppColors.vermilion
+                    : theme.colorScheme.onSurfaceVariant,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              description,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 8,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getModeButtonText() {
+    switch (_selectedMode) {
+      case 'auto':
+        return '⚡ Commencer Auto';
+      case 'fatburner':
+        return '🔥 Fat Burner';
+      default:
+        return 'Commencer';
+    }
+  }
+
   void _startWorkout(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => WorkoutScreen(
-          dayId: 'day1',
+          dayId: 'day${_currentDayIndex + 1}',
           isDarkMode: widget.isDarkMode,
           onThemeToggle: widget.onThemeToggle,
+          initialMode: _selectedMode,
         ),
       ),
     );
