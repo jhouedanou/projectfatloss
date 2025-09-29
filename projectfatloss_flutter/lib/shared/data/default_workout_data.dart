@@ -102,6 +102,57 @@ class DefaultWorkoutData {
           totalSets: 3,
           nbRep: 0,
         ),
+        // EXERCICES ADDITIONNELS POUR ATTEINDRE 500 KCAL
+        Exercise(
+          name: 'Développé couché barre',
+          sets: '4 × 12',
+          equip: 'Barre 30 kg',
+          desc:
+              "Allongé sur banc, descendez la barre jusqu'à la poitrine puis poussez. Exercice roi pour les pectoraux.",
+          caloriesPerSet: [12, 15],
+          totalSets: 4,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Rowing buste penché barre',
+          sets: '4 × 12',
+          equip: 'Barre 30 kg',
+          desc:
+              "Buste penché à 45°, tirez la barre vers le bas des abdominaux. Développe l'épaisseur du dos.",
+          caloriesPerSet: [12, 15],
+          totalSets: 4,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Développé militaire barre',
+          sets: '4 × 10',
+          equip: 'Barre 30 kg',
+          desc:
+              "Debout ou assis, poussez la barre au-dessus de la tête. Exercice complet pour les épaules.",
+          caloriesPerSet: [10, 13],
+          totalSets: 4,
+          nbRep: 10,
+        ),
+        Exercise(
+          name: 'Curl barre',
+          sets: '4 × 12',
+          equip: 'Barre 30 kg',
+          desc:
+              "Debout, coudes fixes, curl la barre vers les épaules. Maximise la congestion des biceps.",
+          caloriesPerSet: [8, 10],
+          totalSets: 4,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Crunchs',
+          sets: '4 × 25',
+          equip: 'Poids du corps',
+          desc:
+              "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
+          caloriesPerSet: [5, 7],
+          totalSets: 4,
+          nbRep: 25,
+        ),
       ],
     );
   }
@@ -192,6 +243,57 @@ class DefaultWorkoutData {
           totalSets: 3,
           nbRep: 20,
         ),
+        // EXERCICES ADDITIONNELS POUR ATTEINDRE 500 KCAL
+        Exercise(
+          name: 'Tractions lestées (ou rowing inversé)',
+          sets: '4 × 10',
+          equip: 'Barre fixe ou barre basse',
+          desc:
+              "Suspendez-vous à une barre, tirez jusqu'à amener le menton au-dessus. Si trop difficile, utilisez rowing inversé sous une barre basse.",
+          caloriesPerSet: [12, 15],
+          totalSets: 4,
+          nbRep: 10,
+        ),
+        Exercise(
+          name: 'Soulevé de terre jambes tendues haltères',
+          sets: '4 × 12',
+          equip: 'Haltères 15 kg',
+          desc:
+              "Jambes quasi-tendues, penchez-vous en avant avec haltères, remontez en contractant les ischio-jambiers et fessiers.",
+          caloriesPerSet: [10, 13],
+          totalSets: 4,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Curl incliné haltères',
+          sets: '3 × 12',
+          equip: 'Haltères 15 kg',
+          desc:
+              "Allongé sur banc incliné, laissez pendre les bras puis curl. Étire et travaille le biceps dans sa pleine amplitude.",
+          caloriesPerSet: [8, 10],
+          totalSets: 3,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Shrugs barre',
+          sets: '4 × 15',
+          equip: 'Barre 30 kg',
+          desc:
+              "Debout, barre en main, haussez les épaules vers les oreilles. Développe les trapèzes supérieurs.",
+          caloriesPerSet: [8, 10],
+          totalSets: 4,
+          nbRep: 15,
+        ),
+        Exercise(
+          name: 'Crunchs',
+          sets: '4 × 25',
+          equip: 'Poids du corps',
+          desc:
+              "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
+          caloriesPerSet: [5, 7],
+          totalSets: 4,
+          nbRep: 25,
+        ),
       ],
     );
   }
@@ -279,6 +381,47 @@ class DefaultWorkoutData {
           caloriesPerSet: [6, 8],
           totalSets: 3,
           nbRep: 15,
+        ),
+        // EXERCICES ADDITIONNELS POUR ATTEINDRE 500 KCAL
+        Exercise(
+          name: 'Squat avant barre',
+          sets: '4 × 12',
+          equip: 'Barre 30 kg',
+          desc:
+              "Barre devant sur les épaules (position front squat), descendez en squat. Met l'accent sur les quadriceps.",
+          caloriesPerSet: [14, 18],
+          totalSets: 4,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Fentes marchées haltères',
+          sets: '3 × 12/jambe',
+          equip: 'Haltères 15 kg',
+          desc:
+              "Fentes en avançant sur plusieurs mètres. Excellent pour l'équilibre et le développement des jambes.",
+          caloriesPerSet: [12, 15],
+          totalSets: 6,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Goblet squat',
+          sets: '3 × 15',
+          equip: 'Haltère 15 kg',
+          desc:
+              "Tenez un haltère contre votre poitrine, descendez en squat profond. Parfait pour la mobilité et les quadriceps.",
+          caloriesPerSet: [10, 12],
+          totalSets: 3,
+          nbRep: 15,
+        ),
+        Exercise(
+          name: 'Crunchs',
+          sets: '4 × 25',
+          equip: 'Poids du corps',
+          desc:
+              "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
+          caloriesPerSet: [5, 7],
+          totalSets: 4,
+          nbRep: 25,
         ),
       ],
     );
@@ -370,6 +513,57 @@ class DefaultWorkoutData {
           totalSets: 3,
           nbRep: 0,
         ),
+        // EXERCICES ADDITIONNELS POUR ATTEINDRE 500 KCAL
+        Exercise(
+          name: 'Développé décliné haltères',
+          sets: '4 × 12',
+          equip: 'Haltères 15 kg',
+          desc:
+              "Sur banc décliné, poussez les haltères. Cible le bas des pectoraux pour un développement complet.",
+          caloriesPerSet: [10, 13],
+          totalSets: 4,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Oiseau haltères',
+          sets: '4 × 15',
+          equip: 'Haltères 10 kg',
+          desc:
+              "Penché à 90°, écartez les haltères sur les côtés. Renforce les deltoïdes postérieurs et le haut du dos.",
+          caloriesPerSet: [8, 10],
+          totalSets: 4,
+          nbRep: 15,
+        ),
+        Exercise(
+          name: 'Extensions triceps poulie haute (ou barre)',
+          sets: '3 × 15',
+          equip: 'Barre 30 kg',
+          desc:
+              "Coudes fixes, descendez la barre en extension complète. Isole et sculpte les triceps.",
+          caloriesPerSet: [8, 10],
+          totalSets: 3,
+          nbRep: 15,
+        ),
+        Exercise(
+          name: 'Développé serré barre',
+          sets: '3 × 12',
+          equip: 'Barre 30 kg',
+          desc:
+              "Comme le développé couché mais mains rapprochées. Excellent pour triceps et centre des pectoraux.",
+          caloriesPerSet: [10, 12],
+          totalSets: 3,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Crunchs',
+          sets: '4 × 25',
+          equip: 'Poids du corps',
+          desc:
+              "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
+          caloriesPerSet: [5, 7],
+          totalSets: 4,
+          nbRep: 25,
+        ),
       ],
     );
   }
@@ -460,6 +654,47 @@ class DefaultWorkoutData {
           totalSets: 3,
           nbRep: 20,
         ),
+        // EXERCICES ADDITIONNELS POUR ATTEINDRE 500 KCAL
+        Exercise(
+          name: 'Soulevé de terre sumo',
+          sets: '4 × 10',
+          equip: 'Barre 30 kg',
+          desc:
+              "Pieds très écartés, barre entre les jambes, soulevez en gardant le dos droit. Variante qui cible davantage les adducteurs.",
+          caloriesPerSet: [14, 18],
+          totalSets: 4,
+          nbRep: 10,
+        ),
+        Exercise(
+          name: 'Rowing Yates barre',
+          sets: '4 × 12',
+          equip: 'Barre 30 kg',
+          desc:
+              "Buste plus redressé que le rowing classique, tirez vers le bas des pectoraux. Cible l'épaisseur du dos.",
+          caloriesPerSet: [10, 13],
+          totalSets: 4,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Curl prise marteau alterné',
+          sets: '4 × 12',
+          equip: 'Haltères 15 kg',
+          desc:
+              "Alternez les bras en prise marteau. Développe biceps et brachial antérieur.",
+          caloriesPerSet: [8, 10],
+          totalSets: 4,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Crunchs',
+          sets: '4 × 25',
+          equip: 'Poids du corps',
+          desc:
+              "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
+          caloriesPerSet: [5, 7],
+          totalSets: 4,
+          nbRep: 25,
+        ),
       ],
     );
   }
@@ -548,6 +783,47 @@ class DefaultWorkoutData {
           totalSets: 6,
           nbRep: 10,
         ),
+        // EXERCICES ADDITIONNELS POUR ATTEINDRE 500 KCAL
+        Exercise(
+          name: 'Squat pistol (ou squat dégressif)',
+          sets: '3 × 10/jambe',
+          equip: 'Haltère 10 kg (optionnel)',
+          desc:
+              "Squat sur une jambe. Si trop difficile, utilisez un support. Développe force et équilibre.",
+          caloriesPerSet: [12, 15],
+          totalSets: 6,
+          nbRep: 10,
+        ),
+        Exercise(
+          name: 'Soulevé de terre jambes raides barre',
+          sets: '4 × 12',
+          equip: 'Barre 30 kg',
+          desc:
+              "Jambes presque tendues, barre descend le long des tibias. Cible ischio-jambiers et lombaires.",
+          caloriesPerSet: [12, 15],
+          totalSets: 4,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Hack squat (ou squat Zercher)',
+          sets: '3 × 12',
+          equip: 'Barre 30 kg',
+          desc:
+              "Barre dans le creux des coudes, squat profond. Variante intense pour les quadriceps.",
+          caloriesPerSet: [14, 18],
+          totalSets: 3,
+          nbRep: 12,
+        ),
+        Exercise(
+          name: 'Crunchs',
+          sets: '4 × 25',
+          equip: 'Poids du corps',
+          desc:
+              "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
+          caloriesPerSet: [5, 7],
+          totalSets: 4,
+          nbRep: 25,
+        ),
       ],
     );
   }
@@ -602,6 +878,16 @@ class DefaultWorkoutData {
           caloriesPerSet: [2, 4],
           totalSets: 1,
           nbRep: 0,
+        ),
+        Exercise(
+          name: 'Crunchs',
+          sets: '4 × 25',
+          equip: 'Poids du corps',
+          desc:
+              "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire même en jour de récupération.",
+          caloriesPerSet: [5, 7],
+          totalSets: 4,
+          nbRep: 25,
         ),
       ],
     );

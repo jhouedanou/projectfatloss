@@ -71,6 +71,15 @@ dependencies:
   # Google Fit integration pour export des données
   health: ^13.1.1
 
+  # Synthèse vocale (Text-to-Speech)
+  flutter_tts: ^4.2.0
+
+  # HTTP client pour Strava
+  http: ^1.2.2
+
+  # Internationalisation
+  intl: ^0.20.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
