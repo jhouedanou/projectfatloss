@@ -19,6 +19,7 @@ import '../components/WorkoutCustomizer.css';
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
 import DayPills from '../components/DayPills';
 import Header from '../components/Header/Header';
+import HistoryViewer from '../components/HistoryViewer';
 import { getServiceWorkerPath, getAssetPath } from '../utils/paths';
 
 const NOTIFICATION_DURATION = 3000; 
@@ -220,6 +221,15 @@ export default function App() {
                 <span className="view-icon">⚖️</span>
                 <span className="view-text">{t('nav.weight')}</span>
               </button>
+              <button 
+                className={`view-toggle ${viewMode === 'data' ? 'active' : ''} ${stepMode ? 'disabled' : ''}`}
+                onClick={() => !stepMode && setViewMode('data')}
+                title={stepMode ? 'Données désactivées' : 'Mes données'}
+                disabled={stepMode}
+              >
+                <span className="view-icon">🔐</span>
+                <span className="view-text">Données</span>
+              </button>
             </div>
           </header>
           
@@ -306,11 +316,15 @@ export default function App() {
               <WorkoutStats />
               <WorkoutCalendar />
             </div>
-          ) : (
+          ) : viewMode === 'weight' ? (
             <div className="weight-content">
               <WeightTracker />
             </div>
-          )}
+          ) : viewMode === 'data' ? (
+            <div className="data-content">
+              <HistoryViewer onClose={() => setViewMode('workout')} />
+            </div>
+          ) : null}
         </div>
         
         {/* Bouton flottant personnaliser - caché en mode exercices */}
