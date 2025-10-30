@@ -549,7 +549,7 @@ export const days = [
         name: 'Squats bulgares',
         sets: '3 × 12/jambe',
         equip: 'Haltères 10 kg',
-        desc: "Pied arrière sur un banc, descendez en fente. Alternative au good morning, cible les quadriceps et les fessiers.",
+        desc: "Pied arrière sur un banc, descendez en fente. Excellent exercice unilatéral pour les quadriceps et les fessiers.",
         caloriesPerSet: [12, 15],
         totalSets: 6,
         nbRep: 12,
