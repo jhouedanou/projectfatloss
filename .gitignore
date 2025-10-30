@@ -44,3 +44,4 @@ coverage/
 
 # BrowserSync
 .browserSync/
+.vite_cache/
