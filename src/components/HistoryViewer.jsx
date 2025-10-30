@@ -30,8 +30,7 @@ import {
 } from '../services/DataSyncService';
 import { getWorkoutHistory, getWorkoutStats } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
-
-const PASSWORD = 'karniella';
+import { verifyPassword } from '../config/auth';
 
 export default function HistoryViewer({ onClose }) {
   const [authenticated, setAuthenticated] = useState(false);
@@ -57,7 +56,7 @@ export default function HistoryViewer({ onClose }) {
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    if (password === PASSWORD) {
+    if (verifyPassword(password)) {
       setAuthenticated(true);
       setError('');
     } else {

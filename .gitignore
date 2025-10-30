@@ -11,7 +11,12 @@ vite.config.ts.timestamp-*
 
 # Local env files
 .env
-.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Keep .env.example for documentation
+!.env.example
 
 # System files
 .DS_Store

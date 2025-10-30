@@ -4,10 +4,28 @@
 
 Le système de synchronisation permet de consulter l'historique complet des entraînements et des pesées depuis tous vos appareils en accédant au site web.
 
+## Configuration
+
+### Mot de passe d'accès
+
+Le mot de passe pour accéder à l'historique protégé est configuré via une variable d'environnement :
+
+1. Copiez le fichier `.env.example` vers `.env` :
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Modifiez le mot de passe dans `.env` :
+   ```
+   VITE_HISTORY_PASSWORD=votre_mot_de_passe
+   ```
+
+**Note de sécurité :** Cette implémentation est simplifiée pour un usage local. Pour une vraie production, utilisez un backend avec authentification sécurisée (JWT, OAuth, etc.).
+
 ## Accès à l'historique
 
 1. Sur la page principale, cliquez sur l'icône "🔐 Données" dans la barre de navigation
-2. Entrez le mot de passe : `karniella`
+2. Entrez le mot de passe configuré (par défaut : `karniella`)
 3. Vous accédez à l'historique complet avec :
    - Statistiques globales (séances, calories, durée, poids soulevé)
    - Tableau des séances d'entraînement
