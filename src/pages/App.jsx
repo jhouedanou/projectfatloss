@@ -19,8 +19,10 @@ import '../components/WorkoutCustomizer.css';
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
 import DayPills from '../components/DayPills';
 import Header from '../components/Header/Header';
-import HistoryViewer from '../components/HistoryViewer';
+import ContactInfoDialog from '../components/ContactInfoDialog';
 import { getServiceWorkerPath, getAssetPath } from '../utils/paths';
+import { hasContactInfo, sendWorkoutReport, getContactInfo } from '../services/ContactService';
+import { getWeightHistory } from '../services/WeightStorage';
 
 const NOTIFICATION_DURATION = 3000; 
 
@@ -46,10 +48,18 @@ export default function App() {
   
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
   
   const [appTheme, setAppTheme] = useState(() => createAppTheme(
     localStorage.getItem('theme') !== 'light'
   ));
+
+  // Vérifier si l'utilisateur a fourni ses informations de contact
+  useEffect(() => {
+    if (!hasContactInfo()) {
+      setShowContactDialog(true);
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -147,6 +157,27 @@ export default function App() {
   const handleWorkoutComplete = (workoutData) => {
     console.log('Entraînement terminé:', workoutData);
     
+    // Récupérer le poids actuel si disponible
+    const weightHistory = getWeightHistory();
+    const currentWeight = weightHistory.length > 0 
+      ? weightHistory[weightHistory.length - 1].weight 
+      : null;
+    
+    // Ajouter le poids actuel aux données
+    const completeWorkoutData = {
+      ...workoutData,
+      currentWeight
+    };
+    
+    // Envoyer le rapport d'entraînement
+    if (hasContactInfo()) {
+      sendWorkoutReport(completeWorkoutData).then(success => {
+        if (success) {
+          console.log('Rapport d\'entraînement envoyé');
+        }
+      });
+    }
+    
     if ("Notification" in window && Notification.permission === "granted" && workoutPlan && workoutPlan.length > 0) {
       new Notification(t('notifications.workoutComplete'), {
         body: t('notifications.nextDay', { day: (current + 1) % workoutPlan.length + 1 }),
@@ -220,15 +251,6 @@ export default function App() {
               >
                 <span className="view-icon">⚖️</span>
                 <span className="view-text">{t('nav.weight')}</span>
-              </button>
-              <button 
-                className={`view-toggle ${viewMode === 'data' ? 'active' : ''} ${stepMode ? 'disabled' : ''}`}
-                onClick={() => !stepMode && setViewMode('data')}
-                title={stepMode ? 'Données désactivées' : 'Mes données'}
-                disabled={stepMode}
-              >
-                <span className="view-icon">🔐</span>
-                <span className="view-text">Données</span>
               </button>
             </div>
           </header>
@@ -316,15 +338,11 @@ export default function App() {
               <WorkoutStats />
               <WorkoutCalendar />
             </div>
-          ) : viewMode === 'weight' ? (
+          ) : (
             <div className="weight-content">
               <WeightTracker />
             </div>
-          ) : viewMode === 'data' ? (
-            <div className="data-content">
-              <HistoryViewer onClose={() => setViewMode('workout')} />
-            </div>
-          ) : null}
+          )}
         </div>
         
         {/* Bouton flottant personnaliser - caché en mode exercices */}
@@ -370,6 +388,16 @@ export default function App() {
         <NotificationSettingsDialog 
           open={showNotificationSettings}
           onClose={() => setShowNotificationSettings(false)}
+        />
+        
+        {/* Boîte de dialogue pour collecter les informations de contact */}
+        <ContactInfoDialog 
+          open={showContactDialog}
+          onClose={(success) => {
+            if (success) {
+              setShowContactDialog(false);
+            }
+          }}
         />
       </div>
     </ThemeProvider>
