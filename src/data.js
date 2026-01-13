@@ -1,4 +1,4 @@
-export const days = [
+const fullPlan = [
   {
     title: 'JOUR 1: HAUT DU CORPS (Pectoraux, Épaules, Triceps)',
     exercises: [
@@ -618,3 +618,59 @@ export const days = [
     ],
   },
 ];
+
+const CALORIE_TARGET = 200;
+const ALLOWED_EQUIPMENT = ['haltère', 'haltères', 'barre'];
+const EXCLUDED_EQUIPMENT = ['gilet', 'poids du corps', 'fixe', 'optionnel', 'chevilles'];
+
+const calculateExerciseCalories = (exercise) => {
+  if (!exercise?.caloriesPerSet || !exercise?.totalSets) return 0;
+  const average = (exercise.caloriesPerSet[0] + exercise.caloriesPerSet[1]) / 2;
+  return average * exercise.totalSets;
+};
+
+const usesAllowedEquipment = (exercise) => {
+  const equip = (exercise.equip || '').toLowerCase();
+  const hasAllowed = ALLOWED_EQUIPMENT.some(term => equip.includes(term));
+  const hasExcluded = EXCLUDED_EQUIPMENT.some(term => equip.includes(term));
+  return hasAllowed && !hasExcluded;
+};
+
+const getAllowedExercises = (plan) => 
+  plan.flatMap(day => 
+    day.exercises
+      .filter(usesAllowedEquipment)
+      .map(exercise => ({
+        exercise,
+        calories: calculateExerciseCalories(exercise)
+      }))
+      .filter(item => item.calories > 0)
+  );
+
+let allowedExercisesCache = null;
+const getCachedAllowedExercises = () => {
+  if (!allowedExercisesCache) {
+    allowedExercisesCache = getAllowedExercises(fullPlan);
+  }
+  return allowedExercisesCache;
+};
+
+const buildCalorieFocusedPlan = () => {
+  const allowedList = getCachedAllowedExercises();
+  const selectedExercises = [];
+  let totalCalories = 0;
+
+  for (const { exercise, calories } of allowedList) {
+    if (totalCalories >= CALORIE_TARGET) break;
+    
+    selectedExercises.push(exercise);
+    totalCalories += calories;
+  }
+
+  return [{
+    title: 'Séance 200 kcal - Barre & haltères',
+    exercises: selectedExercises
+  }];
+};
+
+export const days = buildCalorieFocusedPlan();
