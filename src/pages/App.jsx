@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
+import { 
+  BottomNavigation, 
+  BottomNavigationAction, 
+  Paper, 
+  Fade, 
+  Slide,
+  Box,
+  alpha
+} from '@mui/material';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import { createAppTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import { getWorkoutPlan } from '../services/WorkoutCustomization'; 
@@ -197,13 +211,17 @@ export default function App() {
 
   const isPlanAvailable = workoutPlan && workoutPlan.length > 0 && current < workoutPlan.length;
 
+  const viewModeToIndex = { workout: 0, history: 1, weight: 2 };
+  const indexToViewMode = ['workout', 'history', 'weight'];
+
   return (
     <ThemeProvider theme={appTheme}>
       <div className="app" style={{ 
         width: '100%', 
         overflowX: 'hidden', 
         position: 'relative',
-        minHeight: '100vh'
+        minHeight: '100vh',
+        paddingBottom: stepMode ? 0 : '72px',
       }}>
         <Header onNotificationSettings={() => setShowNotificationSettings(true)} />
         <div style={{ 
@@ -211,46 +229,14 @@ export default function App() {
           overflowX: 'hidden',
           position: 'relative'
         }}>
-          <header className="app-header">
-            <button className="theme-toggle" onClick={toggleTheme} title={darkTheme ? t('theme.light') : t('theme.dark')}>
-              {darkTheme ? '☀️' : '🌙'}
-            </button>
-            <div className="header-controls">
-              <button 
-                className={`view-toggle ${viewMode === 'workout' ? 'active' : ''}`}
-                onClick={() => setViewMode('workout')}
-                title={t('nav.workout')}
-              >
-                <span className="view-icon">🏋️</span>
-                <span className="view-text">{t('nav.workout')}</span>
-              </button>
-              <button 
-                className={`view-toggle ${viewMode === 'history' ? 'active' : ''} ${stepMode ? 'disabled' : ''}`}
-                onClick={() => !stepMode && setViewMode('history')}
-                title={stepMode ? t('nav.historyDisabled') : t('nav.history')}
-                disabled={stepMode}
-              >
-                <span className="view-icon">📊</span>
-                <span className="view-text">{t('nav.history')}</span>
-              </button>
-              <button 
-                className={`view-toggle ${viewMode === 'weight' ? 'active' : ''} ${stepMode ? 'disabled' : ''}`}
-                onClick={() => !stepMode && setViewMode('weight')}
-                title={stepMode ? t('nav.weightDisabled') : t('nav.weight')}
-                disabled={stepMode}
-              >
-                <span className="view-icon">⚖️</span>
-                <span className="view-text">{t('nav.weight')}</span>
-              </button>
-            </div>
-          </header>
           
           {showLanguageSelector && <LanguageSelector />}
           
           {showCustomizer && <WorkoutCustomizer onClose={handleCloseCustomizer} />}
           
-          {viewMode === 'workout' ? (
-            <>
+          {/* Contenu principal avec transitions */}
+          <Fade in={viewMode === 'workout'} timeout={300} unmountOnExit mountOnEnter>
+            <div>
               {isPlanAvailable && (
                 <>
                   {!stepMode ? (
@@ -258,41 +244,35 @@ export default function App() {
                       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
                         <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
                       </div>
-                      <h2 style={{ fontSize: '1.1rem', marginBottom: 16, color: 'var(--text-primary)' }}>{workoutPlan[current].title}</h2>
+                      <h2 className="day-title">{workoutPlan[current].title}</h2>
                       
-                      {/* Boutons de démarrage */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: 16 }}>
+                      {/* Bouton de démarrage amélioré */}
+                      <div className="start-workout-container">
                         <button 
-                          className="timer-btn" 
+                          className="start-workout-btn" 
                           onClick={() => setStepMode(true)}
-                          style={{
-                            minHeight: '60px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            background: 'linear-gradient(45deg, #F03D32 30%, #FF6B35 90%)',
-                            border: 'none',
-                            borderRadius: '12px',
-                            color: 'white',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            boxShadow: '0 4px 15px rgba(240, 61, 50, 0.3)',
-                          }}
                         >
-                          💪 {t('workout.start')}
+                          <span className="start-workout-icon">💪</span>
+                          <span className="start-workout-text">{t('workout.start')}</span>
+                          <span className="start-workout-subtitle">{workoutPlan[current].exercises.length} {t('workout.exercises', { defaultValue: 'exercices' })}</span>
                         </button>
                       </div>
                       
+                      {/* Liste d'exercices avec numérotation */}
                       <div className="exercise-list">
                         {workoutPlan[current].exercises.map((exo, index) => (
-                          <div key={index} className="exercise-item">
-                            <h3 className="exercise-name">{exo.name}</h3>
-                            <div className="exercise-details">
-                              <span className="exercise-sets">{exo.sets}</span>
-                              {exo.equip && (
-                                <span className="exercise-equipment">{exo.equip}</span>
-                              )}
+                          <div key={index} className="exercise-item" style={{ animationDelay: `${index * 0.05}s` }}>
+                            <div className="exercise-number">{index + 1}</div>
+                            <div className="exercise-content">
+                              <h3 className="exercise-name">{exo.name}</h3>
+                              <div className="exercise-details">
+                                <span className="exercise-sets">{exo.sets}</span>
+                                {exo.equip && (
+                                  <span className="exercise-equipment">{exo.equip}</span>
+                                )}
+                              </div>
+                              {exo.desc && <p className="exercise-description">{exo.desc}</p>}
                             </div>
-                            {exo.desc && <p className="exercise-description">{exo.desc}</p>}
                           </div>
                         ))}
                       </div>
@@ -302,7 +282,7 @@ export default function App() {
                       dayIndex={current} 
                       onBack={() => {
                         setStepMode(false);
-                        setAutoMode(false); // Réinitialiser le mode auto
+                        setAutoMode(false);
                       }}
                       onComplete={handleWorkoutComplete}
                       autoMode={autoMode}
@@ -322,20 +302,24 @@ export default function App() {
                   </button>
                 </div>
               )}
-            </>
-          ) : viewMode === 'history' ? (
+            </div>
+          </Fade>
+
+          <Fade in={viewMode === 'history'} timeout={300} unmountOnExit mountOnEnter>
             <div className="history-content">
               <WorkoutStats />
               <WorkoutCalendar />
             </div>
-          ) : (
+          </Fade>
+
+          <Fade in={viewMode === 'weight'} timeout={300} unmountOnExit mountOnEnter>
             <div className="weight-content">
               <WeightTracker />
             </div>
-          )}
+          </Fade>
         </div>
         
-        {/* Bouton flottant personnaliser - caché en mode exercices */}
+        {/* Bouton flottant personnaliser - repositionné au-dessus de la bottom nav */}
         {!stepMode && (
           <button 
             className="floating-customize-button"
@@ -343,19 +327,19 @@ export default function App() {
             title={t('settings.customizeProgram')}
             style={{
               position: 'fixed',
-              bottom: '20px',
+              bottom: '88px',
               right: '20px',
-              width: '60px',
-              height: '60px',
+              width: '56px',
+              height: '56px',
               borderRadius: '50%',
               background: 'linear-gradient(135deg, #F03D32 0%, #FF6B35 50%, #F7931E 100%)',
               border: 'none',
               color: 'white',
-              fontSize: '1.5rem',
+              fontSize: '1.4rem',
               cursor: 'pointer',
-              boxShadow: '0 8px 20px rgba(240, 61, 50, 0.3)',
+              boxShadow: '0 6px 16px rgba(240, 61, 50, 0.35)',
               backdropFilter: 'blur(10px)',
-              transition: 'all 0.3s ease',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               zIndex: 1000,
               display: 'flex',
               alignItems: 'center',
@@ -363,15 +347,99 @@ export default function App() {
             }}
             onMouseEnter={(e) => {
               e.target.style.transform = 'translateY(-3px) scale(1.1)';
-              e.target.style.boxShadow = '0 12px 25px rgba(240, 61, 50, 0.4)';
+              e.target.style.boxShadow = '0 10px 24px rgba(240, 61, 50, 0.45)';
             }}
             onMouseLeave={(e) => {
               e.target.style.transform = 'translateY(0) scale(1)';
-              e.target.style.boxShadow = '0 8px 20px rgba(240, 61, 50, 0.3)';
+              e.target.style.boxShadow = '0 6px 16px rgba(240, 61, 50, 0.35)';
             }}
           >
             ⚙️
           </button>
+        )}
+
+        {/* Bottom Navigation Bar - cachée en mode workout actif */}
+        {!stepMode && (
+          <Paper 
+            sx={{ 
+              position: 'fixed', 
+              bottom: 0, 
+              left: 0, 
+              right: 0, 
+              zIndex: 1100,
+              borderTop: (theme) => `1px solid ${alpha(theme.palette.divider, 0.12)}`,
+              backdropFilter: 'blur(20px)',
+              backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.92),
+            }} 
+            elevation={8}
+          >
+            <BottomNavigation
+              value={viewModeToIndex[viewMode]}
+              onChange={(event, newValue) => {
+                setViewMode(indexToViewMode[newValue]);
+              }}
+              sx={{
+                height: '68px',
+                '& .MuiBottomNavigationAction-root': {
+                  minWidth: 'auto',
+                  padding: '6px 0',
+                  transition: 'all 0.2s ease-in-out',
+                  '&.Mui-selected': {
+                    '& .MuiSvgIcon-root': {
+                      transform: 'scale(1.15)',
+                    },
+                  },
+                },
+                '& .MuiBottomNavigationAction-label': {
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.3px',
+                  '&.Mui-selected': {
+                    fontSize: '0.72rem',
+                  },
+                },
+              }}
+            >
+              <BottomNavigationAction 
+                label={t('nav.workout')} 
+                icon={<FitnessCenterIcon />} 
+                sx={{
+                  '&.Mui-selected': {
+                    color: (theme) => theme.palette.primary.main,
+                  },
+                }}
+              />
+              <BottomNavigationAction 
+                label={t('nav.history')} 
+                icon={<BarChartIcon />} 
+                sx={{
+                  '&.Mui-selected': {
+                    color: (theme) => theme.palette.secondary.main,
+                  },
+                }}
+              />
+              <BottomNavigationAction 
+                label={t('nav.weight')} 
+                icon={<MonitorWeightIcon />} 
+                sx={{
+                  '&.Mui-selected': {
+                    color: '#4CAF50',
+                  },
+                }}
+              />
+              <BottomNavigationAction 
+                label={darkTheme ? t('theme.light', { defaultValue: 'Clair' }) : t('theme.dark', { defaultValue: 'Sombre' })} 
+                icon={darkTheme ? <LightModeIcon /> : <DarkModeIcon />} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleTheme();
+                }}
+                sx={{
+                  color: (theme) => theme.palette.text.secondary,
+                }}
+              />
+            </BottomNavigation>
+          </Paper>
         )}
         
         {/* Boîte de dialogue des paramètres de notification */}
