@@ -7,6 +7,14 @@
   --rosewood: #6a1d1cff;
   --seashell: #fdf6f0ff;
 
+  /* Couleurs UI composants */
+  --color-blue-primary: #1976D2;
+  --color-blue-primary-bg: rgba(25, 118, 210, 0.1);
+  --color-blue-light: #64B5F6;
+  --color-blue-light-bg: rgba(66, 165, 245, 0.15);
+  --color-accent-orange: #FF6B35;
+  --color-accent-orange-dark: #F7931E;
+
   /* Variables thème avec la nouvelle palette */
   --primary-light: var(--cinnabar);
   --primary-main: var(--vermilion);
@@ -1197,8 +1205,8 @@ gap:1rem;
 .exercise-sets {
   font-size: 0.85em;
   font-weight: 600;
-  color: #1976D2;
-  background-color: rgba(25, 118, 210, 0.1);
+  color: var(--color-blue-primary);
+  background-color: var(--color-blue-primary-bg);
   padding: 4px 12px;
   border-radius: 20px;
   white-space: nowrap;
@@ -1240,8 +1248,8 @@ gap:1rem;
 }
 
 .dark-theme .exercise-sets {
-  background-color: rgba(66, 165, 245, 0.15);
-  color: #64B5F6;
+  background-color: var(--color-blue-light-bg);
+  color: var(--color-blue-light);
 }
 
 .dark-theme .exercise-equipment {
