@@ -19,7 +19,6 @@ import '../components/WorkoutCustomizer.css';
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
 import DayPills from '../components/DayPills';
 import Header from '../components/Header/Header';
-import ContactInfoDialog from '../components/ContactInfoDialog';
 import { getServiceWorkerPath, getAssetPath } from '../utils/paths';
 import { hasContactInfo, sendWorkoutReport, getContactInfo } from '../services/ContactService';
 import { getWeightHistory } from '../services/WeightStorage';
@@ -48,18 +47,9 @@ export default function App() {
   
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
-  const [showContactDialog, setShowContactDialog] = useState(false);
-  
   const [appTheme, setAppTheme] = useState(() => createAppTheme(
     localStorage.getItem('theme') !== 'light'
   ));
-
-  // Vérifier si l'utilisateur a fourni ses informations de contact
-  useEffect(() => {
-    if (!hasContactInfo()) {
-      setShowContactDialog(true);
-    }
-  }, []);
 
   useEffect(() => {
     try {
@@ -390,15 +380,6 @@ export default function App() {
           onClose={() => setShowNotificationSettings(false)}
         />
         
-        {/* Boîte de dialogue pour collecter les informations de contact */}
-        <ContactInfoDialog 
-          open={showContactDialog}
-          onClose={(success) => {
-            if (success) {
-              setShowContactDialog(false);
-            }
-          }}
-        />
       </div>
     </ThemeProvider>
   );
