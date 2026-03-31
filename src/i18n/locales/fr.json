@@ -146,5 +146,13 @@
     "workoutComplete": "Entraînement terminé !",
     "nextDay": "Prêt pour le Jour {{day}} demain ?",
     "reminder": "N'oubliez pas votre entraînement aujourd'hui !"
+  },
+  "restDay": {
+    "title": "Jour de repos",
+    "description": "Profitez de cette journée pour récupérer. Hydratez-vous bien et reposez vos muscles.",
+    "nextDay": "Passer au jour suivant"
+  },
+  "dayPills": {
+    "week": "S"
   }
 }
