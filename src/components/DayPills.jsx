@@ -18,7 +18,7 @@ function DayPills({ days, current, setCurrent, setStepMode }) {
   const totalWeeks = Math.ceil(days.length / DAYS_PER_WEEK);
   const currentWeek = Math.floor(current / DAYS_PER_WEEK);
 
-  const weekDays = useMemo(() => {
+  const currentWeekDays = useMemo(() => {
     const start = currentWeek * DAYS_PER_WEEK;
     return days.slice(start, start + DAYS_PER_WEEK);
   }, [days, currentWeek]);
@@ -163,8 +163,8 @@ function DayPills({ days, current, setCurrent, setStepMode }) {
   };
 
   // Split week days into two rows for display
-  const firstRowDays = weekDays.slice(0, 4);
-  const secondRowDays = weekDays.slice(4);
+  const firstRowDays = currentWeekDays.slice(0, 4);
+  const secondRowDays = currentWeekDays.slice(4);
 
   return (
     <Box sx={{ mb: 3, width: '100%', px: { xs: 0.5, sm: 2 } }}>

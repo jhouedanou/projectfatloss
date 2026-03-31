@@ -902,7 +902,7 @@ const fullPlan = [
         }
       },
       {
-        name: 'Extensions triceps corde (haltère)',
+        name: 'Extensions triceps overhead haltère',
         sets: '3 × 15',
         equip: 'Haltère 15 kg',
         desc: "Debout, haltère tenu à deux mains derrière la tête, tendez les bras vers le haut. Excellent étirement et contraction des triceps.",
