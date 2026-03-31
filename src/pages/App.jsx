@@ -15,6 +15,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import SpaIcon from '@mui/icons-material/Spa';
 import { createAppTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import { getWorkoutPlan } from '../services/WorkoutCustomization'; 
@@ -246,36 +247,67 @@ export default function App() {
                       </div>
                       <h2 className="day-title">{workoutPlan[current].title}</h2>
                       
-                      {/* Bouton de démarrage amélioré */}
-                      <div className="start-workout-container">
-                        <button 
-                          className="start-workout-btn" 
-                          onClick={() => setStepMode(true)}
-                        >
-                          <span className="start-workout-icon">💪</span>
-                          <span className="start-workout-text">{t('workout.start')}</span>
-                          <span className="start-workout-subtitle">{workoutPlan[current].exercises.length} {t('workout.exercises', { defaultValue: 'exercices' })}</span>
-                        </button>
-                      </div>
-                      
-                      {/* Liste d'exercices avec numérotation */}
-                      <div className="exercise-list">
-                        {workoutPlan[current].exercises.map((exo, index) => (
-                          <div key={index} className="exercise-item" style={{ animationDelay: `${index * 0.05}s` }}>
-                            <div className="exercise-number">{index + 1}</div>
-                            <div className="exercise-content">
-                              <h3 className="exercise-name">{exo.name}</h3>
-                              <div className="exercise-details">
-                                <span className="exercise-sets">{exo.sets}</span>
-                                {exo.equip && (
-                                  <span className="exercise-equipment">{exo.equip}</span>
-                                )}
-                              </div>
-                              {exo.desc && <p className="exercise-description">{exo.desc}</p>}
-                            </div>
+                      {workoutPlan[current].isRestDay ? (
+                        /* Affichage jour de repos */
+                        <div className="rest-day-container" style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '48px 24px',
+                          textAlign: 'center',
+                          gap: '16px',
+                        }}>
+                          <SpaIcon style={{ fontSize: '4rem', opacity: 0.6, color: '#4CAF50' }} />
+                          <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 600 }}>
+                            {t('restDay.title', { defaultValue: 'Jour de repos' })}
+                          </h3>
+                          <p style={{ margin: 0, opacity: 0.7, maxWidth: '300px', lineHeight: 1.6 }}>
+                            {t('restDay.description', { defaultValue: 'Profitez de cette journée pour récupérer. Hydratez-vous bien et reposez vos muscles.' })}
+                          </p>
+                          <button
+                            className="start-workout-btn"
+                            onClick={() => moveToNextDay()}
+                            style={{ marginTop: '8px' }}
+                          >
+                            <span className="start-workout-icon">➡️</span>
+                            <span className="start-workout-text">{t('restDay.nextDay', { defaultValue: 'Passer au jour suivant' })}</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Bouton de démarrage amélioré */}
+                          <div className="start-workout-container">
+                            <button 
+                              className="start-workout-btn" 
+                              onClick={() => setStepMode(true)}
+                            >
+                              <span className="start-workout-icon">💪</span>
+                              <span className="start-workout-text">{t('workout.start')}</span>
+                              <span className="start-workout-subtitle">{workoutPlan[current].exercises.length} {t('workout.exercises', { defaultValue: 'exercices' })}</span>
+                            </button>
                           </div>
-                        ))}
-                      </div>
+                          
+                          {/* Liste d'exercices avec numérotation */}
+                          <div className="exercise-list">
+                            {workoutPlan[current].exercises.map((exo, index) => (
+                              <div key={index} className="exercise-item" style={{ animationDelay: `${index * 0.05}s` }}>
+                                <div className="exercise-number">{index + 1}</div>
+                                <div className="exercise-content">
+                                  <h3 className="exercise-name">{exo.name}</h3>
+                                  <div className="exercise-details">
+                                    <span className="exercise-sets">{exo.sets}</span>
+                                    {exo.equip && (
+                                      <span className="exercise-equipment">{exo.equip}</span>
+                                    )}
+                                  </div>
+                                  {exo.desc && <p className="exercise-description">{exo.desc}</p>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <StepWorkout 

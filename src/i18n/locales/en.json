@@ -142,5 +142,13 @@
     "workoutComplete": "Workout completed!",
     "nextDay": "Ready for Day {{day}} tomorrow?",
     "reminder": "Don't forget your workout today!"
+  },
+  "restDay": {
+    "title": "Rest Day",
+    "description": "Take this day to recover. Stay hydrated and let your muscles rest.",
+    "nextDay": "Skip to next day"
+  },
+  "dayPills": {
+    "week": "W"
   }
 }
