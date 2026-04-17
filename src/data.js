@@ -87,17 +87,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '3 × 25',
-        equip: 'Poids du corps',
-        desc: "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 25,
+        name: 'Planche lestée',
+        sets: '4 × 30s',
+        equip: 'Gilet lesté 10 kg',
+        desc: "En appui sur avant-bras et pointes de pieds, gainage complet avec gilet lesté sur le dos. Renforce toute la sangle abdominale sans flexion du rachis.",
+        caloriesPerSet: [8, 10],
+        totalSets: 4,
+        nbRep: 30,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
-          muscleGroups: ['abdominals']
+          name: 'Weighted Plank',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -120,17 +134,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Tractions lestées (ou rowing inversé)',
-        sets: '4 × 10',
-        equip: 'Barre fixe ou barre basse',
-        desc: "Suspendez-vous à une barre, tirez jusqu'à amener le menton au-dessus. Si trop difficile, utilisez rowing inversé sous une barre basse.",
-        caloriesPerSet: [12, 15],
+        name: 'Pullover haltère',
+        sets: '4 × 12',
+        equip: 'Haltère 15 kg',
+        desc: "Allongé en travers d'un banc, tenez un haltère à deux mains au-dessus de la poitrine puis descendez derrière la tête bras tendus. Étire et renforce le grand dorsal.",
+        caloriesPerSet: [10, 13],
         totalSets: 4,
-        nbRep: 10,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Pull-ups',
-          muscleGroups: ['back', 'biceps']
+          name: 'Dumbbell Pullover',
+          muscleGroups: ['back', 'chest']
         }
       },
       {
@@ -190,17 +204,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '3 × 25',
-        equip: 'Poids du corps',
-        desc: "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 25,
+        name: 'Pallof press',
+        sets: '3 × 12/côté',
+        equip: 'Haltère 10 kg',
+        desc: "Debout, tenez l'haltère contre la poitrine et tendez les bras devant vous en résistant à la rotation du buste. Gainage anti-rotation des obliques.",
+        caloriesPerSet: [7, 9],
+        totalSets: 6,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
-          muscleGroups: ['abdominals']
+          name: 'Pallof Press',
+          muscleGroups: ['obliques', 'core']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -293,17 +321,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '3 × 25',
-        equip: 'Poids du corps',
-        desc: "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
-        caloriesPerSet: [5, 7],
+        name: 'Dead bug lesté',
+        sets: '3 × 15',
+        equip: 'Poids mobiles 2 kg poignets + chevilles',
+        desc: "Allongé sur le dos, bras et jambes levés à 90°, lestez poignets et chevilles puis tendez alternativement un bras et la jambe opposée. Gainage profond sans flexion.",
+        caloriesPerSet: [7, 9],
         totalSets: 3,
-        nbRep: 25,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
-          muscleGroups: ['abdominals']
+          name: 'Weighted Dead Bug',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -396,17 +438,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '3 × 25',
-        equip: 'Poids du corps',
-        desc: "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 25,
+        name: 'Wood chop haltère',
+        sets: '3 × 15/côté',
+        equip: 'Haltère 10 kg',
+        desc: "Debout, pieds écartés, amenez l'haltère en diagonale d'en haut d'une épaule vers la hanche opposée. Gainage dynamique des obliques sans flexion du rachis.",
+        caloriesPerSet: [8, 10],
+        totalSets: 6,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
-          muscleGroups: ['abdominals']
+          name: 'Wood Chop',
+          muscleGroups: ['obliques', 'core']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -499,17 +555,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '3 × 25',
-        equip: 'Poids du corps',
-        desc: "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
-        caloriesPerSet: [5, 7],
+        name: 'Hollow hold lesté',
+        sets: '3 × 30s',
+        equip: 'Gilet lesté 10 kg',
+        desc: "Allongé sur le dos, bras tendus au-dessus de la tête et jambes levées, creusez le bas du dos au sol. Maintenez la position isométrique avec le gilet. Gainage profond.",
+        caloriesPerSet: [7, 9],
         totalSets: 3,
-        nbRep: 25,
+        nbRep: 30,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
-          muscleGroups: ['abdominals']
+          name: 'Weighted Hollow Hold',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -588,31 +658,45 @@ const fullPlan = [
         }
       },
       {
-        name: 'Bicycle crunch',
+        name: 'Russian twist haltère',
         sets: '3 × 20',
-        equip: 'Lesté (optionnel)',
-        desc: "Allongé, amenez le coude vers le genou opposé en alternant. Excellent pour cibler tous les abdominaux.",
-        caloriesPerSet: [8, 10],
+        equip: 'Haltère 10 kg',
+        desc: "Assis, pieds légèrement décollés, tournez le torse d'un côté à l'autre en tenant l'haltère contre la poitrine. Cible les obliques sans flexion du rachis.",
+        caloriesPerSet: [9, 11],
         totalSets: 3,
         nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Bicycle Crunches',
-          muscleGroups: ['abdominals', 'obliques']
+          name: 'Russian Twist',
+          muscleGroups: ['obliques', 'core']
         }
       },
       {
-        name: 'Crunchs',
-        sets: '3 × 25',
-        equip: 'Poids du corps',
-        desc: "Allongé, jambes fléchies, remontez le buste en contractant les abdominaux. Exercice de finition obligatoire.",
-        caloriesPerSet: [5, 7],
+        name: 'Mountain climbers lestés',
+        sets: '3 × 30s',
+        equip: 'Poids mobiles 2 kg poignets',
+        desc: "En position planche haute avec lests aux poignets, ramenez alternativement les genoux vers la poitrine à rythme soutenu. Cardio + gainage.",
+        caloriesPerSet: [12, 15],
         totalSets: 3,
-        nbRep: 25,
+        nbRep: 30,
         googleFitActivity: {
-          type: 'strength_training',
-          name: 'Crunches',
-          muscleGroups: ['abdominals']
+          type: 'cardio',
+          name: 'Mountain Climbers',
+          muscleGroups: ['abdominals', 'cardio']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -723,6 +807,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
+        }
+      },
     ],
   },
   {
@@ -743,16 +841,16 @@ const fullPlan = [
         }
       },
       {
-        name: 'Tractions supination',
-        sets: '4 × 10',
-        equip: 'Barre fixe',
-        desc: "Mains en supination (paumes vers soi), tirez le menton au-dessus de la barre. Recrute fortement les biceps et le grand dorsal.",
+        name: 'Rowing haltère un bras supination',
+        sets: '4 × 12/bras',
+        equip: 'Haltère 15 kg',
+        desc: "Un genou sur banc, paume en supination, tirez l'haltère vers la hanche en gardant le coude près du corps. Travail ciblé dorsal + biceps (alternative aux tractions supination).",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
-        nbRep: 10,
+        totalSets: 8,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Chin-Ups',
+          name: 'Supinated Dumbbell Row',
           muscleGroups: ['back', 'biceps']
         }
       },
@@ -824,6 +922,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Side Plank',
           muscleGroups: ['obliques', 'abdominals']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -916,17 +1028,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs obliques',
-        sets: '3 × 20',
-        equip: 'Poids du corps',
-        desc: "Allongé, amenez le coude vers le genou opposé en rotation du buste. Cible les obliques pour une taille sculptée.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 20,
+        name: 'Side plank lesté',
+        sets: '3 × 30s/côté',
+        equip: 'Gilet lesté 10 kg',
+        desc: "En appui sur un avant-bras et le côté des pieds, gainage latéral avec gilet lesté. Renforce les obliques et le carré des lombes sans flexion.",
+        caloriesPerSet: [7, 9],
+        totalSets: 6,
+        nbRep: 30,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Oblique Crunches',
-          muscleGroups: ['obliques', 'abdominals']
+          name: 'Weighted Side Plank',
+          muscleGroups: ['obliques', 'core']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -1005,16 +1131,16 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs inversés',
+        name: 'Leg raises lestés',
         sets: '3 × 15',
-        equip: 'Poids du corps',
-        desc: "Allongé, ramenez les genoux vers la poitrine en décollant les hanches du sol. Cible le bas des abdominaux.",
-        caloriesPerSet: [5, 7],
+        equip: 'Poids mobiles 2 kg chevilles',
+        desc: "Allongé sur le dos, jambes tendues avec lests aux chevilles, montez et descendez les jambes sans décoller le bas du dos. Cible le bas des abdos sans crunch.",
+        caloriesPerSet: [7, 9],
         totalSets: 3,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Reverse Crunches',
+          name: 'Weighted Leg Raises',
           muscleGroups: ['abdominals']
         }
       },
@@ -1030,6 +1156,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Plank',
           muscleGroups: ['abdominals']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -1135,6 +1275,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
+        }
+      },
     ],
   },
   {
@@ -1225,17 +1379,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs vélo',
-        sets: '3 × 20',
-        equip: 'Poids du corps',
-        desc: "Allongé, pédalez dans le vide en amenant le coude vers le genou opposé. Travaille abdominaux et obliques simultanément.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 20,
+        name: 'Bird dog lesté',
+        sets: '3 × 12/côté',
+        equip: 'Poids mobiles 2 kg poignets + chevilles',
+        desc: "À quatre pattes avec lests poignets/chevilles, tendez simultanément un bras et la jambe opposée en gardant le dos neutre. Gainage antéro-postérieur.",
+        caloriesPerSet: [7, 9],
+        totalSets: 6,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Bicycle Crunches',
-          muscleGroups: ['abdominals', 'obliques']
+          name: 'Weighted Bird Dog',
+          muscleGroups: ['core', 'glutes']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -1346,6 +1514,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
+        }
+      },
     ],
   },
   {
@@ -1366,17 +1548,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Tractions neutres',
-        sets: '4 × 8',
-        equip: 'Barre fixe',
-        desc: "Paumes face à face, tirez le menton au-dessus de la barre. La prise neutre est la plus naturelle pour les articulations.",
-        caloriesPerSet: [10, 13],
-        totalSets: 4,
-        nbRep: 8,
+        name: 'Renegade row',
+        sets: '4 × 10/bras',
+        equip: 'Haltères 10 kg',
+        desc: "En planche haute sur les haltères, tirez alternativement un haltère vers la hanche sans faire tourner le bassin. Dos + gainage + anti-rotation.",
+        caloriesPerSet: [11, 14],
+        totalSets: 8,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Neutral Grip Pull-Ups',
-          muscleGroups: ['back', 'biceps']
+          name: 'Renegade Row',
+          muscleGroups: ['back', 'core']
         }
       },
       {
@@ -1447,6 +1629,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Superman',
           muscleGroups: ['lower_back', 'abdominals']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -1539,17 +1735,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs lestés',
-        sets: '3 × 20',
-        equip: 'Haltère 10 kg',
-        desc: "Allongé, haltère contre la poitrine, réalisez des crunchs. La charge supplémentaire intensifie le travail des abdominaux.",
-        caloriesPerSet: [6, 8],
+        name: 'Planche lestée longue',
+        sets: '3 × 45s',
+        equip: 'Gilet lesté 10 kg',
+        desc: "Gainage sur les avant-bras avec gilet lesté, durée prolongée. Travail isométrique profond de la sangle abdominale sans flexion.",
+        caloriesPerSet: [9, 11],
         totalSets: 3,
-        nbRep: 20,
+        nbRep: 45,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Weighted Crunches',
-          muscleGroups: ['abdominals']
+          name: 'Weighted Plank',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -1731,17 +1941,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Bicycle crunch lesté',
+        name: 'Russian twist haltère 15 kg',
         sets: '3 × 20',
-        equip: 'Haltère 10 kg',
-        desc: "Allongé, haltère contre la poitrine, amenez le coude vers le genou opposé en alternant. Version intensifiée du bicycle crunch.",
-        caloriesPerSet: [8, 10],
+        equip: 'Haltère 15 kg',
+        desc: "Assis, pieds décollés, tournez le torse d'un côté à l'autre en tenant l'haltère contre la poitrine. Charge plus lourde pour intensifier les obliques.",
+        caloriesPerSet: [10, 12],
         totalSets: 3,
         nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Weighted Bicycle Crunch',
-          muscleGroups: ['abdominals', 'obliques']
+          name: 'Weighted Russian Twist',
+          muscleGroups: ['obliques', 'core']
         }
       },
       {
@@ -1756,6 +1966,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Dynamic Plank',
           muscleGroups: ['abdominals']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -1859,6 +2083,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'V-Ups',
           muscleGroups: ['abdominals']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -1969,6 +2207,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
+        }
+      },
     ],
   },
   {
@@ -1989,16 +2241,16 @@ const fullPlan = [
         }
       },
       {
-        name: 'Tractions larges',
-        sets: '4 × 8',
-        equip: 'Barre fixe',
-        desc: "Prise très large en pronation, tirez le menton au-dessus de la barre. Développe la largeur du dos.",
-        caloriesPerSet: [10, 13],
+        name: 'Rowing barre prise large',
+        sets: '4 × 10',
+        equip: 'Barre 30 kg',
+        desc: "Buste penché à 45°, prise très large en pronation, tirez la barre vers le haut des abdos. Cible la largeur du dos (alternative aux tractions larges).",
+        caloriesPerSet: [12, 15],
         totalSets: 4,
-        nbRep: 8,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Wide Grip Pull-Ups',
+          name: 'Wide Grip Barbell Row',
           muscleGroups: ['back', 'biceps']
         }
       },
@@ -2070,6 +2322,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Superman Hold',
           muscleGroups: ['lower_back', 'abdominals']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -2162,17 +2428,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs jambes levées',
-        sets: '3 × 20',
-        equip: 'Poids du corps',
-        desc: "Allongé, jambes levées à 90°, réalisez des crunchs. La position des jambes augmente la difficulté et l'activation des abdominaux.",
-        caloriesPerSet: [5, 7],
+        name: 'Toes to ceiling lestés',
+        sets: '3 × 15',
+        equip: 'Poids mobiles 2 kg chevilles',
+        desc: "Allongé, jambes levées à 90° avec lests aux chevilles, poussez les pointes de pied vers le plafond en décollant légèrement le bassin. Cible le bas des abdos sans flexion du rachis.",
+        caloriesPerSet: [8, 10],
         totalSets: 3,
-        nbRep: 20,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Legs Up Crunches',
+          name: 'Weighted Leg Raises',
           muscleGroups: ['abdominals']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -2276,6 +2556,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Assisted Dragon Flag',
           muscleGroups: ['abdominals']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -2471,17 +2765,31 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs complets',
-        sets: '3 × 25',
-        equip: 'Poids du corps',
-        desc: "Allongé, remontez le buste entièrement vers les genoux en contractant les abdominaux. Finition complète pour la sangle abdominale.",
-        caloriesPerSet: [5, 7],
+        name: 'Circuit finition gainage lesté',
+        sets: '3 × 45s',
+        equip: 'Gilet lesté 10 kg',
+        desc: "Enchaînement planche avant / planche latérale droite / planche latérale gauche, 15s chacune avec gilet. Sangle abdominale complète sans flexion.",
+        caloriesPerSet: [9, 11],
         totalSets: 3,
-        nbRep: 25,
+        nbRep: 45,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Full Crunches',
-          muscleGroups: ['abdominals']
+          name: 'Weighted Plank Circuit',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Vélo',
+        sets: '1 × 12 min',
+        equip: 'Vélo (ou vélo d\'appartement)',
+        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
+        caloriesPerSet: [120, 150],
+        totalSets: 1,
+        nbRep: 1,
+        googleFitActivity: {
+          type: 'biking',
+          name: 'Cycling',
+          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
