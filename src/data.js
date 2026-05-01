@@ -59,59 +59,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Dips lestés',
-        sets: '3 × 10',
-        equip: 'Gilet lesté 10 kg',
-        desc: "Mains sur un banc/chaise, fléchissez les coudes pour descendre le corps puis remontez. Travaille triceps et pectoraux.",
-        caloriesPerSet: [10, 12],
-        totalSets: 3,
-        nbRep: 10,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Dips',
-          muscleGroups: ['chest', 'triceps']
-        }
-      },
-      {
-        name: 'Extensions triceps',
-        sets: '3 × 15',
-        equip: 'Haltère 15 kg (à deux mains)',
-        desc: "Allongé ou assis, haltère tenu à deux mains au-dessus de la tête, pliez les coudes puis tendez les bras. Isole les triceps.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Triceps Extensions',
-          muscleGroups: ['triceps']
-        }
-      },
-      {
-        name: 'Planche lestée',
-        sets: '4 × 30s',
-        equip: 'Gilet lesté 10 kg',
-        desc: "En appui sur avant-bras et pointes de pieds, gainage complet avec gilet lesté sur le dos. Renforce toute la sangle abdominale sans flexion du rachis.",
-        caloriesPerSet: [8, 10],
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
         totalSets: 4,
-        nbRep: 30,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Weighted Plank',
+          name: 'Crunches',
           muscleGroups: ['abdominals', 'core']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -176,59 +134,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Curl marteau',
-        sets: '3 × 12',
-        equip: 'Haltères 15 kg',
-        desc: "Comme le curl biceps mais paumes face à face. Travaille biceps et avant-bras.",
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Hammer Curl',
-          muscleGroups: ['biceps', 'forearms']
-        }
-      },
-      {
-        name: 'Shrugs barre',
-        sets: '3 × 15',
-        equip: 'Barre 30 kg',
-        desc: "Debout, barre en main, haussez les épaules vers les oreilles. Développe les trapèzes supérieurs.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Barbell Shrugs',
-          muscleGroups: ['trapezius']
-        }
-      },
-      {
-        name: 'Pallof press',
-        sets: '3 × 12/côté',
-        equip: 'Haltère 10 kg',
-        desc: "Debout, tenez l'haltère contre la poitrine et tendez les bras devant vous en résistant à la rotation du buste. Gainage anti-rotation des obliques.",
-        caloriesPerSet: [7, 9],
-        totalSets: 6,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Pallof Press',
-          muscleGroups: ['obliques', 'core']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -237,16 +153,16 @@ const fullPlan = [
     title: 'JOUR 3: HAUT DU CORPS (Pectoraux, Épaules, Dos)',
     exercises: [
       {
-        name: 'Pompes lestées',
+        name: 'Pompes',
         sets: '4 × 10',
-        equip: 'Gilet lesté 10 kg',
+        equip: 'Poids du corps',
         desc: "En appui sur mains et pieds, fléchissez les coudes puis poussez. Différentes positions des mains ciblent différentes parties des pectoraux.",
         caloriesPerSet: [10, 12],
         totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Weighted Push-Ups',
+          name: 'Push-Ups',
           muscleGroups: ['chest', 'triceps']
         }
       },
@@ -293,59 +209,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Curl concentré',
-        sets: '3 × 12',
-        equip: 'Haltère 15 kg',
-        desc: "Assis, coude calé contre la cuisse, fléchissez le bras. Maximise l'isolation du biceps.",
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Concentration Curl',
-          muscleGroups: ['biceps']
-        }
-      },
-      {
-        name: 'Barre au front',
-        sets: '3 × 15',
-        equip: 'Barre 30 kg',
-        desc: "Allongé, descendez la barre vers le front puis remontez en tendant les bras. Alternative aux kickbacks, cible les triceps.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Skull Crushers',
-          muscleGroups: ['triceps']
-        }
-      },
-      {
-        name: 'Dead bug lesté',
-        sets: '3 × 15',
-        equip: 'Poids mobiles 2 kg poignets + chevilles',
-        desc: "Allongé sur le dos, bras et jambes levés à 90°, lestez poignets et chevilles puis tendez alternativement un bras et la jambe opposée. Gainage profond sans flexion.",
-        caloriesPerSet: [7, 9],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Dead Bug',
+          name: 'Crunches',
           muscleGroups: ['abdominals', 'core']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -410,59 +284,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Mollets debout',
-        sets: '3 × 20',
-        equip: 'Haltères 15 kg',
-        desc: "Debout sur une marche/livre, montez sur la pointe des pieds puis redescendez. Cible les mollets.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
         nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Standing Calf Raises',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Relevé de jambes',
-        sets: '3 × 15',
-        equip: 'Lestage aux chevilles (optionnel)',
-        desc: "Allongé, soulevez les jambes tendues à 90°. Cible le bas des abdominaux.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Leg Raises',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Wood chop haltère',
-        sets: '3 × 15/côté',
-        equip: 'Haltère 10 kg',
-        desc: "Debout, pieds écartés, amenez l'haltère en diagonale d'en haut d'une épaule vers la hanche opposée. Gainage dynamique des obliques sans flexion du rachis.",
-        caloriesPerSet: [8, 10],
-        totalSets: 6,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Wood Chop',
-          muscleGroups: ['obliques', 'core']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -527,59 +359,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Step-ups',
-        sets: '3 × 15/jambe',
-        equip: 'Haltères 10 kg',
-        desc: "Montez sur une marche/banc avec un pied, puis l'autre. Alternative aux extensions de jambes.",
-        caloriesPerSet: [10, 12],
-        totalSets: 6,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Step-Ups',
-          muscleGroups: ['quadriceps', 'glutes']
-        }
-      },
-      {
-        name: 'Russian twists',
-        sets: '3 × 20',
-        equip: 'Haltère 10 kg',
-        desc: "Assis, pieds décollés, tournez le torse alternativement de chaque côté. Cible les obliques.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
         nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Russian Twists',
-          muscleGroups: ['obliques', 'abdominals']
-        }
-      },
-      {
-        name: 'Hollow hold lesté',
-        sets: '3 × 30s',
-        equip: 'Gilet lesté 10 kg',
-        desc: "Allongé sur le dos, bras tendus au-dessus de la tête et jambes levées, creusez le bas du dos au sol. Maintenez la position isométrique avec le gilet. Gainage profond.",
-        caloriesPerSet: [7, 9],
-        totalSets: 3,
-        nbRep: 30,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Hollow Hold',
+          name: 'Crunches',
           muscleGroups: ['abdominals', 'core']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -644,59 +434,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Mollets assis',
-        sets: '3 × 20',
-        equip: 'Barre 30 kg sur les genoux',
-        desc: "Assis, montez sur la pointe des pieds puis redescendez. Cible différemment les mollets.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
         nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Seated Calf Raises',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Russian twist haltère',
-        sets: '3 × 20',
-        equip: 'Haltère 10 kg',
-        desc: "Assis, pieds légèrement décollés, tournez le torse d'un côté à l'autre en tenant l'haltère contre la poitrine. Cible les obliques sans flexion du rachis.",
-        caloriesPerSet: [9, 11],
-        totalSets: 3,
-        nbRep: 20,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Russian Twist',
-          muscleGroups: ['obliques', 'core']
-        }
-      },
-      {
-        name: 'Mountain climbers lestés',
-        sets: '3 × 30s',
-        equip: 'Poids mobiles 2 kg poignets',
-        desc: "En position planche haute avec lests aux poignets, ramenez alternativement les genoux vers la poitrine à rythme soutenu. Cardio + gainage.",
-        caloriesPerSet: [12, 15],
-        totalSets: 3,
-        nbRep: 30,
-        googleFitActivity: {
-          type: 'cardio',
-          name: 'Mountain Climbers',
-          muscleGroups: ['abdominals', 'cardio']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -766,61 +514,20 @@ const fullPlan = [
         }
       },
       {
-        name: 'Kickbacks triceps',
-        sets: '3 × 15',
-        equip: 'Haltères 10 kg',
-        desc: "Penché en avant, bras le long du corps, tendez l'avant-bras vers l'arrière. Excellent exercice d'isolation pour les triceps.",
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 15,
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Triceps Kickbacks',
-          muscleGroups: ['triceps']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
-      {
-        name: 'Pompes diamant',
-        sets: '3 × 12',
-        equip: 'Poids du corps',
-        desc: "Mains rapprochées en forme de losange, descendez puis remontez. Sollicite fortement les triceps et l'intérieur des pectoraux.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Diamond Push-Ups',
-          muscleGroups: ['triceps', 'chest']
-        }
-      },
-      {
-        name: 'Planche',
-        sets: '3 × 45s',
-        equip: 'Poids du corps',
-        desc: "En appui sur les avant-bras et les pointes de pieds, maintenez le corps aligné. Renforce la sangle abdominale en profondeur.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 45,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Plank',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
-        }
-      },
+    
     ],
   },
   {
@@ -883,59 +590,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Curl inversé',
-        sets: '3 × 12',
-        equip: 'Barre 30 kg',
-        desc: "Debout, barre en prise pronation, réalisez un curl. Cible les avant-bras et le brachial pour un bras complet.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Reverse Curl',
-          muscleGroups: ['forearms', 'biceps']
-        }
-      },
-      {
-        name: 'Face pulls haltères',
-        sets: '3 × 15',
-        equip: 'Haltères 10 kg',
-        desc: "Penché en avant, tirez les haltères vers le visage, coudes hauts. Renforce l'arrière des épaules et améliore la posture.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Dumbbell Face Pulls',
-          muscleGroups: ['rear_deltoids', 'upper_back']
-        }
-      },
-      {
-        name: 'Gainage latéral',
-        sets: '3 × 30s/côté',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "En appui sur un avant-bras, maintenez le corps aligné sur le côté. Renforce les obliques et la stabilité du tronc.",
-        caloriesPerSet: [5, 7],
-        totalSets: 6,
-        nbRep: 30,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Side Plank',
-          muscleGroups: ['obliques', 'abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -1000,59 +665,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Curl 21s',
-        sets: '3 × 21',
-        equip: 'Barre 30 kg',
-        desc: "7 répétitions en demi-basse, 7 en demi-haute, 7 complètes. Technique intense qui brûle les biceps en profondeur.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 21,
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: '21s Curl',
-          muscleGroups: ['biceps']
-        }
-      },
-      {
-        name: 'Extensions triceps overhead haltère',
-        sets: '3 × 15',
-        equip: 'Haltère 15 kg',
-        desc: "Debout, haltère tenu à deux mains derrière la tête, tendez les bras vers le haut. Excellent étirement et contraction des triceps.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Overhead Triceps Extension',
-          muscleGroups: ['triceps']
-        }
-      },
-      {
-        name: 'Side plank lesté',
-        sets: '3 × 30s/côté',
-        equip: 'Gilet lesté 10 kg',
-        desc: "En appui sur un avant-bras et le côté des pieds, gainage latéral avec gilet lesté. Renforce les obliques et le carré des lombes sans flexion.",
-        caloriesPerSet: [7, 9],
-        totalSets: 6,
-        nbRep: 30,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Side Plank',
-          muscleGroups: ['obliques', 'core']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -1117,59 +740,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Mollets unilatéral',
-        sets: '3 × 15/jambe',
-        equip: 'Haltère 15 kg',
-        desc: "Sur un pied, montez sur la pointe puis redescendez lentement. Le travail unilatéral corrige les déséquilibres entre les deux jambes.",
-        caloriesPerSet: [6, 8],
-        totalSets: 6,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Single Leg Calf Raise',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Leg raises lestés',
-        sets: '3 × 15',
-        equip: 'Poids mobiles 2 kg chevilles',
-        desc: "Allongé sur le dos, jambes tendues avec lests aux chevilles, montez et descendez les jambes sans décoller le bas du dos. Cible le bas des abdos sans crunch.",
-        caloriesPerSet: [7, 9],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Leg Raises',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Gainage',
-        sets: '3 × 45s',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "En appui sur les avant-bras et les pointes de pieds, maintenez le corps droit. Renforce le core en profondeur.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 45,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Plank',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -1234,59 +815,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Box jumps',
-        sets: '3 × 12',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "Sautez sur une surface surélevée de manière explosive puis redescendez. Développe la puissance des jambes et brûle les calories.",
-        caloriesPerSet: [10, 13],
-        totalSets: 3,
-        nbRep: 12,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Box Jumps',
-          muscleGroups: ['quadriceps', 'glutes', 'calves']
-        }
-      },
-      {
-        name: 'Planche abdominale',
-        sets: '3 × 45s',
-        equip: 'Poids du corps',
-        desc: "En appui sur les avant-bras, maintenez le corps parfaitement aligné. Gainage fondamental pour la stabilité du tronc.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 45,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Plank',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Dead bug',
-        sets: '3 × 15',
-        equip: 'Poids du corps',
-        desc: "Allongé sur le dos, bras et jambes levés, étendez alternativement un bras et la jambe opposée. Renforce le core en douceur.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Dead Bug',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -1351,59 +890,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Mollets sautés',
-        sets: '3 × 20',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "Montez sur la pointe des pieds puis sautez légèrement. La composante pliométrique augmente la puissance des mollets.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
         nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Jumping Calf Raises',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Mountain climbers',
-        sets: '3 × 20',
-        equip: 'Poids du corps',
-        desc: "En position de pompe, amenez alternativement les genoux vers la poitrine rapidement. Exercice cardio et abdominaux combiné.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 20,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Mountain Climbers',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Bird dog lesté',
-        sets: '3 × 12/côté',
-        equip: 'Poids mobiles 2 kg poignets + chevilles',
-        desc: "À quatre pattes avec lests poignets/chevilles, tendez simultanément un bras et la jambe opposée en gardant le dos neutre. Gainage antéro-postérieur.",
-        caloriesPerSet: [7, 9],
-        totalSets: 6,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Bird Dog',
-          muscleGroups: ['core', 'glutes']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -1473,61 +970,20 @@ const fullPlan = [
         }
       },
       {
-        name: 'Dips entre chaises',
-        sets: '3 × 12',
-        equip: 'Gilet lesté 10 kg',
-        desc: "Mains sur deux chaises, descendez entre elles en fléchissant les coudes. Amplitude maximale pour les triceps et les pectoraux.",
-        caloriesPerSet: [10, 12],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Chair Dips',
-          muscleGroups: ['triceps', 'chest']
-        }
-      },
-      {
-        name: 'Extension triceps unilatéral',
-        sets: '3 × 12/bras',
-        equip: 'Haltère 10 kg',
-        desc: "Un bras à la fois, haltère derrière la tête, tendez le bras vers le haut. Le travail unilatéral corrige les déséquilibres.",
-        caloriesPerSet: [6, 8],
-        totalSets: 6,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Single Arm Triceps Extension',
-          muscleGroups: ['triceps']
-        }
-      },
-      {
-        name: 'Hollow body hold',
-        sets: '3 × 30s',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "Allongé, bras et jambes tendus et légèrement décollés du sol, maintenez la position. Gainage intense pour les abdominaux profonds.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 30,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Hollow Body Hold',
-          muscleGroups: ['abdominals']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
-        }
-      },
+    
     ],
   },
   {
@@ -1590,59 +1046,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Curl prise inversée',
-        sets: '3 × 12',
-        equip: 'Barre 30 kg',
-        desc: "Debout, barre en prise pronation, réalisez un curl classique. Renforce les avant-bras et le brachial antérieur.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Reverse Grip Curl',
-          muscleGroups: ['forearms', 'biceps']
-        }
-      },
-      {
-        name: 'Shrugs haltères',
-        sets: '3 × 15',
-        equip: 'Haltères 15 kg',
-        desc: "Debout, haltères le long du corps, haussez les épaules vers les oreilles. Développe les trapèzes supérieurs.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Dumbbell Shrugs',
-          muscleGroups: ['trapezius']
-        }
-      },
-      {
-        name: 'Gainage superman',
-        sets: '3 × 15',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "Allongé sur le ventre, soulevez bras et jambes simultanément puis maintenez. Renforce le bas du dos et les érecteurs du rachis.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 15,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Superman',
-          muscleGroups: ['lower_back', 'abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -1651,16 +1065,16 @@ const fullPlan = [
     title: 'JOUR 17: HAUT DU CORPS (Pectoraux, Épaules, Dos)',
     exercises: [
       {
-        name: 'Pompes inclinées lestées',
+        name: 'Pompes inclinées',
         sets: '4 × 10',
-        equip: 'Gilet lesté 10 kg',
-        desc: "Pieds surélevés avec gilet lesté, réalisez des pompes. L'inclinaison cible le haut des pectoraux et les épaules.",
+        equip: 'Poids du corps',
+        desc: "Pieds surélevés, réalisez des pompes. L'inclinaison cible le haut des pectoraux et les épaules.",
         caloriesPerSet: [10, 13],
         totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Weighted Decline Push-Ups',
+          name: 'Decline Push-Ups',
           muscleGroups: ['chest', 'shoulders', 'triceps']
         }
       },
@@ -1707,59 +1121,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Curl concentré alterné',
-        sets: '3 × 10/bras',
-        equip: 'Haltère 10 kg',
-        desc: "Assis, coude calé contre la cuisse, réalisez un curl strict. L'isolation maximale garantit un travail pur du biceps.",
-        caloriesPerSet: [5, 7],
-        totalSets: 6,
-        nbRep: 10,
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Alternating Concentration Curl',
-          muscleGroups: ['biceps']
-        }
-      },
-      {
-        name: 'Barre au front prise serrée',
-        sets: '3 × 15',
-        equip: 'Barre 30 kg',
-        desc: "Allongé, descendez la barre vers le front puis tendez les bras. Exercice classique d'isolation des triceps.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Close Grip Skull Crusher',
-          muscleGroups: ['triceps']
-        }
-      },
-      {
-        name: 'Planche lestée longue',
-        sets: '3 × 45s',
-        equip: 'Gilet lesté 10 kg',
-        desc: "Gainage sur les avant-bras avec gilet lesté, durée prolongée. Travail isométrique profond de la sangle abdominale sans flexion.",
-        caloriesPerSet: [9, 11],
-        totalSets: 3,
-        nbRep: 45,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Plank',
+          name: 'Crunches',
           muscleGroups: ['abdominals', 'core']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
@@ -1796,7 +1168,7 @@ const fullPlan = [
         }
       },
       {
-        name: 'Fentes latérales lestées',
+        name: 'Fentes latérales',
         sets: '3 × 12/côté',
         equip: 'Haltères 15 kg',
         desc: "Faites un grand pas sur le côté avec haltères, fléchissez la jambe puis revenez. Travaille les adducteurs et les quadriceps.",
@@ -1805,7 +1177,7 @@ const fullPlan = [
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Weighted Lateral Lunges',
+          name: 'Lateral Lunges',
           muscleGroups: ['adductors', 'quadriceps']
         }
       },
@@ -1824,47 +1196,20 @@ const fullPlan = [
         }
       },
       {
-        name: 'Mollets escalier',
-        sets: '3 × 20',
-        equip: 'Haltères 15 kg',
-        desc: "Sur une marche d'escalier, descendez les talons sous le niveau de la marche puis remontez. L'amplitude maximale travaille les mollets en profondeur.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
         nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Stair Calf Raises',
-          muscleGroups: ['calves']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
-      {
-        name: 'Relevé de jambes suspendu',
-        sets: '3 × 12',
-        equip: 'Barre fixe',
-        desc: "Suspendu à la barre, montez les jambes tendues devant vous. Exercice avancé pour les abdominaux inférieurs.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Hanging Leg Raise',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Hollow hold',
-        sets: '3 × 30s',
-        equip: 'Poids du corps',
-        desc: "Allongé sur le dos, bras et jambes tendus décollés du sol, maintenez la position. Gainage intense pour le transverse.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 30,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Hollow Hold',
-          muscleGroups: ['abdominals']
-        }
-      },
+    
     ],
   },
   {
@@ -1927,59 +1272,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Extension de hanche au sol',
-        sets: '3 × 15/jambe',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "À quatre pattes, poussez une jambe tendue vers l'arrière et le haut. Isole les fessiers et les ischio-jambiers.",
-        caloriesPerSet: [5, 7],
-        totalSets: 6,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Hip Extension',
-          muscleGroups: ['glutes', 'hamstrings']
-        }
-      },
-      {
-        name: 'Russian twist haltère 15 kg',
-        sets: '3 × 20',
-        equip: 'Haltère 15 kg',
-        desc: "Assis, pieds décollés, tournez le torse d'un côté à l'autre en tenant l'haltère contre la poitrine. Charge plus lourde pour intensifier les obliques.",
-        caloriesPerSet: [10, 12],
-        totalSets: 3,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
         nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Weighted Russian Twist',
-          muscleGroups: ['obliques', 'core']
-        }
-      },
-      {
-        name: 'Planche dynamique',
-        sets: '3 × 12',
-        equip: 'Poids du corps',
-        desc: "En position de planche, passez des avant-bras aux mains tendues en alternant. Ajoute un élément dynamique au gainage classique.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Dynamic Plank',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -2044,59 +1347,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Mollets pliométriques',
-        sets: '3 × 15',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "Enchaînez des sauts sur la pointe des pieds rapidement. Le travail pliométrique développe la puissance et la réactivité des mollets.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Plyometric Calf Raises',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Gainage latéral dynamique',
-        sets: '3 × 12/côté',
-        equip: 'Poids du corps',
-        desc: "En position de gainage latéral, descendez la hanche vers le sol puis remontez. Ajoute un mouvement dynamique pour les obliques.",
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
         caloriesPerSet: [6, 8],
-        totalSets: 6,
-        nbRep: 12,
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Dynamic Side Plank',
-          muscleGroups: ['obliques', 'abdominals']
-        }
-      },
-      {
-        name: 'V-ups',
-        sets: '3 × 15',
-        equip: 'Poids du corps',
-        desc: "Allongé, montez simultanément le buste et les jambes tendues pour toucher les pieds. Exercice complet pour les abdominaux.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'V-Ups',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -2138,16 +1399,16 @@ const fullPlan = [
         }
       },
       {
-        name: 'Pompes déclinées lestées',
+        name: 'Pompes déclinées',
         sets: '3 × 12',
-        equip: 'Gilet lesté 10 kg',
-        desc: "Pieds surélevés avec gilet lesté, réalisez des pompes. Intensifie le travail du haut des pectoraux et des épaules.",
+        equip: 'Poids du corps',
+        desc: "Pieds surélevés, réalisez des pompes. Intensifie le travail du haut des pectoraux et des épaules.",
         caloriesPerSet: [10, 12],
         totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Weighted Decline Push-Ups',
+          name: 'Decline Push-Ups',
           muscleGroups: ['chest', 'shoulders', 'triceps']
         }
       },
@@ -2166,61 +1427,20 @@ const fullPlan = [
         }
       },
       {
-        name: 'Dips profonds',
-        sets: '3 × 10',
-        equip: 'Gilet lesté 10 kg',
-        desc: "Descendez le plus bas possible entre deux supports avec le gilet lesté. L'amplitude maximale intensifie le travail des pectoraux et des triceps.",
-        caloriesPerSet: [10, 13],
-        totalSets: 3,
-        nbRep: 10,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Deep Weighted Dips',
-          muscleGroups: ['chest', 'triceps']
-        }
-      },
-      {
-        name: 'Extension triceps overhead barre',
-        sets: '3 × 12',
-        equip: 'Barre 30 kg',
-        desc: "Debout, barre tenue au-dessus de la tête, pliez les coudes puis tendez les bras. Étirement complet des triceps sous charge.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Overhead Barbell Triceps Extension',
-          muscleGroups: ['triceps']
-        }
-      },
-      {
-        name: 'Planche bras tendus',
-        sets: '3 × 45s',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "En position haute de pompe, maintenez le corps aligné bras tendus. Variante de gainage qui sollicite aussi les épaules.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 45,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Straight Arm Plank',
-          muscleGroups: ['abdominals']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
-        }
-      },
+    
     ],
   },
   {
@@ -2283,59 +1503,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Curl marteau croisé',
-        sets: '3 × 12',
-        equip: 'Haltères 10 kg',
-        desc: "Debout, réalisez un curl marteau en croisant l'haltère devant le corps. Cible le brachial et les avant-bras.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Cross Body Hammer Curl',
-          muscleGroups: ['biceps', 'forearms']
-        }
-      },
-      {
-        name: 'Shrugs unilatéral',
-        sets: '3 × 15/côté',
-        equip: 'Haltère 15 kg',
-        desc: "Un haltère à la fois, haussez l'épaule vers l'oreille. Le travail unilatéral permet de corriger les déséquilibres des trapèzes.",
-        caloriesPerSet: [6, 8],
-        totalSets: 6,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Single Arm Shrug',
-          muscleGroups: ['trapezius']
-        }
-      },
-      {
-        name: 'Superman hold',
-        sets: '3 × 30s',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "Allongé sur le ventre, bras et jambes tendus décollés du sol, maintenez la position. Renforce les érecteurs du rachis.",
-        caloriesPerSet: [5, 7],
-        totalSets: 3,
-        nbRep: 30,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Superman Hold',
-          muscleGroups: ['lower_back', 'abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -2400,59 +1578,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Curl spider',
-        sets: '3 × 12',
-        equip: 'Haltères 10 kg',
-        desc: "Allongé face contre un banc incliné, réalisez des curls. La position empêche toute triche et isole parfaitement les biceps.",
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Spider Curl',
-          muscleGroups: ['biceps']
-        }
-      },
-      {
-        name: 'Kickback triceps haltère',
-        sets: '3 × 12',
-        equip: 'Haltère 10 kg',
-        desc: "Penché en avant, tendez l'avant-bras vers l'arrière en maintenant le coude fixe. Finition efficace pour les triceps.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Dumbbell Triceps Kickback',
-          muscleGroups: ['triceps']
-        }
-      },
-      {
-        name: 'Toes to ceiling lestés',
-        sets: '3 × 15',
-        equip: 'Poids mobiles 2 kg chevilles',
-        desc: "Allongé, jambes levées à 90° avec lests aux chevilles, poussez les pointes de pied vers le plafond en décollant légèrement le bassin. Cible le bas des abdos sans flexion du rachis.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Leg Raises',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -2517,59 +1653,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Mollets charge lourde',
-        sets: '3 × 15',
-        equip: 'Barre 30 kg',
-        desc: "Barre sur les épaules, montez sur la pointe des pieds puis redescendez lentement. La charge lourde développe la masse des mollets.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Heavy Calf Raises',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Relevé de jambes lesté',
-        sets: '3 × 12',
-        equip: 'Poids du corps (lestage chevilles)',
-        desc: "Allongé, montez les jambes tendues vers le plafond avec un lestage aux chevilles. Intensifie le travail des abdominaux inférieurs.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Leg Raise',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Dragon flag assisté',
-        sets: '3 × 8',
+        name: 'Crunchs',
+        sets: '4 × 20',
         equip: 'Poids du corps',
-        desc: "Allongé sur un banc, agrippez le bord et soulevez le corps en un bloc rigide. Exercice avancé pour les abdominaux profonds.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 8,
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Assisted Dragon Flag',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
     ],
@@ -2578,10 +1672,10 @@ const fullPlan = [
     title: 'JOUR 26: BAS DU CORPS (Quadriceps, Fessiers)',
     exercises: [
       {
-        name: 'Squat sauté lesté',
+        name: 'Squat sauté',
         sets: '4 × 10',
-        equip: 'Gilet lesté 10 kg',
-        desc: "Descendez en squat puis explosez vers le haut avec le gilet lesté. Développe la puissance explosive des jambes.",
+        equip: 'Poids du corps',
+        desc: "Descendez en squat puis explosez vers le haut. Développe la puissance explosive des jambes.",
         caloriesPerSet: [14, 18],
         totalSets: 4,
         nbRep: 10,
@@ -2634,47 +1728,20 @@ const fullPlan = [
         }
       },
       {
-        name: 'Box step-up lourd',
-        sets: '3 × 10/jambe',
-        equip: 'Haltères 15 kg',
-        desc: "Montez sur une surface surélevée un pied à la fois avec des haltères lourds. Exercice fonctionnel pour les quadriceps et les fessiers.",
-        caloriesPerSet: [10, 13],
-        totalSets: 6,
-        nbRep: 10,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Heavy Box Step-Up',
-          muscleGroups: ['quadriceps', 'glutes']
-        }
-      },
-      {
-        name: 'Planche abdominale lestée',
-        sets: '3 × 45s',
-        equip: 'Gilet lesté 10 kg',
-        desc: "En appui sur les avant-bras avec le gilet lesté, maintenez le corps aligné. La charge augmente l'intensité du gainage.",
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 45,
+        totalSets: 4,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Weighted Plank',
-          muscleGroups: ['abdominals']
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
         }
       },
-      {
-        name: 'Dead bug lesté',
-        sets: '3 × 12',
-        equip: 'Haltère 10 kg',
-        desc: "Allongé sur le dos, haltère tenu au-dessus de la poitrine, étendez alternativement bras et jambe opposés. Version intensifiée du dead bug.",
-        caloriesPerSet: [6, 8],
-        totalSets: 3,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Dead Bug',
-          muscleGroups: ['abdominals']
-        }
-      },
+    
     ],
   },
   {
@@ -2737,59 +1804,17 @@ const fullPlan = [
         }
       },
       {
-        name: 'Mollets assis lourd',
-        sets: '3 × 20',
-        equip: 'Barre 30 kg',
-        desc: "Assis, barre sur les genoux, montez sur la pointe des pieds. La charge lourde en position assise cible le soléaire.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
+        name: 'Crunchs',
+        sets: '4 × 20',
+        equip: 'Poids du corps',
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
+        caloriesPerSet: [6, 8],
+        totalSets: 4,
         nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Heavy Seated Calf Raises',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Mountain climbers lestés',
-        sets: '3 × 20',
-        equip: 'Gilet lesté 10 kg',
-        desc: "En position de pompe avec gilet lesté, amenez les genoux vers la poitrine rapidement. Version intensifiée du mountain climber.",
-        caloriesPerSet: [10, 12],
-        totalSets: 3,
-        nbRep: 20,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Mountain Climbers',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Circuit finition gainage lesté',
-        sets: '3 × 45s',
-        equip: 'Gilet lesté 10 kg',
-        desc: "Enchaînement planche avant / planche latérale droite / planche latérale gauche, 15s chacune avec gilet. Sangle abdominale complète sans flexion.",
-        caloriesPerSet: [9, 11],
-        totalSets: 3,
-        nbRep: 45,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Weighted Plank Circuit',
+          name: 'Crunches',
           muscleGroups: ['abdominals', 'core']
-        }
-      },
-      {
-        name: 'Vélo',
-        sets: '1 × 12 min',
-        equip: 'Vélo (ou vélo d\'appartement)',
-        desc: "Finisher cardio de 12 min à allure soutenue (zone 3-4, respiration forte) pour sécuriser 300+ kcal sur la séance.",
-        caloriesPerSet: [120, 150],
-        totalSets: 1,
-        nbRep: 1,
-        googleFitActivity: {
-          type: 'biking',
-          name: 'Cycling',
-          muscleGroups: ['legs', 'cardio']
         }
       },
     ],
