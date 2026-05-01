@@ -18,7 +18,6 @@
   "Squats": "squat",
   "Fentes avant alternées": "lunge",
   "Soulevé de terre roumain": "deadlift",
-  "Step-ups": "step-up",
   "Hip thrust": "hip-thrust",
   "Mollets debout": "calf",
   "Crunchs inversés lestés": "abs",
@@ -46,7 +45,6 @@
   "Squats bulgares": "lunge",
   "Mollets assis": "calf",
   "Dead bug": "abs",
-  "Vélo": "bike",
   "Cardio au choix": "cardio",
   "Étirements complets": "stretch",
   "Mobilité articulaire": "mobility",
@@ -99,7 +97,6 @@
   "Adducteur au sol": "lunge",
   "Mollets sautés": "calf",
   "Mountain climbers": "mountain",
-  "Crunchs vélo": "abs",
   "Floor press haltères": "dumbbell",
   "Z-press haltères": "dumbbell",
   "Développé serré barre": "dumbbell",
@@ -172,7 +169,6 @@
   "Good morning haltères": "good-morning",
   "Fentes bulgares lourdes": "lunge",
   "Pistol squat assisté": "squat",
-  "Box step-up lourd": "step-up",
   "Planche abdominale lestée": "plank",
   "Dead bug lesté": "abs",
   "Sumo squat pulse": "squat",
@@ -180,5 +176,10 @@
   "Squat cosaque profond": "squat",
   "Fentes latérales glissées": "lunge",
   "Mollets assis lourd": "calf",
-  "Crunchs complets": "abs"
+  "Crunchs complets": "abs",
+  "Dips": "bars",
+  "Pompes": "pushup",
+  "Pompes inclinées": "pushup",
+  "Pompes déclinées": "pushup",
+  "Pont fessier": "hip-thrust"
 }
