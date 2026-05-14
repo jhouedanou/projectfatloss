@@ -154,5 +154,8 @@
   },
   "dayPills": {
     "week": "S"
+  },
+  "header": {
+    "subtitle": "Fitness • Motivation • Résultats"
   }
 }

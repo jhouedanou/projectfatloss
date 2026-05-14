@@ -122,16 +122,16 @@ function DayPills({ days, current, setCurrent, setStepMode }) {
         }}
         onMouseEnter={(e) => {
           if (!isActive) {
-            e.target.style.backgroundColor = alpha(theme.palette.primary.main, 0.05);
-            e.target.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.backgroundColor = alpha(theme.palette.primary.main, 0.05);
+            e.currentTarget.style.transform = 'translateY(-2px)';
           }
         }}
         onMouseLeave={(e) => {
           if (!isActive) {
-            e.target.style.backgroundColor = isCompleted
+            e.currentTarget.style.backgroundColor = isCompleted
               ? alpha(theme.palette.success.main, 0.1)
               : 'transparent';
-            e.target.style.transform = 'translateY(0)';
+            e.currentTarget.style.transform = 'translateY(0)';
           }
         }}
       >

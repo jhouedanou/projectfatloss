@@ -10,11 +10,13 @@ import {
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import { useTranslation } from 'react-i18next';
 import './Header.css';
 import logo from '/playstore.png';
 
 export default function Header({ onNotificationSettings }) {
   const theme = useTheme();
+  const { t } = useTranslation();
   
   return (
     <AppBar 
@@ -107,7 +109,7 @@ export default function Header({ onNotificationSettings }) {
                 mt: -0.5,
               }}
             >
-              Fitness • Motivation • Résultats
+              {t('header.subtitle', { defaultValue: 'Fitness • Motivation • Résultats' })}
             </Typography>
           </Box>
         </Box>
