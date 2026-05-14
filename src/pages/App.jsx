@@ -204,6 +204,11 @@ export default function App() {
   if (isLoading) {
     return (
       <div className="loading-container">
+        <img
+          src="/playstore.png"
+          alt="Project Fat Loss"
+          className="loading-logo"
+        />
         <div className="loading-spinner"></div>
         <p>{t('app.loading')}</p>
       </div>
@@ -378,12 +383,12 @@ export default function App() {
               justifyContent: 'center',
             }}
             onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-3px) scale(1.1)';
-              e.target.style.boxShadow = '0 10px 24px rgba(240, 61, 50, 0.45)';
+              e.currentTarget.style.transform = 'translateY(-3px) scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 10px 24px rgba(240, 61, 50, 0.45)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0) scale(1)';
-              e.target.style.boxShadow = '0 6px 16px rgba(240, 61, 50, 0.35)';
+              e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(240, 61, 50, 0.35)';
             }}
           >
             ⚙️
@@ -405,72 +410,103 @@ export default function App() {
             }} 
             elevation={8}
           >
-            <BottomNavigation
-              value={viewModeToIndex[viewMode]}
-              onChange={(event, newValue) => {
-                setViewMode(indexToViewMode[newValue]);
-              }}
-              sx={{
-                height: '68px',
-                '& .MuiBottomNavigationAction-root': {
-                  minWidth: 'auto',
-                  padding: '6px 0',
-                  transition: 'all 0.2s ease-in-out',
-                  '&.Mui-selected': {
-                    '& .MuiSvgIcon-root': {
-                      transform: 'scale(1.15)',
+            <Box sx={{ display: 'flex', height: '68px', alignItems: 'stretch' }}>
+              <BottomNavigation
+                value={viewModeToIndex[viewMode]}
+                onChange={(event, newValue) => {
+                  setViewMode(indexToViewMode[newValue]);
+                }}
+                sx={{
+                  flex: 1,
+                  height: '68px',
+                  backgroundColor: 'transparent',
+                  '& .MuiBottomNavigationAction-root': {
+                    minWidth: 'auto',
+                    padding: '6px 0',
+                    transition: 'all 0.2s ease-in-out',
+                    '&.Mui-selected': {
+                      '& .MuiSvgIcon-root': {
+                        transform: 'scale(1.15)',
+                      },
                     },
                   },
-                },
-                '& .MuiBottomNavigationAction-label': {
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.3px',
-                  '&.Mui-selected': {
-                    fontSize: '0.72rem',
-                  },
-                },
-              }}
-            >
-              <BottomNavigationAction 
-                label={t('nav.workout')} 
-                icon={<FitnessCenterIcon />} 
-                sx={{
-                  '&.Mui-selected': {
-                    color: (theme) => theme.palette.primary.main,
+                  '& .MuiBottomNavigationAction-label': {
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                    letterSpacing: '0.3px',
+                    '&.Mui-selected': {
+                      fontSize: '0.72rem',
+                    },
                   },
                 }}
-              />
-              <BottomNavigationAction 
-                label={t('nav.history')} 
-                icon={<BarChartIcon />} 
+              >
+                <BottomNavigationAction 
+                  label={t('nav.workout')} 
+                  icon={<FitnessCenterIcon />} 
+                  sx={{
+                    '&.Mui-selected': {
+                      color: (theme) => theme.palette.primary.main,
+                    },
+                  }}
+                />
+                <BottomNavigationAction 
+                  label={t('nav.history')} 
+                  icon={<BarChartIcon />} 
+                  sx={{
+                    '&.Mui-selected': {
+                      color: (theme) => theme.palette.secondary.main,
+                    },
+                  }}
+                />
+                <BottomNavigationAction 
+                  label={t('nav.weight')} 
+                  icon={<MonitorWeightIcon />} 
+                  sx={{
+                    '&.Mui-selected': {
+                      color: '#4CAF50',
+                    },
+                  }}
+                />
+              </BottomNavigation>
+
+              {/* Theme toggle — séparé de la navigation pour éviter l'état "sélectionné" */}
+              <Box
+                onClick={toggleTheme}
                 sx={{
-                  '&.Mui-selected': {
-                    color: (theme) => theme.palette.secondary.main,
-                  },
-                }}
-              />
-              <BottomNavigationAction 
-                label={t('nav.weight')} 
-                icon={<MonitorWeightIcon />} 
-                sx={{
-                  '&.Mui-selected': {
-                    color: '#4CAF50',
-                  },
-                }}
-              />
-              <BottomNavigationAction 
-                label={darkTheme ? t('theme.light', { defaultValue: 'Clair' }) : t('theme.dark', { defaultValue: 'Sombre' })} 
-                icon={darkTheme ? <LightModeIcon /> : <DarkModeIcon />} 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleTheme();
-                }}
-                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '2px',
+                  px: 1.5,
+                  minWidth: '72px',
+                  cursor: 'pointer',
                   color: (theme) => theme.palette.text.secondary,
+                  borderLeft: (theme) => `1px solid ${alpha(theme.palette.divider, 0.15)}`,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: (theme) => alpha(theme.palette.action.hover, 0.08),
+                    color: (theme) => theme.palette.text.primary,
+                  },
+                  '&:active': {
+                    backgroundColor: (theme) => alpha(theme.palette.action.selected, 0.12),
+                  },
                 }}
-              />
-            </BottomNavigation>
+              >
+                {darkTheme ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                <Box
+                  component="span"
+                  sx={{
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    letterSpacing: '0.3px',
+                    lineHeight: 1,
+                  }}
+                >
+                  {darkTheme ? t('theme.light', { defaultValue: 'Clair' }) : t('theme.dark', { defaultValue: 'Sombre' })}
+                </Box>
+              </Box>
+            </Box>
           </Paper>
         )}
         

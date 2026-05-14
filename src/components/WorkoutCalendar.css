@@ -6,8 +6,8 @@
   align-items: center;
   text-align: center;
   padding: 20px;
-  background-color: var(--background-color);
-  color: var(--text-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   border-radius: 10px;
   margin: 20px auto;
   max-width: 700px; /* Ajusté pour le calendrier */
@@ -16,7 +16,7 @@
 
 .calendar-title {
   font-size: 1.8em;
-  color: var(--primary-color);
+  color: var(--vermilion);
   margin-bottom: 20px;
 }
 
@@ -34,7 +34,7 @@
 
 /* Navigation du calendrier */
 .react-calendar__navigation button {
-  color: var(--primary-color) !important;
+  color: var(--vermilion) !important;
   font-weight: bold;
   font-size: 1.1em;
 }
@@ -53,7 +53,7 @@
 
 /* Cellules de date */
 .react-calendar__tile {
-  color: var(--text-color) !important;
+  color: var(--text-primary) !important;
   border-radius: 4px;
   padding: 10px 5px; /* Ajuster le padding pour une meilleure apparence */
   transition: background-color 0.2s ease;
@@ -61,18 +61,18 @@
 
 .react-calendar__tile:enabled:hover,
 .react-calendar__tile:enabled:focus {
-  background-color: var(--primary-color-light, #d1e3ff) !important;
-  color: var(--primary-color-contrast, #000) !important; 
+  background-color: rgba(240, 61, 50, 0.15) !important;
+  color: var(--text-primary) !important;
 }
 
 .react-calendar__tile--now {
-  background: var(--accent-color-light, #ffe0b2) !important;
-  color: var(--accent-color-contrast, #000) !important;
+  background: rgba(255, 152, 0, 0.2) !important;
+  color: var(--text-primary) !important;
 }
 
 .react-calendar__tile--active {
-  background: var(--primary-color) !important;
-  color: var(--primary-color-contrast, #fff) !important;
+  background: var(--vermilion) !important;
+  color: #fff !important;
 }
 
 /* Marqueur d'entraînement sur les dates */
@@ -88,7 +88,7 @@
 .workout-marker {
   width: 8px;
   height: 8px;
-  background-color: var(--accent-color);
+  background-color: var(--color-accent-orange);
   border-radius: 50%;
   margin: 2px auto 0; /* Ajuster la marge */
 }
@@ -96,7 +96,7 @@
 .calories-badge {
   font-size: 0.6em;
   font-weight: bold;
-  color: var(--accent-color);
+  color: var(--color-accent-orange);
   margin-top: 2px;
 }
 
@@ -113,12 +113,12 @@
 
 .selected-day-title {
   font-size: 1.5em;
-  color: var(--primary-color);
+  color: var(--vermilion);
   margin-bottom: 15px;
 }
 
 .day-workout-card {
-  background-color: var(--background-color); /* Un fond légèrement différent */
+  background-color: var(--bg-primary);
   padding: 15px;
   border-radius: 6px;
   margin-bottom: 12px;
@@ -135,7 +135,7 @@
 .workout-title {
   font-size: 1.1em;
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--text-primary);
 }
 
 .workout-time {
@@ -165,7 +165,7 @@
 .stat-value {
   font-size: 1em;
   font-weight: bold;
-  color: var(--accent-color);
+  color: var(--color-accent-orange);
 }
 
 .no-workouts-message {
