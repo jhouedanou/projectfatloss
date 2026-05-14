@@ -91,9 +91,7 @@ function calculateWeight(equipment) {
 function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode }) {
   const defaultTime = PAUSE_DURATION_SECONDS;
   
-  // Initialiser le temps selon le mode
-  const initialTime = defaultTime;
-  const [time, setTime] = useState(initialTime);
+  const [time, setTime] = useState(defaultTime);
   
   const currentExercise = day.exercises[step];
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
@@ -102,7 +100,7 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   useEffect(() => {
     // Réinitialiser le temps si le mode change
     setTime(defaultTime);
-  }, [autoMode, defaultTime]);
+  }, [defaultTime]);
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -338,7 +336,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       setSetNum(s => s + 1);
     }
     setPendingAdvance(null);
-  }, [pendingAdvance, setStep, setSetNum]);
+  }, [pendingAdvance]);
 
   const handlePauseEnd = () => {
     applyPendingAdvance();
