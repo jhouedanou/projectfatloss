@@ -98,11 +98,6 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const isLastSet = setNum === totalSets - 1;
   
   useEffect(() => {
-    // Réinitialiser le temps si le mode change
-    setTime(defaultTime);
-  }, [defaultTime]);
-  
-  useEffect(() => {
     const timer = setInterval(() => {
       setTime((prevTime) => {
         if (prevTime <= 4 && prevTime > 1) {
@@ -256,7 +251,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [pause, setPause] = useState(false);
   const [isExerciseTransition, setIsExerciseTransition] = useState(false);
   const [setNum, setSetNum] = useState(0);
-  const [pendingAdvance, setPendingAdvance] = useState(null);
+  const [pendingTransitionType, setPendingTransitionType] = useState(null);
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
@@ -306,7 +301,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     setPause(false);
     setIsExerciseTransition(false);
     setSetNum(0);
-    setPendingAdvance(null);
+    setPendingTransitionType(null);
     setTotalCaloriesBurned(0);
   },[dayIndex]);
   
@@ -329,14 +324,14 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   }, [exo, step, setNum, totalSets, pause]);
   
   const applyPendingAdvance = useCallback(() => {
-    if (pendingAdvance === 'exercise') {
+    if (pendingTransitionType === 'exercise') {
       setStep(s => s + 1);
       setSetNum(0);
-    } else if (pendingAdvance === 'set') {
+    } else if (pendingTransitionType === 'set') {
       setSetNum(s => s + 1);
     }
-    setPendingAdvance(null);
-  }, [pendingAdvance]);
+    setPendingTransitionType(null);
+  }, [pendingTransitionType]);
 
   const handlePauseEnd = () => {
     applyPendingAdvance();
@@ -368,13 +363,13 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         setWorkoutCompleted(true);
       } else {
         // Pause de transition puis passage à l'exercice suivant
-        setPendingAdvance('exercise');
+        setPendingTransitionType('exercise');
         setPause(true);
         setIsExerciseTransition(true);
       }
     } else {
       // Passer à la série suivante
-      setPendingAdvance('set');
+      setPendingTransitionType('set');
       setPause(true);
     }
   };
