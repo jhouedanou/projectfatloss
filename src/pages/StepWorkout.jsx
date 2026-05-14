@@ -329,28 +329,24 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     prevStepRef.current = step;
   }, [exo, step, setNum, totalSets, pause]);
   
-  const handlePauseEnd = () => {
+  const applyPendingAdvance = useCallback(() => {
     if (pendingAdvance === 'exercise') {
       setStep(s => s + 1);
       setSetNum(0);
     } else if (pendingAdvance === 'set') {
       setSetNum(s => s + 1);
     }
-
     setPendingAdvance(null);
+  }, [pendingAdvance]);
+
+  const handlePauseEnd = () => {
+    applyPendingAdvance();
     setPause(false);
     setIsExerciseTransition(false);
   };
   
   const handleSkipPause = () => {
-    if (pendingAdvance === 'exercise') {
-      setStep(s => s + 1);
-      setSetNum(0);
-    } else if (pendingAdvance === 'set') {
-      setSetNum(s => s + 1);
-    }
-
-    setPendingAdvance(null);
+    applyPendingAdvance();
     setPause(false);
     setIsExerciseTransition(false);
   };
