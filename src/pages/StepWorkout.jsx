@@ -33,6 +33,8 @@ const formatTime = (seconds) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
+const PAUSE_DURATION_SECONDS = 10;
+
 // Correction de l'import du fichier JSON
 // import iconsMap from '../../public/exo-icons.json'; // ❌ Incorrect
 
@@ -87,11 +89,10 @@ function calculateWeight(equipment) {
 }
 
 function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode }) {
-  const defaultTime = 10;
-  const autoTime = 10;
+  const defaultTime = PAUSE_DURATION_SECONDS;
   
   // Initialiser le temps selon le mode
-  const initialTime = autoMode ? autoTime : defaultTime;
+  const initialTime = defaultTime;
   const [time, setTime] = useState(initialTime);
   
   const currentExercise = day.exercises[step];
@@ -100,8 +101,8 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   
   useEffect(() => {
     // Réinitialiser le temps si le mode change
-    setTime(autoMode ? autoTime : defaultTime);
-  }, [autoMode, defaultTime, autoTime]);
+    setTime(defaultTime);
+  }, [autoMode, defaultTime]);
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -337,7 +338,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       setSetNum(s => s + 1);
     }
     setPendingAdvance(null);
-  }, [pendingAdvance]);
+  }, [pendingAdvance, setStep, setSetNum]);
 
   const handlePauseEnd = () => {
     applyPendingAdvance();
@@ -584,7 +585,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   useEffect(() => {
     if (pause && !workoutCompleted) {
       const pauseData = {
-        remainingTime: 10,
+        remainingTime: PAUSE_DURATION_SECONDS,
         nextExercise: step < total - 1 ? day.exercises[step + 1] : null,
         currentSet: setNum + 1,
         totalSets: totalSets,
