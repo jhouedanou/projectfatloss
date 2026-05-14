@@ -33,6 +33,8 @@ const formatTime = (seconds) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
+const PAUSE_DURATION_SECONDS = 10;
+
 // Correction de l'import du fichier JSON
 // import iconsMap from '../../public/exo-icons.json'; // ❌ Incorrect
 
@@ -87,21 +89,13 @@ function calculateWeight(equipment) {
 }
 
 function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode }) {
-  const defaultTime = reducedTime ? 10 : 15;
-  const autoTime = 20; // Temps pour le mode automatique
+  const defaultTime = PAUSE_DURATION_SECONDS;
   
-  // Initialiser le temps selon le mode
-  const initialTime = autoMode ? autoTime : defaultTime;
-  const [time, setTime] = useState(initialTime);
+  const [time, setTime] = useState(defaultTime);
   
   const currentExercise = day.exercises[step];
   const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
   const isLastSet = setNum === totalSets - 1;
-  
-  useEffect(() => {
-    // Réinitialiser le temps si le mode change
-    setTime(autoMode ? autoTime : defaultTime);
-  }, [autoMode, defaultTime, autoTime]);
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -257,6 +251,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [pause, setPause] = useState(false);
   const [isExerciseTransition, setIsExerciseTransition] = useState(false);
   const [setNum, setSetNum] = useState(0);
+  const [pendingTransitionType, setPendingTransitionType] = useState(null);
   const [totalCaloriesBurned, setTotalCaloriesBurned] = useState(0);
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
@@ -306,6 +301,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     setPause(false);
     setIsExerciseTransition(false);
     setSetNum(0);
+    setPendingTransitionType(null);
     setTotalCaloriesBurned(0);
   },[dayIndex]);
   
@@ -327,12 +323,24 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     prevStepRef.current = step;
   }, [exo, step, setNum, totalSets, pause]);
   
+  const applyPendingAdvance = useCallback(() => {
+    if (pendingTransitionType === 'exercise') {
+      setStep(s => s + 1);
+      setSetNum(0);
+    } else if (pendingTransitionType === 'set') {
+      setSetNum(s => s + 1);
+    }
+    setPendingTransitionType(null);
+  }, [pendingTransitionType]);
+
   const handlePauseEnd = () => {
+    applyPendingAdvance();
     setPause(false);
     setIsExerciseTransition(false);
   };
   
   const handleSkipPause = () => {
+    applyPendingAdvance();
     setPause(false);
     setIsExerciseTransition(false);
   };
@@ -354,15 +362,14 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         // Jour terminé
         setWorkoutCompleted(true);
       } else {
-        // Passer à l'exercice suivant
-        setStep(step + 1);
-        setSetNum(0); // Réinitialiser le numéro de série
+        // Pause de transition puis passage à l'exercice suivant
+        setPendingTransitionType('exercise');
         setPause(true);
         setIsExerciseTransition(true);
       }
     } else {
       // Passer à la série suivante
-      setSetNum(setNum + 1);
+      setPendingTransitionType('set');
       setPause(true);
     }
   };
@@ -571,7 +578,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   useEffect(() => {
     if (pause && !workoutCompleted) {
       const pauseData = {
-        remainingTime: autoMode ? 20 : 15, // Temps de pause
+        remainingTime: PAUSE_DURATION_SECONDS,
         nextExercise: step < total - 1 ? day.exercises[step + 1] : null,
         currentSet: setNum + 1,
         totalSets: totalSets,
