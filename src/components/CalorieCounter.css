@@ -513,6 +513,47 @@
   box-shadow: 0 0 0 2px rgba(240, 61, 50, 0.25);
 }
 
+/* Category filter pills */
+.category-filter-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 14px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-filter-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.category-pill {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.category-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.category-pill.active-pill {
+  background: rgba(240, 61, 50, 0.15);
+  border-color: var(--vermilion);
+  color: var(--vermilion);
+}
+
 .create-custom-shortcut {
   display: flex;
   align-items: center;

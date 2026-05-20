@@ -43,6 +43,7 @@ const CalorieCounter = () => {
   
   // Search & add food state
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedFood, setSelectedFood] = useState(null);
   const [quantity, setQuantity] = useState(100);
   
@@ -161,11 +162,13 @@ const CalorieCounter = () => {
 
   // Filter foods (combines database & custom foods)
   const allAvailableFoods = [...customFoods, ...foodDatabase];
-  const filteredFoods = searchQuery.trim() === '' 
-    ? allAvailableFoods.slice(0, 15) // Limit initial list length
-    : allAvailableFoods.filter(food => 
-        food.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const filteredFoods = allAvailableFoods.filter(food => {
+    const matchesSearch = searchQuery.trim() === '' || food.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || food.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  }).slice(0, searchQuery.trim() !== '' ? 50 : 20);
+
+  const foodCount = allAvailableFoods.length;
 
   // Calorie calculations
   const remainingCalories = Math.max(0, summary.goal - summary.calories);
@@ -356,12 +359,31 @@ const CalorieCounter = () => {
               <Search className="search-icon-inside" size={18} />
               <input 
                 type="text" 
-                placeholder="Rechercher un aliment..." 
+                placeholder={`Rechercher parmi ${foodCount} aliments...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="food-search-input"
                 autoFocus
               />
+            </div>
+
+            {/* Category filter pills */}
+            <div className="category-filter-scroll">
+              <button 
+                className={`category-pill ${selectedCategory === 'all' ? 'active-pill' : ''}`}
+                onClick={() => setSelectedCategory('all')}
+              >
+                Tout
+              </button>
+              {foodCategories.map(cat => (
+                <button 
+                  key={cat.id}
+                  className={`category-pill ${selectedCategory === cat.id ? 'active-pill' : ''}`}
+                  onClick={() => setSelectedCategory(cat.id)}
+                >
+                  {cat.name}
+                </button>
+              ))}
             </div>
 
             {/* Custom food link */}
