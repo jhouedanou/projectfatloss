@@ -4,9 +4,7 @@ import {
   useTheme,
   alpha,
 } from '@mui/material';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import SpaIcon from '@mui/icons-material/Spa';
+import { Dumbbell, CheckCircle2, Leaf } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const DAYS_PER_WEEK = 7;
@@ -45,27 +43,26 @@ function DayPills({ days, current, setCurrent, setStepMode }) {
         onClick={() => handleWeekClick(weekIndex)}
         style={{
           flex: 1,
-          minWidth: '50px',
-          height: '32px',
+          minWidth: '40px',
+          height: '28px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          border: 'none',
-          borderRadius: '8px',
+          borderRadius: '100px',
           cursor: 'pointer',
-          transition: 'all 0.3s ease',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           fontSize: '0.7rem',
           fontWeight: '700',
+          fontFamily: 'Inter, sans-serif',
           backgroundColor: isActiveWeek
-            ? theme.palette.primary.main
-            : isWeekCompleted
-              ? alpha(theme.palette.success.main, 0.15)
-              : alpha(theme.palette.text.secondary, 0.08),
+            ? '#F03D32'
+            : 'transparent',
           color: isActiveWeek
             ? '#fff'
             : isWeekCompleted
-              ? theme.palette.success.main
-              : theme.palette.text.secondary,
+              ? '#888'
+              : '#555',
+          border: isActiveWeek ? 'none' : '1px solid rgba(255, 255, 255, 0.05)',
         }}
       >
         {t('dayPills.week', { defaultValue: 'S' })}{weekIndex + 1}
@@ -81,136 +78,98 @@ function DayPills({ days, current, setCurrent, setStepMode }) {
     const isActive = current === actualIndex;
     const isRestDay = day.isRestDay === true;
 
+    let iconColor = '#555';
+    let IconComponent = Dumbbell;
+
+    if (isActive) {
+      iconColor = '#F03D32';
+      IconComponent = isRestDay ? Leaf : Dumbbell;
+    } else if (isCompleted) {
+      iconColor = '#4CAF50';
+      IconComponent = CheckCircle2;
+    } else {
+      IconComponent = isRestDay ? Leaf : Dumbbell;
+    }
+
     return (
       <button
         key={actualIndex}
         onClick={() => handleDayClick(actualIndex)}
         style={{
-          minWidth: '44px',
-          width: '44px',
-          height: '50px',
+          minWidth: '40px',
+          width: '40px',
+          height: '54px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '2px',
-          border: 'none',
-          borderRadius: '12px',
+          gap: '4px',
+          border: isActive ? '1px solid rgba(240, 61, 50, 0.3)' : '1px solid rgba(255, 255, 255, 0.05)',
+          borderRadius: '16px',
           cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          fontSize: '0.6rem',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          fontSize: '0.65rem',
           fontWeight: '700',
+          fontFamily: 'Inter, sans-serif',
           flexShrink: 0,
           backgroundColor: isActive
-            ? isRestDay
-              ? alpha(theme.palette.info.main, 0.15)
-              : alpha(theme.palette.primary.main, 0.15)
+            ? 'rgba(240, 61, 50, 0.1)'
             : isCompleted
-              ? alpha(theme.palette.success.main, 0.1)
+              ? 'rgba(255, 255, 255, 0.02)'
               : 'transparent',
-          color: isActive
-            ? isRestDay
-              ? theme.palette.info.main
-              : theme.palette.primary.main
-            : isCompleted
-              ? theme.palette.success.main
-              : theme.palette.text.secondary,
-          transform: isActive ? 'scale(1.05)' : 'scale(1)',
-          boxShadow: isActive
-            ? `0 4px 12px ${alpha(isRestDay ? theme.palette.info.main : theme.palette.primary.main, 0.2)}`
-            : 'none',
-        }}
-        onMouseEnter={(e) => {
-          if (!isActive) {
-            e.currentTarget.style.backgroundColor = alpha(theme.palette.primary.main, 0.05);
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!isActive) {
-            e.currentTarget.style.backgroundColor = isCompleted
-              ? alpha(theme.palette.success.main, 0.1)
-              : 'transparent';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }
+          color: isActive ? '#fff' : (isCompleted ? '#aaa' : '#666'),
+          boxShadow: isActive ? '0 0 15px rgba(240, 61, 50, 0.2)' : 'none',
         }}
       >
-        {isCompleted ? (
-          <CheckCircleIcon
-            style={{
-              fontSize: '0.9rem',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-            }}
-          />
-        ) : isRestDay ? (
-          <SpaIcon
-            style={{
-              fontSize: '0.9rem',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-            }}
-          />
-        ) : (
-          <FitnessCenterIcon
-            style={{
-              fontSize: '0.9rem',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-            }}
-          />
-        )}
+        <IconComponent size={18} color={iconColor} strokeWidth={isActive ? 2.5 : 2} />
         J{actualIndex + 1}
       </button>
     );
   };
 
-  // Split week days into two rows for display
   const firstRowDays = currentWeekDays.slice(0, 4);
   const secondRowDays = currentWeekDays.slice(4);
 
   return (
-    <Box sx={{ mb: 3, width: '100%', px: { xs: 0.5, sm: 2 } }}>
+    <Box sx={{ mb: 2, width: '100%', px: { xs: 0.5, sm: 2 } }}>
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          gap: { xs: 0.75, sm: 1 },
-          py: { xs: 1, sm: 2 },
-          px: { xs: 1, sm: 2 },
-          borderRadius: '16px',
-          background: `linear-gradient(135deg, 
-            ${alpha(theme.palette.primary.main, 0.08)} 0%, 
-            ${alpha(theme.palette.secondary.main, 0.08)} 100%
-          )`,
-          border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+          gap: 1.5,
+          py: 2,
+          px: 2,
+          borderRadius: '24px',
+          background: 'rgba(24, 24, 27, 0.6)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
           width: '100%',
           boxSizing: 'border-box',
         }}
       >
-        {/* Week selector */}
         {totalWeeks > 1 && (
           <Box sx={{
             display: 'flex',
-            gap: 0.5,
+            gap: 1,
             justifyContent: 'center',
-            mb: 0.5,
+            mb: 1,
           }}>
             {Array.from({ length: totalWeeks }, (_, i) => renderWeekTab(i))}
           </Box>
         )}
 
-        {/* First row of day pills */}
         <Box sx={{
           display: 'flex',
-          gap: { xs: 0.5, sm: 1 },
+          gap: 1,
           justifyContent: 'center',
         }}>
           {firstRowDays.map((day, index) => renderDayButton(day, index))}
         </Box>
 
-        {/* Second row of day pills */}
         {secondRowDays.length > 0 && (
           <Box sx={{
             display: 'flex',
-            gap: { xs: 0.5, sm: 1 },
+            gap: 1,
             justifyContent: 'center',
           }}>
             {secondRowDays.map((day, index) => renderDayButton(day, index + 4))}

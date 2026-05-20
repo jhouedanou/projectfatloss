@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Edit2, Trash2, Plus, X } from 'lucide-react';
 import { 
   getWorkoutPlan, 
   saveWorkoutPlan, 
@@ -182,7 +183,7 @@ const WorkoutCustomizer = ({ onClose }) => {
     <div className="workout-customizer">
       <div className="customizer-header">
         <h2>{t('customizer.title')}</h2>
-        <button className="close-button" onClick={onClose}>×</button>
+        <button className="close-button" onClick={onClose}><X size={20} /></button>
       </div>
       
       {/* Messages de succès et d'erreur */}
@@ -229,14 +230,14 @@ const WorkoutCustomizer = ({ onClose }) => {
                   onClick={() => handleEditExercise(index)}
                   disabled={editingExercise !== null || isAdding}
                 >
-                  ✏️
+                  <Edit2 size={16} />
                 </button>
                 <button 
                   className="delete-button"
                   onClick={() => handleDeleteExercise(index)}
                   disabled={editingExercise !== null || isAdding}
                 >
-                  🗑️
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>
@@ -248,7 +249,8 @@ const WorkoutCustomizer = ({ onClose }) => {
             onClick={handleAddExercise}
             disabled={editingExercise !== null || isAdding}
           >
-            {t('customizer.addExercise')} +
+            <Plus size={16} style={{ marginRight: '6px' }} />
+            <span>{t('customizer.addExercise')}</span>
           </button>
         </div>
       )}

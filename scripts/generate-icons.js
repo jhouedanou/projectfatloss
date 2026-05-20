@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
-const inputIcon = path.join(__dirname, '../public/favicon.ico');
+const inputIcon = path.join(__dirname, '../public/logo.png');
 const outputDir = path.join(__dirname, '../public');
 
 // Créer le dossier de sortie s'il n'existe pas

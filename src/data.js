@@ -60,12 +60,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -135,12 +135,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -153,17 +153,17 @@ const fullPlan = [
     title: 'JOUR 3: HAUT DU CORPS (Pectoraux, Épaules, Dos)',
     exercises: [
       {
-        name: 'Pompes',
+        name: 'Écartés couchés haltères',
         sets: '4 × 10',
-        equip: 'Poids du corps',
-        desc: "En appui sur mains et pieds, fléchissez les coudes puis poussez. Différentes positions des mains ciblent différentes parties des pectoraux.",
+        equip: 'Haltères 15 kg',
+        desc: "Allongé sur le dos, ouvrez les bras en demi-cercle puis ramenez les haltères au-dessus de la poitrine.",
         caloriesPerSet: [10, 12],
         totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Push-Ups',
-          muscleGroups: ['chest', 'triceps']
+          name: 'Dumbbell Chest Flyes',
+          muscleGroups: ['chest']
         }
       },
       {
@@ -210,12 +210,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -285,12 +285,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -360,12 +360,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -435,12 +435,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -450,9 +450,66 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 7: REPOS',
-    isRestDay: true,
-    exercises: [],
+    title: 'JOUR 7: COMPLEXES HALTÈRES (Haute Intensité)',
+    isRestDay: false,
+    exercises: [
+      {
+        name: 'Complexe Haltères (Soulevé de terre + Rowing)',
+        sets: '4 × 10',
+        equip: 'Haltères 15 kg',
+        desc: "Enchaînez sans poser les haltères : 1 Soulevé de terre puis 1 Rowing. Répétez 10 fois. Exigeant pour le dos et les jambes.",
+        caloriesPerSet: [25, 30],
+        totalSets: 4,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex 1',
+          muscleGroups: ['back', 'legs']
+        }
+      },
+      {
+        name: 'Complexe Haltères (Fente + Développé épaules)',
+        sets: '4 × 10/jambe',
+        equip: 'Haltères 10 kg',
+        desc: "Faites une fente, et en remontant, développez les haltères au-dessus de la tête. Travail complet du corps.",
+        caloriesPerSet: [25, 30],
+        totalSets: 4,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex 2',
+          muscleGroups: ['shoulders', 'legs']
+        }
+      },
+      {
+        name: 'Squat Goblet lourd',
+        sets: '4 × 15',
+        equip: 'Haltère 15 kg',
+        desc: "Squat profond avec un haltère tenu contre la poitrine. Temps de repos court (45s) pour maintenir l'intensité.",
+        caloriesPerSet: [18, 22],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Heavy Goblet Squat',
+          muscleGroups: ['quadriceps', 'glutes']
+        }
+      },
+      {
+        name: 'Crunchs',
+        sets: '1 × 50',
+        equip: 'Poids du corps',
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
+        }
+      }
+    ],
   },
   {
     title: 'JOUR 8: HAUT DU CORPS (Pectoraux, Épaules, Triceps)',
@@ -515,12 +572,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -591,12 +648,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -666,12 +723,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -741,12 +798,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -801,27 +858,27 @@ const fullPlan = [
         }
       },
       {
-        name: 'Squat pistol assisté',
+        name: 'Step-ups haltères',
         sets: '3 × 8/jambe',
-        equip: 'Poids du corps',
-        desc: "Sur un pied, descendez en squat complet en utilisant un support pour l'équilibre. Développe la force unilatérale des jambes.",
+        equip: 'Haltères 10 kg',
+        desc: "Posez un pied sur un banc solide ou une chaise stable, poussez sur cette jambe pour vous surélever en tenant les haltères.",
         caloriesPerSet: [10, 12],
         totalSets: 6,
         nbRep: 8,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Assisted Pistol Squat',
-          muscleGroups: ['quadriceps', 'glutes']
+          name: 'Dumbbell Step-Up',
+          muscleGroups: ['quadriceps', 'glutes', 'hamstrings']
         }
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -891,12 +948,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -906,9 +963,66 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 14: REPOS',
-    isRestDay: true,
-    exercises: [],
+    title: 'JOUR 14: COMPLEXES BARRE (Haute Intensité)',
+    isRestDay: false,
+    exercises: [
+      {
+        name: 'Complexe Barre (Soulevé de terre + Rowing)',
+        sets: '4 × 8',
+        equip: 'Barre 30 kg',
+        desc: "Sans poser la barre : 8 Soulevés de terre suivis immédiatement de 8 Rowings buste penché. Brûlure garantie.",
+        caloriesPerSet: [30, 35],
+        totalSets: 4,
+        nbRep: 8,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Barbell Complex 1',
+          muscleGroups: ['back', 'legs']
+        }
+      },
+      {
+        name: 'Complexe Barre (Épaulé + Front Squat + Push Press)',
+        sets: '4 × 8',
+        equip: 'Barre 30 kg',
+        desc: "1 Épaulé (Clean), 1 Squat avant, puis 1 Push Press au-dessus de la tête. Répétez 8 fois. Redoutable.",
+        caloriesPerSet: [35, 40],
+        totalSets: 4,
+        nbRep: 8,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Barbell Complex 2',
+          muscleGroups: ['full_body']
+        }
+      },
+      {
+        name: 'Thrusters Haltères',
+        sets: '4 × 12',
+        equip: 'Haltères 10 kg',
+        desc: "Squat complet suivi d'un développé épaules dans le même mouvement fluide.",
+        caloriesPerSet: [20, 25],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thrusters',
+          muscleGroups: ['quadriceps', 'shoulders']
+        }
+      },
+      {
+        name: 'Crunchs',
+        sets: '1 × 50',
+        equip: 'Poids du corps',
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
+        }
+      }
+    ],
   },
   {
     title: 'JOUR 15: HAUT DU CORPS (Pectoraux, Épaules, Triceps)',
@@ -971,12 +1085,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -1047,12 +1161,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -1065,16 +1179,16 @@ const fullPlan = [
     title: 'JOUR 17: HAUT DU CORPS (Pectoraux, Épaules, Dos)',
     exercises: [
       {
-        name: 'Pompes inclinées',
+        name: 'Développé incliné haltères',
         sets: '4 × 10',
-        equip: 'Poids du corps',
-        desc: "Pieds surélevés, réalisez des pompes. L'inclinaison cible le haut des pectoraux et les épaules.",
+        equip: 'Haltères 15 kg',
+        desc: "Allongé sur un banc incliné à 30-45°, poussez les haltères au-dessus de la poitrine de façon contrôlée.",
         caloriesPerSet: [10, 13],
         totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Decline Push-Ups',
+          name: 'Incline Dumbbell Press',
           muscleGroups: ['chest', 'shoulders', 'triceps']
         }
       },
@@ -1122,12 +1236,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -1197,12 +1311,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -1216,17 +1330,17 @@ const fullPlan = [
     title: 'JOUR 19: BAS DU CORPS (Quadriceps, Fessiers)',
     exercises: [
       {
-        name: 'Squat sauté',
+        name: 'Squats lourds haltères',
         sets: '4 × 12',
-        equip: 'Poids du corps',
-        desc: "Descendez en squat puis explosez vers le haut en sautant. Développe la puissance et brûle un maximum de calories.",
+        equip: 'Haltères 15 kg',
+        desc: "Haltères sur les épaules ou le long du corps, descendez en squat profond et remontez. Cible les quadriceps et fessiers.",
         caloriesPerSet: [12, 15],
         totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Jump Squat',
-          muscleGroups: ['quadriceps', 'glutes', 'calves']
+          name: 'Dumbbell Squats',
+          muscleGroups: ['quadriceps', 'glutes']
         }
       },
       {
@@ -1273,12 +1387,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -1348,12 +1462,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -1428,12 +1542,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -1504,12 +1618,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -1579,12 +1693,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',
@@ -1654,12 +1768,12 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '4 × 20',
+        sets: '1 × 50',
         equip: 'Poids du corps',
-        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Exercice de finition abdominal.",
-        caloriesPerSet: [6, 8],
-        totalSets: 4,
-        nbRep: 20,
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunches',

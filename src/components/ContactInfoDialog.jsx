@@ -67,7 +67,7 @@ export default function ContactInfoDialog({ open, onClose }) {
       <DialogTitle>
         <Box sx={{ textAlign: 'center', mb: 1 }}>
           <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', mb: 1 }}>
-            Bienvenue sur Project Fat Loss! 🏋️
+            Bienvenue sur Project Fat Loss !
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Pour recevoir vos rapports d'entraînement
@@ -145,7 +145,7 @@ export default function ContactInfoDialog({ open, onClose }) {
               }
             }}
           >
-            Commencer l'aventure 💪
+            Commencer l'aventure
           </Button>
         </DialogActions>
       </form>

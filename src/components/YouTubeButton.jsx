@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@mui/material';
-import { YouTube as YouTubeIcon } from '@mui/icons-material';
+import YouTubeIcon from '@mui/icons-material/YouTube';
 import './YouTubeButton.css';
 
 function YouTubeButton({ exercise, exerciseName }) {
@@ -41,7 +41,7 @@ function YouTubeButton({ exercise, exerciseName }) {
         variant="outlined"
         color="error"
         size="small"
-        sx={{ ml: 1 }}
+        sx={{ ml: 1, borderColor: '#F03D32', color: '#F03D32', '&:hover': { borderColor: '#ff5247', backgroundColor: 'rgba(240,61,50,0.08)' } }}
         startIcon={<YouTubeIcon />}
         onClick={handleYouTubeOpen}
       >

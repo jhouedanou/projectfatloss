@@ -79,7 +79,7 @@ export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose })
       // Créer une notification personnalisée pour le pre-workout
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification("Pre-Workout terminé !", {
-          body: "C'est parti ! Votre entraînement commence maintenant 💪",
+          body: "C'est parti ! Votre entraînement commence maintenant",
           icon: '/favicon.ico',
           tag: 'preworkout-complete'
         });
@@ -221,7 +221,7 @@ export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose })
           pb: 1
         }}>
           <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
-            🔥 Pre-Workout Timer
+            Pre-Workout Timer
           </Typography>
           <IconButton 
             onClick={handleClose}
@@ -270,13 +270,13 @@ export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose })
           {/* Status Text */}
           <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
             {timeLeft === 0 ? (
-              "🎉 C'est parti ! Votre entraînement va commencer..."
+              "C'est parti ! Votre entraînement va commencer..."
             ) : isRunning && !isPaused ? (
-              "⏳ Préparez-vous mentalement pour votre séance..."
+              "Préparez-vous mentalement pour votre séance..."
             ) : isPaused ? (
-              "⏸️ Timer en pause"
+              "Timer en pause"
             ) : (
-              "🚀 Cliquez sur Démarrer pour commencer votre préparation"
+              "Cliquez sur Démarrer pour commencer votre préparation"
             )}
           </Typography>
 
@@ -285,17 +285,17 @@ export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose })
             <Box sx={{ mb: 3, p: 2, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: 2 }}>
               <Typography variant="body1" sx={{ fontStyle: 'italic' }}>
                 {timeLeft > 25 * 60 ? (
-                  "🧠 Visualisez vos objectifs et préparez votre mindset"
+                  "Visualisez vos objectifs et préparez votre mindset"
                 ) : timeLeft > 20 * 60 ? (
-                  "💧 Hydratez-vous et préparez votre équipement"
+                  "Hydratez-vous et préparez votre équipement"
                 ) : timeLeft > 15 * 60 ? (
-                  "🔥 Échauffez vos articulations en douceur"
+                  "Échauffez vos articulations en douceur"
                 ) : timeLeft > 10 * 60 ? (
-                  "💪 Activez vos muscles avec des mouvements légers"
+                  "Activez vos muscles avec des mouvements légers"
                 ) : timeLeft > 5 * 60 ? (
-                  "⚡ Augmentez progressivement l'intensité"
+                  "Augmentez progressivement l'intensité"
                 ) : (
-                  "🎯 Dernière ligne droite, vous êtes prêt(e) !"
+                  "Dernière ligne droite, vous êtes prêt(e) !"
                 )}
               </Typography>
             </Box>

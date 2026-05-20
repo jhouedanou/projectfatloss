@@ -10,12 +10,7 @@ import {
   Box,
   alpha
 } from '@mui/material';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import SpaIcon from '@mui/icons-material/Spa';
+import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft } from 'lucide-react';
 import { createAppTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import { getWorkoutPlan } from '../services/WorkoutCustomization'; 
@@ -32,7 +27,7 @@ import { days as initialWorkoutPlan } from '../data';
 import '../components/WeightTracker.css';
 import '../components/WorkoutCustomizer.css'; 
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
-import DayPills from '../components/DayPills';
+import WeekSelector from '../components/WeekSelector';
 import Header from '../components/Header/Header';
 import { getServiceWorkerPath, getAssetPath } from '../utils/paths';
 import { hasContactInfo, sendWorkoutReport, getContactInfo } from '../services/ContactService';
@@ -49,9 +44,7 @@ export default function App() {
   const [stepMode, setStepMode] = useState(false);
   const [autoMode, setAutoMode] = useState(false);
   const [viewMode, setViewMode] = useState('workout'); 
-  const [darkTheme, setDarkTheme] = useState(
-    localStorage.getItem('theme') !== 'light' 
-  );
+  const [darkTheme, setDarkTheme] = useState(true);
   const [showLanguageSelector, setShowLanguageSelector] = useState(() => {
     const savedPref = localStorage.getItem('showLanguageSelector');
     return false;
@@ -62,9 +55,8 @@ export default function App() {
   
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
-  const [appTheme, setAppTheme] = useState(() => createAppTheme(
-    localStorage.getItem('theme') !== 'light'
-  ));
+  const [showExercises, setShowExercises] = useState(false);
+  const [appTheme, setAppTheme] = useState(() => createAppTheme(true));
 
   useEffect(() => {
     try {
@@ -157,6 +149,7 @@ export default function App() {
       setCurrent(prev => (prev + 1) % workoutPlan.length);
     }
     setStepMode(false); 
+    setShowExercises(false);
   };
   
   const handleWorkoutComplete = (workoutData) => {
@@ -205,7 +198,7 @@ export default function App() {
     return (
       <div className="loading-container">
         <img
-          src="/playstore.png"
+          src="/logo.png"
           alt="Project Fat Loss"
           className="loading-logo"
         />
@@ -229,7 +222,12 @@ export default function App() {
         minHeight: '100vh',
         paddingBottom: stepMode ? 0 : '72px',
       }}>
-        <Header onNotificationSettings={() => setShowNotificationSettings(true)} />
+        {!stepMode && (
+          <Header 
+            onNotificationSettings={() => setShowNotificationSettings(true)} 
+            onBack={showExercises ? () => setShowExercises(false) : null} 
+          />
+        )}
         <div style={{ 
           width: '100%', 
           overflowX: 'hidden',
@@ -246,76 +244,100 @@ export default function App() {
               {isPlanAvailable && (
                 <>
                   {!stepMode ? (
-                    <div className="day-content">
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
-                        <DayPills days={workoutPlan} current={current} setCurrent={setCurrent} />
-                      </div>
-                      <h2 className="day-title">{workoutPlan[current].title}</h2>
+                    !showExercises ? (
+                      <WeekSelector
+                        days={workoutPlan}
+                        current={current}
+                        onSelectDay={(dayIndex) => {
+                          setCurrent(dayIndex);
+                          setShowExercises(true);
+                        }}
+                      />
+                    ) : (
+                      <div className="day-content">
+                        <div className="hero-section">
+                          <div className="hero-content">
+                            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                              <button
+                                onClick={() => setShowExercises(false)}
+                                style={{
+                                  background: 'rgba(255, 255, 255, 0.08)',
+                                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                                  color: '#fff',
+                                  padding: '8px 18px',
+                                  borderRadius: '100px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 700,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.25s ease',
+                                }}
+                              >
+                                <ArrowLeft size={14} color="#F03D32" strokeWidth={2.5} />
+                                <span>PROGRAMME</span>
+                              </button>
+                            </div>
+                            <h2 className="hero-title">{workoutPlan[current].title}</h2>
+                            <p className="hero-subtitle">
+                              {workoutPlan[current].isRestDay 
+                                ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
+                                : `${workoutPlan[current].exercises.length} EXERCICES • HAUTE INTENSITÉ`}
+                            </p>
+                          </div>
+                          <div className="hero-overlay"></div>
+                        </div>
                       
                       {workoutPlan[current].isRestDay ? (
                         /* Affichage jour de repos */
-                        <div className="rest-day-container" style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '48px 24px',
-                          textAlign: 'center',
-                          gap: '16px',
-                        }}>
-                          <SpaIcon style={{ fontSize: '4rem', opacity: 0.6, color: '#4CAF50' }} />
-                          <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 600 }}>
-                            {t('restDay.title', { defaultValue: 'Jour de repos' })}
-                          </h3>
-                          <p style={{ margin: 0, opacity: 0.7, maxWidth: '300px', lineHeight: 1.6 }}>
-                            {t('restDay.description', { defaultValue: 'Profitez de cette journée pour récupérer. Hydratez-vous bien et reposez vos muscles.' })}
-                          </p>
-                          <button
-                            className="start-workout-btn"
-                            onClick={() => moveToNextDay()}
-                            style={{ marginTop: '8px' }}
-                          >
-                            <span className="start-workout-icon">➡️</span>
-                            <span className="start-workout-text">{t('restDay.nextDay', { defaultValue: 'Passer au jour suivant' })}</span>
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          {/* Bouton de démarrage amélioré */}
-                          <div className="start-workout-container">
-                            <button 
-                              className="start-workout-btn" 
-                              onClick={() => setStepMode(true)}
+                        <div className="rest-day-card">
+                          <Award size={80} color="#4CAF50" style={{ marginBottom: '24px' }} />
+                          <h3>{t('restDay.title', { defaultValue: 'REPOS TOTAL' })}</h3>
+                          <p>{t('restDay.description', { defaultValue: 'La croissance musculaire a lieu pendant le repos. Hydratez-vous bien et préparez-vous pour demain.' })}</p>
+                          <div className="sticky-btn-wrapper">
+                            <button
+                              className="sticky-start-btn rest-btn"
+                              onClick={() => moveToNextDay()}
                             >
-                              <span className="start-workout-icon">💪</span>
-                              <span className="start-workout-text">{t('workout.start')}</span>
-                              <span className="start-workout-subtitle">{workoutPlan[current].exercises.length} {t('workout.exercises', { defaultValue: 'exercices' })}</span>
+                              PASSER AU JOUR SUIVANT
                             </button>
                           </div>
-                          
-                          {/* Liste d'exercices avec numérotation */}
-                          <div className="exercise-list">
+                        </div>
+                      ) : (
+                        <div className="exercises-container">
+                          {/* Liste d'exercices avec numérotation géante */}
+                          <div className="exercise-grid">
                             {workoutPlan[current].exercises.map((exo, index) => (
-                              <div key={index} className="exercise-item" style={{ animationDelay: `${index * 0.05}s` }}>
-                                <div className="exercise-number">{index + 1}</div>
-                                <div className="exercise-content">
-                                  <h3 className="exercise-name">{exo.name}</h3>
-                                  <div className="exercise-details">
-                                    <span className="exercise-sets">{exo.sets}</span>
-                                    {exo.equip && (
-                                      <span className="exercise-equipment">{exo.equip}</span>
-                                    )}
+                              <div key={index} className="exercise-card-premium" style={{ animationDelay: `${index * 0.1}s` }}>
+                                <div className="huge-number">{index + 1}</div>
+                                <div className="exercise-card-content">
+                                  <h3 className="exo-name">{exo.name}</h3>
+                                  <div className="exo-tags">
+                                    <span className="tag sets-tag">{exo.sets}</span>
+                                    {exo.equip && <span className="tag equip-tag">{exo.equip}</span>}
                                   </div>
-                                  {exo.desc && <p className="exercise-description">{exo.desc}</p>}
+                                  {exo.desc && <p className="exo-desc">{exo.desc}</p>}
                                 </div>
                               </div>
                             ))}
                           </div>
-                        </>
+                          
+                          {/* Sticky Start Button */}
+                          <div className="sticky-btn-wrapper">
+                            <button 
+                              className="sticky-start-btn pulse-glow" 
+                              onClick={() => setStepMode(true)}
+                            >
+                              COMMENCER L'ENTRAÎNEMENT
+                            </button>
+                          </div>
+                        </div>
                       )}
                     </div>
-                  ) : (
-                    <StepWorkout 
+                  )
+                ) : (
+                  <StepWorkout 
                       dayIndex={current} 
                       onBack={() => {
                         setStepMode(false);
@@ -323,6 +345,7 @@ export default function App() {
                       }}
                       onComplete={handleWorkoutComplete}
                       autoMode={autoMode}
+                      onNotificationSettings={() => setShowNotificationSettings(true)}
                     />
                   )}
                 </>
@@ -369,10 +392,9 @@ export default function App() {
               width: '56px',
               height: '56px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #F03D32 0%, #FF6B35 50%, #F7931E 100%)',
+              background: '#F03D32',
               border: 'none',
               color: 'white',
-              fontSize: '1.4rem',
               cursor: 'pointer',
               boxShadow: '0 6px 16px rgba(240, 61, 50, 0.35)',
               backdropFilter: 'blur(10px)',
@@ -391,7 +413,7 @@ export default function App() {
               e.currentTarget.style.boxShadow = '0 6px 16px rgba(240, 61, 50, 0.35)';
             }}
           >
-            ⚙️
+            <Settings size={22} />
           </button>
         )}
 
@@ -442,7 +464,7 @@ export default function App() {
               >
                 <BottomNavigationAction 
                   label={t('nav.workout')} 
-                  icon={<FitnessCenterIcon />} 
+                  icon={<Dumbbell size={20} />} 
                   sx={{
                     '&.Mui-selected': {
                       color: (theme) => theme.palette.primary.main,
@@ -451,7 +473,7 @@ export default function App() {
                 />
                 <BottomNavigationAction 
                   label={t('nav.history')} 
-                  icon={<BarChartIcon />} 
+                  icon={<BarChart2 size={20} />} 
                   sx={{
                     '&.Mui-selected': {
                       color: (theme) => theme.palette.secondary.main,
@@ -460,7 +482,7 @@ export default function App() {
                 />
                 <BottomNavigationAction 
                   label={t('nav.weight')} 
-                  icon={<MonitorWeightIcon />} 
+                  icon={<Scale size={20} />} 
                   sx={{
                     '&.Mui-selected': {
                       color: '#4CAF50',
@@ -468,44 +490,6 @@ export default function App() {
                   }}
                 />
               </BottomNavigation>
-
-              {/* Theme toggle — séparé de la navigation pour éviter l'état "sélectionné" */}
-              <Box
-                onClick={toggleTheme}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '2px',
-                  px: 1.5,
-                  minWidth: '72px',
-                  cursor: 'pointer',
-                  color: (theme) => theme.palette.text.secondary,
-                  borderLeft: (theme) => `1px solid ${alpha(theme.palette.divider, 0.15)}`,
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    backgroundColor: (theme) => alpha(theme.palette.action.hover, 0.08),
-                    color: (theme) => theme.palette.text.primary,
-                  },
-                  '&:active': {
-                    backgroundColor: (theme) => alpha(theme.palette.action.selected, 0.12),
-                  },
-                }}
-              >
-                {darkTheme ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
-                <Box
-                  component="span"
-                  sx={{
-                    fontSize: '0.68rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.3px',
-                    lineHeight: 1,
-                  }}
-                >
-                  {darkTheme ? t('theme.light', { defaultValue: 'Clair' }) : t('theme.dark', { defaultValue: 'Sombre' })}
-                </Box>
-              </Box>
             </Box>
           </Paper>
         )}
@@ -515,7 +499,6 @@ export default function App() {
           open={showNotificationSettings}
           onClose={() => setShowNotificationSettings(false)}
         />
-        
       </div>
     </ThemeProvider>
   );

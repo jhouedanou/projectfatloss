@@ -177,8 +177,9 @@
 }
 
 .dark-theme .stat-item {
-  background-color: #1e1e30;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background-color: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .dark-theme .stat-value {
@@ -186,11 +187,12 @@
 }
 
 .dark-theme .stat-label {
-  color: #aaa;
+  color: #a1a1aa;
 }
 
 .dark-theme .last-workout {
-  background-color: #1e1e30;
+  background-color: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #ccc;
 }
 
@@ -203,15 +205,16 @@
 }
 
 .dark-theme .exercise-item-stats {
-  background-color: #1e1e30;
+  background-color: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .dark-theme .exercise-item-stats:hover {
-  background-color: #2a2a40;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .dark-theme .exercise-rank {
-  color: var(--color-accent-orange, #FF6B35);
+  color: var(--vermilion);
 }
 
 .dark-theme .exercise-name-stats {
@@ -219,8 +222,8 @@
 }
 
 .dark-theme .exercise-weight-stats {
-  color: var(--color-blue-light, #64B5F6);
-  background: var(--color-blue-light-bg, rgba(66, 165, 245, 0.15));
+  color: var(--vermilion);
+  background: rgba(240, 61, 50, 0.1);
 }
 
 @media (max-width: 600px) {

@@ -3,6 +3,7 @@ import { getWorkoutStats, getWeightLiftedByExercise } from '../services/WorkoutS
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
+import { BarChart3, Dumbbell, Flame, Timer, Trophy } from 'lucide-react';
 import './WorkoutStats.css';
 
 function WorkoutStats() {
@@ -43,21 +44,30 @@ function WorkoutStats() {
   
   return (
     <div className="workout-stats-container workout-stats-centered">
-      <h2 className="stats-title">📊 {t('stats.title', { defaultValue: "Statistiques d'Entraînement" })}</h2>
+      <h2 className="stats-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+        <BarChart3 size={24} className="accent-red" />
+        <span>{t('stats.title', { defaultValue: "Statistiques d'Entraînement" })}</span>
+      </h2>
       
       <div className="stats-summary">
         <div className="stat-item stat-workouts">
-          <div className="stat-icon">🏋️</div>
+          <div className="stat-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+            <Dumbbell size={24} color="#F03D32" />
+          </div>
           <div className="stat-value">{stats.totalWorkouts}</div>
           <div className="stat-label">{t('stats.workouts', { defaultValue: 'Entraînements' })}</div>
         </div>
         <div className="stat-item stat-calories">
-          <div className="stat-icon">🔥</div>
+          <div className="stat-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+            <Flame size={24} color="#FF6B35" />
+          </div>
           <div className="stat-value">{stats.totalCalories}</div>
           <div className="stat-label">{t('stats.calories', { defaultValue: 'Calories' })}</div>
         </div>
         <div className="stat-item stat-duration">
-          <div className="stat-icon">⏱️</div>
+          <div className="stat-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+            <Timer size={24} color="#4CAF50" />
+          </div>
           <div className="stat-value">
             {Math.floor(stats.totalDuration / 60)}h{' '}
             {Math.floor(stats.totalDuration % 60)}m
@@ -79,7 +89,10 @@ function WorkoutStats() {
       
       {topExercises.length > 0 && (
         <div className="top-exercises">
-          <h3 className="top-exercises-title">🏆 {t('stats.topExercises', { defaultValue: 'Top Exercices (poids total soulevé)' })}</h3>
+          <h3 className="top-exercises-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <Trophy size={20} color="#FFD700" />
+            <span>{t('stats.topExercises', { defaultValue: 'Top Exercices (poids total soulevé)' })}</span>
+          </h3>
           <ul className="exercise-list-stats">
             {topExercises.map(([exercise, weight], index) => (
               <li key={index} className="exercise-item-stats">

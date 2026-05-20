@@ -1,8 +1,6 @@
 import React from 'react';
-import { Box, LinearProgress, CircularProgress, Typography, Paper } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { Box, Typography } from '@mui/material';
+import { Dumbbell, Flame, Target } from 'lucide-react';
 
 const ProgressTracker = ({ 
   currentExercise, 
@@ -12,97 +10,87 @@ const ProgressTracker = ({
   calories, 
   fatBurnerMode 
 }) => {
-  const theme = useTheme();
-  
   const exerciseProgress = (currentExercise / totalExercises) * 100;
   const setProgress = (currentSet / totalSets) * 100;
 
   return (
-    <Paper
-      elevation={2}
+    <Box
       sx={{
-        p: 2,
-        borderRadius: 2,
-        bgcolor: 'background.paper',
-        mb: 2,
-        width: '80vw',
-        maxWidth: '100%',
-        margin: '0 auto',
+        width: '100%',
+        bgcolor: '#141414',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        borderRadius: '24px',
+        padding: '16px 20px',
+        boxSizing: 'border-box',
+        mb: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+        fontFamily: 'Inter, sans-serif'
       }}
     >
-      {/* Progress Indicators */}
-      <Box display="flex" justifyContent="space-between" mb={2}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {/* Exercise Progress */}
-        <Box flex={1} mr={2}>
-          <Box display="flex" alignItems="center" mb={1}>
-            <FitnessCenterIcon color="primary" sx={{ mr: 1 }} />
-            <Typography variant="body2" color="textSecondary">
-              Exercice {currentExercise}/{totalExercises}
+        <Box sx={{ flex: 1, mr: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5, gap: 1 }}>
+            <Dumbbell size={16} color="#F03D32" strokeWidth={2.5} />
+            <Typography variant="caption" sx={{ color: '#888', fontWeight: 700, letterSpacing: '0.5px' }}>
+              EXERCICE {currentExercise}/{totalExercises}
             </Typography>
           </Box>
-          <LinearProgress
-            variant="determinate"
-            value={exerciseProgress}
-            sx={{
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800],
-              '& .MuiLinearProgress-bar': {
-                backgroundColor: theme.palette.primary.main,
-                borderRadius: 4,
-              },
-            }}
-          />
+          <Box sx={{ width: '100%', height: '4px', bgcolor: 'rgba(255, 255, 255, 0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+            <Box sx={{ width: `${exerciseProgress}%`, height: '100%', bgcolor: '#F03D32', borderRadius: '10px', transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+          </Box>
         </Box>
 
         {/* Set Progress */}
-        <Box flex={1}>
-          <Box display="flex" alignItems="center" mb={1}>
-            <LocalFireDepartmentIcon 
-              sx={{ 
-                mr: 1,
-                color: fatBurnerMode ? theme.palette.error.main : theme.palette.warning.main
-              }} 
-            />
-            <Typography variant="body2" color="textSecondary">
-              Série {currentSet}/{totalSets}
+        <Box sx={{ flex: 1, mr: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5, gap: 1 }}>
+            <Target size={16} color="#fff" strokeWidth={2.5} />
+            <Typography variant="caption" sx={{ color: '#888', fontWeight: 700, letterSpacing: '0.5px' }}>
+              SÉRIE {currentSet}/{totalSets}
             </Typography>
           </Box>
-          <LinearProgress
-            variant="determinate"
-            value={setProgress}
-            sx={{
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800],
-              '& .MuiLinearProgress-bar': {
-                backgroundColor: fatBurnerMode ? theme.palette.error.main : theme.palette.warning.main,
-                borderRadius: 4,
-              },
-            }}
-          />
+          <Box sx={{ width: '100%', height: '4px', bgcolor: 'rgba(255, 255, 255, 0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+            <Box sx={{ width: `${setProgress}%`, height: '100%', bgcolor: '#fff', borderRadius: '10px', transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+          </Box>
+        </Box>
+
+        {/* Calories Burned - Integrated cleanly */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '70px' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Flame size={18} color="#FF6B35" strokeWidth={2.5} className="pulse-animation" />
+            <Typography sx={{ color: '#fff', fontWeight: 900, fontSize: '1.2rem', letterSpacing: '-0.5px', lineHeight: 1 }}>
+              {calories || 0}
+            </Typography>
+          </Box>
+          <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.5px', mt: 0.2 }}>
+            KCAL
+          </Typography>
         </Box>
       </Box>
 
-
-
       {fatBurnerMode && (
         <Box 
-          mt={2} 
-          p={1} 
-          bgcolor="error.main" 
-          borderRadius={1} 
-          display="flex" 
-          alignItems="center"
-          justifyContent="center"
+          sx={{ 
+            p: '8px 12px', 
+            bgcolor: 'rgba(240, 61, 50, 0.1)', 
+            border: '1px solid rgba(240, 61, 50, 0.2)',
+            borderRadius: '12px', 
+            display: 'flex', 
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1
+          }}
         >
-          <LocalFireDepartmentIcon sx={{ color: 'white', mr: 1 }} />
-          <Typography color="white" variant="body2">
-            Mode Fat Burner actif
+          <Flame size={14} color="#F03D32" strokeWidth={2.5} />
+          <Typography sx={{ color: '#F03D32', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.5px' }}>
+            MODE FAT BURNER ACTIF
           </Typography>
         </Box>
       )}
-    </Paper>
+    </Box>
   );
 };
 

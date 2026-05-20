@@ -70,7 +70,7 @@ export function updateNotificationSettings(settings) {
  * @returns {Promise<boolean>} - True si la permission est accordée
  */
 export async function requestNotificationPermission() {
-  console.log('🔔 Demande de permission de notification');
+  console.log('Demande de permission de notification');
   
   // Vérifier si les notifications sont supportées
   if (!('Notification' in window)) {
@@ -81,7 +81,7 @@ export async function requestNotificationPermission() {
   // Si déjà accordé, retourner true
   if (Notification.permission === 'granted') {
     updateNotificationSettings({ permission: true });
-    console.log('✅ Permission déjà accordée');
+    console.log('Permission déjà accordée');
     return true;
   }
   
@@ -94,13 +94,13 @@ export async function requestNotificationPermission() {
 
   // Demander la permission native directement
   try {
-    console.log('🚀 Demande permission native...');
+    console.log('Demande permission native...');
     const permission = await Notification.requestPermission();
-    console.log('🔔 Résultat permission:', permission);
+    console.log('Résultat permission:', permission);
     
     if (permission === 'granted') {
       updateNotificationSettings({ permission: true });
-      console.log('✅ Permission accordée !');
+      console.log('Permission accordée !');
       
       // Programmer les notifications quotidiennes
       await scheduleWorkoutNotifications();
@@ -108,11 +108,11 @@ export async function requestNotificationPermission() {
       return true;
     } else {
       updateNotificationSettings({ permission: false });
-      console.log('❌ Permission refusée');
+      console.log('Permission refusée');
       return false;
     }
   } catch (error) {
-    console.error('❌ Erreur demande permission:', error);
+    console.error('Erreur demande permission:', error);
     updateNotificationSettings({ permission: false });
     return false;
   }
@@ -123,7 +123,7 @@ export async function requestNotificationPermission() {
  */
 export async function showTestNotification() {
   try {
-    console.log('🧪 Test de notification démarré');
+    console.log('Test de notification démarré');
     
     // Vérifier le support
     if (!('Notification' in window)) {
@@ -150,12 +150,12 @@ export async function showTestNotification() {
           registration.active.postMessage({
             type: 'TEST_NOTIFICATION',
             payload: {
-              title: 'Test Notification ✅',
-              body: 'Vos notifications fonctionnent parfaitement ! 🎉',
+              title: 'Test Notification',
+              body: 'Vos notifications fonctionnent parfaitement !',
               tag: 'test-notification'
             }
           });
-          console.log('✅ Test notification envoyé via Service Worker');
+          console.log('Test notification envoyé via Service Worker');
           return true;
         }
       } catch (swError) {
@@ -165,8 +165,8 @@ export async function showTestNotification() {
     
     // Fallback : notification directe
     try {
-      new Notification('Test Notification ✅', {
-        body: 'Vos notifications fonctionnent parfaitement ! 🎉',
+      new Notification('Test Notification', {
+        body: 'Vos notifications fonctionnent parfaitement !',
         icon: '/android/android-launchericon-192-192.png',
         badge: '/android/android-launchericon-96-96.png',
         vibrate: [200, 100, 200],
@@ -174,15 +174,15 @@ export async function showTestNotification() {
         requireInteraction: false,
         silent: false
       });
-      console.log('✅ Test notification envoyé directement');
+      console.log('Test notification envoyé directement');
       return true;
     } catch (directError) {
-      console.error('❌ Erreur notification directe:', directError);
+      console.error('Erreur notification directe:', directError);
       return false;
     }
     
   } catch (error) {
-    console.error('❌ Erreur test notification:', error);
+    console.error('Erreur test notification:', error);
     return false;
   }
 }
@@ -192,11 +192,11 @@ export async function showTestNotification() {
  */
 export async function scheduleWorkoutNotifications() {
   try {
-    console.log('📅 Programmation des notifications quotidiennes');
+    console.log('Programmation des notifications quotidiennes');
     
     // Vérifier les permissions
     if (Notification.permission !== 'granted') {
-      console.log('❌ Pas de permission pour programmer les notifications');
+      console.log('Pas de permission pour programmer les notifications');
       return false;
     }
     
@@ -204,7 +204,7 @@ export async function scheduleWorkoutNotifications() {
     const settings = getNotificationSettings();
     
     if (!settings.enabled) {
-      console.log('⚠️ Notifications désactivées par l\'utilisateur');
+      console.log('Notifications désactivées par l\'utilisateur');
       return false;
     }
     
@@ -220,40 +220,40 @@ export async function scheduleWorkoutNotifications() {
             payload: {
               time: settings.time || DEFAULT_TIME,
               enabled: settings.enabled,
-              title: '🏋️ Temps d\'Entraînement !',
-              body: 'Il est temps de brûler des calories ! Votre corps vous attend 💪',
+              title: 'Temps d\'Entraînement !',
+              body: 'Il est temps de brûler des calories ! Votre corps vous attend',
               tag: 'daily-workout-reminder',
               requireInteraction: true,
               actions: [
                 {
                   action: 'start',
-                  title: '🚀 Commencer',
+                  title: 'Commencer',
                   icon: '/android/android-launchericon-48-48.png'
                 },
                 {
                   action: 'later',
-                  title: '⏰ Plus tard',
+                  title: 'Plus tard',
                   icon: '/android/android-launchericon-48-48.png'
                 }
               ]
             }
           });
           
-          console.log(`✅ Notifications programmées pour ${settings.time}`);
+          console.log(`Notifications programmées pour ${settings.time}`);
           return true;
         }
       } catch (error) {
-        console.error('❌ Erreur programmation Service Worker:', error);
+        console.error('Erreur programmation Service Worker:', error);
       }
     }
     
     // Fallback : programmer via setTimeout (moins fiable)
-    console.log('⚠️ Fallback: programmation locale');
+    console.log('Fallback: programmation locale');
     scheduleLocalNotification(settings.time || DEFAULT_TIME);
     return true;
     
   } catch (error) {
-    console.error('❌ Erreur programmation notifications:', error);
+    console.error('Erreur programmation notifications:', error);
     return false;
   }
 }
@@ -276,13 +276,13 @@ function scheduleLocalNotification(time) {
   
   const delay = targetTime.getTime() - now.getTime();
   
-  console.log(`⏰ Prochaine notification dans ${Math.round(delay / (1000 * 60 * 60))}h ${Math.round((delay % (1000 * 60 * 60)) / (1000 * 60))}min`);
+  console.log(`Prochaine notification dans ${Math.round(delay / (1000 * 60 * 60))}h ${Math.round((delay % (1000 * 60 * 60)) / (1000 * 60))}min`);
   
   // Programmer la notification
   setTimeout(() => {
     if (Notification.permission === 'granted') {
-      new Notification('🏋️ Temps d\'Entraînement !', {
-        body: 'Il est temps de brûler des calories ! Votre corps vous attend 💪',
+      new Notification('Temps d\'Entraînement !', {
+        body: 'Il est temps de brûler des calories ! Votre corps vous attend',
         icon: '/android/android-launchericon-192-192.png',
         badge: '/android/android-launchericon-96-96.png',
         tag: 'daily-workout-reminder',
@@ -689,7 +689,7 @@ export async function initNotificationService() {
  */
 export async function testAndroid15GitHubPagesNotification() {
   try {
-    console.log('🔧 Test notification Android 15 GitHub Pages');
+    console.log('Test notification Android 15 GitHub Pages');
     
     // Vérifier les permissions
     if (Notification.permission !== 'granted') {
@@ -713,14 +713,14 @@ export async function testAndroid15GitHubPagesNotification() {
           registration.active.postMessage({
             type: 'TEST_ANDROID15_GITHUB_PAGES',
             payload: {
-              title: `✅ Test Android ${platform.androidVersion || 'Standard'}`,
-              body: `Notification push fonctionnelle ! 🎉\n${platform.isAndroid15Plus ? 'Optimisations Android 15 activées' : 'Configuration standard'}`,
+              title: `Test Android ${platform.androidVersion || 'Standard'}`,
+              body: `Notification push fonctionnelle !\n${platform.isAndroid15Plus ? 'Optimisations Android 15 activées' : 'Configuration standard'}`,
               android15: platform.isAndroid15Plus,
               chrome: platform.isChrome
             }
           });
           
-          console.log('✅ Test envoyé via Service Worker');
+          console.log('Test envoyé via Service Worker');
           return true;
         }
       } catch (swError) {
@@ -730,8 +730,8 @@ export async function testAndroid15GitHubPagesNotification() {
     
     // Fallback : notification directe
     try {
-      new Notification(`✅ Test Android ${platform.androidVersion || 'Standard'}`, {
-        body: `Notification push fonctionnelle ! 🎉\n${platform.isAndroid15Plus ? 'Optimisations Android 15 activées' : 'Configuration standard'}`,
+      new Notification(`Test Android ${platform.androidVersion || 'Standard'}`, {
+        body: `Notification push fonctionnelle !\n${platform.isAndroid15Plus ? 'Optimisations Android 15 activées' : 'Configuration standard'}`,
         icon: '/android/android-launchericon-192-192.png',
         badge: '/android/android-launchericon-96-96.png',
         vibrate: platform.isAndroid15Plus ? [200, 100, 200, 100, 200] : [200, 100, 200],
@@ -744,15 +744,15 @@ export async function testAndroid15GitHubPagesNotification() {
         }
       });
       
-      console.log('✅ Test envoyé directement');
+      console.log('Test envoyé directement');
       return true;
     } catch (directError) {
-      console.error('❌ Erreur notification directe:', directError);
+      console.error('Erreur notification directe:', directError);
       return false;
     }
     
   } catch (error) {
-    console.error('❌ Erreur test Android 15 GitHub Pages:', error);
+    console.error('Erreur test Android 15 GitHub Pages:', error);
     return false;
   }
 }

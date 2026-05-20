@@ -104,41 +104,41 @@ const formatWorkoutReport = (workoutData, contactInfo) => {
   });
 
   const emailBody = `
-🏋️ Rapport d'Entraînement - Project Fat Loss
+Rapport d'Entraînement - Project Fat Loss
 
-📅 Date: ${date} à ${time}
-👤 Utilisateur: ${contactInfo.email}
+Date: ${date} à ${time}
+Utilisateur: ${contactInfo.email}
 
-📊 STATISTIQUES DE LA SÉANCE
+STATISTIQUES DE LA SÉANCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏃 Séance: ${workoutData.title || 'Entraînement'}
-⏱️ Durée: ${Math.round((workoutData.duration || 0) / 60)} minutes
-🔥 Calories dépensées: ${workoutData.calories || 0} kcal
-💪 Poids soulevé: ${workoutData.weightLifted || 0} kg
-⚖️ Poids actuel: ${workoutData.currentWeight || 'Non renseigné'} kg
+Séance: ${workoutData.title || 'Entraînement'}
+Durée: ${Math.round((workoutData.duration || 0) / 60)} minutes
+Calories dépensées: ${workoutData.calories || 0} kcal
+Poids soulevé: ${workoutData.weightLifted || 0} kg
+Poids actuel: ${workoutData.currentWeight || 'Non renseigné'} kg
 
 ${workoutData.exercises ? `
-📝 EXERCICES RÉALISÉS
+EXERCICES RÉALISÉS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${workoutData.exercises.map((ex, i) => `${i + 1}. ${ex.name} - ${ex.sets || 'N/A'}`).join('\n')}
 ` : ''}
 
-💪 Continuez comme ça! Vous progressez vers vos objectifs!
+Continuez comme ça! Vous progressez vers vos objectifs!
 
 ---
 Project Fat Loss - Fitness • Motivation • Résultats
   `.trim();
 
   const whatsappBody = `
-🏋️ *Rapport d'Entraînement*
+Rapport d'Entraînement
 
-📅 ${date}
-⏱️ Durée: ${Math.round((workoutData.duration || 0) / 60)} min
-🔥 Calories: ${workoutData.calories || 0} kcal
-💪 Poids soulevé: ${workoutData.weightLifted || 0} kg
-⚖️ Poids: ${workoutData.currentWeight || 'N/A'} kg
+${date}
+Durée: ${Math.round((workoutData.duration || 0) / 60)} min
+Calories: ${workoutData.calories || 0} kcal
+Poids soulevé: ${workoutData.weightLifted || 0} kg
+Poids: ${workoutData.currentWeight || 'N/A'} kg
 
-Excellent travail! 💪
+Excellent travail!
   `.trim();
 
   return { emailBody, whatsappBody };

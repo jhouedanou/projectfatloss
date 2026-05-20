@@ -7,6 +7,9 @@ import {
   Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import { 
+  Dumbbell, Flame, Target, Lightbulb, Heart, Trash2, Scale
+} from 'lucide-react';
+import { 
   getWeightHistory, 
   addWeightRecord, 
   deleteWeightRecord,
@@ -17,17 +20,20 @@ import {
 function EncouragementModal({ isOpen, onClose, weightIncrease }) {
   const encouragementMessages = [
     {
-      title: "💪 Restez Motivé(e) !",
+      title: "Restez Motivé(e) !",
+      icon: <Dumbbell size={24} style={{ color: '#f03d32', marginRight: '8px' }} />,
       message: "Chaque petit pas compte ! Les fluctuations de poids sont normales. Continuez vos efforts, les résultats viendront !",
       tips: ["Gardez une alimentation équilibrée", "Maintenez votre routine d'exercice", "Le muscle pèse plus que la graisse"]
     },
     {
-      title: "🔥 Ne Lâchez Rien !",
+      title: "Ne Lâchez Rien !",
+      icon: <Flame size={24} style={{ color: '#ff6b35', marginRight: '8px' }} />,
       message: "Rome ne s'est pas construite en un jour ! Votre parcours de transformation demande de la patience et de la persévérance.",
       tips: ["Concentrez-vous sur vos sensations", "Mesurez vos progrès autrement", "Prenez des photos pour voir l'évolution"]
     },
     {
-      title: "🎯 Vous Êtes Sur la Bonne Voie !",
+      title: "Vous Êtes Sur la Bonne Voie !",
+      icon: <Target size={24} style={{ color: '#4caf50', marginRight: '8px' }} />,
       message: "Les résultats durables prennent du temps. Votre corps s'adapte et se renforce chaque jour !",
       tips: ["Buvez plus d'eau", "Dormez suffisamment", "Soyez fier(e) de vos efforts"]
     }
@@ -41,7 +47,10 @@ function EncouragementModal({ isOpen, onClose, weightIncrease }) {
     <div className="encouragement-modal-overlay">
       <div className="encouragement-modal">
         <div className="encouragement-header">
-          <h3>{randomMessage.title}</h3>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {randomMessage.icon}
+            <h3>{randomMessage.title}</h3>
+          </div>
           <button className="close-modal" onClick={onClose}>×</button>
         </div>
         
@@ -54,7 +63,10 @@ function EncouragementModal({ isOpen, onClose, weightIncrease }) {
           <p className="encouragement-message">{randomMessage.message}</p>
           
           <div className="encouragement-tips">
-            <h4>💡 Conseils pour continuer :</h4>
+            <h4 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Lightbulb size={18} style={{ color: '#ffd700' }} />
+              <span>Conseils pour continuer :</span>
+            </h4>
             <ul>
               {randomMessage.tips.map((tip, index) => (
                 <li key={index}>{tip}</li>
@@ -63,13 +75,17 @@ function EncouragementModal({ isOpen, onClose, weightIncrease }) {
           </div>
           
           <div className="encouragement-reminder">
-            <p><strong>Rappel :</strong> Votre valeur ne se mesure pas sur une balance ! 💚</p>
+            <p style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+              <strong>Rappel :</strong> Votre valeur ne se mesure pas sur une balance !
+              <Heart size={16} fill="#f03d32" color="#f03d32" style={{ verticalAlign: 'middle' }} />
+            </p>
           </div>
         </div>
         
         <div className="encouragement-actions">
-          <button className="continue-btn" onClick={onClose}>
-            💪 Continuer Mon Parcours !
+          <button className="continue-btn" onClick={onClose} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <Dumbbell size={18} />
+            <span>Continuer Mon Parcours !</span>
           </button>
         </div>
       </div>
@@ -260,22 +276,29 @@ function WeightTracker() {
               data={chartData}
               margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis domain={['dataMin - 2', 'dataMax + 2']} />
-              <Tooltip />
-              <Legend />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+              <XAxis dataKey="date" stroke="#a1a1aa" fontSize={11} />
+              <YAxis domain={['dataMin - 2', 'dataMax + 2']} stroke="#a1a1aa" fontSize={11} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#18181b', 
+                  border: '1px solid rgba(255, 255, 255, 0.1)', 
+                  borderRadius: '8px',
+                  color: '#fff' 
+                }} 
+              />
+              <Legend wrapperStyle={{ paddingTop: '10px' }} />
               <Line 
                 type="monotone" 
                 dataKey="poids" 
-                stroke="#8884d8" 
+                stroke="#F03D32" 
                 activeDot={{ r: 8 }} 
-                strokeWidth={2}
+                strokeWidth={3}
               />
               <Line 
                 type="monotone" 
                 dataKey="référence" 
-                stroke="#82ca9d" 
+                stroke="rgba(255, 255, 255, 0.25)" 
                 strokeDasharray="5 5" 
                 dot={false}
               />
@@ -304,7 +327,7 @@ function WeightTracker() {
                   onClick={() => handleDeleteRecord(record.id)}
                   aria-label="Supprimer"
                 >
-                  ×
+                  <Trash2 size={16} />
                 </button>
               </div>
             ))}

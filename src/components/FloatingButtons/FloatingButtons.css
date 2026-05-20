@@ -1,128 +1,77 @@
-.floating-buttons-container {
-  position: fixed;
-  right: 20px;
-  bottom: 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  z-index: 1000;
-}
+/* Muscle Monster Floating Buttons */
 
 .floating-button {
-  width: 50px;
-  height: 50px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  background-color: #F03D32; /* Rouge par défaut */
-  color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: transparent;
+  color: #a1a1aa;
 }
 
 .floating-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  background-color: #D32F2F; /* Rouge plus sombre au hover */
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .floating-button:active {
   transform: scale(0.95);
 }
 
-.youtube-button {
+.rhythm-button {
+  width: 54px;
+  height: 54px;
   background-color: #F03D32;
+  color: white;
+  box-shadow: 0 4px 15px rgba(240, 61, 50, 0.4);
+}
+
+.youtube-button {
+  color: #FF0000 !important;
 }
 
 .youtube-button:hover {
-  background-color: #D32F2F;
-}
-
-.rhythm-button {
-  background-color: #F03D32;
+  background-color: rgba(255, 0, 0, 0.12) !important;
+  color: #FF3333 !important;
 }
 
 .rhythm-button:hover {
-  background-color: #D32F2F;
+  background-color: #ff5247;
+  color: white;
+  box-shadow: 0 6px 20px rgba(240, 61, 50, 0.6);
 }
 
 .rhythm-button.active {
-  background-color: #B71C1C;
-}
-
-.next-button {
-  background-color: #F03D32;
-}
-
-.next-button:hover {
-  background-color: #D32F2F;
-}
-
-.back-button {
-  background-color: #F03D32;
-}
-
-.back-button:hover {
-  background-color: #D32F2F;
+  background-color: #222;
+  color: #F03D32;
+  border: 1px solid #F03D32;
+  box-shadow: 0 0 15px rgba(240, 61, 50, 0.2);
 }
 
 .skip-button {
-  background-color: #F03D32;
-  width: 60px;
-  height: 60px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(240, 61, 50, 0.4);
 }
 
 .skip-button:hover {
-  background-color: #D32F2F;
+  background-color: #ff5247 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(240, 61, 50, 0.6);
 }
 
-.skip-button svg {
-  font-size: 32px;
-}
-
-/* Bouton retour - jaune */
-.back-btn {
-  background-color: #FFC107; /* Jaune */
-}
-
-.back-btn:hover {
-  background-color: #FFD54F; /* Jaune plus clair */
-}
-
-/* Bouton rythme - vert */
-.rhythm-btn {
-  background-color: #4CAF50; /* Vert */
-}
-
-.rhythm-btn:hover {
-  background-color: #66BB6A; /* Vert plus clair */
-}
-
-/* Bouton suivant - bleu */
-.next-btn {
-  background-color: #2196F3; /* Bleu */
-}
-
-.next-btn:hover {
-  background-color: #42A5F5; /* Bleu plus clair */
-}
-
-/* Ajustement pour le mode sombre */
-.dark-theme .floating-button {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-}
-
-/* Ajustement pour les écrans mobiles */
 @media (max-width: 768px) {
-  .floating-buttons-container {
-    right: 15px;
-    bottom: 70px;
+  .floating-button {
+    width: 40px;
+    height: 40px;
   }
   
-  .floating-button {
+  .rhythm-button {
     width: 48px;
     height: 48px;
   }

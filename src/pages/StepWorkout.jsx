@@ -2,12 +2,7 @@
 import React, { useState, useEffect, useRef, createContext, useCallback } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PauseIcon from '@mui/icons-material/Pause';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
-import StopIcon from '@mui/icons-material/Stop';
+import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell } from 'lucide-react';
 const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon from '../components/ExoIcon';
@@ -21,7 +16,8 @@ import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
 import { useTranslation } from 'react-i18next';
 import YouTube from 'react-youtube';
-import { getExerciseIconsPath } from '../utils/paths';
+import { getExerciseIconsPath, getAssetPath } from '../utils/paths';
+import GoogleFitService from '../services/GoogleFitService';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -46,6 +42,73 @@ fetch(getExerciseIconsPath())
   .then(response => response.json())
   .then(data => Object.assign(iconsMap, data))
   .catch(error => console.error('Erreur chargement icônes:', error));
+
+// Helper to map exercise icon types and names to premium generated illustrations
+const getExerciseIllustration = (iconType, name = '') => {
+  const cleanName = name.toLowerCase();
+  
+  if (cleanName.includes('biceps') || cleanName.includes('curl') || cleanName.includes('triceps') || cleanName.includes('barre au front') || cleanName.includes('dips') || cleanName.includes('kickback')) {
+    return 'arms_workout.png';
+  }
+  if (cleanName.includes('épaule') || cleanName.includes('arnold') || cleanName.includes('latérale') || cleanName.includes('frontale') || cleanName.includes('oiseau') || cleanName.includes('reverse fly') || cleanName.includes('face pull')) {
+    return 'shoulders_workout.png';
+  }
+  if (cleanName.includes('développé couch') || cleanName.includes('pompe') || cleanName.includes('écarté') || cleanName.includes('chest') || cleanName.includes('incliné')) {
+    return 'chest_workout.png';
+  }
+  if (cleanName.includes('rowing') || cleanName.includes('deadlift') || cleanName.includes('soulevé de terre') || cleanName.includes('traction') || cleanName.includes('shrug') || cleanName.includes('meadows') || cleanName.includes('yates')) {
+    return 'back_workout.png';
+  }
+  if (cleanName.includes('squat') || cleanName.includes('fente') || cleanName.includes('thrust') || cleanName.includes('pont fessier') || cleanName.includes('mollet') || cleanName.includes('jambe') || cleanName.includes('hanche') || cleanName.includes('adducteur') || cleanName.includes('dead bug')) {
+    return 'legs_workout.png';
+  }
+  if (cleanName.includes('crunch') || cleanName.includes('planche') || cleanName.includes('gainage') || cleanName.includes('twist') || cleanName.includes('hollow') || cleanName.includes('v-up')) {
+    return 'abs_workout.png';
+  }
+  if (cleanName.includes('cardio') || cleanName.includes('étirement') || cleanName.includes('étirer') || cleanName.includes('mobilité') || cleanName.includes('vélo') || cleanName.includes('stretch') || cleanName.includes('good morning')) {
+    return 'cardio_stretch.png';
+  }
+
+  switch (iconType) {
+    case 'dumbbell':
+    case 'dumbbell_equip':
+    case 'barbell':
+    case 'bench':
+      return 'chest_workout.png';
+    case 'arrow-up':
+    case 'step-up':
+    case 'shrug':
+    case 'reverse-fly':
+      return 'shoulders_workout.png';
+    case 'arm-flex':
+    case 'bars':
+      return 'arms_workout.png';
+    case 'rowing':
+    case 'deadlift':
+      return 'back_workout.png';
+    case 'squat':
+    case 'lunge':
+    case 'hip-thrust':
+    case 'calf':
+    case 'hip-extension':
+    case 'ankle':
+      return 'legs_workout.png';
+    case 'abs':
+    case 'plank':
+    case 'twist':
+    case 'leg-raise':
+      return 'abs_workout.png';
+    case 'compass':
+    case 'mountain':
+    case 'cardio':
+    case 'stretch':
+    case 'mobility':
+    case 'good-morning':
+      return 'cardio_stretch.png';
+    default:
+      return 'chest_workout.png';
+  }
+};
 
 // Créer un contexte pour partager le mode automatique entre composants
 const WorkoutContext = createContext({
@@ -161,26 +224,11 @@ function CalorieDisplay({ calories, visible }) {
   );
 }
 
-function FloatingCalorieCounter({ calories, exerciseCompleted }) {
-  const [pulse, setPulse] = useState(false);
-  
-  useEffect(() => {
-    if (calories > 0) {
-      setPulse(true);
-      const timer = setTimeout(() => setPulse(false), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [calories]);
-  
-  return (
-    <div className={`floating-calories ${exerciseCompleted ? 'completed' : ''} ${pulse ? 'pulse' : ''}`}>
-      <p className="floating-calories-value">{calories}</p>
-      <p className="floating-calories-label">CALORIES</p>
-    </div>
-  );
-}
 
 function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
+  const [isLoadingFit, setIsLoadingFit] = useState(false);
+  const [isSynced, setIsSynced] = useState(false);
+
   function calculateWeight(equipment) {
     const match = equipment && equipment.match(/(\d+)\s*kg/i);
     return match ? parseInt(match[1], 10) : 0;
@@ -201,6 +249,29 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
     return total + (weight * sets * reps);
   }, 0);
   
+  const handleGoogleFitSync = async () => {
+    setIsLoadingFit(true);
+    try {
+      await GoogleFitService.signIn();
+      const sessionActivity = {
+        activityType: 97, // Strength Training in Google Fit
+        name: `Project Fat Loss - ${day.title}`,
+        description: `Séance de musculation de haute intensité. Poids total soulevé : ${totalWeightLifted} kg.`,
+        startTime: new Date().getTime() - 45 * 60 * 1000,
+        duration: 45 * 60 * 1000,
+        calories: totalCalories,
+      };
+      await GoogleFitService.addActivity(sessionActivity);
+      setIsSynced(true);
+      alert('Séance synchronisée avec Google Fit !');
+    } catch (error) {
+      console.error('Erreur lors de la synchronisation Google Fit:', error);
+      alert('Erreur lors de la synchronisation avec Google Fit. Assurez-vous d\'avoir configuré votre Client ID dans GoogleFitService.js.');
+    } finally {
+      setIsLoadingFit(false);
+    }
+  };
+
   const handleSave = async () => {
     const workoutData = {
       title: day.title,
@@ -228,14 +299,57 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
   
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="modal-content" style={{ background: '#111', border: '1px solid #333' }}>
         <h2>Félicitations !</h2>
-        <div className="completion-icon">🔥</div>
+        <div className="completion-icon" style={{ background: 'transparent', boxShadow: 'none' }}><Flame size={64} color="#F03D32" /></div>
         <h3>Séance terminée : {day.title}</h3>
         <p className="calorie-total">Vous avez brûlé <span>{totalCalories}</span> calories !</p>
         <p className="weight-total">Poids total soulevé : <span>{totalWeightLifted} kg</span></p>
         <p className="motivation-text">Excellent travail ! Continuez ainsi pour atteindre vos objectifs.</p>
         
+        <div style={{ margin: '20px 0', width: '100%' }}>
+          <button 
+            onClick={handleGoogleFitSync}
+            disabled={isLoadingFit || isSynced}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: isSynced ? 'rgba(76, 175, 80, 0.2)' : 'linear-gradient(135deg, #4285F4, #34A853)',
+              color: isSynced ? '#4CAF50' : 'white',
+              fontSize: '0.95rem',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              cursor: isSynced ? 'default' : 'pointer',
+              boxShadow: isSynced ? 'none' : '0 4px 12px rgba(66, 133, 244, 0.25)',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoadingFit && !isSynced) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(66, 133, 244, 0.35)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isSynced) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(66, 133, 244, 0.25)';
+              }
+            }}
+          >
+            <img 
+              src="https://www.gstatic.com/images/branding/product/1x/gfit_512dp.png" 
+              alt="Google Fit" 
+              style={{ width: '22px', height: '22px', objectFit: 'contain' }}
+            />
+            {isLoadingFit ? 'Synchronisation...' : isSynced ? 'Synchronisé avec Google Fit' : 'Synchroniser avec Google Fit'}
+          </button>
+        </div>
+
         <div className="modal-actions">
           <button className="timer-btn save-btn" onClick={handleSave}>Enregistrer</button>
           <button className="timer-btn close-btn" onClick={onClose}>Fermer</button>
@@ -245,7 +359,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
   );
 }
 
-export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, autoMode: initialAutoMode }) {
+export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, autoMode: initialAutoMode, onNotificationSettings }) {
   const [dayIndex, setDayIndex] = useState(initialDayIndex || 0);
   const [step, setStep] = useState(0);
   const [pause, setPause] = useState(false);
@@ -598,22 +712,62 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         minHeight: '100vh',
       }}
     >
-      <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor:'#2e2e3f' }}>
-        <button className="timer-btn" onClick={handleBackClick}>⬅️</button>
-        <button 
-          className={`timer-btn ${autoMode ? 'active' : ''}`} 
-          onClick={handleToggleAutoMode}
-          title={autoMode ? "Désactiver le mode automatique" : "Activer le mode automatique"}
-          style={{ 
-            background: autoMode ? '#FF6B35' : '#6c757d',
-            minWidth: '50px'
-          }}
-        >
-          🚀
-        </button>
-        <button className="timer-btn save-btn" onClick={handleSaveAndExit}>
-          💾
-        </button>
+      <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor: 'transparent', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backdropFilter: 'blur(15px)', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img 
+            src={getAssetPath('/logo.png')} 
+            alt="PFL Logo" 
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '9px',
+              objectFit: 'cover',
+              border: '1px solid rgba(240, 61, 50, 0.25)'
+            }}
+          />
+          <button 
+            className="timer-btn" 
+            onClick={handleBackClick}
+            title="Retour"
+            style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', padding: 0, cursor: 'pointer', transition: 'all 0.2s' }}
+          >
+            <ArrowLeft size={18} />
+          </button>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button 
+            className={`timer-btn ${autoMode ? 'active' : ''}`} 
+            onClick={handleToggleAutoMode}
+            title={autoMode ? "Désactiver le mode automatique" : "Activer le mode automatique"}
+            style={{ 
+              background: autoMode ? 'rgba(240, 61, 50, 0.15)' : 'rgba(255, 255, 255, 0.08)',
+              color: autoMode ? '#F03D32' : '#fff',
+              border: autoMode ? '1px solid rgba(240, 61, 50, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', padding: 0, cursor: 'pointer', transition: 'all 0.2s'
+            }}
+          >
+            <Rocket size={18} />
+          </button>
+          <button 
+            className="timer-btn save-btn" 
+            onClick={handleSaveAndExit}
+            title="Sauvegarder et quitter"
+            style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', padding: 0, cursor: 'pointer', transition: 'all 0.2s' }}
+          >
+            <Save size={18} />
+          </button>
+          {onNotificationSettings && (
+            <button 
+              className="timer-btn notification-btn" 
+              onClick={onNotificationSettings}
+              title="Paramètres de notification"
+              style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', padding: 0, cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              <Bell size={18} />
+            </button>
+          )}
+        </div>
       </div>
 
       <h2 style={{fontSize:'1.1rem',marginBottom:8}}> {day.title}</h2>
@@ -653,20 +807,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             autoMode={autoMode}
           />
         )}  
-        
-        <Box
-          sx={{
-            position: 'fixed',
-            top: 50,
-            left: 20, // Changé de right à left
-            zIndex: 1000
-          }}
-        >
-          <FloatingCalorieCounter 
-            calories={totalCaloriesBurned} 
-            exerciseCompleted={exerciseCompleted} 
-          />
-        </Box>
+
       </>
       
       {workoutCompleted && (
@@ -1118,7 +1259,27 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
             )}
           </Box>
         )}
-        <ExoIcon type={iconType} size={48} />
+        <div style={{ 
+          width: '100%', 
+          maxWidth: '280px', 
+          aspectRatio: '1/1', 
+          borderRadius: '16px', 
+          overflow: 'hidden', 
+          border: '1px solid rgba(255, 255, 255, 0.08)', 
+          background: '#070707', 
+          marginBottom: '20px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
+          position: 'relative'
+        }}>
+          <img 
+            src={getAssetPath(`/illustrations/${getExerciseIllustration(iconType, exo.name)}`)} 
+            alt={exo.name} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
+        </div>
         
         <Typography 
           variant="h6" 
@@ -1126,33 +1287,42 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           sx={{ 
             fontWeight: 'bold',
             color: 'text.primary',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '1.4rem'
           }}
         >
           {exo.name}
         </Typography>
         {/* Affichage du poids réel soulevé */}
         {calculateWeight(exo.equipment) > 0 && (
-          <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
-            Poids soulevé : {calculateWeight(exo.equipment)} kg
+          <Typography variant="subtitle1" sx={{ color: '#F03D32', fontWeight: 'bold', mb: 2 }}>
+            Poids cible : {calculateWeight(exo.equipment)} kg
           </Typography>
         )}
         
-        <Typography variant="body1" color="text.secondary">
-          Matériel : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#455A64', padding: '2px 6px', borderRadius: '4px' }}>{exo.equip}</span>
-        </Typography>
-        
-        <Typography variant="body1" color="text.secondary">
-          Série <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#3949AB', padding: '2px 6px', borderRadius: '4px' }}>{setNum + 1}</span> / {totalSets}
-        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
+          {exo.equip && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 1.5, py: 0.5, borderRadius: '100px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <Dumbbell size={14} color="#a1a1aa" />
+              <Typography variant="caption" sx={{ color: '#a1a1aa', fontWeight: 600 }}>{exo.equip}</Typography>
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(240, 61, 50, 0.1)', px: 1.5, py: 0.5, borderRadius: '100px', border: '1px solid rgba(240, 61, 50, 0.3)' }}>
+            <Repeat size={14} color="#F03D32" />
+            <Typography variant="caption" sx={{ color: '#F03D32', fontWeight: 600 }}>Série {setNum + 1} / {totalSets}</Typography>
+          </Box>
+        </Box>
         
         <Typography 
           variant="body2" 
           color="text.primary"
           sx={{ 
-            fontSize: '1.1rem',
-            fontWeight: 500,
-            opacity: theme => theme.palette.mode === 'dark' ? 1 : 0.87,
-            mb: 2
+            fontSize: '1rem',
+            fontWeight: 400,
+            color: '#888',
+            mb: 2,
+            textAlign: 'center',
+            maxWidth: '90%'
           }}
         >
           {exo.desc}
@@ -1178,15 +1348,25 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
               </Typography>
             )}
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant={timerRunning ? 'outlined' : 'contained'} color="primary" onClick={() => setTimerRunning(r => !r)}>
+              <button 
+                className={timerRunning ? 'btn-timer-outline' : 'btn-timer-primary'} 
+                onClick={() => setTimerRunning(r => !r)}
+              >
                 {timerRunning ? 'Pause' : (exerciseTimer === exo.duration ? 'Démarrer' : 'Reprendre')}
-              </Button>
-              <Button variant="outlined" color="secondary" onClick={() => { setExerciseTimer(exo.duration); setTimerRunning(false); }} disabled={exerciseTimer === exo.duration}>
+              </button>
+              <button 
+                className="btn-timer-secondary" 
+                onClick={() => { setExerciseTimer(exo.duration); setTimerRunning(false); }} 
+                disabled={exerciseTimer === exo.duration}
+              >
                 Réinitialiser
-              </Button>
-              <Button variant="contained" color="success" onClick={() => { setTimerRunning(false); onDone(); }} sx={{ ml: 2 }}>
+              </button>
+              <button 
+                className="btn-timer-success" 
+                onClick={() => { setTimerRunning(false); onDone(); }}
+              >
                 Terminer
-              </Button>
+              </button>
             </Box>
           </Box>
         ) : 
@@ -1210,15 +1390,25 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
               </Typography>
             )}
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant={chronoRunning ? 'outlined' : 'contained'} color="primary" onClick={() => setChronoRunning(r => !r)}>
+              <button 
+                className={chronoRunning ? 'btn-timer-outline' : 'btn-timer-primary'} 
+                onClick={() => setChronoRunning(r => !r)}
+              >
                 {chronoRunning ? 'Pause' : (chrono === 0 ? 'Démarrer' : 'Reprendre')}
-              </Button>
-              <Button variant="outlined" color="secondary" onClick={() => { setChrono(0); setChronoRunning(false); }} disabled={chrono === 0}>
+              </button>
+              <button 
+                className="btn-timer-secondary" 
+                onClick={() => { setChrono(0); setChronoRunning(false); }} 
+                disabled={chrono === 0}
+              >
                 Réinitialiser
-              </Button>
-              <Button variant="contained" color="success" onClick={() => { setChronoRunning(false); onDone(); }} sx={{ ml: 2 }}>
+              </button>
+              <button 
+                className="btn-timer-success" 
+                onClick={() => { setChronoRunning(false); onDone(); }}
+              >
                 Terminer
-              </Button>
+              </button>
             </Box>
           </Box>
         ) : (isChrono || hasTimer) && isDoubleSided ? (
@@ -1244,50 +1434,56 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
               Côté {side + 1} sur 2
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Button variant={chronoRunning ? 'outlined' : 'contained'} color="primary" onClick={() => setChronoRunning(r => !r)}>
+              <button 
+                className={chronoRunning ? 'btn-timer-outline' : 'btn-timer-primary'} 
+                onClick={() => setChronoRunning(r => !r)}
+              >
                 {chronoRunning ? 'Pause' : (chrono === 0 ? 'Démarrer' : 'Reprendre')}
-              </Button>
-              <Button variant="outlined" color="secondary" onClick={() => { setChrono(0); setChronoRunning(false); }} disabled={chrono === 0}>
+              </button>
+              <button 
+                className="btn-timer-secondary" 
+                onClick={() => { setChrono(0); setChronoRunning(false); }} 
+                disabled={chrono === 0}
+              >
                 Réinitialiser
-              </Button>
+              </button>
               {side === 0 ? (
-                <Button 
-                  variant="contained" 
-                  color="info" 
+                <button 
+                  className="btn-timer-primary" 
+                  style={{ background: '#3b82f6', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)' }}
                   onClick={() => { 
                     setChronoRunning(false); 
                     setSide(1); 
                     setChrono(0); 
                     setTimeout(() => setChronoRunning(true), 1000);
                   }} 
-                  sx={{ ml: 1 }}
                 >
                   Côté Suivant
-                </Button>
+                </button>
               ) : (
-                <Button 
-                  variant="contained" 
-                  color="success" 
+                <button 
+                  className="btn-timer-success" 
                   onClick={() => { 
                     setChronoRunning(false); 
                     onDone(); 
                   }} 
-                  sx={{ ml: 1 }}
                 >
                   Terminer
-                </Button>
+                </button>
               )}
             </Box>
           </Box>
         ) : (
-          <>
-            <Typography variant="body1" color="text.secondary">
-              Répétitions : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#2E7D32', padding: '2px 6px', borderRadius: '4px' }}>{exo.nbRep}</span>
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Longueur de la série : <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#536DFE', padding: '2px 6px', borderRadius: '4px' }}>{exo.sets}</span>
-            </Typography>
-          </>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 2, py: 1, borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <RotateCcw size={18} color="#a1a1aa" />
+              <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>{exo.nbRep} Reps</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 2, py: 1, borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <Timer size={18} color="#a1a1aa" />
+              <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>{exo.sets}</Typography>
+            </Box>
+          </Box>
         )}
         {/* Boutons flottants pour toutes les actions */}
         <FloatingButtons 

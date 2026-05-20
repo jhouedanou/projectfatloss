@@ -1,145 +1,177 @@
 .workout-customizer {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 2px 10px var(--card-shadow);
-  padding: 20px;
-  margin-bottom: 20px;
+  background: rgba(18, 18, 18, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  padding: 28px;
+  margin-bottom: 24px;
   position: relative;
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #f4f4f5;
 }
 
 .dark-theme .workout-customizer {
-  background-color: var(--card-bg-dark);
-  box-shadow: 0 2px 10px var(--card-shadow-dark);
+  background: rgba(18, 18, 18, 0.96);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
 }
 
 .customizer-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .dark-theme .customizer-header {
-  border-bottom-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .customizer-header h2 {
   margin: 0;
-  font-size: 1.3rem;
-  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+  color: #fff;
 }
 
 .dark-theme .customizer-header h2 {
-  color: var(--text-primary-dark);
+  color: #fff;
 }
 
 .close-button {
-  background: transparent;
-  border: none;
-  font-size: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 20px;
   cursor: pointer;
-  color: var(--text-tertiary);
-  height: 30px;
-  width: 30px;
+  color: #a1a1aa;
+  height: 32px;
+  width: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  transition: all 0.2s ease;
 }
 
 .close-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(240, 61, 50, 0.2);
+  color: #fff;
+  border-color: rgba(240, 61, 50, 0.4);
 }
 
 .dark-theme .close-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(240, 61, 50, 0.2);
 }
 
 .success-message {
-  background-color: rgba(40, 167, 69, 0.1);
-  color: #28a745;
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-bottom: 15px;
+  background-color: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
   animation: fadeOut 3s forwards;
   animation-delay: 3s;
 }
 
 .error-message {
-  background-color: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-bottom: 15px;
+  background-color: rgba(240, 61, 50, 0.1);
+  border: 1px solid rgba(240, 61, 50, 0.2);
+  color: #f03d32;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .day-selector {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .day-selector label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #a1a1aa;
 }
 
 .day-selector select {
   width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #fff;
   font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.day-selector select:focus {
+  border-color: #f03d32;
+  box-shadow: 0 0 0 3px rgba(240, 61, 50, 0.25);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .dark-theme .day-selector select {
-  background-color: var(--bg-primary-dark);
-  color: var(--text-primary-dark);
-  border-color: #444;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .exercises-list {
-  margin-bottom: 20px;
-}
-.exercises-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))
-    ;
- column-gap: normal;
-
+  margin-bottom: 24px;
 }
 
 .exercises-list h3 {
-  font-size: 1.1rem;
-  margin: 0 0 15px 0;
-  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 16px 0;
+  color: #fff;
 }
 
 .dark-theme .exercises-list h3 {
-  color: var(--text-primary-dark);
+  color: #fff;
 }
 
 .exercise-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border: 1px solid #eee;
-  border-radius: 6px;
-  margin-bottom: 10px;
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  margin-bottom: 12px;
+  transition: all 0.25s ease;
 }
 
 .dark-theme .exercise-item {
-  border-color: #444;
+  border-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.01);
 }
 
 .exercise-item:hover {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .dark-theme .exercise-item:hover {
@@ -151,123 +183,149 @@
 }
 
 .exercise-name {
-  font-weight: 500;
-  margin-bottom: 3px;
-  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+  color: #fff;
 }
 
 .dark-theme .exercise-name {
-  color: var(--text-primary-dark);
+  color: #fff;
 }
 
 .exercise-info {
   display: flex;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+  font-size: 0.85rem;
+  color: #a1a1aa;
+  gap: 12px;
 }
 
 .dark-theme .exercise-info {
-  color: var(--text-secondary-dark);
+  color: #a1a1aa;
 }
 
 .exercise-sets {
-  margin-right: 15px;
-  font-weight: 500;
-  color: var(--series-text);
+  font-weight: 700;
+  color: #f03d32;
 }
 
 .dark-theme .exercise-sets {
-  color: #ff6b6b;
+  color: #f03d32;
+}
+
+.exercise-equip {
+  color: #a1a1aa;
 }
 
 .exercise-actions {
   display: flex;
-  gap: 5px;
+  gap: 8px;
 }
 
 .edit-button, .delete-button {
-  background: transparent;
-  border: none;
-  font-size: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
   cursor: pointer;
-  padding: 5px;
-  border-radius: 3px;
+  padding: 8px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
 }
 
-.edit-button:hover, .delete-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+.edit-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.dark-theme .edit-button:hover, .dark-theme .delete-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.delete-button:hover {
+  background-color: rgba(240, 61, 50, 0.15);
+  color: #f03d32;
+  border-color: rgba(240, 61, 50, 0.3);
 }
 
 .edit-button:disabled, .delete-button:disabled {
-  opacity: 0.5;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
 .add-button {
   width: 100%;
-  padding: 10px;
-  border: 1px dashed #ccc;
-  border-radius: 6px;
+  padding: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
   background-color: transparent;
-  color: var(--text-tertiary);
+  color: #fff;
   cursor: pointer;
-  font-weight: 500;
-  margin-top: 10px;
-  transition: all 0.2s ease;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
 }
 
 .add-button:hover {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
 }
 
 .dark-theme .add-button {
-  border-color: #444;
-  color: var(--text-tertiary-dark);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .dark-theme .add-button:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
 .add-button:disabled {
-  opacity: 0.5;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
 .exercise-form {
-  background-color: rgba(0, 0, 0, 0.02);
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  animation: fadeIn 0.3s ease-in-out;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 24px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dark-theme .exercise-form {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
 .exercise-form h3 {
-  font-size: 1.1rem;
-  margin: 0 0 15px 0;
-  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0 0 18px 0;
+  color: #fff;
 }
 
 .dark-theme .exercise-form h3 {
-  color: var(--text-primary-dark);
+  color: #fff;
 }
 
 .form-group {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .form-row {
   display: flex;
-  gap: 15px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .form-group.half {
@@ -276,101 +334,127 @@
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
-  font-size: 0.9rem;
-  color: var(--text-tertiary);
+  margin-bottom: 6px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #a1a1aa;
 }
 
 .dark-theme .form-group label {
-  color: var(--text-tertiary-dark);
+  color: #a1a1aa;
 }
 
 .form-group input, .form-group textarea, .form-group select {
   width: 100%;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #fff;
   font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  border-color: #f03d32;
+  box-shadow: 0 0 0 3px rgba(240, 61, 50, 0.25);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .dark-theme .form-group input, 
 .dark-theme .form-group textarea, 
 .dark-theme .form-group select {
-  background-color: var(--bg-primary-dark);
-  color: var(--text-primary-dark);
-  border-color: #444;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .form-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 12px;
+  margin-top: 24px;
 }
 
 .save-button, .cancel-button {
-  padding: 8px 15px;
-  border-radius: 6px;
-  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 100px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .save-button {
-  background-color: var(--button-bg);
+  background-color: #f03d32;
   color: white;
   border: none;
+  box-shadow: 0 4px 15px rgba(240, 61, 50, 0.3);
 }
 
 .save-button:hover {
-  background-color: var(--button-active);
+  background-color: #d62d24;
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(240, 61, 50, 0.4);
 }
 
 .cancel-button {
   background-color: transparent;
-  border: 1px solid var(--text-tertiary);
-  color: var(--text-tertiary);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #a1a1aa;
 }
 
 .cancel-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .dark-theme .cancel-button {
-  border-color: var(--text-tertiary-dark);
-  color: var(--text-tertiary-dark);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #a1a1aa;
 }
 
 .dark-theme .cancel-button:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .reset-button {
   width: 100%;
-  padding: 10px;
-  background-color: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  border-radius: 6px;
+  padding: 12px;
+  background-color: rgba(240, 61, 50, 0.06);
+  color: #f03d32;
+  border: 1px solid rgba(240, 61, 50, 0.15);
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 500;
-  margin-top: 20px;
-  transition: all 0.2s ease;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 24px;
+  transition: all 0.25s ease;
 }
 
 .reset-button:hover {
-  background-color: rgba(220, 53, 69, 0.2);
+  background-color: rgba(240, 61, 50, 0.12);
+  border-color: rgba(240, 61, 50, 0.3);
 }
 
 .reset-button:disabled {
-  opacity: 0.5;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -383,6 +467,6 @@
 @media (max-width: 600px) {
   .form-row {
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
   }
 }

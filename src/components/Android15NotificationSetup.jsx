@@ -23,6 +23,7 @@ import {
   Error as ErrorIcon,
   Settings as SettingsIcon
 } from '@mui/icons-material';
+import { Dumbbell, Timer, Activity, BarChart3 } from 'lucide-react';
 import GradientButton from './GradientButton';
 import { requestNotificationPermission, testAndroid15GitHubPagesNotification } from '../services/NotificationService';
 
@@ -69,14 +70,14 @@ const Android15NotificationSetup = ({ onComplete, onSkip }) => {
       if (granted) {
         setPermission('granted');
         setActiveStep(2);
-        setTestResult('✅ Permission accordée avec succès !');
+        setTestResult('Permission accordée avec succès !');
       } else {
         setPermission('denied');
-        setTestResult('❌ Permission refusée');
+        setTestResult('Permission refusée');
       }
     } catch (error) {
       console.error('Erreur demande permission:', error);
-      setTestResult('❌ Erreur lors de la demande');
+      setTestResult('Erreur lors de la demande');
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +90,7 @@ const Android15NotificationSetup = ({ onComplete, onSkip }) => {
       const success = await testAndroid15GitHubPagesNotification();
       
       if (success) {
-        setTestResult('✅ Notification test envoyée !');
+        setTestResult('Notification test envoyée !');
         setTimeout(() => {
           setActiveStep(3);
           onComplete?.({
@@ -99,30 +100,29 @@ const Android15NotificationSetup = ({ onComplete, onSkip }) => {
           });
         }, 2000);
       } else {
-        setTestResult('❌ Échec du test de notification');
+        setTestResult('Échec du test de notification');
       }
     } catch (error) {
       console.error('Erreur test notification:', error);
-      setTestResult('❌ Erreur lors du test');
+      setTestResult('Erreur lors du test');
     } finally {
       setIsLoading(false);
     }
   };
 
   const openAndroidSettings = () => {
-    // Essayer d'ouvrir les paramètres Android
     const instructions = `
-📱 Paramètres Android pour notifications :
+Paramètres Android pour notifications :
 
-1️⃣ Paramètres → Applications
-2️⃣ Chrome → Notifications  
-3️⃣ Autoriser toutes les notifications
-4️⃣ Notifications importantes → Activer
+1. Paramètres → Applications
+2. Chrome → Notifications  
+3. Autoriser toutes les notifications
+4. Notifications importantes → Activer
 
-🔋 Optimisation batterie :
-1️⃣ Paramètres → Batterie
-2️⃣ Optimisation batterie
-3️⃣ Chrome → Ne pas optimiser
+Optimisation batterie :
+1. Paramètres → Batterie
+2. Optimisation batterie
+3. Chrome → Ne pas optimiser
 
 Revenez ensuite à l'application.
     `;
@@ -163,7 +163,7 @@ Revenez ensuite à l'application.
               }}
             >
               <Typography variant="body2">
-                <strong>🚀 Optimisations Android 15 :</strong><br />
+                <strong>Optimisations Android 15 :</strong><br />
                 • Notifications persistantes avec contrôles<br />
                 • Vibrations personnalisées<br />
                 • Actions rapides d'entraînement<br />
@@ -178,7 +178,7 @@ Revenez ensuite à l'application.
             fullWidth
             size="large"
           >
-            🔥 Continuer la Configuration
+            Continuer la Configuration
           </GradientButton>
         </Box>
       )
@@ -188,48 +188,52 @@ Revenez ensuite à l'application.
       content: (
         <Box>
           <Typography variant="body2" sx={{ mb: 2, color: theme.palette.text.primary }}>
-            🔔 Autorisez les notifications pour recevoir :
+            Autorisez les notifications pour recevoir :
           </Typography>
           
           <Stack spacing={1} sx={{ mb: 3 }}>
             <Chip 
-              icon="🏋️" 
+              icon={<Dumbbell size={16} />} 
               label="Rappels d'entraînement quotidiens" 
               size="small"
               sx={{ 
                 background: alpha(theme.palette.primary.main, 0.1),
                 color: theme.palette.primary.main,
-                fontWeight: 500
+                fontWeight: 500,
+                paddingLeft: '4px'
               }}
             />
             <Chip 
-              icon="⏰" 
+              icon={<Timer size={16} />} 
               label="Minuteurs de pause et exercices" 
               size="small"
               sx={{ 
                 background: alpha(theme.palette.secondary.main, 0.1),
                 color: theme.palette.secondary.main,
-                fontWeight: 500
+                fontWeight: 500,
+                paddingLeft: '4px'
               }}
             />
             <Chip 
-              icon="🔥" 
+              icon={<Activity size={16} />} 
               label="Suivi d'exercices en temps réel" 
               size="small"
               sx={{ 
                 background: alpha(theme.palette.warning.main, 0.1),
                 color: theme.palette.warning.main,
-                fontWeight: 500
+                fontWeight: 500,
+                paddingLeft: '4px'
               }}
             />
             <Chip 
-              icon="📊" 
+              icon={<BarChart3 size={16} />} 
               label="Statistiques et progression" 
               size="small"
               sx={{ 
                 background: alpha(theme.palette.success.main, 0.1),
                 color: theme.palette.success.main,
-                fontWeight: 500
+                fontWeight: 500,
+                paddingLeft: '4px'
               }}
             />
           </Stack>
@@ -248,7 +252,7 @@ Revenez ensuite à l'application.
               }}
             >
               <Typography variant="body2">
-                <strong>⚠️ Permission bloquée</strong><br />
+                <strong>Permission bloquée</strong><br />
                 Cliquez sur "Paramètres Android" pour débloquer manuellement les notifications.
               </Typography>
             </Alert>
@@ -262,9 +266,9 @@ Revenez ensuite à l'application.
               fullWidth
               size="large"
             >
-              {permission === 'granted' ? '✅ Permission Accordée' : 
+              {permission === 'granted' ? 'Permission Accordée' : 
                isLoading ? 'Demande en cours...' : 
-               '🔔 Autoriser les Notifications'}
+               'Autoriser les Notifications'}
             </GradientButton>
             
             {permission === 'denied' && (
@@ -274,14 +278,14 @@ Revenez ensuite à l'application.
                 startIcon={<SettingsIcon />}
                 fullWidth
               >
-                ⚙️ Ouvrir Paramètres Android
+                Ouvrir Paramètres Android
               </GradientButton>
             )}
           </Stack>
           
           {testResult && (
             <Alert 
-              severity={testResult.includes('✅') ? 'success' : 'error'} 
+              severity={testResult.includes('échoué') || testResult.includes('refusée') || testResult.includes('Erreur') ? 'error' : 'success'} 
               sx={{ 
                 mt: 2,
                 borderRadius: '12px',
@@ -299,7 +303,7 @@ Revenez ensuite à l'application.
       content: (
         <Box>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            🧪 Testons maintenant votre système de notifications :
+            Testons maintenant votre système de notifications :
           </Typography>
           
           <Alert 
@@ -315,28 +319,28 @@ Revenez ensuite à l'application.
             }}
           >
             <Typography variant="body2">
-              <strong>🔍 Test complet :</strong><br />
+              <strong>Test complet :</strong><br />
               • Affichage de la notification push<br />
               • Vibration et son personnalisés<br />
               • Icône et badge Project Fat Loss<br />
-              {isAndroid15 && '• 🚀 Fonctionnalités avancées Android 15'}
+              {isAndroid15 && '• Fonctionnalités avancées Android 15'}
             </Typography>
           </Alert>
           
           <GradientButton
             onClick={handleTestNotification}
             disabled={isLoading || permission !== 'granted'}
-            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : '🧪'}
+            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <NotificationsActiveIcon />}
             fullWidth
             size="large"
             sx={{ mb: 2 }}
           >
-            {isLoading ? 'Test en cours...' : '🔥 Tester les Notifications'}
+            {isLoading ? 'Test en cours...' : 'Tester les Notifications'}
           </GradientButton>
           
           {testResult && (
             <Alert 
-              severity={testResult.includes('✅') ? 'success' : 'error'} 
+              severity={testResult.includes('échoué') || testResult.includes('refusée') || testResult.includes('Erreur') ? 'error' : 'success'} 
               sx={{ 
                 mt: 2,
                 borderRadius: '12px',
@@ -364,11 +368,11 @@ Revenez ensuite à l'application.
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}>
-            🎉 Configuration Réussie ! 
+            Configuration Réussie !
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             Vos notifications sont maintenant configurées{isAndroid15 ? ' avec les optimisations Android 15' : ''}.
-            <br />💪 Vous êtes prêt à transformer votre corps !
+            <br />Vous êtes prêt à transformer votre corps !
           </Typography>
           
           <GradientButton
@@ -380,7 +384,7 @@ Revenez ensuite à l'application.
             size="large"
             sx={{ minWidth: '200px' }}
           >
-            🚀 Commencer l'Entraînement
+            Commencer l'Entraînement
           </GradientButton>
         </Box>
       )
@@ -427,7 +431,6 @@ Revenez ensuite à l'application.
         >
           <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
             
-            {/* Header avec design amélioré */}
             <Box textAlign="center" mb={4}>
               <Box
                 sx={{
@@ -457,11 +460,10 @@ Revenez ensuite à l'application.
                 Configuration Android{isAndroid15 ? ' 15' : ''}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                🚀 Optimisation des notifications pour votre entraînement
+                Optimisation des notifications pour votre entraînement
               </Typography>
             </Box>
 
-            {/* Stepper avec styles améliorés */}
             <Stepper 
               activeStep={activeStep} 
               orientation="vertical"
@@ -498,18 +500,17 @@ Revenez ensuite à l'application.
               ))}
             </Stepper>
 
-            {/* Actions Footer */}
             <Box mt={4} display="flex" justifyContent="space-between" alignItems="center">
               <GradientButton
                 variant="text"
                 onClick={() => onSkip?.()}
                 size="small"
               >
-                ⏭️ Passer pour l'instant
+                Passer pour l'instant
               </GradientButton>
               
               <Chip 
-                label={`📱 Android ${isAndroid15 ? '15+' : 'Standard'}`}
+                label={`Android ${isAndroid15 ? '15+' : 'Standard'}`}
                 sx={{
                   background: isAndroid15 ? 
                     `linear-gradient(45deg, ${theme.palette.success.main} 30%, ${theme.palette.primary.main} 90%)` :
@@ -528,4 +529,4 @@ Revenez ensuite à l'application.
   );
 };
 
-export default Android15NotificationSetup; 
+export default Android15NotificationSetup;
