@@ -513,16 +513,26 @@ body.dark-theme .encouragement-tips {
   .encouragement-content {
     padding: 0 15px 15px;
   }
-  
-  .encouragement-actions {
-    padding: 0 15px 15px;
-  }
-  
-  .weight-increase {
-    font-size: 1.5rem;
-  }
-  
-  .encouragement-message {
-    font-size: 1rem;
-  }
+  box-shadow: 0 6px 20px rgba(240, 61, 50, 0.35);
+}
+
+.close-modal-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.05);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.close-modal-icon:hover {
+  background: rgba(255,255,255,0.1);
 }

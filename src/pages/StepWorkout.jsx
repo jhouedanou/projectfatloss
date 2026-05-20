@@ -299,91 +299,174 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
   return (
     <div className="modal-overlay">
       <div className="modal-content" style={{
-        background: '#18181b',
+        background: 'linear-gradient(135deg, #141416 0%, #0d0d0e 100%)',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '24px',
-        padding: '32px 24px',
-        maxWidth: '440px',
-        width: '90%',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+        padding: '36px 24px 28px',
+        maxWidth: '450px',
+        width: '92%',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
         color: '#fff',
-        fontFamily: 'Inter, sans-serif'
+        fontFamily: "'Inter', sans-serif",
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '8px', color: '#fff' }}>FÉLICITATIONS !</h2>
-        <div className="completion-icon" style={{
-          width: '80px',
-          height: '80px',
+        {/* Decorative corner glow */}
+        <div style={{
+          position: 'absolute',
+          top: '-50px',
+          right: '-50px',
+          width: '120px',
+          height: '120px',
+          background: 'rgba(240, 61, 50, 0.15)',
+          filter: 'blur(30px)',
           borderRadius: '50%',
-          background: 'rgba(240, 61, 50, 0.1)',
-          border: '2px solid var(--vermilion)',
+          pointerEvents: 'none'
+        }} />
+
+        <h2 style={{ 
+          fontFamily: "'Outfit', sans-serif",
+          fontSize: '2rem', 
+          fontWeight: 900, 
+          marginBottom: '4px', 
+          letterSpacing: '-0.5px',
+          background: 'linear-gradient(135deg, #fff 30%, #a1a1aa 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent'
+        }}>
+          FÉLICITATIONS !
+        </h2>
+        <p style={{
+          color: 'var(--vermilion)',
+          fontSize: '0.75rem',
+          fontWeight: 800,
+          textTransform: 'uppercase',
+          letterSpacing: '2px',
+          margin: '0 0 16px 0'
+        }}>
+          Séance Complétée
+        </p>
+
+        <div className="completion-icon" style={{
+          width: '76px',
+          height: '76px',
+          borderRadius: '50%',
+          background: 'rgba(240, 61, 50, 0.08)',
+          border: '1px solid rgba(240, 61, 50, 0.25)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '20px auto',
-          boxShadow: '0 0 20px rgba(240, 61, 50, 0.2)'
+          margin: '0 auto 16px',
+          boxShadow: '0 0 24px rgba(240, 61, 50, 0.15)',
+          animation: 'pulse 2s infinite'
         }}>
-          <Flame size={40} color="var(--vermilion)" />
+          <Flame size={36} color="var(--vermilion)" />
         </div>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '10px 0', textTransform: 'uppercase', color: '#fff' }}>
+
+        <h3 style={{ 
+          fontFamily: "'Outfit', sans-serif",
+          fontSize: '1.2rem', 
+          fontWeight: 800, 
+          margin: '0 0 20px 0', 
+          textTransform: 'uppercase', 
+          color: '#fff',
+          letterSpacing: '-0.2px'
+        }}>
           {day.title}
         </h3>
         
+        {/* Stats Container - Two premium cards side-by-side */}
         <div style={{
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
-          borderRadius: '16px',
-          padding: '16px',
-          margin: '20px 0',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px'
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '12px',
+          margin: '0 0 20px 0'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontWeight: 600 }}>Calories brûlées</span>
-            <span style={{ color: 'var(--vermilion)', fontSize: '1.2rem', fontWeight: 900 }}>{totalCalories} kcal</span>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            borderRadius: '16px',
+            padding: '14px 8px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <Flame size={20} color="var(--vermilion)" />
+            <span style={{ color: '#71717a', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Calories
+            </span>
+            <span style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 900, fontFamily: "'Outfit', sans-serif" }}>
+              {totalCalories} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#71717a' }}>kcal</span>
+            </span>
           </div>
-          <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.05)' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontWeight: 600 }}>Poids total soulevé</span>
-            <span style={{ color: 'var(--vermilion)', fontSize: '1.2rem', fontWeight: 900 }}>{totalWeightLifted} kg</span>
+
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            borderRadius: '16px',
+            padding: '14px 8px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <Dumbbell size={20} color="#3b82f6" />
+            <span style={{ color: '#71717a', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Volume
+            </span>
+            <span style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 900, fontFamily: "'Outfit', sans-serif" }}>
+              {totalWeightLifted} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#71717a' }}>kg</span>
+            </span>
           </div>
         </div>
 
-        <p className="motivation-text" style={{ color: '#a1a1aa', fontSize: '0.9rem', lineHeight: 1.5, margin: '15px 0' }}>
+        <p className="motivation-text" style={{ 
+          color: '#a1a1aa', 
+          fontSize: '0.82rem', 
+          lineHeight: 1.5, 
+          margin: '0 0 24px 0',
+          padding: '0 8px'
+        }}>
           Excellent travail ! Vos progrès sont enregistrés. Continuez sur cette lancée !
         </p>
         
-        <div style={{ margin: '24px 0 16px', width: '100%' }}>
+        {/* Google Fit Sync Button */}
+        <div style={{ margin: '0 0 16px 0', width: '100%' }}>
           <button 
             onClick={handleGoogleFitSync}
             disabled={isLoadingFit || isSynced}
             style={{
               width: '100%',
-              padding: '14px',
+              padding: '14px 16px',
               borderRadius: '14px',
-              border: isSynced ? '1px solid rgba(76, 175, 80, 0.3)' : 'none',
-              background: isSynced ? 'rgba(76, 175, 80, 0.15)' : 'linear-gradient(135deg, #4285F4, #34A853)',
-              color: isSynced ? '#4CAF50' : 'white',
-              fontSize: '0.95rem',
-              fontWeight: '700',
+              border: isSynced ? '1px solid rgba(16, 185, 129, 0.2)' : 'none',
+              background: isSynced 
+                ? 'rgba(16, 185, 129, 0.08)' 
+                : 'linear-gradient(135deg, #4285F4 0%, #357ae8 100%)',
+              color: isSynced ? '#10b981' : 'white',
+              fontSize: '0.88rem',
+              fontWeight: '800',
+              fontFamily: "'Outfit', sans-serif",
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '10px',
               cursor: isSynced ? 'default' : 'pointer',
-              boxShadow: isSynced ? 'none' : '0 4px 15px rgba(66, 133, 244, 0.3)',
-              transition: 'all 0.25s ease',
+              boxShadow: isSynced ? 'none' : '0 4px 15px rgba(66, 133, 244, 0.2)',
+              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
             onMouseEnter={(e) => {
               if (!isLoadingFit && !isSynced) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(66, 133, 244, 0.4)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(66, 133, 244, 0.35)';
               }
             }}
             onMouseLeave={(e) => {
               if (!isSynced) {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 15px rgba(66, 133, 244, 0.3)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(66, 133, 244, 0.2)';
               }
             }}
           >
@@ -392,51 +475,67 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
               alt="Google Fit" 
               style={{ width: '20px', height: '20px', objectFit: 'contain' }}
             />
-            {isLoadingFit ? 'Synchronisation...' : isSynced ? '✓ Synchronisé avec Google Fit' : 'Synchroniser avec Google Fit'}
+            {isLoadingFit ? 'Synchronisation...' : isSynced ? '✓ SYNCHRONISÉ AVEC GOOGLE FIT' : 'SYNCHRONISER AVEC GOOGLE FIT'}
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '12px' }}>
           <button 
             style={{
-              flex: 1,
+              flex: 1.2,
               padding: '14px',
               borderRadius: '14px',
               border: 'none',
-              background: 'var(--vermilion)',
+              background: 'linear-gradient(135deg, var(--vermilion), #c41e0b)',
               color: '#fff',
               fontWeight: 800,
-              fontSize: '0.95rem',
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: '0.88rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
               cursor: 'pointer',
-              transition: 'all 0.2s',
+              boxShadow: '0 4px 15px rgba(240, 61, 50, 0.25)',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
             onClick={handleSave}
-            onMouseEnter={(e) => e.currentTarget.style.filter = 'brightness(1.1)'}
-            onMouseLeave={(e) => e.currentTarget.style.filter = 'none'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(240, 61, 50, 0.35)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(240, 61, 50, 0.25)';
+            }}
           >
             Enregistrer
           </button>
           <button 
             style={{
-              flex: 1,
+              flex: 0.8,
               padding: '14px',
               borderRadius: '14px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              background: 'transparent',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.02)',
               color: '#a1a1aa',
               fontWeight: 700,
-              fontSize: '0.95rem',
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: '0.88rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
               cursor: 'pointer',
-              transition: 'all 0.2s',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
             onClick={onClose}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
               e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
               e.currentTarget.style.color = '#a1a1aa';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
             }}
           >
             Fermer

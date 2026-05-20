@@ -7,7 +7,7 @@ import {
   Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import { 
-  Dumbbell, Flame, Target, Lightbulb, Heart, Trash2, Scale
+  Dumbbell, Flame, Target, Lightbulb, Heart, Trash2, Scale, X, Activity, TrendingDown, TrendingUp
 } from 'lucide-react';
 import { 
   getWeightHistory, 
@@ -15,25 +15,26 @@ import {
   deleteWeightRecord,
   getWeightStats
 } from '../services/WeightStorage';
+import './WeightTracker.css';
 
 // Composant Popup d'encouragement
 function EncouragementModal({ isOpen, onClose, weightIncrease }) {
   const encouragementMessages = [
     {
       title: "Restez Motivé(e) !",
-      icon: <Dumbbell size={24} style={{ color: '#f03d32', marginRight: '8px' }} />,
+      icon: <Dumbbell size={28} color="var(--vermilion)" />,
       message: "Chaque petit pas compte ! Les fluctuations de poids sont normales. Continuez vos efforts, les résultats viendront !",
       tips: ["Gardez une alimentation équilibrée", "Maintenez votre routine d'exercice", "Le muscle pèse plus que la graisse"]
     },
     {
       title: "Ne Lâchez Rien !",
-      icon: <Flame size={24} style={{ color: '#ff6b35', marginRight: '8px' }} />,
+      icon: <Flame size={28} color="var(--vermilion)" />,
       message: "Rome ne s'est pas construite en un jour ! Votre parcours de transformation demande de la patience et de la persévérance.",
       tips: ["Concentrez-vous sur vos sensations", "Mesurez vos progrès autrement", "Prenez des photos pour voir l'évolution"]
     },
     {
       title: "Vous Êtes Sur la Bonne Voie !",
-      icon: <Target size={24} style={{ color: '#4caf50', marginRight: '8px' }} />,
+      icon: <Target size={28} color="var(--vermilion)" />,
       message: "Les résultats durables prennent du temps. Votre corps s'adapte et se renforce chaque jour !",
       tips: ["Buvez plus d'eau", "Dormez suffisamment", "Soyez fier(e) de vos efforts"]
     }
@@ -46,48 +47,38 @@ function EncouragementModal({ isOpen, onClose, weightIncrease }) {
   return (
     <div className="encouragement-modal-overlay">
       <div className="encouragement-modal">
+        <button className="close-modal-icon" onClick={onClose}><X size={20} /></button>
+        
         <div className="encouragement-header">
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
             {randomMessage.icon}
             <h3>{randomMessage.title}</h3>
           </div>
-          <button className="close-modal" onClick={onClose}>×</button>
         </div>
         
-        <div className="encouragement-content">
-          <div className="weight-change-info">
-            <span className="weight-increase">+{weightIncrease.toFixed(1)} kg</span>
-            <p>depuis votre dernière pesée</p>
-          </div>
-          
-          <p className="encouragement-message">{randomMessage.message}</p>
-          
-          <div className="encouragement-tips">
-            <h4 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Lightbulb size={18} style={{ color: '#ffd700' }} />
-              <span>Conseils pour continuer :</span>
-            </h4>
-            <ul>
-              {randomMessage.tips.map((tip, index) => (
-                <li key={index}>{tip}</li>
-              ))}
-            </ul>
-          </div>
-          
-          <div className="encouragement-reminder">
-            <p style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-              <strong>Rappel :</strong> Votre valeur ne se mesure pas sur une balance !
-              <Heart size={16} fill="#f03d32" color="#f03d32" style={{ verticalAlign: 'middle' }} />
-            </p>
-          </div>
+        <div className="weight-change-info">
+          <span className="weight-increase">+{weightIncrease.toFixed(1)} kg</span>
+          <p>depuis votre dernière pesée</p>
         </div>
         
-        <div className="encouragement-actions">
-          <button className="continue-btn" onClick={onClose} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            <Dumbbell size={18} />
-            <span>Continuer Mon Parcours !</span>
-          </button>
+        <p className="encouragement-message">{randomMessage.message}</p>
+        
+        <div className="encouragement-tips">
+          <h4>
+            <Lightbulb size={18} color="#FFD700" />
+            Conseils pour continuer :
+          </h4>
+          <ul>
+            {randomMessage.tips.map((tip, index) => (
+              <li key={index}>{tip}</li>
+            ))}
+          </ul>
         </div>
+        
+        <button className="continue-btn" onClick={onClose}>
+          <Dumbbell size={20} />
+          <span>Continuer Mon Parcours !</span>
+        </button>
       </div>
     </div>
   );
@@ -104,22 +95,16 @@ function WeightTracker() {
   const [showEncouragement, setShowEncouragement] = useState(false);
   const [weightIncrease, setWeightIncrease] = useState(0);
   
-  // Charger les données au démarrage
   useEffect(() => {
     loadWeightData();
   }, []);
   
-  // Fonction pour charger les données de poids
   const loadWeightData = () => {
     const history = getWeightHistory();
     setWeightRecords(history);
-    
-    // Récupérer les statistiques
-    const weightStats = getWeightStats();
-    setStats(weightStats);
+    setStats(getWeightStats());
   };
   
-  // Fonction pour ajouter un nouvel enregistrement
   const handleAddWeight = (e) => {
     e.preventDefault();
     setError('');
@@ -129,102 +114,97 @@ function WeightTracker() {
       const weightValue = parseFloat(newWeight.replace(',', '.'));
       
       if (isNaN(weightValue) || weightValue <= 0) {
-        setError(t('weight.invalidWeight'));
+        setError(t('weight.invalidWeight', { defaultValue: 'Poids invalide' }));
         return;
       }
       
-      // Obtenir le dernier poids avant d'ajouter le nouveau
       const currentHistory = getWeightHistory();
       const lastWeight = currentHistory.length > 0 ? currentHistory[currentHistory.length - 1].weight : null;
       
-      // Ajouter l'enregistrement
       addWeightRecord(weightValue, null, notes);
       
-      // Vérifier si le poids a augmenté et afficher le popup d'encouragement
       if (lastWeight && weightValue > lastWeight) {
         const increase = weightValue - lastWeight;
-        // Afficher le popup seulement si l'augmentation est significative (plus de 0.2 kg)
         if (increase >= 0.2) {
           setWeightIncrease(increase);
           setShowEncouragement(true);
         }
       }
       
-      // Recharger les données
       loadWeightData();
-      
-      // Réinitialiser le formulaire
       setNewWeight('');
       setNotes('');
-      setSuccess(t('weight.recordSaved'));
+      setSuccess(t('weight.recordSaved', { defaultValue: 'Poids enregistré !' }));
       
-      // Effacer le message de succès après 3 secondes
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err.message || t('weight.errorSaving'));
+      setError(err.message || t('weight.errorSaving', { defaultValue: 'Erreur lors de l\'enregistrement' }));
     }
   };
   
-  // Fonction pour supprimer un enregistrement
   const handleDeleteRecord = (id) => {
     try {
       deleteWeightRecord(id);
       loadWeightData();
-      setSuccess(t('weight.recordDeleted'));
+      setSuccess(t('weight.recordDeleted', { defaultValue: 'Enregistrement supprimé' }));
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(t('weight.errorDeleting'));
+      setError(t('weight.errorDeleting', { defaultValue: 'Erreur lors de la suppression' }));
     }
   };
   
-  // Préparer les données pour le graphique
   const chartData = weightRecords.map(record => ({
     date: format(new Date(record.date), 'dd/MM/yy'),
     poids: record.weight,
-    // Ajouter un point pour chaque 10kg (pour référence)
     référence: record.weight > 10 ? Math.floor(record.weight / 10) * 10 : null
   }));
   
-  // Formater la date pour l'affichage
   const formatDate = (dateString) => {
     const locale = i18n.language === 'fr' ? fr : undefined;
-    return format(new Date(dateString), 'dd MMMM yyyy', { locale });
+    return format(new Date(dateString), 'dd MMM yyyy', { locale });
   };
   
   return (
     <div className="weight-tracker">
-      <h2>{t('weight.title')}</h2>
+      <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+        <Scale size={28} color="var(--vermilion)" />
+        {t('weight.title', { defaultValue: 'Suivi de Poids' })}
+      </h2>
       
       {/* Formulaire d'ajout de poids */}
       <div className="weight-form-container">
         <form onSubmit={handleAddWeight} className="weight-form">
-          <div className="form-group">
-            <label htmlFor="weight">{t('weight.weightKg')}:</label>
-            <input
-              type="number"
-              id="weight"
-              min="30"
-              max="300"
-              step="0.1"
-              value={newWeight}
-              onChange={(e) => setNewWeight(e.target.value)}
-              required
-              placeholder="Ex: 75.5"
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="weight">{t('weight.weightKg', { defaultValue: 'Poids (kg)' })}</label>
+              <input
+                type="number"
+                id="weight"
+                min="30"
+                max="300"
+                step="0.1"
+                value={newWeight}
+                onChange={(e) => setNewWeight(e.target.value)}
+                required
+                placeholder="Ex: 75.5"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="notes">{t('weight.notes', { defaultValue: 'Notes (Optionnel)' })}</label>
+              <input
+                type="text"
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="À jeun, après le sport..."
+              />
+            </div>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="notes">{t('weight.notes')}:</label>
-            <input
-              type="text"
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ex: Après cardio"
-            />
-          </div>
-          
-          <button type="submit" className="add-weight-btn">{t('weight.add')}</button>
+          <button type="submit" className="add-weight-btn">
+            {t('weight.add', { defaultValue: 'Enregistrer mon poids' })}
+          </button>
         </form>
         
         {error && <div className="error-message">{error}</div>}
@@ -235,17 +215,20 @@ function WeightTracker() {
       {stats.current && (
         <div className="weight-stats">
           <div className="stat-card current-weight">
-            <div className="stat-title">{t('weight.currentWeight')}</div>
-            <div className="stat-value">{stats.current.weight} kg</div>
+            <div className="stat-title">{t('weight.currentWeight', { defaultValue: 'Poids Actuel' })}</div>
+            <div className="stat-value">{stats.current.weight} <span style={{ fontSize: '1rem', color: '#71717a' }}>kg</span></div>
             <div className="stat-date">{formatDate(stats.current.date)}</div>
           </div>
           
           {stats.initial && stats.current.id !== stats.initial.id && (
             <div className={`stat-card weight-change ${stats.change <= 0 ? 'positive' : 'negative'}`}>
-              <div className="stat-title">{t('weight.evolution')}</div>
+              <div className="stat-title" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {stats.change <= 0 ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
+                {t('weight.evolution', { defaultValue: 'Évolution' })}
+              </div>
               <div className="stat-value">
                 {stats.change > 0 ? '+' : ''}
-                {stats.change.toFixed(1)} kg
+                {stats.change.toFixed(1)} <span style={{ fontSize: '1rem', color: 'inherit' }}>kg</span>
               </div>
               <div className="stat-percentage">
                 {stats.change > 0 ? '+' : ''}
@@ -256,11 +239,12 @@ function WeightTracker() {
           
           <div className="stat-card min-max">
             <div className="min-weight">
-              <span className="stat-label">{t('weight.min')}:</span>
+              <span className="stat-label">{t('weight.min', { defaultValue: 'Minimum' })}</span>
               <span className="stat-value">{stats.lowestRecord.weight} kg</span>
             </div>
+            <div style={{ width: '1px', height: '100%', background: 'rgba(255,255,255,0.1)' }}></div>
             <div className="max-weight">
-              <span className="stat-label">{t('weight.max')}:</span>
+              <span className="stat-label">{t('weight.max', { defaultValue: 'Maximum' })}</span>
               <span className="stat-value">{stats.highestRecord.weight} kg</span>
             </div>
           </div>
@@ -270,64 +254,64 @@ function WeightTracker() {
       {/* Graphique d'évolution */}
       {weightRecords.length > 0 ? (
         <div className="weight-chart">
-          <h3>{t('weight.chart')}</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          <h3>
+            <Activity size={20} color="var(--vermilion)" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+            {t('weight.chart', { defaultValue: 'Évolution Graphique' })}
+          </h3>
+          <ResponsiveContainer width="100%" height={260}>
             <LineChart
               data={chartData}
-              margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
-              <XAxis dataKey="date" stroke="#a1a1aa" fontSize={11} />
-              <YAxis domain={['dataMin - 2', 'dataMax + 2']} stroke="#a1a1aa" fontSize={11} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
+              <XAxis dataKey="date" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+              <YAxis domain={['dataMin - 2', 'dataMax + 2']} stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#18181b', 
+                  backgroundColor: 'rgba(20, 20, 22, 0.9)', 
                   border: '1px solid rgba(255, 255, 255, 0.1)', 
-                  borderRadius: '8px',
-                  color: '#fff' 
+                  borderRadius: '12px',
+                  color: '#fff',
+                  boxShadow: '0 10px 20px rgba(0,0,0,0.3)'
                 }} 
               />
-              <Legend wrapperStyle={{ paddingTop: '10px' }} />
               <Line 
                 type="monotone" 
                 dataKey="poids" 
-                stroke="#F03D32" 
-                activeDot={{ r: 8 }} 
+                stroke="var(--vermilion)" 
+                activeDot={{ r: 6, fill: 'var(--vermilion)', stroke: '#fff', strokeWidth: 2 }} 
                 strokeWidth={3}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="référence" 
-                stroke="rgba(255, 255, 255, 0.25)" 
-                strokeDasharray="5 5" 
-                dot={false}
+                dot={{ r: 3, fill: '#18181b', stroke: 'var(--vermilion)', strokeWidth: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       ) : (
         <div className="no-weight-data">
-          <p>{t('weight.noData')}</p>
-          <p>{t('weight.startTracking')}</p>
+          <Scale size={40} color="rgba(255,255,255,0.2)" style={{ marginBottom: '16px' }} />
+          <p>{t('weight.noData', { defaultValue: 'Aucune donnée disponible.' })}</p>
+          <p>{t('weight.startTracking', { defaultValue: 'Enregistrez votre premier poids !' })}</p>
         </div>
       )}
       
       {/* Historique des enregistrements */}
       {weightRecords.length > 0 && (
         <div className="weight-history">
-          <h3>{t('weight.history')}</h3>
+          <h3>{t('weight.history', { defaultValue: 'Historique des Pesées' })}</h3>
           <div className="weight-records-list">
             {weightRecords.slice().reverse().map(record => (
               <div key={record.id} className="weight-record">
-                <div className="record-date">{formatDate(record.date)}</div>
-                <div className="record-weight">{record.weight} kg</div>
-                {record.notes && <div className="record-notes">{record.notes}</div>}
+                <div className="record-info">
+                  <div className="record-weight">{record.weight} <span style={{ fontSize: '0.9rem', color: '#71717a', fontWeight: 600 }}>kg</span></div>
+                  <div className="record-date">{formatDate(record.date)}</div>
+                  {record.notes && <div className="record-notes">{record.notes}</div>}
+                </div>
                 <button 
                   className="delete-record" 
                   onClick={() => handleDeleteRecord(record.id)}
                   aria-label="Supprimer"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} />
                 </button>
               </div>
             ))}
@@ -335,7 +319,6 @@ function WeightTracker() {
         </div>
       )}
       
-      {/* Popup d'encouragement */}
       <EncouragementModal 
         isOpen={showEncouragement}
         onClose={() => setShowEncouragement(false)}

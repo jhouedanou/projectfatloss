@@ -1,5 +1,5 @@
 // Service pour l'intégration avec Google Fit
-const CLIENT_ID = '310337608749-m8tfo848fog0jfa6q06cdt2771bhd1h6.apps.googleusercontent.com'; // À remplacer par votre Client ID Google
+const CLIENT_ID = '310337608749-e771j9tp94c7i0mts2basfarc53i4ecl.apps.googleusercontent.com'; // À remplacer par votre Client ID Google
 const SCOPES = [
   'https://www.googleapis.com/auth/fitness.activity.write',
   'https://www.googleapis.com/auth/fitness.body.write'

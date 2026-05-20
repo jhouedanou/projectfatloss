@@ -1,78 +1,105 @@
-/* WorkoutCalendar.css */
+/* Premium WorkoutCalendar.css */
 
 .workout-calendar-centered {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 20px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  border-radius: 10px;
-  margin: 20px auto;
-  max-width: 700px; /* Ajusté pour le calendrier */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  background-color: transparent;
+  color: #fff;
+  margin: 16px auto;
+  max-width: 600px;
+  padding-bottom: 80px;
 }
 
 .calendar-title {
-  font-size: 1.8em;
-  color: var(--vermilion);
-  margin-bottom: 20px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 32px;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
 }
 
 /* Styles pour le composant Calendar de react-calendar */
 .react-calendar {
-  width: 100% !important; /* S'assurer que le calendrier prend toute la largeur */
-  max-width: 450px; /* Limiter la largeur maximale du calendrier lui-même */
-  border: none !important; /* Supprimer la bordure par défaut */
-  border-radius: 8px;
-  background-color: var(--card-bg) !important;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  padding: 15px;
-  margin-bottom: 25px;
+  width: 100% !important;
+  max-width: 500px;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #18181b 0%, #111112 100%) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  padding: 24px;
+  margin-bottom: 32px;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Navigation du calendrier */
+.react-calendar__navigation {
+  margin-bottom: 16px;
+}
+
 .react-calendar__navigation button {
-  color: var(--vermilion) !important;
-  font-weight: bold;
-  font-size: 1.1em;
+  color: #fff !important;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  background: transparent !important;
+  border-radius: 12px;
+  padding: 8px;
+  transition: all 0.2s ease;
 }
 
 .react-calendar__navigation button:enabled:hover,
 .react-calendar__navigation button:enabled:focus {
-  background-color: var(--hover-bg, #f0f0f01a) !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* Jours de la semaine */
+.react-calendar__month-view__weekdays {
+  margin-bottom: 12px;
+}
+
 .react-calendar__month-view__weekdays__weekday abbr {
   text-decoration: none !important;
-  color: var(--text-secondary) !important;
-  font-weight: 600;
+  color: var(--text-tertiary) !important;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Cellules de date */
 .react-calendar__tile {
-  color: var(--text-primary) !important;
-  border-radius: 4px;
-  padding: 10px 5px; /* Ajuster le padding pour une meilleure apparence */
-  transition: background-color 0.2s ease;
+  color: #fff !important;
+  border-radius: 12px;
+  padding: 14px 8px;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+  background: transparent !important;
 }
 
 .react-calendar__tile:enabled:hover,
 .react-calendar__tile:enabled:focus {
-  background-color: rgba(240, 61, 50, 0.15) !important;
-  color: var(--text-primary) !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  color: #fff !important;
 }
 
 .react-calendar__tile--now {
-  background: rgba(255, 152, 0, 0.2) !important;
-  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
 }
 
 .react-calendar__tile--active {
   background: var(--vermilion) !important;
   color: #fff !important;
+  font-weight: 800;
+  box-shadow: 0 4px 15px rgba(240, 61, 50, 0.3);
 }
 
 /* Marqueur d'entraînement sur les dates */
@@ -82,190 +109,141 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%; /* S'assurer que le tile prend toute la hauteur */
+  height: 100%;
 }
 
 .workout-marker {
-  width: 8px;
-  height: 8px;
-  background-color: var(--color-accent-orange);
+  width: 6px;
+  height: 6px;
+  background-color: var(--vermilion);
   border-radius: 50%;
-  margin: 2px auto 0; /* Ajuster la marge */
+  margin: 4px auto 0;
+  box-shadow: 0 0 8px rgba(240, 61, 50, 0.6);
+}
+
+.react-calendar__tile--active .workout-marker {
+  background-color: #fff;
+  box-shadow: none;
 }
 
 .calories-badge {
-  font-size: 0.6em;
-  font-weight: bold;
-  color: var(--color-accent-orange);
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--vermilion);
   margin-top: 2px;
+  font-family: 'Outfit', sans-serif;
+}
+
+.react-calendar__tile--active .calories-badge {
+  color: rgba(255,255,255,0.8);
 }
 
 
 /* Styles pour les entraînements du jour sélectionné */
 .selected-day-workouts {
   width: 100%;
-  margin-top: 20px;
-  padding: 15px;
-  background-color: var(--card-bg);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 24px;
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 .selected-day-title {
-  font-size: 1.5em;
-  color: var(--vermilion);
-  margin-bottom: 15px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 20px;
+  letter-spacing: -0.3px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .day-workout-card {
-  background-color: var(--bg-primary);
-  padding: 15px;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.day-workout-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .workout-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .workout-title {
-  font-size: 1.1em;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
 }
 
 .workout-time {
-  font-size: 0.9em;
-  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
 }
 
 .workout-stats {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  gap: 10px;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .stat-item {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .stat-label {
-  font-size: 0.8em;
-  color: var(--text-secondary);
-  display: block;
-  margin-bottom: 3px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
 }
 
 .stat-value {
-  font-size: 1em;
-  font-weight: bold;
-  color: var(--color-accent-orange);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--vermilion);
 }
 
 .no-workouts-message {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: var(--card-bg-alt, var(--card-bg));
+  padding: 32px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
-  border-radius: 6px;
-  font-style: italic;
-}
-
-/* Thème sombre spécifique pour le calendrier */
-.dark-theme .react-calendar {
-  background-color: #18181b !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+  font-weight: 600;
 }
 
-.dark-theme .react-calendar__navigation button {
-  color: var(--vermilion) !important;
-}
-
-.dark-theme .react-calendar__navigation button:enabled:hover,
-.dark-theme .react-calendar__navigation button:enabled:focus {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-.dark-theme .react-calendar__month-view__weekdays__weekday abbr {
-  color: #a1a1aa !important;
-  text-decoration: none !important;
-}
-
-.dark-theme .react-calendar__tile {
-  color: #eee !important;
-}
-
-.dark-theme .react-calendar__tile:enabled:hover,
-.dark-theme .react-calendar__tile:enabled:focus {
-  background-color: rgba(240, 61, 50, 0.15) !important;
-  color: #fff !important;
-}
-
-.dark-theme .react-calendar__tile--now {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid var(--vermilion) !important;
-  color: #fff !important;
-}
-
-.dark-theme .react-calendar__tile--active {
-  background: var(--vermilion) !important;
-  color: #fff !important;
-  font-weight: bold;
-}
-
-.dark-theme .workout-marker {
-  background-color: var(--vermilion);
-}
-
-.dark-theme .calories-badge {
-  color: var(--vermilion);
-}
-
-.dark-theme .selected-day-workouts {
-  background-color: #18181b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.dark-theme .selected-day-title {
-  color: #fff;
-}
-
-.dark-theme .day-workout-card {
-  background-color: #121214;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-}
-
-.dark-theme .workout-title {
-  color: #fff;
-}
-
-.dark-theme .workout-time {
-  color: #a1a1aa;
-}
-
-.dark-theme .stat-label {
-  color: #a1a1aa;
-}
-
-.dark-theme .stat-value {
-  color: var(--vermilion);
-}
-
-.dark-theme .no-workouts-message {
-  background-color: #18181b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  color: #a1a1aa;
+/* Fallbacks */
+html.dark-theme .workout-calendar-centered,
+body.dark-theme .workout-calendar-centered {
+  background-color: transparent;
 }
