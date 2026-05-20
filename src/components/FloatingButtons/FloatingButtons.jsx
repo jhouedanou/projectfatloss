@@ -62,7 +62,7 @@ function FloatingButtons({
               onClick={onYouTube}
               aria-label="Voir la vidéo YouTube"
             >
-              <YouTubeIcon style={{ fontSize: 26, color: '#F03D32' }} />
+              <YouTubeIcon style={{ fontSize: 28, color: '#F03D32' }} />
             </button>
           )}
           

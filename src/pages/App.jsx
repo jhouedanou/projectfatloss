@@ -10,7 +10,7 @@ import {
   Box,
   alpha
 } from '@mui/material';
-import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft } from 'lucide-react';
+import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft, Apple } from 'lucide-react';
 import { createAppTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import { getWorkoutPlan } from '../services/WorkoutCustomization'; 
@@ -18,6 +18,7 @@ import StepWorkout from './StepWorkout';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import WorkoutStats from '../components/WorkoutStats';
 import WeightTracker from '../components/WeightTracker';
+import CalorieCounter from '../components/CalorieCounter';
 import LanguageSelector from '../components/LanguageSelector';
 import WorkoutCustomizer from '../components/WorkoutCustomizer'; 
 import NotificationSettingsDialog from '../components/NotificationSettingsDialog';
@@ -217,8 +218,8 @@ export default function App() {
 
   const isPlanAvailable = workoutPlan && workoutPlan.length > 0 && current < workoutPlan.length;
 
-  const viewModeToIndex = { workout: 0, history: 1, weight: 2 };
-  const indexToViewMode = ['workout', 'history', 'weight'];
+  const viewModeToIndex = { workout: 0, history: 1, weight: 2, calorie: 3 };
+  const indexToViewMode = ['workout', 'history', 'weight', 'calorie'];
 
   return (
     <ThemeProvider theme={appTheme}>
@@ -389,6 +390,12 @@ export default function App() {
               <WeightTracker />
             </div>
           </Fade>
+
+          <Fade in={viewMode === 'calorie'} timeout={300} unmountOnExit mountOnEnter>
+            <div className="calorie-content">
+              <CalorieCounter />
+            </div>
+          </Fade>
         </div>
         
         {/* Bouton flottant personnaliser - repositionné au-dessus de la bottom nav */}
@@ -497,7 +504,16 @@ export default function App() {
                   icon={<Scale size={20} />} 
                   sx={{
                     '&.Mui-selected': {
-                      color: '#4CAF50',
+                      color: '#10B981',
+                    },
+                  }}
+                />
+                <BottomNavigationAction 
+                  label={t('nav.calorie', { defaultValue: 'Calories' })} 
+                  icon={<Apple size={20} />} 
+                  sx={{
+                    '&.Mui-selected': {
+                      color: '#F03D32',
                     },
                   }}
                 />

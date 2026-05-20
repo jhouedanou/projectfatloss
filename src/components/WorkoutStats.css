@@ -14,10 +14,13 @@
 }
 
 .stats-title {
-  font-size: 1.5em;
-  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.6em;
+  font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 24px;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
 }
 
 .stats-summary {
@@ -110,10 +113,13 @@
 }
 
 .top-exercises-title {
-  font-size: 1.2em;
-  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.3em;
+  font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 16px;
+  letter-spacing: -0.3px;
+  text-transform: uppercase;
 }
 
 .exercise-list-stats {

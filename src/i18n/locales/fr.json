@@ -13,8 +13,10 @@
     "workout": "Entraînement",
     "history": "Historique",
     "weight": "Suivi Poids",
+    "calorie": "Nutrition",
     "historyDisabled": "Historique indisponible pendant l'entraînement",
-    "weightDisabled": "Suivi poids indisponible pendant l'entraînement"
+    "weightDisabled": "Suivi poids indisponible pendant l'entraînement",
+    "calorieDisabled": "Nutrition indisponible pendant l'entraînement"
   },
   "workout": {
     "start": "Commencer la séance",

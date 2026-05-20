@@ -9,8 +9,10 @@
     "workout": "Workout",
     "history": "History",
     "weight": "Weight",
+    "calorie": "Nutrition",
     "historyDisabled": "History unavailable during workout",
-    "weightDisabled": "Weight tracking unavailable during workout"
+    "weightDisabled": "Weight tracking unavailable during workout",
+    "calorieDisabled": "Nutrition tracking unavailable during workout"
   },
   "workout": {
     "start": "Start workout",

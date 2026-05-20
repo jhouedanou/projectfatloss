@@ -7,15 +7,23 @@
 }
 
 .weight-tracker h2 {
+  font-family: 'Outfit', sans-serif;
   margin-top: 0;
   margin-bottom: 20px;
-  font-size: 1.3rem;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
   color: var(--text-primary);
   text-align: center;
 }
 
 .weight-tracker h3 {
-  font-size: 1.1rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  text-transform: uppercase;
   margin: 20px 0 15px;
   color: var(--text-primary);
 }
@@ -144,12 +152,12 @@
 
 .weight-change.positive .stat-value,
 .weight-change.positive .stat-percentage {
-  color: #2E7D32; /* Vert foncé pour un meilleur contraste */
+  color: #10B981; /* Vert émeraude premium */
 }
 
 .weight-change.negative .stat-value,
 .weight-change.negative .stat-percentage {
-  color: var(--cinnabar);
+  color: #EF4444; /* Rouge néon premium */
 }
 
 .min-max {
@@ -164,12 +172,12 @@
 }
 
 .min-weight .stat-value {
-  color: #2E7D32; /* Vert foncé */
+  color: #10B981; /* Émeraude */
   font-size: 1.2rem;
 }
 
 .max-weight .stat-value {
-  color: var(--rosewood); /* Rosewood pour le poids max */
+  color: #EF4444; /* Rouge néon */
   font-size: 1.2rem;
 }
 

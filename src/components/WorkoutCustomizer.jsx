@@ -180,11 +180,12 @@ const WorkoutCustomizer = ({ onClose }) => {
   };
 
   return (
-    <div className="workout-customizer">
-      <div className="customizer-header">
-        <h2>{t('customizer.title')}</h2>
-        <button className="close-button" onClick={onClose}><X size={20} /></button>
-      </div>
+    <div className="customizer-overlay" onClick={onClose}>
+      <div className="workout-customizer" onClick={(e) => e.stopPropagation()}>
+        <div className="customizer-header">
+          <h2>{t('customizer.title')}</h2>
+          <button className="close-button" onClick={onClose}><X size={20} /></button>
+        </div>
       
       {/* Messages de succès et d'erreur */}
       {successMessage && (
@@ -349,6 +350,7 @@ const WorkoutCustomizer = ({ onClose }) => {
         {t('customizer.resetProgram')}
       </button>
     </div>
+  </div>
   );
 };
 
