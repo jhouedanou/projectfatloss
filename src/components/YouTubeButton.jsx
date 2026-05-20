@@ -40,12 +40,30 @@ function YouTubeButton({ exercise, exerciseName }) {
       <Button
         variant="outlined"
         color="error"
-        size="small"
-        sx={{ ml: 1, borderColor: '#F03D32', color: '#F03D32', '&:hover': { borderColor: '#ff5247', backgroundColor: 'rgba(240,61,50,0.08)' } }}
-        startIcon={<YouTubeIcon />}
+        size="medium"
+        sx={{ 
+          borderColor: 'rgba(240, 61, 50, 0.3)', 
+          color: '#fff', 
+          borderRadius: '12px',
+          background: 'rgba(240, 61, 50, 0.05)',
+          textTransform: 'uppercase',
+          fontWeight: 800,
+          fontSize: '0.75rem',
+          letterSpacing: '0.5px',
+          padding: '8px 16px',
+          '&:hover': { 
+            borderColor: '#F03D32', 
+            backgroundColor: '#F03D32',
+            color: '#fff',
+            boxShadow: '0 4px 15px rgba(240, 61, 50, 0.3)',
+            transform: 'translateY(-1px)'
+          },
+          transition: 'all 0.25s ease'
+        }}
+        startIcon={<YouTubeIcon sx={{ fontSize: '22px !important', color: '#F03D32' }} />}
         onClick={handleYouTubeOpen}
       >
-        Voir sur YouTube
+        Tutoriel
       </Button>
       {showModal && (
         <div className="youtube-modal-overlay" onClick={() => setShowModal(false)}>

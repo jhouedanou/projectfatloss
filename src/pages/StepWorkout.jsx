@@ -296,63 +296,151 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
     // Fermer la modale
     onClose();
   };
-  
   return (
     <div className="modal-overlay">
-      <div className="modal-content" style={{ background: '#111', border: '1px solid #333' }}>
-        <h2>Félicitations !</h2>
-        <div className="completion-icon" style={{ background: 'transparent', boxShadow: 'none' }}><Flame size={64} color="#F03D32" /></div>
-        <h3>Séance terminée : {day.title}</h3>
-        <p className="calorie-total">Vous avez brûlé <span>{totalCalories}</span> calories !</p>
-        <p className="weight-total">Poids total soulevé : <span>{totalWeightLifted} kg</span></p>
-        <p className="motivation-text">Excellent travail ! Continuez ainsi pour atteindre vos objectifs.</p>
+      <div className="modal-content" style={{
+        background: '#18181b',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '24px',
+        padding: '32px 24px',
+        maxWidth: '440px',
+        width: '90%',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+        color: '#fff',
+        fontFamily: 'Inter, sans-serif'
+      }}>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '8px', color: '#fff' }}>FÉLICITATIONS !</h2>
+        <div className="completion-icon" style={{
+          width: '80px',
+          height: '80px',
+          borderRadius: '50%',
+          background: 'rgba(240, 61, 50, 0.1)',
+          border: '2px solid var(--vermilion)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '20px auto',
+          boxShadow: '0 0 20px rgba(240, 61, 50, 0.2)'
+        }}>
+          <Flame size={40} color="var(--vermilion)" />
+        </div>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '10px 0', textTransform: 'uppercase', color: '#fff' }}>
+          {day.title}
+        </h3>
         
-        <div style={{ margin: '20px 0', width: '100%' }}>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.02)',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          borderRadius: '16px',
+          padding: '16px',
+          margin: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontWeight: 600 }}>Calories brûlées</span>
+            <span style={{ color: 'var(--vermilion)', fontSize: '1.2rem', fontWeight: 900 }}>{totalCalories} kcal</span>
+          </div>
+          <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.05)' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#a1a1aa', fontSize: '0.9rem', fontWeight: 600 }}>Poids total soulevé</span>
+            <span style={{ color: 'var(--vermilion)', fontSize: '1.2rem', fontWeight: 900 }}>{totalWeightLifted} kg</span>
+          </div>
+        </div>
+
+        <p className="motivation-text" style={{ color: '#a1a1aa', fontSize: '0.9rem', lineHeight: 1.5, margin: '15px 0' }}>
+          Excellent travail ! Vos progrès sont enregistrés. Continuez sur cette lancée !
+        </p>
+        
+        <div style={{ margin: '24px 0 16px', width: '100%' }}>
           <button 
             onClick={handleGoogleFitSync}
             disabled={isLoadingFit || isSynced}
             style={{
               width: '100%',
-              padding: '12px',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              background: isSynced ? 'rgba(76, 175, 80, 0.2)' : 'linear-gradient(135deg, #4285F4, #34A853)',
+              padding: '14px',
+              borderRadius: '14px',
+              border: isSynced ? '1px solid rgba(76, 175, 80, 0.3)' : 'none',
+              background: isSynced ? 'rgba(76, 175, 80, 0.15)' : 'linear-gradient(135deg, #4285F4, #34A853)',
               color: isSynced ? '#4CAF50' : 'white',
               fontSize: '0.95rem',
-              fontWeight: '600',
+              fontWeight: '700',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '10px',
               cursor: isSynced ? 'default' : 'pointer',
-              boxShadow: isSynced ? 'none' : '0 4px 12px rgba(66, 133, 244, 0.25)',
-              transition: 'all 0.2s ease',
+              boxShadow: isSynced ? 'none' : '0 4px 15px rgba(66, 133, 244, 0.3)',
+              transition: 'all 0.25s ease',
             }}
             onMouseEnter={(e) => {
               if (!isLoadingFit && !isSynced) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(66, 133, 244, 0.35)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(66, 133, 244, 0.4)';
               }
             }}
             onMouseLeave={(e) => {
               if (!isSynced) {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(66, 133, 244, 0.25)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(66, 133, 244, 0.3)';
               }
             }}
           >
             <img 
               src="https://www.gstatic.com/images/branding/product/1x/gfit_512dp.png" 
               alt="Google Fit" 
-              style={{ width: '22px', height: '22px', objectFit: 'contain' }}
+              style={{ width: '20px', height: '20px', objectFit: 'contain' }}
             />
-            {isLoadingFit ? 'Synchronisation...' : isSynced ? 'Synchronisé avec Google Fit' : 'Synchroniser avec Google Fit'}
+            {isLoadingFit ? 'Synchronisation...' : isSynced ? '✓ Synchronisé avec Google Fit' : 'Synchroniser avec Google Fit'}
           </button>
         </div>
 
-        <div className="modal-actions">
-          <button className="timer-btn save-btn" onClick={handleSave}>Enregistrer</button>
-          <button className="timer-btn close-btn" onClick={onClose}>Fermer</button>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+          <button 
+            style={{
+              flex: 1,
+              padding: '14px',
+              borderRadius: '14px',
+              border: 'none',
+              background: 'var(--vermilion)',
+              color: '#fff',
+              fontWeight: 800,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onClick={handleSave}
+            onMouseEnter={(e) => e.currentTarget.style.filter = 'brightness(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.filter = 'none'}
+          >
+            Enregistrer
+          </button>
+          <button 
+            style={{
+              flex: 1,
+              padding: '14px',
+              borderRadius: '14px',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: 'transparent',
+              color: '#a1a1aa',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onClick={onClose}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+              e.currentTarget.style.color = '#fff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#a1a1aa';
+            }}
+          >
+            Fermer
+          </button>
         </div>
       </div>
     </div>

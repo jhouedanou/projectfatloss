@@ -21,6 +21,7 @@ import WeightTracker from '../components/WeightTracker';
 import LanguageSelector from '../components/LanguageSelector';
 import WorkoutCustomizer from '../components/WorkoutCustomizer'; 
 import NotificationSettingsDialog from '../components/NotificationSettingsDialog';
+import YouTubeButton from '../components/YouTubeButton';
 import { initNotificationService } from '../services/NotificationService';
 // Import de la synthèse vocale supprimé
 import { days as initialWorkoutPlan } from '../data'; 
@@ -39,7 +40,13 @@ export default function App() {
   const { t } = useTranslation();
   const [current, setCurrent] = useState(() => {
     const savedDay = localStorage.getItem('currentWorkoutDay');
-    return savedDay !== null ? parseInt(savedDay, 10) : 0;
+    const dayOfWeek = (new Date().getDay() + 6) % 7; // 0 = Lundi, 6 = Dimanche
+    if (savedDay !== null) {
+      const savedIndex = parseInt(savedDay, 10);
+      const activeWeek = Math.floor(savedIndex / 7);
+      return activeWeek * 7 + dayOfWeek;
+    }
+    return dayOfWeek; // Par défaut, jour de la semaine en cours de la Semaine 1
   });
   const [stepMode, setStepMode] = useState(false);
   const [autoMode, setAutoMode] = useState(false);
@@ -311,13 +318,18 @@ export default function App() {
                             {workoutPlan[current].exercises.map((exo, index) => (
                               <div key={index} className="exercise-card-premium" style={{ animationDelay: `${index * 0.1}s` }}>
                                 <div className="huge-number">{index + 1}</div>
-                                <div className="exercise-card-content">
-                                  <h3 className="exo-name">{exo.name}</h3>
-                                  <div className="exo-tags">
-                                    <span className="tag sets-tag">{exo.sets}</span>
-                                    {exo.equip && <span className="tag equip-tag">{exo.equip}</span>}
+                                <div className="exercise-card-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+                                  <div style={{ flex: 1 }}>
+                                    <h3 className="exo-name" style={{ margin: '0 0 8px 0' }}>{exo.name}</h3>
+                                    <div className="exo-tags">
+                                      <span className="tag sets-tag">{exo.sets}</span>
+                                      {exo.equip && <span className="tag equip-tag">{exo.equip}</span>}
+                                    </div>
+                                    {exo.desc && <p className="exo-desc" style={{ margin: '8px 0 0 0' }}>{exo.desc}</p>}
                                   </div>
-                                  {exo.desc && <p className="exo-desc">{exo.desc}</p>}
+                                  <div style={{ alignSelf: 'center', zIndex: 10 }}>
+                                    <YouTubeButton exercise={exo} />
+                                  </div>
                                 </div>
                               </div>
                             ))}
