@@ -29,7 +29,7 @@ const formatTime = (seconds) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-const PAUSE_DURATION_SECONDS = 10;
+const PAUSE_DURATION_SECONDS = 60;
 
 // Correction de l'import du fichier JSON
 // import iconsMap from '../../public/exo-icons.json'; // ❌ Incorrect
@@ -257,8 +257,8 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
         activityType: 97, // Strength Training in Google Fit
         name: `Project Fat Loss - ${day.title}`,
         description: `Séance de musculation de haute intensité. Poids total soulevé : ${totalWeightLifted} kg.`,
-        startTime: new Date().getTime() - 45 * 60 * 1000,
-        duration: 45 * 60 * 1000,
+        startTime: new Date().getTime() - 30 * 60 * 1000,
+        duration: 30 * 60 * 1000,
         calories: totalCalories,
       };
       await GoogleFitService.addActivity(sessionActivity);
@@ -284,7 +284,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
         sets: parseSets(exercise.sets),
         weightLifted: calculateWeight(exercise.equip)
       })),
-      duration: day.exercises.length * 180 // Estimation de la durée : 3 minutes par exercice
+      duration: day.exercises.reduce((sum, ex) => sum + (ex.totalSets || 3), 0) * 90 // 90s par série (30s travail + 60s repos)
     };
     
     // Sauvegarder localement

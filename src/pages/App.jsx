@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { 
@@ -40,14 +40,28 @@ const NOTIFICATION_DURATION = 3000;
 export default function App() {
   const { t } = useTranslation();
   const [current, setCurrent] = useState(() => {
-    const savedDay = localStorage.getItem('currentWorkoutDay');
-    const dayOfWeek = (new Date().getDay() + 6) % 7; // 0 = Lundi, 6 = Dimanche
-    if (savedDay !== null) {
-      const savedIndex = parseInt(savedDay, 10);
-      const activeWeek = Math.floor(savedIndex / 7);
-      return activeWeek * 7 + dayOfWeek;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let startDateStr = localStorage.getItem('programStartDate');
+
+    if (!startDateStr) {
+      const savedDay = localStorage.getItem('currentWorkoutDay');
+      if (savedDay !== null) {
+        // Reconstituer la date de départ depuis le jour sauvegardé
+        const savedIndex = parseInt(savedDay, 10);
+        const startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - savedIndex);
+        startDateStr = startDate.toISOString().split('T')[0];
+      } else {
+        startDateStr = today.toISOString().split('T')[0];
+      }
+      localStorage.setItem('programStartDate', startDateStr);
     }
-    return dayOfWeek; // Par défaut, jour de la semaine en cours de la Semaine 1
+
+    const startDate = new Date(startDateStr + 'T00:00:00');
+    const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+    return Math.min(Math.max(daysSinceStart, 0), 27);
   });
   const [stepMode, setStepMode] = useState(false);
   const [autoMode, setAutoMode] = useState(false);
@@ -128,6 +142,15 @@ export default function App() {
     localStorage.setItem('currentWorkoutDay', current.toString());
   }, [current]);
 
+  const handleSetDay = useCallback((newDay) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const newStartDate = new Date(today);
+    newStartDate.setDate(newStartDate.getDate() - newDay);
+    localStorage.setItem('programStartDate', newStartDate.toISOString().split('T')[0]);
+    setCurrent(newDay);
+  }, []);
+
   useEffect(() => {
     if (darkTheme) {
       document.body.classList.add('dark-theme');
@@ -154,9 +177,9 @@ export default function App() {
   
   const moveToNextDay = () => {
     if (workoutPlan && workoutPlan.length > 0) {
-      setCurrent(prev => (prev + 1) % workoutPlan.length);
+      handleSetDay((current + 1) % workoutPlan.length);
     }
-    setStepMode(false); 
+    setStepMode(false);
     setShowExercises(false);
   };
   
@@ -257,7 +280,7 @@ export default function App() {
                         days={workoutPlan}
                         current={current}
                         onSelectDay={(dayIndex) => {
-                          setCurrent(dayIndex);
+                          handleSetDay(dayIndex);
                           setShowExercises(true);
                         }}
                       />

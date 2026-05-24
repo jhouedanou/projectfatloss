@@ -56,46 +56,29 @@ class GoogleFitService {
 
   async addActivity(activity) {
     if (!this.isInitialized) await this.init();
-    
-    const startTime = new Date(activity.startTime).getTime();
-    const endTime = startTime + (activity.duration || 3600000); // Durée par défaut 1h
 
-    const request = {
-      userId: 'me',
-      resource: {
-        aggregateBy: [{
-          dataTypeName: 'com.google.calories.expended',
-          dataSourceId: 'derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended'
-        }],
-        bucketByTime: { durationMillis: activity.duration || 3600000 },
-        startTimeMillis: startTime,
-        endTimeMillis: endTime,
-        session: {
-          name: activity.name,
-          description: activity.description,
-          startTimeMillis: startTime,
-          endTimeMillis: endTime,
-          application: {
-            packageName: 'com.projectfatloss'
-          },
-          activityType: activity.activityType
-        },
-        point: [{
-          dataTypeName: 'com.google.calories.expended',
-          startTimeNanos: startTime * 1000000,
-          endTimeNanos: endTime * 1000000,
-          value: [{
-            fpVal: activity.calories
-          }]
-        }]
-      }
-    };
+    const startTime = new Date(activity.startTime).getTime();
+    const endTime = startTime + (activity.duration || 1800000); // Durée par défaut 30 min
+    const sessionId = `projectfatloss-${startTime}`;
 
     try {
+      // Créer la session d'entraînement via l'API Sessions
       await gapi.client.request({
-        path: 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate',
-        method: 'POST',
-        body: request
+        path: `https://www.googleapis.com/fitness/v1/users/me/sessions/${sessionId}`,
+        method: 'PUT',
+        body: {
+          id: sessionId,
+          name: activity.name,
+          description: activity.description || '',
+          startTimeMillis: startTime,
+          endTimeMillis: endTime,
+          activityType: activity.activityType || 97, // 97 = Musculation
+          application: {
+            packageName: 'com.projectfatloss',
+            name: 'Project Fat Loss',
+            version: '1'
+          }
+        }
       });
       return true;
     } catch (error) {
