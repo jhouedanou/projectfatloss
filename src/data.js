@@ -1477,9 +1477,66 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 21: REPOS',
-    isRestDay: true,
-    exercises: [],
+    title: 'JOUR 21: COMPLEXES MIXTES (Haute Intensité)',
+    isRestDay: false,
+    exercises: [
+      {
+        name: 'Complexe Mixte (Soulevé de terre barre + Rowing haltères)',
+        sets: '4 × 8',
+        equip: 'Barre 30 kg / Haltères 15 kg',
+        desc: "Enchaînez 8 soulevés de terre à la barre puis immédiatement 8 rowings avec haltères. Combinaison mixte pour le dos et les jambes, sans temps de repos entre les deux exercices.",
+        caloriesPerSet: [28, 33],
+        totalSets: 4,
+        nbRep: 8,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Mixed Complex - Deadlift & Row',
+          muscleGroups: ['back', 'legs', 'hamstrings']
+        }
+      },
+      {
+        name: 'Complexe Corps Complet (Squat + Push Press + Rowing)',
+        sets: '4 × 8',
+        equip: 'Barre 30 kg',
+        desc: "Sans poser la barre : 1 Squat barre → 1 Push Press au-dessus de la tête → 1 Rowing buste penché. Répétez 8 fois. Le circuit le plus complet du programme.",
+        caloriesPerSet: [33, 38],
+        totalSets: 4,
+        nbRep: 8,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Full Body Barbell Complex',
+          muscleGroups: ['full_body']
+        }
+      },
+      {
+        name: 'Thrusters Barre',
+        sets: '4 × 10',
+        equip: 'Barre 20 kg',
+        desc: "Squat complet avec la barre sur les épaules, puis poussez la barre explosive au-dessus de la tête en remontant. L'enchaînement squat-développé brûle massivement des calories.",
+        caloriesPerSet: [22, 27],
+        totalSets: 4,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Barbell Thrusters',
+          muscleGroups: ['quadriceps', 'shoulders', 'triceps']
+        }
+      },
+      {
+        name: 'Crunchs',
+        sets: '1 × 50',
+        equip: 'Poids du corps',
+        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
+        caloriesPerSet: [20, 25],
+        totalSets: 1,
+        nbRep: 50,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+    ],
   },
   {
     title: 'JOUR 22: HAUT DU CORPS (Pectoraux, Épaules, Triceps)',
@@ -1934,9 +1991,66 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 28: REPOS',
-    isRestDay: true,
-    exercises: [],
+    title: 'JOUR 28: DÉFI FINAL (Corps Complet)',
+    isRestDay: false,
+    exercises: [
+      {
+        name: 'Complexe Final (Épaulé + Front Squat + Push Press + Fente)',
+        sets: '4 × 8',
+        equip: 'Barre 30 kg',
+        desc: "Le complexe ultime pour conclure le programme : Épaulé de terre → Front Squat → Push Press → Fente arrière. Ne posez pas la barre entre les mouvements. Donnez tout ce qu'il vous reste.",
+        caloriesPerSet: [38, 45],
+        totalSets: 4,
+        nbRep: 8,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Final Barbell Complex',
+          muscleGroups: ['full_body']
+        }
+      },
+      {
+        name: 'Complexe Haltères Final (Rowing + Curl + Développé épaules)',
+        sets: '4 × 10',
+        equip: 'Haltères 15 kg',
+        desc: "Sans poser les haltères : 10 Rowings buste penché → 10 Curls biceps → 10 Développés épaules. Circuit de finition complet pour le haut du corps.",
+        caloriesPerSet: [28, 33],
+        totalSets: 4,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Final Complex',
+          muscleGroups: ['back', 'biceps', 'shoulders']
+        }
+      },
+      {
+        name: 'Burpees avec Haltères',
+        sets: '4 × 10',
+        equip: 'Haltères 10 kg',
+        desc: "Tenez des haltères légers, descendez en position de pompe, remontez et enchaînez immédiatement un développé épaules explosif. La version ultime du burpee pour finir le programme en apothéose.",
+        caloriesPerSet: [30, 35],
+        totalSets: 4,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Burpees',
+          muscleGroups: ['full_body']
+        }
+      },
+      {
+        name: 'Crunchs',
+        sets: '4 × 25',
+        equip: 'Poids du corps',
+        desc: "4 séries de 25 répétitions pour clôturer le programme. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Vous avez terminé les 28 jours.",
+        caloriesPerSet: [10, 13],
+        totalSets: 4,
+        nbRep: 25,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Crunches',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+    ],
   },
 ];
 
