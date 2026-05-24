@@ -473,7 +473,7 @@ const fullPlan = [
         equip: 'Haltères 10 kg',
         desc: "Faites une fente, et en remontant, développez les haltères au-dessus de la tête. Travail complet du corps.",
         caloriesPerSet: [25, 30],
-        totalSets: 4,
+        totalSets: 8,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
