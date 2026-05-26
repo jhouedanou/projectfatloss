@@ -159,7 +159,7 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const [time, setTime] = useState(defaultTime);
   
   const currentExercise = day.exercises[step];
-  const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
+  const nextExercise = step < total - 1 ? day?.exercises?.[step + 1] : null;
   const isLastSet = setNum === totalSets - 1;
   
   useEffect(() => {
@@ -257,7 +257,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
       await GoogleFitService.signIn();
       const sessionActivity = {
         activityType: 97, // Strength Training in Google Fit
-        name: `Project Fat Loss - ${day.title}`,
+        name: `Project Fat Loss - ${day?.title}`,
         description: `Séance de musculation de haute intensité. Poids total soulevé : ${totalWeightLifted} kg.`,
         startTime: new Date().getTime() - 45 * 60 * 1000,
         duration: 45 * 60 * 1000,
@@ -276,7 +276,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
 
   const handleSave = async () => {
     const workoutData = {
-      title: day.title,
+      title: day?.title,
       date: new Date().toISOString(),
       calories: totalCalories,
       weightLifted: totalWeightLifted,
@@ -375,7 +375,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
           color: '#fff',
           letterSpacing: '-0.2px'
         }}>
-          {day.title}
+          {day?.title}
         </h3>
         
         {/* Stats Container - Two premium cards side-by-side */}
@@ -559,7 +559,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
   const [autoMode, setAutoMode] = useState(initialAutoMode || false); // Mode automatique pour les pauses
-  const [showPreWorkout, setShowPreWorkout] = useState(true);
+  const [showPreWorkout, setShowPreWorkout] = useState(false);
   // Synthèse vocale réactivée pour les exercices
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState({
@@ -584,21 +584,13 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // mais utiliser les vraies valeurs de nbRep du data.js
   const totalSets = exo ? baseTotalSets : 1;
 
-  // Ajout d'une vérification pour éviter le crash si les données ne sont pas prêtes
-  if (!workoutPlan || !day || !exo) {
-    return (
-      <div style={{textAlign: 'center', marginTop: 40}}>
-        <h2>Chargement...</h2>
-        <p>Veuillez patienter.</p>
-      </div>
-    );
-  }
+  const dataReady = !!(workoutPlan && day && exo);
 
   // Initialiser la synthèse vocale au démarrage
   useEffect(() => {
     initSpeechService();
   }, []);
-  
+
   useEffect(()=>{
     setStep(0);
     setPause(false);
@@ -607,22 +599,19 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     setPendingTransitionType(null);
     setTotalCaloriesBurned(0);
   },[dayIndex]);
-  
+
   // Annoncer l'exercice uniquement au début de chaque nouvel exercice
   const prevStepRef = useRef(step);
-  
+
   useEffect(() => {
-    // Vérifier si c'est un nouvel exercice
     const isNewExercise = prevStepRef.current !== step;
-    
+
     if (isNewExercise && exo && !isFirstRender.current && !pause) {
-      // Annoncer uniquement au début du premier exercice de la série
       if (setNum === 0) {
         announceExercise(exo, setNum, totalSets, pause);
       }
     }
-    
-    // Mettre à jour la référence
+
     prevStepRef.current = step;
   }, [exo, step, setNum, totalSets, pause]);
   
@@ -679,7 +668,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
   const next = () => {
     const currentExercise = day.exercises[step];
-    const nextExercise = step < total - 1 ? day.exercises[step + 1] : null;
+    const nextExercise = step < total - 1 ? day?.exercises?.[step + 1] : null;
 
     if (setNum < totalSets - 1) {
       setSetNum(s => s + 1);
@@ -766,7 +755,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         try {
           // Sauvegarder la progression et créer un objet workout complet
           const workoutData = {
-            title: day.title,
+            title: day?.title,
             date: new Date().toISOString(),
             calories: totalCaloriesBurned,
             weightLifted: day.exercises.reduce((total, exercise) => {
@@ -816,6 +805,74 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     // L'entraînement se lance automatiquement
   };
 
+  // Gestion des notifications d'exercice en cours
+  useEffect(() => {
+    if (showPreWorkout) return;
+    if (exo && !pause && !workoutCompleted) {
+      const exerciseData = {
+        name: exo.name,
+        currentSet: setNum + 1,
+        totalSets: totalSets,
+        dayTitle: day?.title,
+        currentExercise: step + 1,
+        totalExercises: total,
+        autoMode: autoMode
+      };
+
+      notificationService.updateCurrentExercise(exerciseData);
+    }
+  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, showPreWorkout]);
+
+  // Gestion des notifications d'exercice en cours avec plus de données
+  useEffect(() => {
+    if (showPreWorkout) return;
+    if (exo && !pause && !workoutCompleted) {
+      const exerciseData = {
+        name: exo.name,
+        currentSet: setNum + 1,
+        totalSets: totalSets,
+        dayTitle: day?.title,
+        currentExercise: step + 1,
+        totalExercises: total,
+        autoMode: autoMode,
+        exerciseType: exo.timer ? 'timer' : 'reps',
+        remainingTime: exo.duration || null,
+        currentRep: 0,
+        totalReps: exo.nbRep || 0,
+        isPaused: pause,
+        calories: totalCaloriesBurned,
+        progress: 0
+      };
+
+      notificationService.updateCurrentExercise(exerciseData);
+    }
+  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, totalCaloriesBurned, showPreWorkout]);
+
+  // Gestion des notifications de pause avec timer
+  useEffect(() => {
+    if (showPreWorkout) return;
+    if (pause && !workoutCompleted) {
+      const pauseData = {
+        remainingTime: PAUSE_DURATION_SECONDS,
+        nextExercise: step < total - 1 ? day?.exercises?.[step + 1] : null,
+        currentSet: setNum + 1,
+        totalSets: totalSets,
+        autoMode: autoMode
+      };
+
+      notificationService.showPauseNotification(pauseData);
+    }
+  }, [pause, workoutCompleted, autoMode, step, total, day?.exercises, setNum, totalSets, showPreWorkout]);
+
+  if (!dataReady) {
+    return (
+      <div style={{textAlign: 'center', marginTop: 40}}>
+        <h2>Chargement...</h2>
+        <p>Veuillez patienter.</p>
+      </div>
+    );
+  }
+
   // Si on veut afficher le pre-workout, on l'affiche en premier
   if (showPreWorkout) {
     return (
@@ -827,72 +884,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     );
   }
 
-  // Gestion des notifications d'exercice en cours
-  useEffect(() => {
-    if (exo && !pause && !workoutCompleted) {
-      // Afficher/mettre à jour la notification avec l'exercice en cours
-      const exerciseData = {
-        name: exo.name,
-        currentSet: setNum + 1,
-        totalSets: totalSets,
-        dayTitle: day.title,
-        currentExercise: step + 1,
-        totalExercises: total,
-        autoMode: autoMode
-      };
-      
-      notificationService.updateCurrentExercise(exerciseData);
-    }
-  }, [exo, setNum, totalSets, day.title, step, total, autoMode, pause, workoutCompleted]);
-
-  // Gestion des notifications d'exercice en cours avec plus de données
-  useEffect(() => {
-    if (exo && !pause && !workoutCompleted) {
-      // Déterminer le type d'exercice pour les notifications
-      let exerciseType = 'reps';
-      let remainingTime = null;
-      
-      // Simplifier - utiliser des valeurs par défaut pour les variables inaccessibles
-      // Les variables exerciseTimer, chrono, isChrono, hasTimer sont dans StepSet, pas ici
-      
-      // Afficher/mettre à jour la notification avec l'exercice en cours
-      const exerciseData = {
-        name: exo.name,
-        currentSet: setNum + 1,
-        totalSets: totalSets,
-        dayTitle: day.title,
-        currentExercise: step + 1,
-        totalExercises: total,
-        autoMode: autoMode,
-        // Données simplifiées pour éviter les erreurs de portée
-        exerciseType: exo.timer ? 'timer' : 'reps',
-        remainingTime: exo.duration || null,
-        currentRep: 0, // Valeur par défaut
-        totalReps: exo.nbRep || 0,
-        isPaused: pause,
-        calories: totalCaloriesBurned,
-        progress: 0 // Progression par défaut
-      };
-      
-      notificationService.updateCurrentExercise(exerciseData);
-    }
-  }, [exo, setNum, totalSets, day.title, step, total, autoMode, pause, workoutCompleted, totalCaloriesBurned]);
-
-  // Gestion des notifications de pause avec timer
-  useEffect(() => {
-    if (pause && !workoutCompleted) {
-      const pauseData = {
-        remainingTime: PAUSE_DURATION_SECONDS,
-        nextExercise: step < total - 1 ? day.exercises[step + 1] : null,
-        currentSet: setNum + 1,
-        totalSets: totalSets,
-        autoMode: autoMode
-      };
-      
-      notificationService.showPauseNotification(pauseData);
-    }
-  }, [pause, workoutCompleted, autoMode, step, total, day.exercises, setNum, totalSets]);
-  
   return (
     <div 
       className="day-content" 
@@ -960,7 +951,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         </div>
       </div>
 
-      <h2 style={{fontSize:'1.1rem',marginBottom:8}}> {day.title}</h2>
+      <h2 style={{fontSize:'1.1rem',marginBottom:8}}> {day?.title}</h2>
       
       <>
         <ProgressTracker 

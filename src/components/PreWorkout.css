@@ -1,130 +1,241 @@
-/* Styles pour le composant PreWorkout */
-
-.preworkout-container {
+.pfl-prewk-launchers {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.pfl-prewk-launch-btn {
+  display: inline-flex;
   align-items: center;
-  padding: 20px;
-}
-
-.preworkout-button {
-  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 22px;
   border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 1.2rem;
-  font-weight: bold;
-  padding: 15px 30px;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.pfl-prewk-launch-btn.primary {
+  background: linear-gradient(45deg, #F03D32 30%, #FF6B35 90%);
+  box-shadow: 0 6px 18px rgba(240, 61, 50, 0.35);
+}
+.pfl-prewk-launch-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(240, 61, 50, 0.45);
+}
+.pfl-prewk-launch-btn.secondary {
+  background: linear-gradient(45deg, #FF6B35 30%, #F03D32 90%);
+  box-shadow: 0 6px 18px rgba(255, 107, 53, 0.3);
+}
+.pfl-prewk-launch-btn.secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(255, 107, 53, 0.4);
 }
 
-.preworkout-button:hover {
-  background: linear-gradient(45deg, #FF5252, #26C6DA);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+.pfl-prewk-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  z-index: 1400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: pflPrewkFade 0.25s ease-out;
+}
+@keyframes pflPrewkFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.preworkout-timer {
-  font-family: 'Roboto Mono', monospace;
-  font-size: 3rem;
-  font-weight: bold;
-  text-align: center;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+.pfl-prewk-card {
+  width: 100%;
+  max-width: 480px;
+  background: linear-gradient(160deg, #1A1A1A 0%, #0F0F0F 100%);
+  border: 1px solid rgba(240, 61, 50, 0.2);
+  border-radius: 24px;
+  padding: 22px 22px 24px;
+  color: #fff;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  animation: pflPrewkRise 0.32s cubic-bezier(0.2, 0.9, 0.2, 1.1);
+}
+@keyframes pflPrewkRise {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.preworkout-timer.warning {
-  color: #FFD700;
-  animation: pulse 1s infinite;
+.pfl-prewk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
 }
+.pfl-prewk-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pfl-prewk-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: #fff;
+}
+.pfl-prewk-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+.pfl-prewk-close:hover { background: rgba(255, 255, 255, 0.12); }
 
-.preworkout-progress {
+.pfl-prewk-progress-track {
+  position: relative;
   width: 100%;
   height: 8px;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
   overflow: hidden;
-  background-color: rgba(255, 255, 255, 0.3);
-  margin: 20px 0;
+}
+.pfl-prewk-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, #F03D32, #FF6B35, #FFD700);
+  border-radius: 100px;
+  transition: width 0.6s ease;
+}
+.pfl-prewk-progress-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-top: 8px;
+  text-align: right;
 }
 
-.preworkout-progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #FFD700, #FF6B6B);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.motivation-text {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 15px;
-  margin: 15px 0;
-  font-style: italic;
+.pfl-prewk-timer {
+  font-family: 'JetBrains Mono', 'Roboto Mono', ui-monospace, monospace;
+  font-size: 4.5rem;
+  font-weight: 800;
   text-align: center;
-  backdrop-filter: blur(10px);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  margin: 22px 0 8px;
+  color: #fff;
+  text-shadow: 0 4px 30px rgba(240, 61, 50, 0.25);
+  line-height: 1;
+}
+.pfl-prewk-timer.warning {
+  color: #FFD700;
+  animation: pflPrewkPulse 1s ease-in-out infinite;
+}
+@keyframes pflPrewkPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.04); opacity: 0.85; }
 }
 
-.preworkout-controls {
+.pfl-prewk-status {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 22px;
+  min-height: 1.4em;
+  line-height: 1.4;
+  padding: 0 8px;
+}
+
+.pfl-prewk-controls {
   display: flex;
-  gap: 15px;
+  gap: 10px;
   flex-wrap: wrap;
+}
+.pfl-prewk-btn {
+  flex: 1;
+  min-width: 100px;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 20px;
+  gap: 6px;
+  padding: 12px 16px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+.pfl-prewk-btn.primary {
+  background: linear-gradient(45deg, #F03D32 0%, #FF6B35 100%);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(240, 61, 50, 0.4);
+}
+.pfl-prewk-btn.primary:hover { transform: translateY(-1px); }
+.pfl-prewk-btn.ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.pfl-prewk-btn.ghost:hover { background: rgba(255, 255, 255, 0.12); }
+.pfl-prewk-btn.skip {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.pfl-prewk-btn.skip:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.preworkout-controls button {
-  min-width: 120px;
-  padding: 10px 20px;
-  border-radius: 25px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+@media (max-width: 420px) {
+  .pfl-prewk-timer { font-size: 3.5rem; }
+  .pfl-prewk-card { padding: 18px; }
+  .pfl-prewk-btn { min-width: 0; padding: 11px 12px; font-size: 0.8rem; }
 }
 
-/* Animations */
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+body:not(.dark-theme) .pfl-prewk-overlay {
+  background: rgba(20, 20, 20, 0.6);
 }
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+body:not(.dark-theme) .pfl-prewk-card {
+  background: linear-gradient(160deg, #FFFFFF 0%, #F5F5F5 100%);
+  color: #1A1A1A;
+  border-color: rgba(240, 61, 50, 0.18);
 }
-
-.preworkout-dialog-content {
-  animation: fadeInUp 0.5s ease-out;
+body:not(.dark-theme) .pfl-prewk-title,
+body:not(.dark-theme) .pfl-prewk-timer { color: #1A1A1A; }
+body:not(.dark-theme) .pfl-prewk-status { color: rgba(0, 0, 0, 0.65); }
+body:not(.dark-theme) .pfl-prewk-close {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #1A1A1A;
 }
-
-/* Responsive design */
-@media (max-width: 600px) {
-  .preworkout-timer {
-    font-size: 2.5rem;
-  }
-  
-  .preworkout-controls {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .preworkout-controls button {
-    width: 100%;
-    max-width: 200px;
-  }
-} 
+body:not(.dark-theme) .pfl-prewk-progress-track { background: rgba(0, 0, 0, 0.08); }
+body:not(.dark-theme) .pfl-prewk-progress-label { color: rgba(0, 0, 0, 0.55); }
+body:not(.dark-theme) .pfl-prewk-btn.ghost {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1A1A1A;
+}
+body:not(.dark-theme) .pfl-prewk-btn.skip {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.6);
+}

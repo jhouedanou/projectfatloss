@@ -29,6 +29,7 @@ import { days as initialWorkoutPlan } from '../data';
 import '../components/WeightTracker.css';
 import '../components/WorkoutCustomizer.css'; 
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
+import HomeDashboard from '../components/HomeDashboard';
 import WeekSelector from '../components/WeekSelector';
 import Header from '../components/Header/Header';
 import { getServiceWorkerPath, getAssetPath } from '../utils/paths';
@@ -253,14 +254,17 @@ export default function App() {
                 <>
                   {!stepMode ? (
                     !showExercises ? (
-                      <WeekSelector
-                        days={workoutPlan}
-                        current={current}
-                        onSelectDay={(dayIndex) => {
-                          setCurrent(dayIndex);
-                          setShowExercises(true);
-                        }}
-                      />
+                      <>
+                        <HomeDashboard onStartWorkout={() => setShowExercises(true)} />
+                        <WeekSelector
+                          days={workoutPlan}
+                          current={current}
+                          onSelectDay={(dayIndex) => {
+                            setCurrent(dayIndex);
+                            setShowExercises(true);
+                          }}
+                        />
+                      </>
                     ) : (
                       <div className="day-content">
                         <div className="hero-section">
