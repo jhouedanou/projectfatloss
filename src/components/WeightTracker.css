@@ -504,6 +504,7 @@ body.dark-theme .encouragement-tips {
   
   .encouragement-modal {
     max-height: 95vh;
+    box-shadow: 0 6px 20px rgba(240, 61, 50, 0.35);
   }
   
   .encouragement-header {
@@ -513,7 +514,6 @@ body.dark-theme .encouragement-tips {
   .encouragement-content {
     padding: 0 15px 15px;
   }
-  box-shadow: 0 6px 20px rgba(240, 61, 50, 0.35);
 }
 
 .close-modal-icon {

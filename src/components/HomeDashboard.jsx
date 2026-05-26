@@ -26,8 +26,8 @@ function fmtMMSS(ms) {
 }
 
 function Ring({ percent, label, sub }) {
-  const size = 168;
-  const stroke = 14;
+  const size = 156;
+  const stroke = 12;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const offset = c * (1 - Math.min(1, Math.max(0, percent / 100)));
@@ -197,7 +197,7 @@ export default function HomeDashboard({ onStartWorkout }) {
         {!caffeineAt && (
           <>
             <p className="hd-caffeine-desc">
-              {t('home.caffeine.help', { defaultValue: 'Pic de caféine ~30–45 min après ingestion. Tap pour démarrer le chrono.' })}
+              {t('home.caffeine.help', { defaultValue: 'Pic de caféine entre 30 et 45 min après ingestion. Touchez pour démarrer le chrono.' })}
             </p>
             <button className="hd-caffeine-btn" onClick={handleTakeDrink}>
               {t('home.caffeine.take', { defaultValue: 'J\'ai pris ma boisson' })}
@@ -230,6 +230,13 @@ export default function HomeDashboard({ onStartWorkout }) {
           </>
         )}
       </div>
+
+      {onStartWorkout && (
+        <button className="hd-primary-action" onClick={onStartWorkout}>
+          <Activity size={18} strokeWidth={2.4} />
+          <span>{t('home.openTodayWorkout', { defaultValue: 'Voir la séance du jour' })}</span>
+        </button>
+      )}
     </div>
   );
 }

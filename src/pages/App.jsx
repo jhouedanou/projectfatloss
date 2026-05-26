@@ -403,7 +403,7 @@ export default function App() {
         </div>
         
         {/* Bouton flottant personnaliser - repositionné au-dessus de la bottom nav */}
-        {!stepMode && (
+        {!stepMode && viewMode === 'workout' && !showExercises && (
           <button 
             className="floating-customize-button"
             onClick={() => setShowCustomizer(true)}
