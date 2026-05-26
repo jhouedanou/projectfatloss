@@ -25,6 +25,114 @@
   background-color: #444;
 }
 
+.day-content .workout-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto 10px;
+  padding: 14px 18px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.72);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.workout-topbar-left,
+.workout-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+}
+
+.workout-topbar-actions {
+  margin-left: auto;
+  gap: 8px;
+}
+
+.workout-logo-chip,
+.workout-icon-btn {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 12px;
+  box-sizing: border-box;
+  line-height: 1;
+}
+
+.workout-logo-chip {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(240, 61, 50, 0.28);
+}
+
+.workout-logo-chip img {
+  width: 30px;
+  height: 30px;
+  display: block;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.workout-icon-btn,
+.workout-icon-btn.save-btn,
+.workout-icon-btn.notification-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.workout-icon-btn:hover,
+.workout-icon-btn.save-btn:hover,
+.workout-icon-btn.notification-btn:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  transform: translateY(-1px);
+}
+
+.workout-icon-btn.is-active {
+  color: #F03D32 !important;
+  background: rgba(240, 61, 50, 0.14) !important;
+  border-color: rgba(240, 61, 50, 0.38) !important;
+}
+
+.workout-icon-btn svg {
+  width: 18px !important;
+  height: 18px !important;
+  display: block !important;
+  flex: 0 0 18px;
+  color: currentColor !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.workout-day-title {
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto 10px;
+  padding: 0 18px;
+  box-sizing: border-box;
+  color: #fff;
+  font-size: 1.08rem;
+  line-height: 1.25;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-align: left;
+}
+
 .save-btn {
   background-color: rgba(240, 61, 50, 0.1);
   color: #F03D32;

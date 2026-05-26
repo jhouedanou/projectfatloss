@@ -893,57 +893,47 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         minHeight: '100vh',
       }}
     >
-      <div className="action-buttons" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor: 'transparent', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backdropFilter: 'blur(15px)', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img 
-            src={getAssetPath('/logo.png')} 
-            alt="PFL Logo" 
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '9px',
-              objectFit: 'cover',
-              border: '1px solid rgba(240, 61, 50, 0.25)'
-            }}
-          />
+      <div className="action-buttons workout-topbar">
+        <div className="workout-topbar-left">
+          <span className="workout-logo-chip">
+            <img 
+              src={getAssetPath('/logo.png')} 
+              alt="PFL Logo" 
+            />
+          </span>
           <button 
-            className="timer-btn" 
+            className="timer-btn workout-icon-btn" 
             onClick={handleBackClick}
             title="Retour"
-            style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', padding: 0, cursor: 'pointer', transition: 'all 0.2s' }}
+            aria-label="Retour"
           >
             <ArrowLeft size={18} />
           </button>
         </div>
         
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div className="workout-topbar-actions">
           <button 
-            className={`timer-btn ${autoMode ? 'active' : ''}`} 
+            className={`timer-btn workout-icon-btn ${autoMode ? 'is-active' : ''}`} 
             onClick={handleToggleAutoMode}
             title={autoMode ? "Désactiver le mode automatique" : "Activer le mode automatique"}
-            style={{ 
-              background: autoMode ? 'rgba(240, 61, 50, 0.15)' : 'rgba(255, 255, 255, 0.08)',
-              color: autoMode ? '#F03D32' : '#fff',
-              border: autoMode ? '1px solid rgba(240, 61, 50, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', padding: 0, cursor: 'pointer', transition: 'all 0.2s'
-            }}
+            aria-label={autoMode ? "Desactiver le mode automatique" : "Activer le mode automatique"}
           >
             <Rocket size={18} />
           </button>
           <button 
-            className="timer-btn save-btn" 
+            className="timer-btn workout-icon-btn save-btn" 
             onClick={handleSaveAndExit}
             title="Sauvegarder et quitter"
-            style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', padding: 0, cursor: 'pointer', transition: 'all 0.2s' }}
+            aria-label="Sauvegarder et quitter"
           >
             <Save size={18} />
           </button>
           {onNotificationSettings && (
             <button 
-              className="timer-btn notification-btn" 
+              className="timer-btn workout-icon-btn notification-btn" 
               onClick={onNotificationSettings}
               title="Paramètres de notification"
-              style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', padding: 0, cursor: 'pointer', transition: 'all 0.2s' }}
+              aria-label="Parametres de notification"
             >
               <Bell size={18} />
             </button>
@@ -951,7 +941,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         </div>
       </div>
 
-      <h2 style={{fontSize:'1.1rem',marginBottom:8}}> {day?.title}</h2>
+      <h2 className="workout-day-title">{day?.title}</h2>
       
       <>
         <ProgressTracker 
