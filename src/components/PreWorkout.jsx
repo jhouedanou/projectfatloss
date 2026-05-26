@@ -18,10 +18,10 @@ function playBeep() {
   beep.play().catch(err => console.error("Erreur de lecture audio:", err));
 }
 
-export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose }) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function PreWorkout({ onStartWorkout, onStartAutoMode, onClose, autoOpen = false }) {
+  const [isOpen, setIsOpen] = useState(autoOpen);
   const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes en secondes
-  const [isRunning, setIsRunning] = useState(false);
+  const [isRunning, setIsRunning] = useState(autoOpen);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
   const theme = useTheme();

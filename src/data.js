@@ -4,11 +4,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Développé couché barre',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Allongé sur banc, descendez la barre jusqu'à la poitrine puis poussez. Exercice roi pour les pectoraux.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -18,11 +18,11 @@ const fullPlan = [
       },
       {
         name: 'Développé militaire barre',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Debout ou assis, poussez la barre au-dessus de la tête. Exercice complet pour les épaules.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -32,11 +32,11 @@ const fullPlan = [
       },
       {
         name: 'Développé incliné haltères',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 15 kg',
         desc: "Sur banc incliné (30-45°), poussez les haltères vers le haut. Accentue le travail du haut des pectoraux.",
         caloriesPerSet: [8, 10],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -46,11 +46,11 @@ const fullPlan = [
       },
       {
         name: 'Élévations latérales',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
         desc: "Debout, bras le long du corps, soulevez les haltères latéralement jusqu'à hauteur d'épaules. Cible le deltoïde moyen.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -59,17 +59,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -79,11 +95,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Rowing buste penché barre',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Buste penché à 45°, tirez la barre vers le bas des abdominaux. Développe l'épaisseur du dos.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -93,11 +109,11 @@ const fullPlan = [
       },
       {
         name: 'Pullover haltère',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Haltère 15 kg',
         desc: "Allongé en travers d'un banc, tenez un haltère à deux mains au-dessus de la poitrine puis descendez derrière la tête bras tendus. Étire et renforce le grand dorsal.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -107,11 +123,11 @@ const fullPlan = [
       },
       {
         name: 'Rowing haltères un bras',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltère 15 kg',
         desc: "Un genou et une main sur un banc, tirez l'haltère vers la hanche en gardant le coude près du corps. Isole un côté du dos à la fois.",
         caloriesPerSet: [8, 10],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -121,11 +137,11 @@ const fullPlan = [
       },
       {
         name: 'Curl barre',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Barre 30 kg',
         desc: "Debout, coudes fixes, curl la barre vers les épaules. Maximise la congestion des biceps.",
         caloriesPerSet: [8, 10],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -134,17 +150,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -154,11 +186,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Écartés couchés haltères',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Allongé sur le dos, ouvrez les bras en demi-cercle puis ramenez les haltères au-dessus de la poitrine.",
         caloriesPerSet: [10, 12],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -168,11 +200,11 @@ const fullPlan = [
       },
       {
         name: 'Développé Arnold',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
         desc: "Assis, partez haltères devant vous, paumes face à vous, puis tournez les poignets en poussant vers le haut. Travaille tous les faisceaux des deltoïdes.",
         caloriesPerSet: [8, 10],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -182,11 +214,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Debout, pieds écartés, saisissez la barre au sol et soulevez-la en gardant le dos droit. Travaille tout le corps, particulièrement le dos et les jambes.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -209,17 +241,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -243,11 +291,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre roumain',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Debout, jambes légèrement fléchies, penchez le buste en avant en gardant le dos droit. Cible les ischio-jambiers et les lombaires.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -284,17 +332,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -304,11 +368,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat avant barre',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Barre devant sur les épaules (position front squat), descendez en squat. Met l'accent sur les quadriceps.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -318,11 +382,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre jambes raides barre',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Jambes presque tendues, barre descend le long des tibias. Cible ischio-jambiers et lombaires.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -359,17 +423,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -393,11 +473,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre sumo',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Pieds très écartés, barre entre les jambes, soulevez en gardant le dos droit. Variante qui cible davantage les adducteurs.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -434,17 +514,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -455,11 +551,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Complexe Haltères (Soulevé de terre + Rowing)',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Enchaînez sans poser les haltères : 1 Soulevé de terre puis 1 Rowing. Répétez 10 fois. Exigeant pour le dos et les jambes.",
         caloriesPerSet: [25, 30],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -473,7 +569,7 @@ const fullPlan = [
         equip: 'Haltères 10 kg',
         desc: "Faites une fente, et en remontant, développez les haltères au-dessus de la tête. Travail complet du corps.",
         caloriesPerSet: [25, 30],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -516,11 +612,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Développé couché haltères',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Allongé sur banc, poussez les haltères vers le haut en contractant les pectoraux. Variante offrant une plus grande amplitude de mouvement.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -530,11 +626,11 @@ const fullPlan = [
       },
       {
         name: 'Push press',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Debout, fléchissez légèrement les genoux puis poussez la barre au-dessus de la tête de manière explosive. Combine force et puissance.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -544,11 +640,11 @@ const fullPlan = [
       },
       {
         name: 'Écartés haltères',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
         desc: "Allongé sur banc, bras légèrement fléchis, écartez les haltères puis ramenez-les au-dessus de la poitrine. Isole les pectoraux.",
         caloriesPerSet: [7, 9],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -558,11 +654,11 @@ const fullPlan = [
       },
       {
         name: 'Élévations frontales',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
         desc: "Debout, soulevez les haltères devant vous jusqu'à hauteur d'épaules. Cible le deltoïde antérieur.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -571,17 +667,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     
@@ -592,11 +704,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Rowing Pendlay',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Penché à 90°, tirez la barre depuis le sol vers le ventre de manière explosive. Développe la puissance et l'épaisseur du dos.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -620,11 +732,11 @@ const fullPlan = [
       },
       {
         name: 'Tirage menton',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Barre 30 kg',
         desc: "Debout, tirez la barre le long du corps jusqu'au menton, coudes hauts. Travaille les trapèzes et les épaules.",
         caloriesPerSet: [8, 10],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -634,11 +746,11 @@ const fullPlan = [
       },
       {
         name: 'Curl incliné',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
         desc: "Assis sur banc incliné, bras pendants, réalisez un curl. L'inclinaison étire davantage le biceps pour un meilleur travail musculaire.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -647,17 +759,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -667,11 +795,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Développé décliné barre',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Allongé sur banc décliné, descendez la barre vers le bas de la poitrine puis poussez. Accentue le travail du bas des pectoraux.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -681,11 +809,11 @@ const fullPlan = [
       },
       {
         name: 'Développé haltères épaules',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 15 kg',
         desc: "Assis ou debout, poussez les haltères au-dessus de la tête. Offre une meilleure liberté de mouvement que la barre.",
         caloriesPerSet: [8, 10],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -695,11 +823,11 @@ const fullPlan = [
       },
       {
         name: 'Rowing barre prise large',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Penché en avant, tirez la barre avec une prise large vers la poitrine. Cible davantage le deltoïde postérieur et le haut du dos.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -722,17 +850,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -742,11 +886,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat pause',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Descendez en squat, marquez une pause de 2 secondes en bas puis remontez. La pause élimine l'élan et intensifie le travail musculaire.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -756,11 +900,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre classique',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Pieds largeur des épaules, soulevez la barre du sol en gardant le dos droit. Mouvement fondamental pour la chaîne postérieure.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -797,17 +941,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -817,11 +977,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Hack squat (haltère)',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Haltères le long du corps, descendez en squat en gardant le buste droit. Variante qui cible davantage les quadriceps.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -831,11 +991,11 @@ const fullPlan = [
       },
       {
         name: 'Good morning barre',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Barre sur les épaules, penchez le buste vers l'avant en gardant les jambes légèrement fléchies. Renforce les ischio-jambiers et le bas du dos.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -872,17 +1032,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -947,17 +1123,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -996,11 +1188,11 @@ const fullPlan = [
       },
       {
         name: 'Thrusters Haltères',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Haltères 10 kg',
         desc: "Squat complet suivi d'un développé épaules dans le même mouvement fluide.",
         caloriesPerSet: [20, 25],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1029,11 +1221,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Floor press haltères',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Allongé au sol, poussez les haltères vers le haut. Le sol limite l'amplitude et protège les épaules tout en ciblant les triceps.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1043,11 +1235,11 @@ const fullPlan = [
       },
       {
         name: 'Z-press haltères',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Haltères 10 kg',
         desc: "Assis au sol jambes tendues, poussez les haltères au-dessus de la tête. Exige une grande stabilité du tronc et isole les épaules.",
         caloriesPerSet: [8, 10],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1057,11 +1249,11 @@ const fullPlan = [
       },
       {
         name: 'Développé serré barre',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Barre 30 kg',
         desc: "Allongé sur banc, prise rapprochée, descendez la barre puis poussez. La prise serrée accentue le travail des triceps.",
         caloriesPerSet: [10, 13],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1071,11 +1263,11 @@ const fullPlan = [
       },
       {
         name: 'Élévations en Y',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
         desc: "Penché en avant, soulevez les bras en formant un Y. Renforce les épaules et améliore la stabilité de la coiffe des rotateurs.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1084,17 +1276,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     
@@ -1105,11 +1313,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Rowing Yates',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Penché à 45°, prise en supination, tirez la barre vers le ventre. Variante qui recrute davantage les biceps.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1133,11 +1341,11 @@ const fullPlan = [
       },
       {
         name: 'Pullover haltère',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltère 15 kg',
         desc: "Allongé en travers d'un banc, descendez l'haltère derrière la tête puis ramenez-le au-dessus de la poitrine. Travaille le dos et les pectoraux.",
         caloriesPerSet: [8, 10],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1147,11 +1355,11 @@ const fullPlan = [
       },
       {
         name: 'Curl Zottman',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
         desc: "Curl en supination à la montée, tournez en pronation pour la descente. Travaille les biceps et les avant-bras en un seul mouvement.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1160,17 +1368,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -1180,11 +1404,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Développé incliné haltères',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Allongé sur un banc incliné à 30-45°, poussez les haltères au-dessus de la poitrine de façon contrôlée.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1194,11 +1418,11 @@ const fullPlan = [
       },
       {
         name: 'Développé militaire haltères',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 15 kg',
         desc: "Assis ou debout, poussez les haltères au-dessus de la tête en gardant le core gainé. Développe les deltoïdes de manière équilibrée.",
         caloriesPerSet: [8, 10],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1208,11 +1432,11 @@ const fullPlan = [
       },
       {
         name: 'Rowing un bras haltère (lourd)',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Haltère 15 kg',
         desc: "Un genou et une main sur un banc, tirez l'haltère vers la hanche. Le travail unilatéral permet de charger davantage chaque côté.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1235,17 +1459,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -1255,11 +1495,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat étroit',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Pieds rapprochés, descendez en squat complet. La position étroite accentue le travail des quadriceps.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1269,11 +1509,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre déficit',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Debout sur une surface surélevée, soulevez la barre depuis un point plus bas. Augmente l'amplitude et l'activation musculaire.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1310,17 +1550,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     
@@ -1331,11 +1587,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squats lourds haltères',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Haltères sur les épaules ou le long du corps, descendez en squat profond et remontez. Cible les quadriceps et fessiers.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1345,11 +1601,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre roumain haltères',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Debout, haltères devant les cuisses, penchez le buste en gardant les jambes légèrement fléchies. Étire et renforce les ischio-jambiers.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1373,12 +1629,14 @@ const fullPlan = [
       },
       {
         name: 'Squat isométrique mur',
-        sets: '3 × 45s',
+        sets: '4 × 60s',
         equip: 'Poids du corps',
-        desc: "Dos contre un mur, cuisses parallèles au sol, maintenez la position. La contraction isométrique brûle intensément les quadriceps.",
-        caloriesPerSet: [8, 10],
-        totalSets: 3,
-        nbRep: 45,
+        desc: "Dos contre un mur, cuisses parallèles au sol, maintenez 60s. Le chrono démarre automatiquement. Brûle intensément les quadriceps.",
+        caloriesPerSet: [12, 16],
+        totalSets: 4,
+        nbRep: 0,
+        timer: true,
+        duration: 60,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Wall Sit',
@@ -1386,17 +1644,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -1420,11 +1694,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre sumo haltères',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Pieds très écartés, haltères entre les jambes, soulevez en gardant le dos droit. Cible les adducteurs et le dos.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1461,17 +1735,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -1510,11 +1800,11 @@ const fullPlan = [
       },
       {
         name: 'Thrusters Barre',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 20 kg',
         desc: "Squat complet avec la barre sur les épaules, puis poussez la barre explosive au-dessus de la tête en remontant. L'enchaînement squat-développé brûle massivement des calories.",
         caloriesPerSet: [22, 27],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1523,17 +1813,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -1543,11 +1849,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Développé couché pause',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Allongé sur banc, descendez la barre, marquez une pause de 2 secondes sur la poitrine puis poussez. Élimine l'élan pour un travail pur.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1557,11 +1863,11 @@ const fullPlan = [
       },
       {
         name: 'Push press barre',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Debout, utilisez l'élan des jambes pour pousser la barre au-dessus de la tête. Mouvement de force-puissance pour les épaules.",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1571,11 +1877,11 @@ const fullPlan = [
       },
       {
         name: 'Pompes déclinées',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Poids du corps',
         desc: "Pieds surélevés, réalisez des pompes. Intensifie le travail du haut des pectoraux et des épaules.",
         caloriesPerSet: [10, 12],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1585,11 +1891,11 @@ const fullPlan = [
       },
       {
         name: 'Élévations latérales penchées',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
         desc: "Penché en avant à 45°, soulevez les haltères latéralement. Cible le deltoïde postérieur et le moyen.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1598,17 +1904,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     
@@ -1633,11 +1955,11 @@ const fullPlan = [
       },
       {
         name: 'Rowing barre prise large',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Buste penché à 45°, prise très large en pronation, tirez la barre vers le haut des abdos. Cible la largeur du dos (alternative aux tractions larges).",
         caloriesPerSet: [12, 15],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1674,17 +1996,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -1722,11 +2060,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre snatch grip',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "Soulevé de terre avec prise très large. L'écartement des mains augmente l'amplitude et le travail du haut du dos.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1736,11 +2074,11 @@ const fullPlan = [
       },
       {
         name: 'Oiseau sur banc incliné',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
         desc: "Allongé face contre un banc incliné, écartez les bras latéralement. Le support élimine la triche et isole l'arrière des épaules.",
         caloriesPerSet: [6, 8],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1749,17 +2087,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -1769,11 +2123,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat tempo 3-1-3',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Barre 30 kg',
         desc: "3 secondes pour descendre, 1 seconde de pause, 3 secondes pour remonter. Le tempo lent maximise le temps sous tension.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1811,11 +2165,11 @@ const fullPlan = [
       },
       {
         name: 'Hip thrust pause',
-        sets: '3 × 12',
+        sets: '4 × 12',
         equip: 'Barre 30 kg',
         desc: "Dos contre un banc, poussez les hanches vers le haut et marquez une pause de 2 secondes en haut. Activation maximale des fessiers.",
         caloriesPerSet: [10, 12],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1824,17 +2178,33 @@ const fullPlan = [
         }
       },
       {
-        name: 'Crunchs',
-        sets: '1 × 50',
+        name: 'Crunchs tempo',
+        sets: '3 × 20',
         equip: 'Poids du corps',
-        desc: "Série unique de 50 répétitions à la fin. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol.",
-        caloriesPerSet: [20, 25],
-        totalSets: 1,
-        nbRep: 50,
+        desc: "3 séries de 20 reps en tempo lent (2s montée, 1s contraction haute, 2s descente). Allongé sur le dos, genoux fléchis. Le temps sous tension brûle les abdos en profondeur.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 20,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunches',
+          name: 'Tempo Crunches',
           muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Gainage planche',
+        sets: '3 × 45s',
+        equip: 'Poids du corps',
+        desc: "Position planche sur les avant-bras, corps gainé et aligné, maintenez 45s. Le chrono démarre automatiquement. Finisher isométrique pour le core complet.",
+        caloriesPerSet: [10, 14],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 45,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Plank Hold',
+          muscleGroups: ['abdominals', 'core', 'lower_back']
         }
       },
     ],
@@ -1844,11 +2214,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat sauté',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Poids du corps',
         desc: "Descendez en squat puis explosez vers le haut. Développe la puissance explosive des jambes.",
         caloriesPerSet: [14, 18],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1858,11 +2228,11 @@ const fullPlan = [
       },
       {
         name: 'Good morning haltères',
-        sets: '4 × 12',
+        sets: '5 × 12 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Haltères sur les épaules, penchez le buste vers l'avant en gardant le dos droit. Variante avec haltères pour les ischio-jambiers.",
         caloriesPerSet: [10, 13],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2010,11 +2380,11 @@ const fullPlan = [
       },
       {
         name: 'Complexe Haltères Final (Rowing + Curl + Développé épaules)',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Haltères 15 kg',
         desc: "Sans poser les haltères : 10 Rowings buste penché → 10 Curls biceps → 10 Développés épaules. Circuit de finition complet pour le haut du corps.",
         caloriesPerSet: [28, 33],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -2024,11 +2394,11 @@ const fullPlan = [
       },
       {
         name: 'Burpees avec Haltères',
-        sets: '4 × 10',
+        sets: '5 × 10 (tempo 3-1-3)',
         equip: 'Haltères 10 kg',
         desc: "Tenez des haltères légers, descendez en position de pompe, remontez et enchaînez immédiatement un développé épaules explosif. La version ultime du burpee pour finir le programme en apothéose.",
         caloriesPerSet: [30, 35],
-        totalSets: 4,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',

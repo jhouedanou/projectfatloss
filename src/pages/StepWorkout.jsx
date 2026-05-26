@@ -18,6 +18,8 @@ import { useTranslation } from 'react-i18next';
 import YouTube from 'react-youtube';
 import { getExerciseIconsPath, getAssetPath } from '../utils/paths';
 import GoogleFitService from '../services/GoogleFitService';
+import PreWorkout from '../components/PreWorkout';
+import { getCaloriesForSet } from '../services/CalorieEstimator';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -557,7 +559,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
   const [autoMode, setAutoMode] = useState(initialAutoMode || false); // Mode automatique pour les pauses
-  const [showPreWorkout, setShowPreWorkout] = useState(false);
+  const [showPreWorkout, setShowPreWorkout] = useState(true);
   // Synthèse vocale réactivée pour les exercices
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState({
@@ -817,7 +819,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // Si on veut afficher le pre-workout, on l'affiche en premier
   if (showPreWorkout) {
     return (
-      <PreWorkout 
+      <PreWorkout
+        autoOpen={true}
         onStartWorkout={handleStartWorkout}
         onClose={() => setShowPreWorkout(false)}
       />
@@ -1054,9 +1057,9 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   
   const iconType = iconsMap[exo.name] || 'dumbbell';
   
-  // Calculer les calories pour la série avec une valeur par défaut sécurisée
-  const caloriesPerSet = exo.caloriesPerSet ? 
-    Math.round((exo.caloriesPerSet[0] + exo.caloriesPerSet[1]) / 2) : 10;
+  // Calories MET-based pondérées par poids utilisateur (CalorieEstimator)
+  // Remplace l'ancienne moyenne caloriesPerSet figée pour 80kg
+  const caloriesPerSet = getCaloriesForSet(exo);
 
   const [isPulsing, setIsPulsing] = useState(false);
   const [currentRep, setCurrentRep] = useState(0);
