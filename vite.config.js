@@ -2,10 +2,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+// isProd = true pour toute commande `vite build` (CI ou local), false en `vite serve` (dev).
+// Fiable contrairement à process.env.NODE_ENV qui n'est pas défini au build.
+export default defineConfig(({ command }) => {
+  const isProd = command === 'build';
+  const BASE = isProd ? '/projectfatloss/' : '/';
+
+  return {
   // Ajouter la base URL pour GitHub Pages
-  base: process.env.NODE_ENV === 'production' ? '/projectfatloss/' : '/',
-  
+  base: BASE,
+
   plugins: [
     react(),
     VitePWA({
@@ -61,46 +67,46 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
-        scope: process.env.NODE_ENV === 'production' ? '/projectfatloss/' : '/',
-        start_url: process.env.NODE_ENV === 'production' ? '/projectfatloss/' : '/',
+        scope: isProd ? '/projectfatloss/' : '/',
+        start_url: isProd ? '/projectfatloss/' : '/',
         icons: [
           {
-            src: process.env.NODE_ENV === 'production' ? '/projectfatloss/icons/icon-72x72.png' : '/icons/icon-72x72.png',
+            src: isProd ? '/projectfatloss/icons/icon-72x72.png' : '/icons/icon-72x72.png',
             sizes: '72x72',
             type: 'image/png'
           },
           {
-            src: process.env.NODE_ENV === 'production' ? '/projectfatloss/icons/icon-96x96.png' : '/icons/icon-96x96.png',
+            src: isProd ? '/projectfatloss/icons/icon-96x96.png' : '/icons/icon-96x96.png',
             sizes: '96x96',
             type: 'image/png'
           },
           {
-            src: process.env.NODE_ENV === 'production' ? '/projectfatloss/icons/icon-128x128.png' : '/icons/icon-128x128.png',
+            src: isProd ? '/projectfatloss/icons/icon-128x128.png' : '/icons/icon-128x128.png',
             sizes: '128x128',
             type: 'image/png'
           },
           {
-            src: process.env.NODE_ENV === 'production' ? '/projectfatloss/icons/icon-144x144.png' : '/icons/icon-144x144.png',
+            src: isProd ? '/projectfatloss/icons/icon-144x144.png' : '/icons/icon-144x144.png',
             sizes: '144x144',
             type: 'image/png'
           },
           {
-            src: process.env.NODE_ENV === 'production' ? '/projectfatloss/icons/icon-152x152.png' : '/icons/icon-152x152.png',
+            src: isProd ? '/projectfatloss/icons/icon-152x152.png' : '/icons/icon-152x152.png',
             sizes: '152x152',
             type: 'image/png'
           },
           {
-            src: process.env.NODE_ENV === 'production' ? '/projectfatloss/icons/icon-192x192.png' : '/icons/icon-192x192.png',
+            src: isProd ? '/projectfatloss/icons/icon-192x192.png' : '/icons/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: process.env.NODE_ENV === 'production' ? '/projectfatloss/icons/icon-384x384.png' : '/icons/icon-384x384.png',
+            src: isProd ? '/projectfatloss/icons/icon-384x384.png' : '/icons/icon-384x384.png',
             sizes: '384x384',
             type: 'image/png'
           },
           {
-            src: process.env.NODE_ENV === 'production' ? '/projectfatloss/icons/icon-512x512.png' : '/icons/icon-512x512.png',
+            src: isProd ? '/projectfatloss/icons/icon-512x512.png' : '/icons/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
@@ -134,4 +140,5 @@ export default defineConfig({
   
   // Configurer la gestion du cache
   cacheDir: '.vite_cache', // Dossier de cache personnalisé
+  };
 });

@@ -233,7 +233,7 @@ export default function App() {
     return (
       <div className="loading-container">
         <img
-          src="/logo.png"
+          src={getAssetPath('/logo.png')}
           alt="Project Fat Loss"
           className="loading-logo"
         />

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { signIn, signUp } from '../services/AuthService';
 import { isSupabaseConfigured } from '../services/supabase';
+import { getAssetPath } from '../utils/paths';
 import './LoginForm.css';
 
 const LoginForm = ({ onClose }) => {
@@ -55,7 +56,7 @@ const LoginForm = ({ onClose }) => {
       <button className="login-close" onClick={onClose} aria-label="Fermer">×</button>
 
       <div className="login-brand">
-        <img src="/logo.png" alt="" className="login-logo" />
+        <img src={getAssetPath('/logo.png')} alt="" className="login-logo" />
         <h2>{isSignup ? 'Créer un compte' : 'Bon retour'}</h2>
         <p className="login-sub">
           {isSignup ? 'Quelques secondes pour démarrer' : 'Connecte-toi pour retrouver tes données'}
