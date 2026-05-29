@@ -166,6 +166,7 @@ async function parseCsvStream(stream, onRecord) {
     shouldContinue = onRecord(current) !== false;
   };
 
+  try {
   for await (const chunk of stream) {
     if (!shouldContinue) break;
     const text = Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk;
@@ -210,9 +211,19 @@ async function parseCsvStream(stream, onRecord) {
     }
   }
 
+  } catch (error) {
+    if (shouldContinue || !isAbortError(error)) {
+      throw error;
+    }
+  }
+
   if (shouldContinue && (field || row.length)) {
     endRecord();
   }
+}
+
+function isAbortError(error) {
+  return error && (error.name === 'AbortError' || error.code === 'ABORT_ERR' || error.code === 'ECONNRESET');
 }
 
 function toRow(headers, record) {
@@ -235,12 +246,13 @@ function buildFoodItem(row) {
   const section = cleanText(row.collection_section);
   const description = cleanText(row.product_description);
   const storeName = cleanText(row.store_name);
-  const combined = `${name} ${section} ${description} ${storeName}`;
+  const productContext = `${name} ${section} ${description}`;
+  const combined = `${productContext} ${storeName}`;
 
   if (nonFoodPattern.test(removeAccents(combined))) return null;
   if (!foodSignalPattern.test(combined) && row.HIER !== 'True') return null;
 
-  const inferred = inferProfile(combined);
+  const inferred = inferProfile(productContext);
   const aliases = unique([section, storeName].filter(Boolean)).slice(0, 3);
 
   return {
@@ -266,7 +278,7 @@ function inferProfile(value) {
   if (/\b(eau|water)\b/.test(text)) return withCategory('drinks', profiles.water);
   if (/\b(coca|fanta|sprite|soda|sucre|boisson gazeuse)\b/.test(text)) return withCategory('drinks', profiles.drinks);
   if (/\b(jus|smoothie|bissap|gingembre|gnamak|tamarin|corossol|baobab|bouye)\b/.test(text)) return withCategory('drinks', profiles.juice);
-  if (/\b(vin|biere|bière|champagne|whisky|rhum|vodka|tchapalo|bandji)\b/.test(text)) return withCategory('alcohol', profiles.alcohol);
+  if (/\b(vins?|biere|bière|champagne|whisky|rhum|vodka|tchapalo|bandji|cocktail)\b/.test(text)) return withCategory('alcohol', profiles.alcohol);
   if (/\b(cafe|coffee|latte|cappuccino|the |th[eé])\b/.test(text)) return withCategory('drinks', profiles.coffee);
   if (/\b(pizza)\b/.test(text)) return withCategory('fastfood', profiles.pizza);
   if (/\b(burger|cheeseburger)\b/.test(text)) return withCategory('fastfood', profiles.burger);
@@ -330,7 +342,7 @@ function writeOutput(foods, destination, meta) {
     `// Source: ${meta.input}`,
     `// Filters: country=${meta.country}${meta.city ? ` city=${meta.city}` : ''} limit=${meta.limit}`,
     '',
-    'export const glovoFoodDatabase = ',
+    'export const glovoFoodDatabase =',
     JSON.stringify(foods, null, 2),
     ';',
     ''

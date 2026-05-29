@@ -33,7 +33,7 @@ if (!url || !key) {
 
 const sb = createClient(url, key, { auth: { persistSession: false } });
 
-const tables = ['profiles', 'workouts', 'weigh_ins', 'cardio_sessions', 'exercises'];
+const tables = ['profiles', 'workouts', 'weigh_ins', 'cardio_sessions', 'exercises', 'nutrition_logs'];
 
 for (const t of tables) {
   const { data, count, error } = await sb
@@ -59,6 +59,10 @@ for (const t of tables) {
       console.log(`  • ${row.name} | owner ${row.owner_id ? String(row.owner_id).slice(0, 8) : 'GLOBAL'}`);
     else if (t === 'profiles')
       console.log(`  • ${row.username || row.display_name || '?'} | ${String(row.id).slice(0, 8)}`);
+    else if (t === 'nutrition_logs') {
+      const totalCal = Object.values(row.meals || {}).flat().reduce((s, i) => s + (i.calories || 0), 0);
+      console.log(`  • ${row.day} | ${totalCal} kcal | user ${String(row.user_id).slice(0, 8)}`);
+    }
   }
 }
 

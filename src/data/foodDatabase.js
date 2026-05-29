@@ -1,4 +1,4 @@
-import { glovoFoodDatabase } from './glovoFoodDatabase';
+import { glovoFoodDatabase } from './glovoFoodDatabase.js';
 
 export const foodCategories = [
   { id: 'fruits', name: 'Fruits' },
@@ -683,6 +683,11 @@ export const saveDailyNutritionLog = (dateStr, data) => {
   const allLogs = JSON.parse(localStorage.getItem('pfl_nutrition_logs') || '{}');
   allLogs[dateStr] = data;
   localStorage.setItem('pfl_nutrition_logs', JSON.stringify(allLogs));
+
+  // Pousse le jour vers Supabase (offline-first, non bloquant)
+  import('../services/SyncService')
+    .then(({ pushNutritionDay }) => pushNutritionDay(dateStr, data))
+    .catch(() => {});
 };
 
 export const deleteFoodFromLog = (dateStr, mealType, index) => {

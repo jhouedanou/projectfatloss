@@ -175,3 +175,25 @@ alter table public.cardio_sessions enable row level security;
 drop policy if exists "cardio_all_own" on public.cardio_sessions;
 create policy "cardio_all_own" on public.cardio_sessions
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- ----------------------------------------------------------------------------
+-- nutrition_logs : journal alimentaire (1 ligne par user et par jour)
+-- meals = jsonb { breakfast:[], lunch:[], dinner:[], snacks:[] }
+-- ----------------------------------------------------------------------------
+create table if not exists public.nutrition_logs (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users (id) on delete cascade,
+  day          date not null,
+  meals        jsonb,
+  calorie_goal integer default 2000,
+  updated_at   timestamptz not null default now(),
+  unique (user_id, day)
+);
+
+create index if not exists nutrition_user_day_idx on public.nutrition_logs (user_id, day desc);
+
+alter table public.nutrition_logs enable row level security;
+
+drop policy if exists "nutrition_all_own" on public.nutrition_logs;
+create policy "nutrition_all_own" on public.nutrition_logs
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());

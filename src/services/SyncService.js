@@ -17,6 +17,15 @@ const WORKOUT_HISTORY_KEY = 'workout_history';
 const WEIGHT_HISTORY_KEY = 'weight_history_data';
 const USER_EXERCISES_KEY = 'user_custom_exercises';
 const CARDIO_KEY = 'cardio_sessions_data';
+const NUTRITION_KEY = 'pfl_nutrition_logs';
+
+const getNutritionLogs = () => {
+  try {
+    return JSON.parse(localStorage.getItem(NUTRITION_KEY) || '{}');
+  } catch {
+    return {};
+  }
+};
 
 const notReady = () => ({ success: false, error: 'Synchronisation indisponible (non connecté ou Supabase non configuré)' });
 
@@ -86,6 +95,14 @@ const rowToCardio = (r) => ({
   notes: r.notes || '',
 });
 
+const nutritionToRow = (day, data, userId) => ({
+  user_id: userId,
+  day,
+  meals: data?.meals ?? null,
+  calorie_goal: data?.calorieGoal ?? 2000,
+  updated_at: new Date().toISOString(),
+});
+
 // Fusion par id (les entrées locales priment en cas de conflit d'id identique)
 const mergeById = (local, remote) => {
   const map = new Map();
@@ -130,6 +147,16 @@ export const syncData = async () => {
       const { error } = await supabase
         .from('cardio_sessions')
         .upsert(cardioSessions.map((s) => cardioToRow(s, user.id)), { onConflict: 'user_id,client_id' });
+      if (error) throw error;
+    }
+
+    // Journal alimentaire (1 ligne par jour)
+    const nutritionLogs = getNutritionLogs();
+    const nutritionRows = Object.entries(nutritionLogs).map(([day, data]) => nutritionToRow(day, data, user.id));
+    if (nutritionRows.length) {
+      const { error } = await supabase
+        .from('nutrition_logs')
+        .upsert(nutritionRows, { onConflict: 'user_id,day' });
       if (error) throw error;
     }
 
@@ -248,6 +275,21 @@ export const deleteRemoteCardio = async (clientId) => {
   }
 };
 
+/**
+ * Pousse le journal alimentaire d'un jour (dateStr YYYY-MM-DD) vers Supabase.
+ */
+export const pushNutritionDay = async (day, data) => {
+  try {
+    const user = await requireUser();
+    if (!user) return;
+    await supabase
+      .from('nutrition_logs')
+      .upsert(nutritionToRow(day, data, user.id), { onConflict: 'user_id,day' });
+  } catch (error) {
+    console.warn('[sync] pushNutritionDay différé:', error?.message);
+  }
+};
+
 const customExerciseToRow = (ex, userId) => ({
   owner_id: userId,
   name: ex.name,
@@ -305,15 +347,23 @@ export const fetchSyncedData = async () => {
     const user = await requireUser();
     if (!user) return notReady();
 
-    const [workoutsRes, weighRes, cardioRes] = await Promise.all([
+    const [workoutsRes, weighRes, cardioRes, nutritionRes] = await Promise.all([
       supabase.from('workouts').select('*').eq('user_id', user.id).order('date', { ascending: false }),
       supabase.from('weigh_ins').select('*').eq('user_id', user.id).order('date', { ascending: true }),
       supabase.from('cardio_sessions').select('*').eq('user_id', user.id).order('date', { ascending: false }),
+      supabase.from('nutrition_logs').select('*').eq('user_id', user.id),
     ]);
 
     if (workoutsRes.error) throw workoutsRes.error;
     if (weighRes.error) throw weighRes.error;
     if (cardioRes.error) throw cardioRes.error;
+    if (nutritionRes.error) throw nutritionRes.error;
+
+    // nutrition : reconstruit l'objet { [day]: { meals, calorieGoal } }
+    const nutritionLogs = {};
+    (nutritionRes.data || []).forEach((r) => {
+      nutritionLogs[r.day] = { meals: r.meals, calorieGoal: r.calorie_goal ?? 2000 };
+    });
 
     return {
       success: true,
@@ -321,6 +371,7 @@ export const fetchSyncedData = async () => {
         workoutHistory: (workoutsRes.data || []).map(rowToWorkout),
         weightEntries: (weighRes.data || []).map(rowToWeigh),
         cardioSessions: (cardioRes.data || []).map(rowToCardio),
+        nutritionLogs,
       },
       syncedAt: new Date().toISOString(),
     };
@@ -355,6 +406,12 @@ export const applySyncedData = (syncedData) => {
       const merged = mergeById(getCardioSessions(), syncedData.cardioSessions)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
       localStorage.setItem(CARDIO_KEY, JSON.stringify(merged));
+    }
+
+    // nutrition : fusion par jour (le local prime sur conflit de même jour)
+    if (syncedData.nutritionLogs && typeof syncedData.nutritionLogs === 'object') {
+      const merged = { ...syncedData.nutritionLogs, ...getNutritionLogs() };
+      localStorage.setItem(NUTRITION_KEY, JSON.stringify(merged));
     }
 
     return true;
