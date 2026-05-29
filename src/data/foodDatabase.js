@@ -214,12 +214,12 @@ export const foodDatabase = [
   // ═══════════════════════════════════════════
   // ŒUFS (6 entrées)
   // ═══════════════════════════════════════════
-  { name: 'Œuf Entier (1 œuf ~60g)', calories: 155, protein: 13, carbs: 1.1, fat: 11, category: 'eggs', unit: '100g' },
-  { name: 'Blanc d\'Œuf', calories: 52, protein: 11, carbs: 0.7, fat: 0.2, category: 'eggs', unit: '100g' },
-  { name: 'Jaune d\'Œuf', calories: 322, protein: 16, carbs: 3.6, fat: 27, category: 'eggs', unit: '100g' },
-  { name: 'Œuf Brouillé', calories: 166, protein: 11, carbs: 1.6, fat: 12, category: 'eggs', unit: '100g' },
+  { name: 'Œuf Entier (1 œuf ~60g)', calories: 93, protein: 7.8, carbs: 0.7, fat: 6.6, category: 'eggs', unit: '1 œuf' },
+  { name: 'Blanc d\'Œuf', calories: 17, protein: 3.6, carbs: 0.2, fat: 0.1, category: 'eggs', unit: '1 blanc' },
+  { name: 'Jaune d\'Œuf', calories: 58, protein: 2.9, carbs: 0.6, fat: 4.9, category: 'eggs', unit: '1 jaune' },
+  { name: 'Œuf Brouillé', calories: 100, protein: 6.6, carbs: 1, fat: 7.2, category: 'eggs', unit: '1 œuf' },
   { name: 'Omelette Nature', calories: 154, protein: 11, carbs: 0.6, fat: 12, category: 'eggs', unit: '100g' },
-  { name: 'Œuf à la Coque', calories: 155, protein: 13, carbs: 1.1, fat: 11, category: 'eggs', unit: '100g' },
+  { name: 'Œuf à la Coque', calories: 93, protein: 7.8, carbs: 0.7, fat: 6.6, category: 'eggs', unit: '1 œuf' },
 
   // ═══════════════════════════════════════════
   // PRODUITS LAITIERS (20+ entrées)
@@ -699,13 +699,99 @@ export const deleteFoodFromLog = (dateStr, mealType, index) => {
   return dayLog;
 };
 
-export const getFoodUnitBaseAmount = (unit = '100g') => {
+const parseFoodUnitBaseAmount = (unit = '100g') => {
   const match = String(unit).match(/(\d+(?:\.\d+)?)/);
   return match ? parseFloat(match[1]) : 100;
 };
 
+const normalizeFoodUnitText = (unit = '100g') =>
+  String(unit || '100g')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const pluralizeFoodUnit = (label) => {
+  if (!label || label === 'g' || label === 'ml') return label;
+  if (label === 'œuf' || label === 'oeuf') return 'œufs';
+  if (label.endsWith('s')) return label;
+  return `${label}s`;
+};
+
+const getFoodUnitMeta = (unit = '100g') => {
+  const rawUnit = String(unit || '100g').trim();
+  const normalizedUnit = normalizeFoodUnitText(rawUnit);
+  const baseAmount = parseFoodUnitBaseAmount(rawUnit);
+
+  if (normalizedUnit.includes('ml')) {
+    return {
+      baseAmount,
+      unitLabel: 'ml',
+      pluralUnitLabel: 'ml',
+      inputLabel: 'millilitres',
+      compact: true
+    };
+  }
+
+  if (/(?:^|\d|\s)g\b/.test(normalizedUnit) || normalizedUnit.includes('gramme')) {
+    return {
+      baseAmount,
+      unitLabel: 'g',
+      pluralUnitLabel: 'g',
+      inputLabel: 'grammes',
+      compact: true
+    };
+  }
+
+  const unitLabel = rawUnit
+    .replace(/^\d+(?:\.\d+)?\s*/, '')
+    .trim()
+    .replace(/\s*\(.*\)\s*$/, '') || 'pièce';
+
+  return {
+    baseAmount,
+    unitLabel,
+    pluralUnitLabel: pluralizeFoodUnit(unitLabel),
+    inputLabel: pluralizeFoodUnit(unitLabel),
+    compact: false
+  };
+};
+
+const formatQuantityNumber = (quantityAmount) => {
+  const numericQuantity = Number(quantityAmount);
+  if (!Number.isFinite(numericQuantity)) return '0';
+  return Number.isInteger(numericQuantity)
+    ? String(numericQuantity)
+    : String(parseFloat(numericQuantity.toFixed(1)));
+};
+
+export const getFoodUnitBaseAmount = (unit = '100g') => {
+  return getFoodUnitMeta(unit).baseAmount;
+};
+
 export const getFoodQuantityUnit = (unit = '100g') => {
-  return String(unit).toLowerCase().includes('ml') ? 'ml' : 'g';
+  return getFoodUnitMeta(unit).unitLabel;
+};
+
+export const getFoodQuantityInputLabel = (unit = '100g') => {
+  return getFoodUnitMeta(unit).inputLabel;
+};
+
+export const getFoodDefaultQuantity = (unit = '100g') => {
+  return getFoodUnitMeta(unit).baseAmount;
+};
+
+export const formatFoodQuantity = (quantityAmount, unit = '100g') => {
+  const meta = getFoodUnitMeta(unit);
+  const quantityLabel = formatQuantityNumber(quantityAmount);
+
+  if (meta.compact) {
+    return `${quantityLabel}${meta.unitLabel}`;
+  }
+
+  const numericQuantity = Number(quantityAmount);
+  const label = numericQuantity > 1 ? meta.pluralUnitLabel : meta.unitLabel;
+  return `${quantityLabel} ${label}`;
 };
 
 export const addFoodToLog = (dateStr, mealType, foodItem, quantityAmount) => {
@@ -716,6 +802,7 @@ export const addFoodToLog = (dateStr, mealType, foodItem, quantityAmount) => {
     name: foodItem.name,
     quantity: quantityAmount,
     unitLabel: getFoodQuantityUnit(foodItem.unit),
+    unit: foodItem.unit || '100g',
     calories: Math.round(foodItem.calories * factor),
     protein: parseFloat((foodItem.protein * factor).toFixed(1)),
     carbs: parseFloat((foodItem.carbs * factor).toFixed(1)),

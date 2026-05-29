@@ -21,17 +21,39 @@ import {
   deleteFoodFromLog,
   getNutritionSummary,
   getFoodUnitBaseAmount,
-  getFoodQuantityUnit
+  getFoodQuantityUnit,
+  getFoodQuantityInputLabel,
+  getFoodDefaultQuantity,
+  formatFoodQuantity
 } from '../data/foodDatabase';
 import './CalorieCounter.css';
 
 const normalizeFoodSearchText = (value) =>
   String(value || '')
     .toLowerCase()
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
 const getFoodDisplayUnit = (food) => food?.unit || '100g';
+
+const getFoodSearchRank = (food, query) => {
+  if (!query) return 0;
+
+  const aliases = Array.isArray(food.aliases) ? food.aliases : [];
+  const normalizedName = normalizeFoodSearchText(food.name);
+  const normalizedAliases = aliases.map(normalizeFoodSearchText);
+  const terms = [normalizedName, ...normalizedAliases];
+  const wordStartsWithQuery = terms.some(term =>
+    term.split(/[^a-z0-9]+/).some(word => word.startsWith(query))
+  );
+
+  if (normalizedName.startsWith(query)) return 0;
+  if (wordStartsWithQuery) return 1;
+  if (normalizedAliases.some(alias => alias.includes(query))) return 2;
+  return 3;
+};
 
 const CalorieCounter = () => {
   const { t } = useTranslation();
@@ -66,6 +88,7 @@ const CalorieCounter = () => {
   const [customProtein, setCustomProtein] = useState('');
   const [customCarbs, setCustomCarbs] = useState('');
   const [customFat, setCustomFat] = useState('');
+  const [customUnit, setCustomUnit] = useState('100g');
   const [customFoods, setCustomFoods] = useState(() => {
     return JSON.parse(localStorage.getItem('pfl_custom_foods') || '[]');
   });
@@ -111,6 +134,11 @@ const CalorieCounter = () => {
     setShowAddModal(false);
   };
 
+  const handleSelectFood = (food) => {
+    setSelectedFood(food);
+    setQuantity(getFoodDefaultQuantity(food.unit));
+  };
+
   // Delete logged food
   const handleDeleteFood = (mealType, index) => {
     const updatedLog = deleteFoodFromLog(selectedDate, mealType, index);
@@ -140,7 +168,7 @@ const CalorieCounter = () => {
       carbs: parseFloat(customCarbs) || 0,
       fat: parseFloat(customFat) || 0,
       category: 'custom',
-      unit: '100g'
+      unit: customUnit
     };
 
     const updatedCustomList = [newFood, ...customFoods];
@@ -149,6 +177,7 @@ const CalorieCounter = () => {
 
     // Auto select it in search list
     setSelectedFood(newFood);
+    setQuantity(getFoodDefaultQuantity(newFood.unit));
     
     // Reset form & view
     setCustomName('');
@@ -156,7 +185,9 @@ const CalorieCounter = () => {
     setCustomProtein('');
     setCustomCarbs('');
     setCustomFat('');
+    setCustomUnit('100g');
     setShowCustomModal(false);
+    setShowAddModal(true);
   };
 
   // Delete custom food
@@ -181,6 +212,9 @@ const CalorieCounter = () => {
     const matchesSearch = normalizedSearchQuery === '' || searchableText.includes(normalizedSearchQuery);
     const matchesCategory = selectedCategory === 'all' || food.category === selectedCategory || foodCategoriesForMatch.includes(selectedCategory);
     return matchesSearch && matchesCategory;
+  }).sort((a, b) => {
+    if (!normalizedSearchQuery) return 0;
+    return getFoodSearchRank(a, normalizedSearchQuery) - getFoodSearchRank(b, normalizedSearchQuery);
   }).slice(0, resultLimit);
 
   const foodCount = allAvailableFoods.length;
@@ -338,7 +372,7 @@ const CalorieCounter = () => {
                       <div className="logged-item-info">
                         <span className="logged-item-name">{item.name}</span>
                         <span className="logged-item-qty">
-                          {item.quantity}{item.unitLabel || 'g'} • P:{item.protein}g G:{item.carbs}g L:{item.fat}g
+                          {formatFoodQuantity(item.quantity, item.unit || item.unitLabel || 'g')} • P:{item.protein}g G:{item.carbs}g L:{item.fat}g
                         </span>
                       </div>
                       <div className="logged-item-right">
@@ -423,7 +457,7 @@ const CalorieCounter = () => {
                   <div 
                     key={idx} 
                     className={`food-result-row ${selectedFood?.name === food.name ? 'selected-row' : ''}`}
-                    onClick={() => setSelectedFood(food)}
+                    onClick={() => handleSelectFood(food)}
                   >
                     <div className="food-result-meta">
                       <span className="result-name">{food.name}</span>
@@ -451,17 +485,18 @@ const CalorieCounter = () => {
                 <div className="selected-preview">
                   <h4>Saisie de quantité pour {selectedFood.name}</h4>
                   <p className="preview-cal-math">
-                    {Math.round(selectedFood.calories * (quantity / getFoodUnitBaseAmount(selectedFood.unit)))} kcal pour {quantity}{getFoodQuantityUnit(selectedFood.unit)}
+                    {Math.round(selectedFood.calories * (quantity / getFoodUnitBaseAmount(selectedFood.unit)))} kcal pour {formatFoodQuantity(quantity, selectedFood.unit)}
                   </p>
                 </div>
 
                 <div className="quantity-controls">
-                  <label>Quantité (en {getFoodQuantityUnit(selectedFood.unit) === 'ml' ? 'millilitres' : 'grammes'}) :</label>
+                  <label>Quantité (en {getFoodQuantityInputLabel(selectedFood.unit)}) :</label>
                   <div className="quantity-input-group">
                     <input 
                       type="number" 
                       min="1" 
                       max="2000"
+                      step="1"
                       value={quantity}
                       onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 0))}
                       className="quantity-number-input"
@@ -544,7 +579,21 @@ const CalorieCounter = () => {
               </div>
 
               <div className="form-group-custom">
-                <label>Calories (pour 100g) * :</label>
+                <label>Mesure de référence :</label>
+                <select
+                  value={customUnit}
+                  onChange={(e) => setCustomUnit(e.target.value)}
+                  className="custom-form-input"
+                >
+                  <option value="100g">100g</option>
+                  <option value="100ml">100ml</option>
+                  <option value="1 pièce">1 pièce</option>
+                  <option value="1 portion">1 portion</option>
+                </select>
+              </div>
+
+              <div className="form-group-custom">
+                <label>Calories (pour {customUnit}) * :</label>
                 <input 
                   type="number" 
                   min="0"
@@ -559,7 +608,7 @@ const CalorieCounter = () => {
 
               <div className="macro-input-row">
                 <div className="form-group-custom">
-                  <label>Protéines (g/100g) :</label>
+                  <label>Protéines (g/{customUnit}) :</label>
                   <input 
                     type="number" 
                     step="0.1"
@@ -573,7 +622,7 @@ const CalorieCounter = () => {
                 </div>
 
                 <div className="form-group-custom">
-                  <label>Glucides (g/100g) :</label>
+                  <label>Glucides (g/{customUnit}) :</label>
                   <input 
                     type="number" 
                     step="0.1"
@@ -587,7 +636,7 @@ const CalorieCounter = () => {
                 </div>
 
                 <div className="form-group-custom">
-                  <label>Lipides (g/100g) :</label>
+                  <label>Lipides (g/{customUnit}) :</label>
                   <input 
                     type="number" 
                     step="0.1"
