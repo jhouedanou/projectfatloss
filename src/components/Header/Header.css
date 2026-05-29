@@ -94,6 +94,12 @@
   border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
+.pfl-header-icon--auth {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #10B981 !important;
+}
+
 .pfl-header-copy {
   min-width: 0;
   display: flex;

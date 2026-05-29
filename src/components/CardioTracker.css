@@ -1,0 +1,175 @@
+.cardio-tracker {
+  padding: 16px 16px 96px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.cardio-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 8px 0 16px;
+  color: var(--text-primary, #fff);
+}
+
+.cardio-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.cardio-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.cardio-stat div { display: flex; flex-direction: column; line-height: 1.1; }
+.cardio-stat strong { font-size: 1.15rem; font-weight: 800; color: var(--text-primary, #fff); }
+.cardio-stat span { font-size: 0.7rem; color: var(--text-tertiary, #9a9aa2); }
+
+.cardio-form {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 22px;
+}
+
+.cardio-type-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.cardio-type-toggle button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: var(--text-tertiary, #9a9aa2);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cardio-type-toggle button.active {
+  background: #F03D32;
+  border-color: #F03D32;
+  color: #fff;
+}
+
+.cardio-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.cardio-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--text-tertiary, #9a9aa2);
+  font-weight: 600;
+}
+
+.cardio-inputs input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary, #fff);
+  font-size: 1rem;
+}
+
+.cardio-inputs input:focus { outline: none; border-color: #F03D32; }
+
+.cardio-add-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #F03D32;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(240, 61, 50, 0.3);
+}
+
+.cardio-list { display: flex; flex-direction: column; gap: 10px; }
+
+.cardio-empty {
+  text-align: center;
+  color: var(--text-tertiary, #9a9aa2);
+  font-size: 0.9rem;
+  padding: 24px 0;
+}
+
+.cardio-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.cardio-item-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+.cardio-item.walk .cardio-item-icon { background: #10B981; }
+.cardio-item.bike .cardio-item-icon { background: #3B82F6; }
+
+.cardio-item-main { flex: 1; min-width: 0; }
+
+.cardio-item-top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 4px;
+}
+.cardio-item-type { font-weight: 700; color: var(--text-primary, #fff); }
+.cardio-item-date { font-size: 0.75rem; color: var(--text-tertiary, #9a9aa2); text-transform: capitalize; }
+
+.cardio-item-meta { display: flex; gap: 12px; font-size: 0.8rem; color: var(--text-tertiary, #b5b5bd); }
+.cardio-item-meta .cardio-cal { color: #F03D32; font-weight: 700; }
+
+.cardio-del {
+  background: transparent; border: none; color: var(--text-tertiary, #76767e);
+  cursor: pointer; padding: 6px; flex-shrink: 0;
+}
+.cardio-del:hover { color: #F03D32; }
+
+/* Thème clair */
+body:not(.dark-theme) .cardio-stat,
+body:not(.dark-theme) .cardio-form,
+body:not(.dark-theme) .cardio-item { background: #f5f5f7; border-color: #e6e6eb; }
+body:not(.dark-theme) .cardio-inputs input { background: #fff; border-color: #e0e0e6; color: #1a1a1a; }
+body:not(.dark-theme) .cardio-type-toggle button { border-color: #e0e0e6; }
+
+@media (max-width: 400px) {
+  .cardio-inputs { grid-template-columns: 1fr 1fr; }
+  .cardio-inputs label:last-child { grid-column: span 2; }
+}

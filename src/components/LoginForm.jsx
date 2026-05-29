@@ -1,106 +1,131 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { login } from '../services/AuthService';
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { signIn, signUp } from '../services/AuthService';
+import { isSupabaseConfigured } from '../services/supabase';
 import './LoginForm.css';
 
-const LoginForm = ({ onLoginSuccess, onClose }) => {
-  const { t } = useTranslation();
-  const [username, setUsername] = useState('');
+const LoginForm = ({ onClose }) => {
+  const [mode, setMode] = useState('login'); // 'login' | 'signup'
+  const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [info, setInfo] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const isSignup = mode === 'signup';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Réinitialiser l'erreur
     setError('');
-    
-    // Valider les champs
-    if (!username || !password) {
-      setError(t('auth.errorRequiredFields'));
+    setInfo('');
+
+    if (!email || !password) {
+      setError('Email et mot de passe requis');
       return;
     }
-    
-    try {
-      setIsLoading(true);
-      
-      // Appeler le service d'authentification
-      const result = await login(username, password);
-      
-      if (result.success) {
-        // Notification de succès
-        if ("Notification" in window && Notification.permission === "granted") {
-          new Notification(t('auth.welcomeBack'), {
-            body: t('auth.syncReady'),
-            icon: '/favicon.ico'
-          });
-        }
-        
-        // Appeler le callback de succès
-        onLoginSuccess(result.user);
-      } else {
-        setError(result.error || t('auth.errorUnknown'));
+
+    setLoading(true);
+    const result = isSignup
+      ? await signUp(email, password, displayName)
+      : await signIn(email, password);
+    setLoading(false);
+
+    if (result.success) {
+      if (isSignup && !result.session) {
+        setInfo('Compte créé. Vérifie ta boîte mail pour confirmer, puis connecte-toi.');
+        setMode('login');
+        setPassword('');
       }
-    } catch (error) {
-      console.error('Erreur lors de la connexion:', error);
-      setError(t('auth.errorUnknown'));
-    } finally {
-      setIsLoading(false);
+      // Sinon : onAuthChange ferme la modale automatiquement
+    } else {
+      setError(result.error || 'Erreur');
     }
   };
 
+  const switchMode = () => {
+    setMode(isSignup ? 'login' : 'signup');
+    setError('');
+    setInfo('');
+  };
+
   return (
-    <div className="login-form-container">
-      <div className="login-form-header">
-        <h2>{t('auth.login')}</h2>
-        <button className="close-button" onClick={onClose}>×</button>
+    <div className="login-card">
+      <button className="login-close" onClick={onClose} aria-label="Fermer">×</button>
+
+      <div className="login-brand">
+        <img src="/logo.png" alt="" className="login-logo" />
+        <h2>{isSignup ? 'Créer un compte' : 'Bon retour'}</h2>
+        <p className="login-sub">
+          {isSignup ? 'Quelques secondes pour démarrer' : 'Connecte-toi pour retrouver tes données'}
+        </p>
       </div>
-      
-      {error && (
-        <div className="login-error-message">{error}</div>
+
+      {!isSupabaseConfigured && (
+        <div className="login-error-message">Supabase non configuré (variables VITE_ manquantes).</div>
       )}
-      
+      {error && <div className="login-error-message">{error}</div>}
+      {info && <div className="login-info-message">{info}</div>}
+
       <form onSubmit={handleSubmit} className="login-form">
-        <div className="form-group">
-          <label htmlFor="username">{t('auth.username')}</label>
+        {isSignup && (
+          <div className="login-field">
+            <User size={18} className="login-field-icon" />
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              disabled={loading}
+              placeholder="Nom affiché (optionnel)"
+              autoComplete="name"
+            />
+          </div>
+        )}
+
+        <div className="login-field">
+          <Mail size={18} className="login-field-icon" />
           <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            disabled={isLoading}
-            placeholder={t('auth.usernamePlaceholder')}
-            autoComplete="username"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            placeholder="Email"
+            autoComplete="email"
+            required
           />
         </div>
-        
-        <div className="form-group">
-          <label htmlFor="password">{t('auth.password')}</label>
+
+        <div className="login-field">
+          <Lock size={18} className="login-field-icon" />
           <input
-            type="password"
-            id="password"
+            type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            placeholder={t('auth.passwordPlaceholder')}
-            autoComplete="current-password"
+            disabled={loading}
+            placeholder="Mot de passe"
+            autoComplete={isSignup ? 'new-password' : 'current-password'}
+            required
           />
+          <button
+            type="button"
+            className="login-eye"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? 'Masquer' : 'Afficher'}
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+          </button>
         </div>
-        
-        <div className="login-info-message">
-          <p>{t('auth.loginHint')}</p>
-          <p className="credentials-hint"></p>
-        </div>
-        
-        <button 
-          type="submit" 
-          className="login-button"
-          disabled={isLoading}
-        >
-          {isLoading ? t('auth.loggingIn') : t('auth.loginButton')}
+
+        <button type="submit" className="login-button" disabled={loading || !isSupabaseConfigured}>
+          {loading ? '…' : isSignup ? 'Créer le compte' : 'Se connecter'}
         </button>
       </form>
+
+      <button type="button" className="login-switch" onClick={switchMode}>
+        {isSignup ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? Créer un compte'}
+      </button>
     </div>
   );
 };

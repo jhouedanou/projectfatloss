@@ -38,7 +38,12 @@ export const addWeightRecord = (weight, date = null, notes = '') => {
     
     // Sauvegarder l'historique mis à jour
     localStorage.setItem(WEIGHT_HISTORY_KEY, JSON.stringify(history));
-    
+
+    // Pousser vers Supabase (offline-first, non bloquant)
+    import('./SyncService')
+      .then(({ pushWeighIn }) => pushWeighIn(newRecord))
+      .catch(() => {});
+
     return newRecord;
   } catch (error) {
     console.error('Erreur lors de l\'ajout d\'un enregistrement de poids:', error);
@@ -71,6 +76,12 @@ export const deleteWeightRecord = (id) => {
     const updatedHistory = history.filter(record => record.id !== id);
     
     localStorage.setItem(WEIGHT_HISTORY_KEY, JSON.stringify(updatedHistory));
+
+    // Répercuter la suppression sur Supabase
+    import('./SyncService')
+      .then(({ deleteRemoteWeighIn }) => deleteRemoteWeighIn(id))
+      .catch(() => {});
+
     return true;
   } catch (error) {
     console.error('Erreur lors de la suppression de l\'enregistrement de poids:', error);

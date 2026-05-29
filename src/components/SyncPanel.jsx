@@ -83,8 +83,8 @@ const SyncPanel = ({ user, onLogout, onSyncComplete }) => {
   };
 
   // Gérer la déconnexion
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     if (onLogout) {
       onLogout();
     }
@@ -95,7 +95,7 @@ const SyncPanel = ({ user, onLogout, onSyncComplete }) => {
       <div className="sync-header">
         <h2>{t('sync.title')}</h2>
         <div className="user-info">
-          <span className="username">{user.username}</span>
+          <span className="username">{user.user_metadata?.full_name || user.user_metadata?.user_name || user.email}</span>
           <button className="logout-button" onClick={handleLogout}>
             {t('auth.logout')}
           </button>

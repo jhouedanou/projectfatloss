@@ -10,6 +10,7 @@
     "history": "History",
     "weight": "Weight",
     "calorie": "Nutrition",
+    "cardio": "Cardio",
     "historyDisabled": "History unavailable during workout",
     "weightDisabled": "Weight tracking unavailable during workout",
     "calorieDisabled": "Nutrition tracking unavailable during workout"

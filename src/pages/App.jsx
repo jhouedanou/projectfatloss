@@ -10,7 +10,7 @@ import {
   Box,
   alpha
 } from '@mui/material';
-import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft, Apple } from 'lucide-react';
+import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft, Apple, Bike } from 'lucide-react';
 import { createAppTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import { getWorkoutPlan } from '../services/WorkoutCustomization'; 
@@ -35,6 +35,10 @@ import Header from '../components/Header/Header';
 import { getServiceWorkerPath, getAssetPath } from '../utils/paths';
 import { hasContactInfo, sendWorkoutReport, getContactInfo } from '../services/ContactService';
 import { getWeightHistory } from '../services/WeightStorage';
+import { onAuthChange, signOut } from '../services/AuthService';
+import { fullSync } from '../services/SyncService';
+import LoginForm from '../components/LoginForm';
+import CardioTracker from '../components/CardioTracker';
 
 const NOTIFICATION_DURATION = 3000; 
 
@@ -66,6 +70,28 @@ export default function App() {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showExercises, setShowExercises] = useState(false);
   const [appTheme, setAppTheme] = useState(() => createAppTheme(true));
+  const [user, setUser] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+
+  // Auth Supabase : suit l'état de connexion et synchronise à la connexion
+  useEffect(() => {
+    const unsubscribe = onAuthChange((u) => {
+      setUser(u);
+      if (u) {
+        setShowLogin(false);
+        // Pull + merge + push à la connexion (offline-first)
+        fullSync()
+          .then(() => console.log('Synchronisation Supabase terminée'))
+          .catch((e) => console.warn('Sync échouée:', e?.message));
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut();
+    setUser(null);
+  };
 
   useEffect(() => {
     try {
@@ -219,8 +245,8 @@ export default function App() {
 
   const isPlanAvailable = workoutPlan && workoutPlan.length > 0 && current < workoutPlan.length;
 
-  const viewModeToIndex = { workout: 0, history: 1, weight: 2, calorie: 3 };
-  const indexToViewMode = ['workout', 'history', 'weight', 'calorie'];
+  const viewModeToIndex = { workout: 0, history: 1, weight: 2, calorie: 3, cardio: 4 };
+  const indexToViewMode = ['workout', 'history', 'weight', 'calorie', 'cardio'];
 
   return (
     <ThemeProvider theme={appTheme}>
@@ -232,10 +258,33 @@ export default function App() {
         paddingBottom: stepMode ? 0 : '72px',
       }}>
         {!stepMode && (
-          <Header 
-            onNotificationSettings={() => setShowNotificationSettings(true)} 
-            onBack={showExercises ? () => setShowExercises(false) : null} 
+          <Header
+            onNotificationSettings={() => setShowNotificationSettings(true)}
+            onBack={showExercises ? () => setShowExercises(false) : null}
+            user={user}
+            onAccountClick={() => (user ? handleLogout() : setShowLogin(true))}
           />
+        )}
+
+        {/* Modale de connexion */}
+        {showLogin && !user && (
+          <div
+            onClick={() => setShowLogin(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 2000,
+              background: 'rgba(0,0,0,0.55)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+            }}
+          >
+            <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: '400px' }}>
+              <LoginForm onClose={() => setShowLogin(false)} />
+            </div>
+          </div>
         )}
         <div style={{ 
           width: '100%', 
@@ -400,6 +449,12 @@ export default function App() {
               <CalorieCounter />
             </div>
           </Fade>
+
+          <Fade in={viewMode === 'cardio'} timeout={300} unmountOnExit mountOnEnter>
+            <div className="cardio-content">
+              <CardioTracker />
+            </div>
+          </Fade>
         </div>
         
         {/* Bouton flottant personnaliser - repositionné au-dessus de la bottom nav */}
@@ -512,12 +567,21 @@ export default function App() {
                     },
                   }}
                 />
-                <BottomNavigationAction 
-                  label={t('nav.calorie', { defaultValue: 'Calories' })} 
-                  icon={<Apple size={20} />} 
+                <BottomNavigationAction
+                  label={t('nav.calorie', { defaultValue: 'Calories' })}
+                  icon={<Apple size={20} />}
                   sx={{
                     '&.Mui-selected': {
                       color: '#F03D32',
+                    },
+                  }}
+                />
+                <BottomNavigationAction
+                  label={t('nav.cardio', { defaultValue: 'Cardio' })}
+                  icon={<Bike size={20} />}
+                  sx={{
+                    '&.Mui-selected': {
+                      color: '#3B82F6',
                     },
                   }}
                 />

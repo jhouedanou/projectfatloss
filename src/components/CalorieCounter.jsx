@@ -19,9 +19,19 @@ import {
   saveDailyNutritionLog, 
   addFoodToLog, 
   deleteFoodFromLog,
-  getNutritionSummary 
+  getNutritionSummary,
+  getFoodUnitBaseAmount,
+  getFoodQuantityUnit
 } from '../data/foodDatabase';
 import './CalorieCounter.css';
+
+const normalizeFoodSearchText = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const getFoodDisplayUnit = (food) => food?.unit || '100g';
 
 const CalorieCounter = () => {
   const { t } = useTranslation();
@@ -162,11 +172,16 @@ const CalorieCounter = () => {
 
   // Filter foods (combines database & custom foods)
   const allAvailableFoods = [...customFoods, ...foodDatabase];
+  const normalizedSearchQuery = normalizeFoodSearchText(searchQuery.trim());
+  const resultLimit = normalizedSearchQuery !== '' || selectedCategory !== 'all' ? 80 : 20;
   const filteredFoods = allAvailableFoods.filter(food => {
-    const matchesSearch = searchQuery.trim() === '' || food.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || food.category === selectedCategory;
+    const aliases = Array.isArray(food.aliases) ? food.aliases : [];
+    const searchableText = normalizeFoodSearchText([food.name, ...aliases].join(' '));
+    const foodCategoriesForMatch = Array.isArray(food.categories) ? food.categories : [];
+    const matchesSearch = normalizedSearchQuery === '' || searchableText.includes(normalizedSearchQuery);
+    const matchesCategory = selectedCategory === 'all' || food.category === selectedCategory || foodCategoriesForMatch.includes(selectedCategory);
     return matchesSearch && matchesCategory;
-  }).slice(0, searchQuery.trim() !== '' ? 50 : 20);
+  }).slice(0, resultLimit);
 
   const foodCount = allAvailableFoods.length;
 
@@ -323,7 +338,7 @@ const CalorieCounter = () => {
                       <div className="logged-item-info">
                         <span className="logged-item-name">{item.name}</span>
                         <span className="logged-item-qty">
-                          {item.quantity}g • P:{item.protein}g G:{item.carbs}g L:{item.fat}g
+                          {item.quantity}{item.unitLabel || 'g'} • P:{item.protein}g G:{item.carbs}g L:{item.fat}g
                         </span>
                       </div>
                       <div className="logged-item-right">
@@ -413,7 +428,7 @@ const CalorieCounter = () => {
                     <div className="food-result-meta">
                       <span className="result-name">{food.name}</span>
                       <span className="result-macros">
-                        {food.calories} kcal/100g • P:{food.protein}g G:{food.carbs}g L:{food.fat}g
+                        {food.calories} kcal/{getFoodDisplayUnit(food)} • P:{food.protein}g G:{food.carbs}g L:{food.fat}g
                       </span>
                     </div>
                     {food.category === 'custom' && (
@@ -436,12 +451,12 @@ const CalorieCounter = () => {
                 <div className="selected-preview">
                   <h4>Saisie de quantité pour {selectedFood.name}</h4>
                   <p className="preview-cal-math">
-                    {Math.round(selectedFood.calories * (quantity / 100))} kcal pour {quantity}g
+                    {Math.round(selectedFood.calories * (quantity / getFoodUnitBaseAmount(selectedFood.unit)))} kcal pour {quantity}{getFoodQuantityUnit(selectedFood.unit)}
                   </p>
                 </div>
 
                 <div className="quantity-controls">
-                  <label>Quantité (en grammes) :</label>
+                  <label>Quantité (en {getFoodQuantityUnit(selectedFood.unit) === 'ml' ? 'millilitres' : 'grammes'}) :</label>
                   <div className="quantity-input-group">
                     <input 
                       type="number" 
@@ -451,7 +466,7 @@ const CalorieCounter = () => {
                       onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 0))}
                       className="quantity-number-input"
                     />
-                    <span className="g-unit">g</span>
+                    <span className="g-unit">{getFoodQuantityUnit(selectedFood.unit)}</span>
                   </div>
                 </div>
 

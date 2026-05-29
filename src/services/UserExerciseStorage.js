@@ -52,7 +52,12 @@ export function saveUserExercise(exercise) {
   
   exercises.push(customExercise);
   localStorage.setItem(USER_EXERCISES_KEY, JSON.stringify(exercises));
-  
+
+  // Pousser vers Supabase (offline-first, non bloquant)
+  import('./SyncService')
+    .then(({ pushUserExercise }) => pushUserExercise(customExercise))
+    .catch(() => {});
+
   return customExercise;
 }
 
@@ -87,13 +92,22 @@ export function updateUserExercise(exerciseId, updates) {
  */
 export function deleteUserExercise(exerciseId) {
   const exercises = getUserExercises();
+  const target = exercises.find(ex => ex.id === exerciseId);
   const filteredExercises = exercises.filter(ex => ex.id !== exerciseId);
-  
+
   if (filteredExercises.length === exercises.length) {
     return false; // Exercice non trouvé
   }
-  
+
   localStorage.setItem(USER_EXERCISES_KEY, JSON.stringify(filteredExercises));
+
+  // Répercuter la suppression sur Supabase (match par nom)
+  if (target?.name) {
+    import('./SyncService')
+      .then(({ deleteRemoteUserExercise }) => deleteRemoteUserExercise(target.name))
+      .catch(() => {});
+  }
+
   return true;
 }
 

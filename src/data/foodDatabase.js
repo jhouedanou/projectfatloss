@@ -1,3 +1,5 @@
+import { glovoFoodDatabase } from './glovoFoodDatabase';
+
 export const foodCategories = [
   { id: 'fruits', name: 'Fruits' },
   { id: 'vegetables', name: 'Légumes' },
@@ -21,6 +23,8 @@ export const foodCategories = [
   { id: 'alcohol', name: 'Boissons Alcoolisées' },
   { id: 'supplements', name: 'Compléments & Poudres' },
   { id: 'breakfast', name: 'Petit-Déjeuner & Céréales' },
+  { id: 'ivorian', name: 'Cuisine Ivoirienne' },
+  { id: 'glovo_food', name: 'Glovo FooDI-ML' },
   { id: 'african', name: 'Cuisine Africaine & Antillaise' }
 ];
 
@@ -568,19 +572,8 @@ export const foodDatabase = [
   { name: 'Nesquik / Chocolat en Poudre', calories: 380, protein: 4, carbs: 80, fat: 4, category: 'breakfast', unit: '100g' },
 
   // ═══════════════════════════════════════════
-  // CUISINE AFRICAINE & ANTILLAISE (20+ entrées)
+  // CUISINE AFRICAINE & ANTILLAISE (7 entrées)
   // ═══════════════════════════════════════════
-  { name: 'Alloco (Banane Plantain Frite)', calories: 252, protein: 1.5, carbs: 35, fat: 12, category: 'african', unit: '100g' },
-  { name: 'Attiéké', calories: 125, protein: 0.5, carbs: 30, fat: 0.1, category: 'african', unit: '100g' },
-  { name: 'Foutou Banane', calories: 150, protein: 1.5, carbs: 35, fat: 0.5, category: 'african', unit: '100g' },
-  { name: 'Foutou Igname', calories: 118, protein: 1.5, carbs: 28, fat: 0.2, category: 'african', unit: '100g' },
-  { name: 'Igname (Cuit)', calories: 118, protein: 1.5, carbs: 28, fat: 0.2, category: 'african', unit: '100g' },
-  { name: 'Manioc (Cuit)', calories: 160, protein: 1.4, carbs: 38, fat: 0.3, category: 'african', unit: '100g' },
-  { name: 'Semoule de Manioc (Garba)', calories: 160, protein: 0.5, carbs: 39, fat: 0.1, category: 'african', unit: '100g' },
-  { name: 'Sauce Graine (Palme)', calories: 180, protein: 3, carbs: 5, fat: 17, category: 'african', unit: '100g' },
-  { name: 'Sauce Arachide', calories: 200, protein: 8, carbs: 10, fat: 15, category: 'african', unit: '100g' },
-  { name: 'Sauce Gombo', calories: 55, protein: 3, carbs: 6, fat: 2, category: 'african', unit: '100g' },
-  { name: 'Kédjénou de Poulet', calories: 130, protein: 15, carbs: 4, fat: 6, category: 'african', unit: '100g' },
   { name: 'Tiep Bou Djen (Thiéboudienne)', calories: 155, protein: 10, carbs: 18, fat: 5, category: 'african', unit: '100g' },
   { name: 'Yassa de Poulet', calories: 140, protein: 14, carbs: 5, fat: 7, category: 'african', unit: '100g' },
   { name: 'Mafé', calories: 170, protein: 10, carbs: 8, fat: 11, category: 'african', unit: '100g' },
@@ -588,16 +581,89 @@ export const foodDatabase = [
   { name: 'Accras de Morue', calories: 250, protein: 10, carbs: 22, fat: 14, category: 'african', unit: '100g' },
   { name: 'Colombo de Poulet', calories: 120, protein: 12, carbs: 8, fat: 5, category: 'african', unit: '100g' },
   { name: 'Bouillon (Poulet Africain)', calories: 70, protein: 5, carbs: 6, fat: 3, category: 'african', unit: '100g' },
-  { name: 'Taro (Cuit)', calories: 142, protein: 0.5, carbs: 35, fat: 0.1, category: 'african', unit: '100g' },
-  { name: 'Bissap (Jus de Hibiscus)', calories: 40, protein: 0, carbs: 10, fat: 0, category: 'african', unit: '100ml' },
-  { name: 'Jus de Gingembre (Gnamankoudji)', calories: 50, protein: 0.2, carbs: 12, fat: 0, category: 'african', unit: '100ml' },
-  { name: 'Jus de Baobab (Bouye)', calories: 55, protein: 0.5, carbs: 13, fat: 0.1, category: 'african', unit: '100ml' },
-  { name: 'Dégué', calories: 160, protein: 4, carbs: 26, fat: 5, category: 'african', unit: '100g' },
-  { name: 'Mil / Millet (Bouillie)', calories: 119, protein: 3.5, carbs: 23, fat: 1, category: 'african', unit: '100g' }
+
+  // ═══════════════════════════════════════════
+  // CUISINE IVOIRIENNE (70+ entrées indicatives)
+  // ═══════════════════════════════════════════
+  { name: 'Alloco (Banane Plantain Frite)', calories: 252, protein: 1.5, carbs: 35, fat: 12, category: 'ivorian', unit: '100g', aliases: ['aloko', 'allocodrome', 'plantain frit'] },
+  { name: 'Attiéké Nature', calories: 125, protein: 0.5, carbs: 30, fat: 0.1, category: 'ivorian', unit: '100g', aliases: ['atcheke', 'attiéké', 'semoule de manioc'] },
+  { name: 'Attiéké Poisson Braisé', calories: 170, protein: 11, carbs: 20, fat: 4.5, category: 'ivorian', unit: '100g', aliases: ['atcheke poisson', 'attiéké poisson'] },
+  { name: 'Attiéké Poulet Braisé', calories: 185, protein: 13, carbs: 19, fat: 6, category: 'ivorian', unit: '100g', aliases: ['atcheke poulet', 'attiéké poulet'] },
+  { name: 'Attiéké Thon Frit', calories: 225, protein: 12, carbs: 22, fat: 9, category: 'ivorian', unit: '100g', aliases: ['garba thon', 'atcheke thon'] },
+  { name: 'Garba Complet', calories: 245, protein: 9, carbs: 28, fat: 9, category: 'ivorian', unit: '100g', aliases: ['attiéké thon', 'garba ivoirien'] },
+  { name: 'Attoukpou', calories: 150, protein: 0.5, carbs: 36, fat: 0.1, category: 'ivorian', unit: '100g', aliases: ['attoupkou', 'galette de manioc'] },
+  { name: 'Placali', calories: 112, protein: 0.6, carbs: 27, fat: 0.1, category: 'ivorian', unit: '100g', aliases: ['plakali', 'pâte de manioc fermentée'] },
+  { name: 'Foutou Banane', calories: 150, protein: 1.5, carbs: 35, fat: 0.5, category: 'ivorian', unit: '100g', aliases: ['futu banane', 'foutou plantain'] },
+  { name: 'Foutou Igname', calories: 118, protein: 1.5, carbs: 28, fat: 0.2, category: 'ivorian', unit: '100g', aliases: ['futu igname'] },
+  { name: 'Foufou Manioc', calories: 145, protein: 1.2, carbs: 34, fat: 0.3, category: 'ivorian', unit: '100g', aliases: ['fufu manioc'] },
+  { name: 'Kabato (Pâte de Maïs)', calories: 120, protein: 2.3, carbs: 26, fat: 0.8, category: 'ivorian', unit: '100g', aliases: ['kabato maïs', 'pâte de mais'] },
+  { name: 'Riz Gras Ivoirien', calories: 180, protein: 4, carbs: 29, fat: 5, category: 'ivorian', unit: '100g', aliases: ['riz au gras', 'riz gras poulet'] },
+  { name: 'Riz Sauce Graine', calories: 210, protein: 5, carbs: 24, fat: 9, category: 'ivorian', unit: '100g', aliases: ['riz sauce palme'] },
+  { name: 'Riz Sauce Arachide', calories: 220, protein: 7, carbs: 25, fat: 10, category: 'ivorian', unit: '100g', aliases: ['riz sauce arachide ivoirienne'] },
+  { name: 'Foutou Sauce Graine', calories: 235, protein: 5, carbs: 25, fat: 12, category: 'ivorian', unit: '100g', aliases: ['foutou sauce palme'] },
+  { name: 'Foutou Sauce Arachide', calories: 240, protein: 7, carbs: 27, fat: 11, category: 'ivorian', unit: '100g' },
+  { name: 'Foutou Sauce Claire', calories: 160, protein: 8, carbs: 25, fat: 3, category: 'ivorian', unit: '100g', aliases: ['foutou sauce légère'] },
+  { name: 'Foutou Sauce Gouagouassou', calories: 185, protein: 6, carbs: 24, fat: 7, category: 'ivorian', unit: '100g', aliases: ['gouagouassou'] },
+  { name: 'Placali Sauce Kplala', calories: 145, protein: 4, carbs: 22, fat: 4, category: 'ivorian', unit: '100g', aliases: ['placali sauce feuilles'] },
+  { name: 'Placali Sauce Graine', calories: 205, protein: 4, carbs: 22, fat: 11, category: 'ivorian', unit: '100g' },
+  { name: 'Placali Sauce Kopè', calories: 135, protein: 3, carbs: 24, fat: 3, category: 'ivorian', unit: '100g', aliases: ['placali sauce gombo', 'sauce kopè'] },
+  { name: 'Akpessi Igname Poisson', calories: 160, protein: 10, carbs: 22, fat: 4, category: 'ivorian', unit: '100g', aliases: ['akpessi igname'] },
+  { name: 'Akpessi Banane Poisson', calories: 175, protein: 9, carbs: 25, fat: 5, category: 'ivorian', unit: '100g', aliases: ['akpessi plantain'] },
+  { name: 'Kédjénou de Poulet', calories: 130, protein: 15, carbs: 4, fat: 6, category: 'ivorian', unit: '100g', aliases: ['kedjenou', 'kédjénou poulet'] },
+  { name: 'Kédjénou de Pintade', calories: 145, protein: 19, carbs: 4, fat: 7, category: 'ivorian', unit: '100g', aliases: ['kedjenou pintade'] },
+  { name: 'Poulet Braisé Ivoirien', calories: 215, protein: 24, carbs: 2, fat: 13, category: 'ivorian', unit: '100g', aliases: ['poulet maquis', 'poulet braisé'] },
+  { name: 'Poisson Braisé Ivoirien', calories: 180, protein: 24, carbs: 1, fat: 8, category: 'ivorian', unit: '100g', aliases: ['poisson maquis', 'poisson braisé'] },
+  { name: 'Poisson Frit Ivoirien', calories: 240, protein: 22, carbs: 3, fat: 14, category: 'ivorian', unit: '100g' },
+  { name: 'Thon Frit', calories: 275, protein: 24, carbs: 2, fat: 17, category: 'ivorian', unit: '100g', aliases: ['thon garba'] },
+  { name: 'Choucouya de Bœuf', calories: 250, protein: 24, carbs: 2, fat: 16, category: 'ivorian', unit: '100g', aliases: ['choukouya', 'viande grillée'] },
+  { name: 'Brochettes de Bœuf Ivoiriennes', calories: 210, protein: 25, carbs: 2, fat: 11, category: 'ivorian', unit: '100g', aliases: ['brochette maquis'] },
+  { name: 'Sauce Graine (Palme)', calories: 180, protein: 3, carbs: 5, fat: 17, category: 'ivorian', unit: '100g', aliases: ['sauce palme'] },
+  { name: 'Sauce Arachide Ivoirienne', calories: 200, protein: 8, carbs: 10, fat: 15, category: 'ivorian', unit: '100g' },
+  { name: 'Sauce Claire Poisson', calories: 85, protein: 8, carbs: 5, fat: 4, category: 'ivorian', unit: '100g' },
+  { name: 'Sauce Claire Viande', calories: 110, protein: 10, carbs: 4, fat: 6, category: 'ivorian', unit: '100g' },
+  { name: 'Sauce Gouagouassou', calories: 120, protein: 5, carbs: 8, fat: 8, category: 'ivorian', unit: '100g' },
+  { name: 'Sauce Aubergine Ivoirienne', calories: 75, protein: 3, carbs: 8, fat: 3.5, category: 'ivorian', unit: '100g', aliases: ['sauce aubergine'] },
+  { name: 'Sauce Kplala', calories: 95, protein: 7, carbs: 6, fat: 5, category: 'ivorian', unit: '100g', aliases: ['sauce feuilles'] },
+  { name: 'Sauce Kopè (Gombo)', calories: 65, protein: 3, carbs: 7, fat: 2.5, category: 'ivorian', unit: '100g', aliases: ['sauce gombo', 'kopè'] },
+  { name: 'Sauce Djoumgblé', calories: 90, protein: 4, carbs: 8, fat: 4, category: 'ivorian', unit: '100g', aliases: ['djumble', 'gombo sec'] },
+  { name: 'Sauce Gnangnan', calories: 80, protein: 4, carbs: 7, fat: 3, category: 'ivorian', unit: '100g' },
+  { name: 'Sauce Pistache', calories: 210, protein: 9, carbs: 7, fat: 16, category: 'ivorian', unit: '100g', aliases: ['sauce egusi', 'sauce graines de courge'] },
+  { name: 'Sauce Feuilles de Manioc', calories: 105, protein: 6, carbs: 8, fat: 5, category: 'ivorian', unit: '100g' },
+  { name: 'Sauce Soumbara', calories: 120, protein: 8, carbs: 8, fat: 5, category: 'ivorian', unit: '100g', aliases: ['sauce soumara', 'soumbala'] },
+  { name: 'Igname Bouillie', calories: 118, protein: 1.5, carbs: 28, fat: 0.2, category: 'ivorian', unit: '100g' },
+  { name: 'Manioc Bouilli', calories: 160, protein: 1.4, carbs: 38, fat: 0.3, category: 'ivorian', unit: '100g' },
+  { name: 'Taro Bouilli', calories: 142, protein: 0.5, carbs: 35, fat: 0.1, category: 'ivorian', unit: '100g' },
+  { name: 'Banane Plantain Bouillie', calories: 122, protein: 1.3, carbs: 32, fat: 0.4, category: 'ivorian', unit: '100g' },
+  { name: 'Gari', calories: 360, protein: 1.6, carbs: 86, fat: 0.5, category: 'ivorian', unit: '100g', aliases: ['semoule de manioc sèche'] },
+  { name: 'Gombo Frais', calories: 33, protein: 1.9, carbs: 7, fat: 0.2, category: 'ivorian', unit: '100g', aliases: ['okra'] },
+  { name: 'Feuilles de Kplala', calories: 43, protein: 4, carbs: 7, fat: 0.8, category: 'ivorian', unit: '100g', aliases: ['corète potagère', 'jute leaves'] },
+  { name: 'Feuilles de Dah', calories: 23, protein: 2.5, carbs: 4, fat: 0.3, category: 'ivorian', unit: '100g', aliases: ['amarante', 'feuilles d’amarante'] },
+  { name: 'Gnangnan', calories: 35, protein: 1.5, carbs: 7, fat: 0.3, category: 'ivorian', unit: '100g', aliases: ['aubergine amère'] },
+  { name: 'Aubergine Africaine', calories: 30, protein: 1.2, carbs: 6, fat: 0.2, category: 'ivorian', unit: '100g', aliases: ['jakatu', 'aubergine locale'] },
+  { name: 'Akpi (Graines)', calories: 570, protein: 18, carbs: 12, fat: 50, category: 'ivorian', unit: '100g', aliases: ['djansang'] },
+  { name: 'Soumbara', calories: 250, protein: 30, carbs: 20, fat: 6, category: 'ivorian', unit: '100g', aliases: ['soumbala', 'soumara'] },
+  { name: 'Adjovan', calories: 190, protein: 28, carbs: 0, fat: 8, category: 'ivorian', unit: '100g', aliases: ['poisson fermenté'] },
+  { name: 'Poudre de Crevettes', calories: 300, protein: 62, carbs: 2, fat: 5, category: 'ivorian', unit: '100g', aliases: ['crevettes séchées'] },
+  { name: 'Arachides Grillées', calories: 585, protein: 26, carbs: 16, fat: 49, category: 'ivorian', unit: '100g', aliases: ['cacahuètes grillées'] },
+  { name: 'Noix de Cajou Grillées', calories: 553, protein: 18, carbs: 30, fat: 44, category: 'ivorian', unit: '100g', aliases: ['cajou'] },
+  { name: 'Claclo (Beignets de Plantain)', calories: 310, protein: 2, carbs: 42, fat: 15, category: 'ivorian', unit: '100g', aliases: ['klaklo', 'beignet plantain'] },
+  { name: 'Gbofloto (Mikaté)', calories: 365, protein: 6, carbs: 55, fat: 13, category: 'ivorian', unit: '100g', aliases: ['gbofloto', 'mikate', 'beignet ivoirien'] },
+  { name: 'Dégué Ivoirien', calories: 160, protein: 4, carbs: 26, fat: 5, category: 'ivorian', unit: '100g', aliases: ['thiakry', 'dèguè'] },
+  { name: 'Bouillie de Mil', calories: 119, protein: 3.5, carbs: 23, fat: 1, category: 'ivorian', unit: '100g', aliases: ['millet bouillie'] },
+  { name: 'Bouillie de Maïs', calories: 95, protein: 2.2, carbs: 20, fat: 0.8, category: 'ivorian', unit: '100g', aliases: ['bouillie mais'] },
+  { name: 'Bissap (Jus de Hibiscus)', calories: 40, protein: 0, carbs: 10, fat: 0, category: 'ivorian', unit: '100ml', aliases: ['jus bissap'] },
+  { name: 'Jus de Gingembre (Gnamankoudji)', calories: 50, protein: 0.2, carbs: 12, fat: 0, category: 'ivorian', unit: '100ml', aliases: ['gnamakoudji', 'gingembre'] },
+  { name: 'Jus de Tamarin', calories: 45, protein: 0.2, carbs: 11, fat: 0.1, category: 'ivorian', unit: '100ml' },
+  { name: 'Jus de Corossol', calories: 65, protein: 0.5, carbs: 15, fat: 0.3, category: 'ivorian', unit: '100ml' },
+  { name: 'Jus de Baobab (Bouye)', calories: 55, protein: 0.5, carbs: 13, fat: 0.1, category: 'ivorian', unit: '100ml', aliases: ['bouye'] },
+  { name: 'Bandji (Vin de Palme)', calories: 82, protein: 0.1, carbs: 6, fat: 0, category: 'ivorian', unit: '100ml', aliases: ['vin de palme'] },
+  { name: 'Tchapalo', calories: 45, protein: 0.4, carbs: 7, fat: 0, category: 'ivorian', unit: '100ml', aliases: ['bière de mil'] }
 ];
 
+foodDatabase.push(...glovoFoodDatabase);
+
 // ═══════════════════════════════════════════════════
-// SERVICE FUNCTIONS (inchangées)
+// SERVICE FUNCTIONS
 // ═══════════════════════════════════════════════════
 
 export const getDailyNutritionLog = (dateStr) => {
@@ -628,13 +694,23 @@ export const deleteFoodFromLog = (dateStr, mealType, index) => {
   return dayLog;
 };
 
-export const addFoodToLog = (dateStr, mealType, foodItem, quantityGrams) => {
+export const getFoodUnitBaseAmount = (unit = '100g') => {
+  const match = String(unit).match(/(\d+(?:\.\d+)?)/);
+  return match ? parseFloat(match[1]) : 100;
+};
+
+export const getFoodQuantityUnit = (unit = '100g') => {
+  return String(unit).toLowerCase().includes('ml') ? 'ml' : 'g';
+};
+
+export const addFoodToLog = (dateStr, mealType, foodItem, quantityAmount) => {
   const dayLog = getDailyNutritionLog(dateStr);
-  const factor = quantityGrams / 100;
+  const factor = quantityAmount / getFoodUnitBaseAmount(foodItem.unit);
   
   const loggedItem = {
     name: foodItem.name,
-    quantity: quantityGrams,
+    quantity: quantityAmount,
+    unitLabel: getFoodQuantityUnit(foodItem.unit),
     calories: Math.round(foodItem.calories * factor),
     protein: parseFloat((foodItem.protein * factor).toFixed(1)),
     carbs: parseFloat((foodItem.carbs * factor).toFixed(1)),

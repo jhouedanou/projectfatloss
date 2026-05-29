@@ -6,11 +6,11 @@ import {
   Box,
   Typography
 } from '@mui/material';
-import { ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft, Bell, User, LogOut } from 'lucide-react';
 import './Header.css';
 import { getAssetPath } from '../../utils/paths';
 
-export default function Header({ onNotificationSettings, onBack }) {
+export default function Header({ onNotificationSettings, onBack, user, onAccountClick }) {
   const title = onBack ? 'Programme' : 'Project Fat Loss';
   const subtitle = onBack ? 'Retour a la vue semaine' : 'Coach entrainement';
 
@@ -61,6 +61,16 @@ export default function Header({ onNotificationSettings, onBack }) {
               aria-label="Parametres de notification"
             >
               <Bell size={19} strokeWidth={2.25} />
+            </IconButton>
+          )}
+          {onAccountClick && (
+            <IconButton
+              onClick={onAccountClick}
+              size="small"
+              className={`pfl-header-icon${user ? ' pfl-header-icon--auth' : ''}`}
+              aria-label={user ? 'Se deconnecter' : 'Se connecter'}
+            >
+              {user ? <LogOut size={19} strokeWidth={2.25} /> : <User size={19} strokeWidth={2.25} />}
             </IconButton>
           )}
         </Box>
