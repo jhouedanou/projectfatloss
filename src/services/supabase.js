@@ -5,27 +5,37 @@
  */
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Nettoie d'éventuels guillemets / espaces / retours ligne dans les secrets CI
+const clean = (v) => String(v ?? '').trim().replace(/^["']|["']$/g, '');
 
-// Permet à l'app de fonctionner en mode local si Supabase n'est pas configuré
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+const supabaseUrl = clean(import.meta.env.VITE_SUPABASE_URL);
+const supabaseAnonKey = clean(import.meta.env.VITE_SUPABASE_ANON_KEY);
 
-if (!isSupabaseConfigured) {
-  console.warn(
-    '[supabase] VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY manquant — ' +
-    'mode local uniquement (pas de synchronisation cloud).'
-  );
-}
+const isValidUrl = /^https?:\/\/.+/i.test(supabaseUrl);
 
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey, {
+let client = null;
+if (isValidUrl && supabaseAnonKey) {
+  try {
+    client = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true, // nécessaire pour le retour OAuth / magic link
       },
-    })
-  : null;
+    });
+  } catch (error) {
+    // Ne jamais crasher l'app à cause d'une config invalide → mode local
+    console.error('[supabase] createClient a échoué, mode local:', error?.message);
+    client = null;
+  }
+} else {
+  console.warn(
+    '[supabase] Config absente ou invalide ' +
+    `(url="${supabaseUrl}", key présente=${Boolean(supabaseAnonKey)}) — mode local uniquement.`
+  );
+}
 
+// true seulement si le client a réellement été créé
+export const isSupabaseConfigured = Boolean(client);
+export const supabase = client;
 export default supabase;
