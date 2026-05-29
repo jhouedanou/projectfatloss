@@ -18,12 +18,21 @@ const WEIGHT_HISTORY_KEY = 'weight_history_data';
 const USER_EXERCISES_KEY = 'user_custom_exercises';
 const CARDIO_KEY = 'cardio_sessions_data';
 const NUTRITION_KEY = 'pfl_nutrition_logs';
+const CUSTOM_FOODS_KEY = 'pfl_custom_foods';
 
 const getNutritionLogs = () => {
   try {
     return JSON.parse(localStorage.getItem(NUTRITION_KEY) || '{}');
   } catch {
     return {};
+  }
+};
+
+const getCustomFoods = () => {
+  try {
+    return JSON.parse(localStorage.getItem(CUSTOM_FOODS_KEY) || '[]');
+  } catch {
+    return [];
   }
 };
 
@@ -103,6 +112,38 @@ const nutritionToRow = (day, data, userId) => ({
   updated_at: new Date().toISOString(),
 });
 
+const customFoodToRow = (food, userId) => ({
+  user_id: userId,
+  entry_type: 'custom',
+  name: food?.name || 'Aliment personnalisé',
+  brand: food?.brand || null,
+  quantity: null,
+  unit: food?.unit || '100g',
+  calories: food?.calories ?? 0,
+  protein: food?.protein ?? 0,
+  carbs: food?.carbs ?? 0,
+  fat: food?.fat ?? 0,
+  fiber: food?.fiber ?? null,
+  sugar: food?.sugar ?? null,
+  sodium: food?.sodium ?? null,
+  meal_type: null,
+  log_day: null,
+  source_custom_id: null,
+});
+
+const rowToCustomFood = (r) => ({
+  remoteId: r.id,
+  name: r.name,
+  calories: Number(r.calories ?? 0),
+  protein: Number(r.protein ?? 0),
+  carbs: Number(r.carbs ?? 0),
+  fat: Number(r.fat ?? 0),
+  category: 'custom',
+  unit: r.unit || '100g',
+});
+
+const normalizeFoodName = (value) => String(value || '').trim().toLowerCase();
+
 // Fusion par id (les entrées locales priment en cas de conflit d'id identique)
 const mergeById = (local, remote) => {
   const map = new Map();
@@ -125,6 +166,7 @@ export const syncData = async () => {
     const weighIns = getWeightEntries();
     const customExercises = getUserExercises();
     const cardioSessions = getCardioSessions();
+    const customFoods = getCustomFoods();
 
     // Séances
     if (workouts.length) {
@@ -158,6 +200,26 @@ export const syncData = async () => {
         .from('nutrition_logs')
         .upsert(nutritionRows, { onConflict: 'user_id,day' });
       if (error) throw error;
+    }
+
+    // Aliments personnalisés : synchronisation par nom (insère ceux absents côté distant)
+    if (customFoods.length) {
+      const { data: existingCustoms, error: customSelErr } = await supabase
+        .from('user_food_entries')
+        .select('id,name')
+        .eq('user_id', user.id)
+        .eq('entry_type', 'custom');
+      if (customSelErr) throw customSelErr;
+
+      const knownNames = new Set((existingCustoms || []).map((r) => normalizeFoodName(r.name)));
+      const toInsertCustoms = customFoods
+        .filter((food) => !knownNames.has(normalizeFoodName(food.name)))
+        .map((food) => customFoodToRow(food, user.id));
+
+      if (toInsertCustoms.length) {
+        const { error } = await supabase.from('user_food_entries').insert(toInsertCustoms);
+        if (error) throw error;
+      }
     }
 
     // Exercices personnels : insère ceux qui n'existent pas encore (match par nom)
@@ -290,6 +352,114 @@ export const pushNutritionDay = async (day, data) => {
   }
 };
 
+/**
+ * Pousse un aliment personnalisé dans user_food_entries.
+ * Retourne la ligne créée (incluant son id distant) si disponible.
+ */
+export const pushCustomFoodEntry = async (food) => {
+  try {
+    const user = await requireUser();
+    if (!user) return null;
+
+    const payload = customFoodToRow(food, user.id);
+    const { data, error } = await supabase
+      .from('user_food_entries')
+      .insert(payload)
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.warn('[sync] pushCustomFoodEntry différé:', error?.message);
+    return null;
+  }
+};
+
+/**
+ * Enregistre un aliment ajouté à un repas.
+ */
+export const pushAddedFoodEntry = async ({ day, mealType, item, sourceCustomId = null }) => {
+  try {
+    const user = await requireUser();
+    if (!user) return null;
+
+    const payload = {
+      user_id: user.id,
+      entry_type: 'added',
+      name: item?.name || 'Aliment',
+      quantity: item?.quantity ?? null,
+      unit: item?.unit || item?.unitLabel || 'g',
+      calories: item?.calories ?? 0,
+      protein: item?.protein ?? 0,
+      carbs: item?.carbs ?? 0,
+      fat: item?.fat ?? 0,
+      meal_type: mealType,
+      log_day: day,
+      source_custom_id: sourceCustomId,
+    };
+
+    const { error } = await supabase.from('user_food_entries').insert(payload);
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.warn('[sync] pushAddedFoodEntry différé:', error?.message);
+    return false;
+  }
+};
+
+/**
+ * Supprime un aliment personnalisé distant.
+ */
+export const deleteRemoteCustomFoodEntry = async ({ remoteId, name }) => {
+  try {
+    const user = await requireUser();
+    if (!user) return;
+
+    if (remoteId) {
+      await supabase
+        .from('user_food_entries')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('entry_type', 'custom')
+        .eq('id', remoteId);
+      return;
+    }
+
+    await supabase
+      .from('user_food_entries')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('entry_type', 'custom')
+      .eq('name', name);
+  } catch (error) {
+    console.warn('[sync] deleteRemoteCustomFoodEntry différé:', error?.message);
+  }
+};
+
+/**
+ * Récupère les aliments personnalisés de l'utilisateur.
+ */
+export const fetchCustomFoodEntries = async () => {
+  try {
+    const user = await requireUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('user_food_entries')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('entry_type', 'custom')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map(rowToCustomFood);
+  } catch (error) {
+    console.warn('[sync] fetchCustomFoodEntries différé:', error?.message);
+    return [];
+  }
+};
+
 const customExerciseToRow = (ex, userId) => ({
   owner_id: userId,
   name: ex.name,
@@ -347,17 +517,19 @@ export const fetchSyncedData = async () => {
     const user = await requireUser();
     if (!user) return notReady();
 
-    const [workoutsRes, weighRes, cardioRes, nutritionRes] = await Promise.all([
+    const [workoutsRes, weighRes, cardioRes, nutritionRes, customFoodsRes] = await Promise.all([
       supabase.from('workouts').select('*').eq('user_id', user.id).order('date', { ascending: false }),
       supabase.from('weigh_ins').select('*').eq('user_id', user.id).order('date', { ascending: true }),
       supabase.from('cardio_sessions').select('*').eq('user_id', user.id).order('date', { ascending: false }),
       supabase.from('nutrition_logs').select('*').eq('user_id', user.id),
+      supabase.from('user_food_entries').select('*').eq('user_id', user.id).eq('entry_type', 'custom').order('created_at', { ascending: false }),
     ]);
 
     if (workoutsRes.error) throw workoutsRes.error;
     if (weighRes.error) throw weighRes.error;
     if (cardioRes.error) throw cardioRes.error;
     if (nutritionRes.error) throw nutritionRes.error;
+    if (customFoodsRes.error) throw customFoodsRes.error;
 
     // nutrition : reconstruit l'objet { [day]: { meals, calorieGoal } }
     const nutritionLogs = {};
@@ -372,6 +544,7 @@ export const fetchSyncedData = async () => {
         weightEntries: (weighRes.data || []).map(rowToWeigh),
         cardioSessions: (cardioRes.data || []).map(rowToCardio),
         nutritionLogs,
+        customFoods: (customFoodsRes.data || []).map(rowToCustomFood),
       },
       syncedAt: new Date().toISOString(),
     };
@@ -412,6 +585,21 @@ export const applySyncedData = (syncedData) => {
     if (syncedData.nutritionLogs && typeof syncedData.nutritionLogs === 'object') {
       const merged = { ...syncedData.nutritionLogs, ...getNutritionLogs() };
       localStorage.setItem(NUTRITION_KEY, JSON.stringify(merged));
+    }
+
+    if (Array.isArray(syncedData.customFoods)) {
+      const localCustoms = getCustomFoods();
+      const map = new Map();
+
+      syncedData.customFoods.forEach((food) => {
+        map.set(normalizeFoodName(food.name), food);
+      });
+
+      localCustoms.forEach((food) => {
+        map.set(normalizeFoodName(food.name), food);
+      });
+
+      localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(Array.from(map.values())));
     }
 
     return true;

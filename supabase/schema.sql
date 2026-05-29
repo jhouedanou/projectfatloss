@@ -197,3 +197,46 @@ alter table public.nutrition_logs enable row level security;
 drop policy if exists "nutrition_all_own" on public.nutrition_logs;
 create policy "nutrition_all_own" on public.nutrition_logs
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- ----------------------------------------------------------------------------
+-- user_food_entries : aliments personnalisés + aliments ajoutés par l'utilisateur
+-- entry_type = 'custom' (catalogue perso) | 'added' (aliment réellement ajouté)
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_food_entries (
+  id                 uuid primary key default gen_random_uuid(),
+  user_id            uuid not null references auth.users (id) on delete cascade,
+  entry_type         text not null check (entry_type in ('custom', 'added')),
+  name               text not null,
+  brand              text,
+  quantity           numeric,
+  unit               text,
+  calories           numeric,
+  protein            numeric,
+  carbs              numeric,
+  fat                numeric,
+  fiber              numeric,
+  sugar              numeric,
+  sodium             numeric,
+  meal_type          text check (meal_type in ('breakfast', 'lunch', 'dinner', 'snacks')),
+  log_day            date,
+  source_custom_id   uuid references public.user_food_entries (id) on delete set null,
+  created_at         timestamptz not null default now(),
+  updated_at         timestamptz not null default now(),
+  check (
+    (entry_type = 'custom' and meal_type is null and log_day is null)
+    or
+    (entry_type = 'added' and meal_type is not null and log_day is not null)
+  )
+);
+
+create index if not exists user_food_entries_user_created_idx
+  on public.user_food_entries (user_id, created_at desc);
+
+create index if not exists user_food_entries_user_day_idx
+  on public.user_food_entries (user_id, log_day desc);
+
+alter table public.user_food_entries enable row level security;
+
+drop policy if exists "user_food_entries_all_own" on public.user_food_entries;
+create policy "user_food_entries_all_own" on public.user_food_entries
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());

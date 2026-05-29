@@ -101,6 +101,23 @@ const CalorieCounter = () => {
     setTempCalorieGoal(dailyLog.calorieGoal || 2000);
   }, [selectedDate]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    import('../services/SyncService')
+      .then(({ fetchCustomFoodEntries }) => fetchCustomFoodEntries())
+      .then((remoteFoods) => {
+        if (!isMounted || !Array.isArray(remoteFoods) || remoteFoods.length === 0) return;
+        setCustomFoods(remoteFoods);
+        localStorage.setItem('pfl_custom_foods', JSON.stringify(remoteFoods));
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Handle date shifts
   const changeDate = (days) => {
     const date = new Date(selectedDate);
@@ -126,6 +143,19 @@ const CalorieCounter = () => {
     const updatedLog = addFoodToLog(selectedDate, activeMealType, foodItem, quantity);
     setLog(updatedLog);
     setSummary(getNutritionSummary(selectedDate));
+
+    const mealItems = updatedLog?.meals?.[activeMealType] || [];
+    const lastLoggedItem = mealItems[mealItems.length - 1];
+    if (lastLoggedItem) {
+      import('../services/SyncService')
+        .then(({ pushAddedFoodEntry }) => pushAddedFoodEntry({
+          day: selectedDate,
+          mealType: activeMealType,
+          item: lastLoggedItem,
+          sourceCustomId: foodItem?.remoteId || null,
+        }))
+        .catch(() => {});
+    }
     
     // Reset states and close modal
     setSelectedFood(null);
@@ -175,6 +205,18 @@ const CalorieCounter = () => {
     setCustomFoods(updatedCustomList);
     localStorage.setItem('pfl_custom_foods', JSON.stringify(updatedCustomList));
 
+    import('../services/SyncService')
+      .then(({ pushCustomFoodEntry }) => pushCustomFoodEntry(newFood))
+      .then((remoteRow) => {
+        if (!remoteRow?.id) return;
+        setCustomFoods((prev) => {
+          const next = prev.map((item, idx) => idx === 0 ? { ...item, remoteId: remoteRow.id } : item);
+          localStorage.setItem('pfl_custom_foods', JSON.stringify(next));
+          return next;
+        });
+      })
+      .catch(() => {});
+
     // Auto select it in search list
     setSelectedFood(newFood);
     setQuantity(getFoodDefaultQuantity(newFood.unit));
@@ -191,14 +233,26 @@ const CalorieCounter = () => {
   };
 
   // Delete custom food
-  const handleDeleteCustomFood = (indexToDelete, e) => {
+  const handleDeleteCustomFood = (foodToDelete, e) => {
     e.stopPropagation();
-    const updatedList = customFoods.filter((_, idx) => idx !== indexToDelete);
+    const updatedList = customFoods.filter((food) => {
+      if (foodToDelete?.remoteId && food?.remoteId) {
+        return food.remoteId !== foodToDelete.remoteId;
+      }
+      return food.name !== foodToDelete.name;
+    });
     setCustomFoods(updatedList);
     localStorage.setItem('pfl_custom_foods', JSON.stringify(updatedList));
-    if (selectedFood && selectedFood.name === customFoods[indexToDelete].name) {
+    if (selectedFood && selectedFood.name === foodToDelete?.name) {
       setSelectedFood(null);
     }
+
+    import('../services/SyncService')
+      .then(({ deleteRemoteCustomFoodEntry }) => deleteRemoteCustomFoodEntry({
+        remoteId: foodToDelete?.remoteId || null,
+        name: foodToDelete?.name || null,
+      }))
+      .catch(() => {});
   };
 
   // Filter foods (combines database & custom foods)
@@ -468,7 +522,7 @@ const CalorieCounter = () => {
                     {food.category === 'custom' && (
                       <button 
                         className="delete-custom-food-row" 
-                        onClick={(e) => handleDeleteCustomFood(idx, e)}
+                        onClick={(e) => handleDeleteCustomFood(food, e)}
                         title="Supprimer cet aliment"
                       >
                         <Trash2 size={14} />
