@@ -7,6 +7,14 @@ import {
   getCardioStats,
 } from '../services/CardioStorage';
 import { getWeightHistory } from '../services/WeightStorage';
+import GoogleFitSyncButton from './GoogleFitSyncButton';
+import GoogleFitItemButton from './GoogleFitItemButton';
+import {
+  getUnsyncedCardio,
+  syncAllCardio,
+  syncCardioToGoogleFit,
+  isSyncedWithGoogleFit
+} from '../services/GoogleFitSync';
 import './CardioTracker.css';
 
 // MET approximatifs : marche ~3.5, vélo ~7.5
@@ -129,6 +137,13 @@ const CardioTracker = () => {
         </button>
       </form>
 
+      <GoogleFitSyncButton
+        getUnsyncedCount={() => getUnsyncedCardio().length}
+        onSync={syncAllCardio}
+        noun="séance cardio"
+        nounPlural="séances cardio"
+      />
+
       <div className="cardio-list">
         {sessions.length === 0 && <p className="cardio-empty">Aucune séance enregistrée.</p>}
         {sessions.map((s) => (
@@ -147,6 +162,11 @@ const CardioTracker = () => {
                 {s.calories != null && <span className="cardio-cal">{Math.round(s.calories)} kcal</span>}
               </div>
             </div>
+            <GoogleFitItemButton
+              synced={isSyncedWithGoogleFit('cardio', s.id)}
+              onSync={() => syncCardioToGoogleFit(s)}
+              title="Synchroniser cette séance cardio avec Google Fit"
+            />
             <button className="cardio-del" onClick={() => handleDelete(s.id)} aria-label="Supprimer">
               <Trash2 size={16} />
             </button>
