@@ -546,35 +546,35 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 7: COMPLEXES HALTÈRES (Haute Intensité)',
+    title: 'JOUR 7: CORPS COMPLET HALTÈRES (Haute Intensité)',
     isRestDay: false,
     exercises: [
       {
-        name: 'Complexe Haltères (Soulevé de terre + Rowing)',
-        sets: '5 × 10 (tempo 3-1-3)',
+        name: 'Rowing haltères buste penché',
+        sets: '5 × 12',
         equip: 'Haltères 15 kg',
-        desc: "Enchaînez sans poser les haltères : 1 Soulevé de terre puis 1 Rowing. Répétez 10 fois. Exigeant pour le dos et les jambes.",
-        caloriesPerSet: [25, 30],
+        desc: "Buste penché à 45°, dos droit, tirez les haltères vers les hanches en serrant les omoplates, puis redescendez lentement. Travail du dos.",
+        caloriesPerSet: [20, 25],
         totalSets: 5,
-        nbRep: 10,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Dumbbell Complex 1',
-          muscleGroups: ['back', 'legs']
+          name: 'Bent-over Dumbbell Row',
+          muscleGroups: ['back', 'biceps']
         }
       },
       {
-        name: 'Complexe Haltères (Fente + Développé épaules)',
-        sets: '4 × 10/jambe',
+        name: 'Développé épaules haltères',
+        sets: '4 × 12',
         equip: 'Haltères 10 kg',
-        desc: "Faites une fente, et en remontant, développez les haltères au-dessus de la tête. Travail complet du corps.",
-        caloriesPerSet: [25, 30],
-        totalSets: 5,
-        nbRep: 10,
+        desc: "Assis ou debout, haltères au niveau des épaules, poussez vers le plafond sans verrouiller brutalement les coudes, puis revenez. Travail des épaules.",
+        caloriesPerSet: [16, 20],
+        totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Dumbbell Complex 2',
-          muscleGroups: ['shoulders', 'legs']
+          name: 'Dumbbell Shoulder Press',
+          muscleGroups: ['shoulders', 'triceps']
         }
       },
       {
@@ -1155,49 +1155,49 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 14: COMPLEXES BARRE (Haute Intensité)',
+    title: 'JOUR 14: CORPS COMPLET BARRE (Haute Intensité)',
     isRestDay: false,
     exercises: [
       {
-        name: 'Complexe Barre (Soulevé de terre + Rowing)',
-        sets: '4 × 8',
+        name: 'Rowing buste penché barre',
+        sets: '4 × 10',
         equip: 'Barre 30 kg',
-        desc: "Sans poser la barre : 8 Soulevés de terre suivis immédiatement de 8 Rowings buste penché. Brûlure garantie.",
-        caloriesPerSet: [30, 35],
+        desc: "Buste penché à 45°, dos droit, tirez la barre vers le nombril en serrant les omoplates, puis redescendez lentement. Travail du dos.",
+        caloriesPerSet: [22, 27],
         totalSets: 4,
-        nbRep: 8,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Barbell Complex 1',
-          muscleGroups: ['back', 'legs']
+          name: 'Bent Over Barbell Row',
+          muscleGroups: ['back', 'biceps']
         }
       },
       {
-        name: 'Complexe Barre (Épaulé + Front Squat + Push Press)',
-        sets: '4 × 8',
+        name: 'Squat avant barre',
+        sets: '4 × 10',
         equip: 'Barre 30 kg',
-        desc: "1 Épaulé (Clean), 1 Squat avant, puis 1 Push Press au-dessus de la tête. Répétez 8 fois. Redoutable.",
-        caloriesPerSet: [35, 40],
+        desc: "Barre posée sur le haut des pectoraux, coudes hauts, descendez en squat en gardant le buste droit, puis remontez. Travail des cuisses.",
+        caloriesPerSet: [22, 27],
         totalSets: 4,
-        nbRep: 8,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Barbell Complex 2',
-          muscleGroups: ['full_body']
+          name: 'Front Squat',
+          muscleGroups: ['quadriceps', 'glutes']
         }
       },
       {
-        name: 'Thrusters Haltères',
-        sets: '5 × 12 (tempo 3-1-3)',
-        equip: 'Haltères 10 kg',
-        desc: "Squat complet suivi d'un développé épaules dans le même mouvement fluide.",
-        caloriesPerSet: [20, 25],
+        name: 'Goblet squat',
+        sets: '5 × 15',
+        equip: 'Haltère 12 kg',
+        desc: "Squat profond avec un haltère tenu verticalement contre la poitrine, dos droit. Descendez puis remontez de façon contrôlée. Travail des cuisses.",
+        caloriesPerSet: [18, 23],
         totalSets: 5,
-        nbRep: 12,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Dumbbell Thrusters',
-          muscleGroups: ['quadriceps', 'shoulders']
+          name: 'Goblet Squat',
+          muscleGroups: ['quadriceps', 'glutes']
         }
       },
       {
@@ -1767,49 +1767,49 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 21: COMPLEXES MIXTES (Haute Intensité)',
+    title: 'JOUR 21: CORPS COMPLET (Haute Intensité)',
     isRestDay: false,
     exercises: [
       {
-        name: 'Complexe Mixte (Soulevé de terre barre + Rowing haltères)',
-        sets: '4 × 8',
-        equip: 'Barre 30 kg / Haltères 15 kg',
-        desc: "Enchaînez 8 soulevés de terre à la barre puis immédiatement 8 rowings avec haltères. Combinaison mixte pour le dos et les jambes, sans temps de repos entre les deux exercices.",
-        caloriesPerSet: [28, 33],
+        name: 'Soulevé de terre barre',
+        sets: '4 × 10',
+        equip: 'Barre 30 kg',
+        desc: "Pieds sous la barre, dos droit, poussez dans les jambes pour vous redresser jusqu'à l'extension complète, puis redescendez la barre en contrôlant. Travail du dos et des jambes.",
+        caloriesPerSet: [22, 27],
         totalSets: 4,
-        nbRep: 8,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Mixed Complex - Deadlift & Row',
+          name: 'Deadlift',
           muscleGroups: ['back', 'legs', 'hamstrings']
         }
       },
       {
-        name: 'Complexe Corps Complet (Squat + Push Press + Rowing)',
-        sets: '4 × 8',
+        name: 'Squat barre',
+        sets: '4 × 10',
         equip: 'Barre 30 kg',
-        desc: "Sans poser la barre : 1 Squat barre → 1 Push Press au-dessus de la tête → 1 Rowing buste penché. Répétez 8 fois. Le circuit le plus complet du programme.",
-        caloriesPerSet: [33, 38],
+        desc: "Barre sur le haut du dos, descendez en squat en gardant le dos droit et les talons au sol, puis remontez. Exercice de base pour les cuisses et les fessiers.",
+        caloriesPerSet: [22, 27],
         totalSets: 4,
-        nbRep: 8,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Full Body Barbell Complex',
-          muscleGroups: ['full_body']
+          name: 'Back Squat',
+          muscleGroups: ['quadriceps', 'glutes']
         }
       },
       {
-        name: 'Thrusters Barre',
-        sets: '5 × 10 (tempo 3-1-3)',
+        name: 'Développé militaire barre',
+        sets: '5 × 10',
         equip: 'Barre 20 kg',
-        desc: "Squat complet avec la barre sur les épaules, puis poussez la barre explosive au-dessus de la tête en remontant. L'enchaînement squat-développé brûle massivement des calories.",
-        caloriesPerSet: [22, 27],
+        desc: "Debout, barre au niveau des clavicules, poussez la barre au-dessus de la tête jusqu'à tendre les bras, puis revenez. Travail des épaules et des triceps.",
+        caloriesPerSet: [18, 22],
         totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Barbell Thrusters',
-          muscleGroups: ['quadriceps', 'shoulders', 'triceps']
+          name: 'Military Press',
+          muscleGroups: ['shoulders', 'triceps']
         }
       },
       {
