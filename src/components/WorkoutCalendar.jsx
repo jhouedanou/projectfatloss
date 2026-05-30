@@ -3,6 +3,14 @@ import Calendar from 'react-calendar';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
+import GoogleFitSyncButton from './GoogleFitSyncButton';
+import GoogleFitItemButton from './GoogleFitItemButton';
+import {
+  getUnsyncedWorkouts,
+  syncAllWorkouts,
+  syncWorkoutToGoogleFit,
+  isSyncedWithGoogleFit
+} from '../services/GoogleFitSync';
 
 // Importez le CSS par défaut de react-calendar
 import 'react-calendar/dist/Calendar.css';
@@ -72,7 +80,14 @@ function WorkoutCalendar() {
   return (
     <div className="workout-calendar-container workout-calendar-centered">
       <h2 className="calendar-title">Calendrier d'Entraînement</h2>
-      
+
+      <GoogleFitSyncButton
+        getUnsyncedCount={() => getUnsyncedWorkouts().length}
+        onSync={syncAllWorkouts}
+        noun="séance"
+        nounPlural="séances"
+      />
+
       <Calendar
         onChange={setValue}
         value={value}
@@ -90,6 +105,11 @@ function WorkoutCalendar() {
               <div className="workout-header">
                 <span className="workout-title">{workout.title}</span>
                 <span className="workout-time">{format(new Date(workout.date), 'HH:mm', { locale: fr })}</span>
+                <GoogleFitItemButton
+                  synced={isSyncedWithGoogleFit('workout', workout.id)}
+                  onSync={() => syncWorkoutToGoogleFit(workout)}
+                  title="Synchroniser cette séance avec Google Fit"
+                />
               </div>
               
               <div className="workout-stats">
