@@ -53,7 +53,7 @@ export function isSyncedWithGoogleFit(category, id) {
 export async function syncWorkoutToGoogleFit(workout) {
   const endTime = new Date(workout.date).getTime();
   await GoogleFitService.addActivity({
-    activityType: 97, // Strength Training
+    activityType: 80, // Strength training → affiché « Musculation » dans Google Fit
     name: `Project Fat Loss - ${workout.title || 'Entraînement'}`,
     description: `Séance de musculation. Poids total soulevé : ${workout.weightLifted || 0} kg.`,
     startTime: endTime - DEFAULT_WORKOUT_DURATION_MS,
