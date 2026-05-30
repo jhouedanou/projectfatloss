@@ -6,6 +6,7 @@
 import GoogleFitService from './GoogleFitService';
 import { getWorkoutHistory } from './WorkoutStorage';
 import { getWeightHistory } from './WeightStorage';
+import { getCardioSessions } from './CardioStorage';
 import { getNutritionSummary } from '../data/foodDatabase';
 
 const SYNCED_KEY = 'pfl_googlefit_synced';
@@ -53,7 +54,7 @@ export function isSyncedWithGoogleFit(category, id) {
 export async function syncWorkoutToGoogleFit(workout) {
   const endTime = new Date(workout.date).getTime();
   await GoogleFitService.addActivity({
-    activityType: 97, // Strength Training
+    activityType: 80, // Strength training → affiché « Musculation » dans Google Fit
     name: `Project Fat Loss - ${workout.title || 'Entraînement'}`,
     description: `Séance de musculation. Poids total soulevé : ${workout.weightLifted || 0} kg.`,
     startTime: endTime - DEFAULT_WORKOUT_DURATION_MS,
@@ -66,6 +67,22 @@ export async function syncWorkoutToGoogleFit(workout) {
 export async function syncWeightToGoogleFit(record) {
   await GoogleFitService.addWeight(record.weight, new Date(record.date).getTime());
   markSynced('weight', record.id);
+}
+
+export async function syncCardioToGoogleFit(session) {
+  const endTime = new Date(session.date).getTime();
+  // duration est en minutes ; défaut 30 min si non renseignée.
+  const durationMs = (session.duration ? session.duration : 30) * 60 * 1000;
+  const isBike = session.type === 'bike';
+  await GoogleFitService.addActivity({
+    activityType: isBike ? 1 : 7, // 1 = Vélo, 7 = Marche
+    name: `Project Fat Loss - ${isBike ? 'Vélo' : 'Marche'}`,
+    description: `Séance cardio${session.distance ? ` — ${session.distance} km` : ''}.`,
+    startTime: endTime - durationMs,
+    duration: durationMs,
+    calories: session.calories || 0
+  });
+  markSynced('cardio', session.id);
 }
 
 export async function syncNutritionDayToGoogleFit(dateStr) {
@@ -103,6 +120,10 @@ export function getUnsyncedWeights() {
   return getWeightHistory().filter(r => !isSyncedWithGoogleFit('weight', r.id));
 }
 
+export function getUnsyncedCardio() {
+  return getCardioSessions().filter(s => !isSyncedWithGoogleFit('cardio', s.id));
+}
+
 export async function syncAllWorkouts() {
   return syncMany(
     getUnsyncedWorkouts(),
@@ -116,6 +137,14 @@ export async function syncAllWeights() {
     getUnsyncedWeights(),
     syncWeightToGoogleFit,
     r => `${r.weight} kg`
+  );
+}
+
+export async function syncAllCardio() {
+  return syncMany(
+    getUnsyncedCardio(),
+    syncCardioToGoogleFit,
+    s => `${s.type === 'bike' ? 'Vélo' : 'Marche'} ${s.duration || ''} min`
   );
 }
 
