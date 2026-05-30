@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import googleFitIcon from '../icons/google-fit.svg';
+import GoogleFitIcon from './GoogleFitIcon';
 import './GoogleFitSync.css';
 
 /**
@@ -47,7 +47,7 @@ const GoogleFitSyncButton = ({ getUnsyncedCount, onSync, noun = 'élément', nou
         onClick={handleClick}
         disabled={syncing || count === 0}
       >
-        <img src={googleFitIcon} alt="Google Fit" width={20} height={20} />
+        <GoogleFitIcon size={20} />
         <span>{label}</span>
       </button>
       {syncing && <div className="gfit-sync-progress"><div className="gfit-sync-bar" /></div>}
