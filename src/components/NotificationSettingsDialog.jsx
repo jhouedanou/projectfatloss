@@ -54,11 +54,10 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
 
       // Vérifier si Google Fit est déjà connecté
       try {
-        if (GoogleFitService.isSignedIn()) {
-          setIsFitConnected(true);
-        }
+        setIsFitConnected(GoogleFitService.isSignedIn());
       } catch (e) {
         console.log('Google Fit non initialisé au montage');
+        setIsFitConnected(false);
       }
     }
   }, [open]);
