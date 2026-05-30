@@ -4,18 +4,23 @@ import './GoogleFitSync.css';
 
 /**
  * Petit bouton de synchronisation Google Fit pour un élément individuel.
+ * Composant présentationnel : la gestion de l'erreur est déléguée au parent
+ * via `onError` (l'erreur est aussi reflétée dans le tooltip du bouton).
  * @param {boolean} synced - true si déjà synchronisé (état initial).
  * @param {() => Promise<void>} onSync - lance la synchro de l'élément.
+ * @param {(error: Error) => void} [onError] - notifié en cas d'échec.
  * @param {boolean} allowResync - si true, le bouton reste cliquable après succès
  *   (utile pour la nutrition d'une journée encore modifiable).
  */
-const GoogleFitItemButton = ({ synced = false, onSync, allowResync = false, title = 'Synchroniser avec Google Fit' }) => {
+const GoogleFitItemButton = ({ synced = false, onSync, onError, allowResync = false, title = 'Synchroniser avec Google Fit' }) => {
   const [state, setState] = useState(synced ? 'done' : 'idle'); // idle | loading | done | error
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleClick = async (e) => {
     e.stopPropagation();
     if (state === 'loading' || (state === 'done' && !allowResync)) return;
     setState('loading');
+    setErrorMsg('');
     try {
       await onSync();
       setState('done');
@@ -25,9 +30,16 @@ const GoogleFitItemButton = ({ synced = false, onSync, allowResync = false, titl
     } catch (err) {
       console.error(err);
       setState('error');
-      alert(`Erreur de synchronisation Google Fit : ${err.message || err}`);
+      setErrorMsg(err.message || String(err));
+      if (typeof onError === 'function') onError(err);
     }
   };
+
+  const tooltip = state === 'done'
+    ? 'Synchronisé avec Google Fit'
+    : state === 'error'
+      ? `Échec : ${errorMsg}`
+      : title;
 
   return (
     <button
@@ -35,7 +47,7 @@ const GoogleFitItemButton = ({ synced = false, onSync, allowResync = false, titl
       className={`gfit-item-btn gfit-item-${state}`}
       onClick={handleClick}
       disabled={state === 'loading' || (state === 'done' && !allowResync)}
-      title={state === 'done' ? 'Synchronisé avec Google Fit' : title}
+      title={tooltip}
       aria-label={title}
     >
       {state === 'loading'

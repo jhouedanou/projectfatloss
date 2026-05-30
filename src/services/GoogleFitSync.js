@@ -9,23 +9,38 @@ import { getWeightHistory } from './WeightStorage';
 import { getNutritionSummary } from '../data/foodDatabase';
 
 const SYNCED_KEY = 'pfl_googlefit_synced';
+const NUTRITION_LOGS_KEY = 'pfl_nutrition_logs';
 
 // Durée par défaut d'une séance enregistrée depuis l'historique (45 min).
 const DEFAULT_WORKOUT_DURATION_MS = 45 * 60 * 1000;
 
-function getSyncedMap() {
+// Accès localStorage protégé pour les contextes non-navigateur (SSR, tests).
+function getStorage() {
+  if (typeof window === 'undefined' || !window.localStorage) return null;
+  return window.localStorage;
+}
+
+function readJSON(key, fallback) {
+  const storage = getStorage();
+  if (!storage) return fallback;
   try {
-    return JSON.parse(localStorage.getItem(SYNCED_KEY) || '{}');
+    return JSON.parse(storage.getItem(key) || JSON.stringify(fallback));
   } catch {
-    return {};
+    return fallback;
   }
 }
 
+function getSyncedMap() {
+  return readJSON(SYNCED_KEY, {});
+}
+
 function markSynced(category, id) {
+  const storage = getStorage();
+  if (!storage) return;
   const map = getSyncedMap();
   if (!map[category]) map[category] = {};
   map[category][String(id)] = Date.now();
-  localStorage.setItem(SYNCED_KEY, JSON.stringify(map));
+  storage.setItem(SYNCED_KEY, JSON.stringify(map));
 }
 
 export function isSyncedWithGoogleFit(category, id) {
@@ -65,7 +80,7 @@ export async function syncNutritionDayToGoogleFit(dateStr) {
 
 // Exécute `syncOne` sur chaque élément non encore synchronisé.
 // Retourne { synced, failed, details }.
-async function syncMany(items, syncOne, getId, getLabel) {
+async function syncMany(items, syncOne, getLabel) {
   const result = { synced: 0, failed: 0, details: [] };
   for (const item of items) {
     try {
@@ -92,7 +107,6 @@ export async function syncAllWorkouts() {
   return syncMany(
     getUnsyncedWorkouts(),
     syncWorkoutToGoogleFit,
-    w => w.id,
     w => `${w.title || 'Entraînement'} (${w.displayDate || ''})`
   );
 }
@@ -101,17 +115,12 @@ export async function syncAllWeights() {
   return syncMany(
     getUnsyncedWeights(),
     syncWeightToGoogleFit,
-    r => r.id,
     r => `${r.weight} kg`
   );
 }
 
 function getNutritionLogDates() {
-  try {
-    return Object.keys(JSON.parse(localStorage.getItem('pfl_nutrition_logs') || '{}'));
-  } catch {
-    return [];
-  }
+  return Object.keys(readJSON(NUTRITION_LOGS_KEY, {}));
 }
 
 // Jours nutritionnels enregistrés (avec au moins une calorie) non encore synchronisés.
@@ -125,7 +134,6 @@ export async function syncAllNutritionDays() {
   return syncMany(
     getUnsyncedNutritionDays(),
     syncNutritionDayToGoogleFit,
-    d => d,
     d => d
   );
 }
