@@ -56,6 +56,7 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
       try {
         setIsFitConnected(GoogleFitService.isSignedIn());
       } catch (e) {
+        setIsFitConnected(false);
         console.log('Google Fit non initialisé au montage');
         setIsFitConnected(false);
       }

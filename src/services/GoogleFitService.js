@@ -90,11 +90,16 @@ class GoogleFitService {
 
       const existing = document.querySelector(`script[src="${src}"]`);
       if (existing) {
-        if (existing.dataset.loaded === 'true') {
+        if (
+          existing.dataset.loaded === 'true' ||
+          (src === GIS_SRC && !!window.google?.accounts?.oauth2) ||
+          existing.readyState === 'complete' ||
+          existing.readyState === 'loaded'
+        ) {
           resolve();
         } else {
-          existing.addEventListener('load', () => resolve());
-          existing.addEventListener('error', () => reject(new Error(`Échec du chargement du script ${src}`)));
+          existing.addEventListener('load', () => resolve(), { once: true });
+          existing.addEventListener('error', () => reject(new Error(`Échec du chargement du script ${src}`)), { once: true });
         }
         return;
       }
@@ -128,12 +133,15 @@ class GoogleFitService {
     return new Promise((resolve, reject) => {
       this.tokenClient.callback = (response) => {
         if (response.error) {
-          reject(new Error(`Erreur d'autorisation Google (${response.error}). Vérifiez que l'origine du site est autorisée dans la console Google Cloud.`));
+          const originHint = response.error === 'origin_mismatch'
+            ? ' Vérifiez que l\'origine du site est autorisée dans la console Google Cloud.'
+            : '';
+          reject(new Error(`Erreur d'autorisation Google (${response.error}).${originHint}`));
           return;
         }
         this.accessToken = response.access_token;
         // expires_in est en secondes ; on garde une marge de 60 s.
-        const ttl = (response.expires_in || 3600) - 60;
+        const ttl = Math.max(0, (response.expires_in || 3600) - 60);
         this.tokenExpiresAt = Date.now() + ttl * 1000;
         resolve(this.accessToken);
       };
