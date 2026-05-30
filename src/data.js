@@ -2361,56 +2361,70 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 28: DÉFI FINAL (Corps Complet)',
+    title: 'JOUR 28: SÉANCE FINALE (Haut du Corps & Abdos)',
     isRestDay: false,
     exercises: [
       {
-        name: 'Complexe Final (Épaulé + Front Squat + Push Press + Fente)',
-        sets: '4 × 8',
-        equip: 'Barre 30 kg',
-        desc: "Le complexe ultime pour conclure le programme : Épaulé de terre → Front Squat → Push Press → Fente arrière. Ne posez pas la barre entre les mouvements. Donnez tout ce qu'il vous reste.",
-        caloriesPerSet: [38, 45],
-        totalSets: 4,
-        nbRep: 8,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Final Barbell Complex',
-          muscleGroups: ['full_body']
-        }
-      },
-      {
-        name: 'Complexe Haltères Final (Rowing + Curl + Développé épaules)',
-        sets: '5 × 10 (tempo 3-1-3)',
+        name: 'Développé Couché Haltères',
+        sets: '4 × 12',
         equip: 'Haltères 15 kg',
-        desc: "Sans poser les haltères : 10 Rowings buste penché → 10 Curls biceps → 10 Développés épaules. Circuit de finition complet pour le haut du corps.",
-        caloriesPerSet: [28, 33],
-        totalSets: 5,
-        nbRep: 10,
+        desc: "Allongé sur le banc, haltères au niveau de la poitrine, poussez vers le haut jusqu'à tendre les bras puis revenez lentement. Mouvement simple pour les pectoraux.",
+        caloriesPerSet: [18, 22],
+        totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Dumbbell Final Complex',
-          muscleGroups: ['back', 'biceps', 'shoulders']
+          name: 'Dumbbell Bench Press',
+          muscleGroups: ['chest', 'triceps']
         }
       },
       {
-        name: 'Burpees avec Haltères',
-        sets: '5 × 10 (tempo 3-1-3)',
-        equip: 'Haltères 10 kg',
-        desc: "Tenez des haltères légers, descendez en position de pompe, remontez et enchaînez immédiatement un développé épaules explosif. La version ultime du burpee pour finir le programme en apothéose.",
-        caloriesPerSet: [30, 35],
-        totalSets: 5,
-        nbRep: 10,
+        name: 'Rowing Haltères Buste Penché',
+        sets: '4 × 12',
+        equip: 'Haltères 15 kg',
+        desc: "Buste penché à 45°, dos bien droit, tirez les haltères vers les hanches en serrant les omoplates, puis redescendez lentement. Travail du dos.",
+        caloriesPerSet: [18, 22],
+        totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Dumbbell Burpees',
-          muscleGroups: ['full_body']
+          name: 'Bent-over Dumbbell Row',
+          muscleGroups: ['back', 'biceps']
+        }
+      },
+      {
+        name: 'Développé Épaules Haltères',
+        sets: '4 × 12',
+        equip: 'Haltères 10 kg',
+        desc: "Assis ou debout, haltères au niveau des épaules, poussez vers le plafond sans verrouiller brutalement les coudes, puis revenez. Travail des épaules.",
+        caloriesPerSet: [16, 20],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Shoulder Press',
+          muscleGroups: ['shoulders', 'triceps']
+        }
+      },
+      {
+        name: 'Curl Biceps Haltères',
+        sets: '4 × 12',
+        equip: 'Haltères 10 kg',
+        desc: "Bras le long du corps, fléchissez les coudes pour monter les haltères vers les épaules, puis redescendez lentement et de façon contrôlée. Travail des biceps.",
+        caloriesPerSet: [12, 16],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Biceps Curl',
+          muscleGroups: ['biceps']
         }
       },
       {
         name: 'Crunchs',
         sets: '4 × 25',
         equip: 'Poids du corps',
-        desc: "4 séries de 25 répétitions pour clôturer le programme. Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol. Vous avez terminé les 28 jours.",
+        desc: "Allongé sur le dos, genoux fléchis, contractez les abdominaux pour décoller les épaules du sol, puis redescendez lentement. 4 séries de 25 répétitions pour clôturer le programme.",
         caloriesPerSet: [10, 13],
         totalSets: 4,
         nbRep: 25,
