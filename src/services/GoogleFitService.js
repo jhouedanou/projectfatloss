@@ -18,6 +18,33 @@ const SCOPES = [
 
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
 
+// Erreur d'appel à l'API Fitness, porteuse du code HTTP pour un test fiable
+// (plutôt qu'un parsing de chaîne).
+class GoogleFitApiError extends Error {
+  constructor(message, status, body) {
+    super(message);
+    this.name = 'GoogleFitApiError';
+    this.status = status;
+    this.body = body;
+  }
+}
+
+// Construit un message d'erreur concis et lisible à partir d'une réponse d'erreur
+// de l'API (qui renvoie souvent un gros JSON), pour l'affichage utilisateur.
+function describeApiError(status, rawBody) {
+  let message;
+  try {
+    const parsed = JSON.parse(rawBody);
+    message = parsed?.error?.message || parsed?.error_description || parsed?.error;
+  } catch {
+    // Le corps n'est pas du JSON : on le garde tel quel s'il est court.
+  }
+  if (!message) {
+    message = rawBody && rawBody.length <= 200 ? rawBody : `Erreur HTTP ${status}`;
+  }
+  return `Google Fit (${status}) : ${message}`;
+}
+
 class GoogleFitService {
   constructor() {
     this.tokenClient = null;
@@ -30,7 +57,7 @@ class GoogleFitService {
     if (this.isInitialized) return;
 
     try {
-      await this.loadScript(GIS_SRC);
+      await this.loadScript(GIS_SRC, () => !!(window.google && window.google.accounts && window.google.accounts.oauth2));
 
       if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
         throw new Error('Google Identity Services indisponible (script non chargé). Vérifiez votre connexion réseau ou un bloqueur de scripts.');
@@ -50,8 +77,17 @@ class GoogleFitService {
     }
   }
 
-  loadScript(src) {
+  // Charge un script externe. `isReady` (optionnel) est un prédicat indiquant que
+  // la lib est déjà disponible : il évite tout blocage si le script a été injecté
+  // ailleurs (sans data-loaded) et a déjà fini de charger — l'événement `load`
+  // ne se redéclenchant pas dans ce cas.
+  loadScript(src, isReady) {
     return new Promise((resolve, reject) => {
+      if (typeof isReady === 'function' && isReady()) {
+        resolve();
+        return;
+      }
+
       const existing = document.querySelector(`script[src="${src}"]`);
       if (existing) {
         if (existing.dataset.loaded === 'true') {
@@ -144,14 +180,23 @@ class GoogleFitService {
       });
     } catch (error) {
       // 409 Conflict = source déjà existante, ce qui est attendu.
-      if (!/\b409\b/.test(error.message)) throw error;
+      if (error.status !== 409) throw error;
     }
+  }
+
+  // Convertit des millisecondes en nanosecondes (chaîne) après validation.
+  // Les nanosecondes dépassent Number.MAX_SAFE_INTEGER : on passe par BigInt.
+  toNanos(timestampMillis) {
+    if (!Number.isFinite(timestampMillis)) {
+      throw new Error('Horodatage invalide pour Google Fit.');
+    }
+    return (BigInt(timestampMillis) * 1000000n).toString();
   }
 
   // Écrit un point instantané (startTime == endTime) dans un dataset.
   async writeInstantPoint(dataTypeName, streamName, timestampMillis, value) {
     const dataSourceId = this.buildDataSourceId(dataTypeName, streamName);
-    const ts = (BigInt(timestampMillis) * 1000000n).toString();
+    const ts = this.toNanos(timestampMillis);
     const datasetId = `${ts}-${ts}`;
     await this.apiFetch(`dataSources/${dataSourceId}/datasets/${datasetId}`, 'PATCH', {
       dataSourceId,
@@ -180,7 +225,7 @@ class GoogleFitService {
 
     if (!response.ok) {
       const detail = await response.text();
-      throw new Error(`API Google Fit ${response.status}: ${detail}`);
+      throw new GoogleFitApiError(describeApiError(response.status, detail), response.status, detail);
     }
 
     return response.status === 204 ? null : response.json();
@@ -193,10 +238,10 @@ class GoogleFitService {
     const durationMillis = activity.duration || 3600000; // Durée par défaut 1h
     const endTimeMillis = startTimeMillis + durationMillis;
 
-    // Les nanosecondes dépassent Number.MAX_SAFE_INTEGER : on utilise BigInt
-    // puis on sérialise en chaîne (l'API accepte les int64 sous forme de string).
-    const startTimeNanos = (BigInt(startTimeMillis) * 1000000n).toString();
-    const endTimeNanos = (BigInt(endTimeMillis) * 1000000n).toString();
+    // toNanos valide les horodatages (lève une erreur si startTime est invalide)
+    // et sérialise en chaîne (l'API accepte les int64 sous forme de string).
+    const startTimeNanos = this.toNanos(startTimeMillis);
+    const endTimeNanos = this.toNanos(endTimeMillis);
 
     const dataSourceId = this.buildDataSourceId('com.google.calories.expended', 'ProjectFatLossCalories');
 
