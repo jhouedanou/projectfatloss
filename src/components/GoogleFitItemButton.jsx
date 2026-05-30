@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import googleFitIcon from '../icons/google-fit.svg';
+import GoogleFitIcon from './GoogleFitIcon';
 import './GoogleFitSync.css';
 
 /**
@@ -52,7 +52,7 @@ const GoogleFitItemButton = ({ synced = false, onSync, onError, allowResync = fa
     >
       {state === 'loading'
         ? <span className="gfit-spinner" aria-hidden="true" />
-        : <img src={googleFitIcon} alt="" width={18} height={18} />}
+        : <GoogleFitIcon size={18} />}
       {state === 'done' && <span className="gfit-check" aria-hidden="true">✓</span>}
     </button>
   );

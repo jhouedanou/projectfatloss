@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import GoogleFitService from '../services/GoogleFitService';
+import GoogleFitIcon from './GoogleFitIcon';
 import './GoogleFitButton.css';
 
 const GoogleFitButton = ({ exercise }) => {
@@ -44,12 +45,7 @@ const GoogleFitButton = ({ exercise }) => {
       onClick={syncWithGoogleFit}
       disabled={isLoading}
     >
-      <img 
-        src="/icons/google-fit.svg" 
-        alt="Google Fit"
-        width="24"
-        height="24"
-      />
+      <GoogleFitIcon size={24} />
       {isLoading ? 'Synchronisation...' : 'Ajouter à Google Fit'}
     </button>
   );
