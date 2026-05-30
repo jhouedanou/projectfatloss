@@ -32,7 +32,7 @@ const GoogleFitButton = ({ exercise }) => {
       alert('Exercice synchronisé avec Google Fit !');
     } catch (error) {
       console.error('Erreur lors de la synchronisation:', error);
-      alert('Erreur lors de la synchronisation avec Google Fit');
+      alert(`Erreur lors de la synchronisation avec Google Fit : ${error.message || error}`);
     } finally {
       setIsLoading(false);
     }

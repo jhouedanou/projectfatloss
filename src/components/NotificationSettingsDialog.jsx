@@ -54,11 +54,8 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
 
       // Vérifier si Google Fit est déjà connecté
       try {
-        if (window.gapi && window.gapi.auth2) {
-          const authInstance = window.gapi.auth2.getAuthInstance();
-          if (authInstance && authInstance.isSignedIn.get()) {
-            setIsFitConnected(true);
-          }
+        if (GoogleFitService.isSignedIn()) {
+          setIsFitConnected(true);
         }
       } catch (e) {
         console.log('Google Fit non initialisé au montage');
@@ -135,7 +132,7 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
       alert('Connexion Google Fit réussie ! Vos futures séances pourront être synchronisées.');
     } catch (error) {
       console.error(error);
-      alert('Erreur de connexion à Google Fit. Assurez-vous d\'avoir configuré votre Client ID dans GoogleFitService.js.');
+      alert(`Erreur de connexion à Google Fit : ${error.message || error}`);
     } finally {
       setIsLoadingFit(false);
     }

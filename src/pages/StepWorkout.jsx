@@ -268,7 +268,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
       alert('Séance synchronisée avec Google Fit !');
     } catch (error) {
       console.error('Erreur lors de la synchronisation Google Fit:', error);
-      alert('Erreur lors de la synchronisation avec Google Fit. Assurez-vous d\'avoir configuré votre Client ID dans GoogleFitService.js.');
+      alert(`Erreur lors de la synchronisation avec Google Fit : ${error.message || error}`);
     } finally {
       setIsLoadingFit(false);
     }
