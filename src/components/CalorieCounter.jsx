@@ -26,6 +26,14 @@ import {
   getFoodDefaultQuantity,
   formatFoodQuantity
 } from '../data/foodDatabase';
+import GoogleFitSyncButton from './GoogleFitSyncButton';
+import GoogleFitItemButton from './GoogleFitItemButton';
+import {
+  getUnsyncedNutritionDays,
+  syncAllNutritionDays,
+  syncNutritionDayToGoogleFit,
+  isSyncedWithGoogleFit
+} from '../services/GoogleFitSync';
 import './CalorieCounter.css';
 
 const normalizeFoodSearchText = (value) =>
@@ -335,6 +343,25 @@ const CalorieCounter = () => {
             <Settings size={16} /> Ajuster Objectif
           </button>
         </div>
+      </div>
+
+      {/* Synchronisation Google Fit */}
+      <div className="gfit-nutrition-sync" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <GoogleFitItemButton
+            synced={isSyncedWithGoogleFit('nutrition', selectedDate)}
+            onSync={() => syncNutritionDayToGoogleFit(selectedDate)}
+            allowResync
+            title="Synchroniser cette journée avec Google Fit"
+          />
+          <span style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>Synchroniser ce jour</span>
+        </div>
+        <GoogleFitSyncButton
+          getUnsyncedCount={() => getUnsyncedNutritionDays().length}
+          onSync={syncAllNutritionDays}
+          noun="jour"
+          nounPlural="jours"
+        />
       </div>
 
       {/* Macros Tracker */}

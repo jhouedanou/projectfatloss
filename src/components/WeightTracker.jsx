@@ -15,6 +15,14 @@ import {
   deleteWeightRecord,
   getWeightStats
 } from '../services/WeightStorage';
+import GoogleFitSyncButton from './GoogleFitSyncButton';
+import GoogleFitItemButton from './GoogleFitItemButton';
+import {
+  getUnsyncedWeights,
+  syncAllWeights,
+  syncWeightToGoogleFit,
+  isSyncedWithGoogleFit
+} from '../services/GoogleFitSync';
 import './WeightTracker.css';
 
 // Composant Popup d'encouragement
@@ -298,6 +306,12 @@ function WeightTracker() {
       {weightRecords.length > 0 && (
         <div className="weight-history">
           <h3>{t('weight.history', { defaultValue: 'Historique des Pesées' })}</h3>
+          <GoogleFitSyncButton
+            getUnsyncedCount={() => getUnsyncedWeights().length}
+            onSync={syncAllWeights}
+            noun="pesée"
+            nounPlural="pesées"
+          />
           <div className="weight-records-list">
             {weightRecords.slice().reverse().map(record => (
               <div key={record.id} className="weight-record">
@@ -306,13 +320,20 @@ function WeightTracker() {
                   <div className="record-date">{formatDate(record.date)}</div>
                   {record.notes && <div className="record-notes">{record.notes}</div>}
                 </div>
-                <button 
-                  className="delete-record" 
-                  onClick={() => handleDeleteRecord(record.id)}
-                  aria-label="Supprimer"
-                >
-                  <Trash2 size={18} />
-                </button>
+                <div className="record-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <GoogleFitItemButton
+                    synced={isSyncedWithGoogleFit('weight', record.id)}
+                    onSync={() => syncWeightToGoogleFit(record)}
+                    title="Synchroniser cette pesée avec Google Fit"
+                  />
+                  <button
+                    className="delete-record"
+                    onClick={() => handleDeleteRecord(record.id)}
+                    aria-label="Supprimer"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
