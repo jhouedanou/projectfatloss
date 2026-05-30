@@ -279,9 +279,10 @@ class GoogleFitService {
         description: activity.description,
         startTimeMillis,
         endTimeMillis,
+        // Pas de packageName : un client web/REST n'est pas une app Android de
+        // confiance, et Google Fit rejette alors la session (403 "un-trusted source").
         application: {
-          name: 'Project Fat Loss',
-          packageName: 'com.projectfatloss'
+          name: 'Project Fat Loss'
         },
         activityType: activity.activityType
       });
