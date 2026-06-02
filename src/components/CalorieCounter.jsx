@@ -351,7 +351,6 @@ const CalorieCounter = () => {
         {!isSelectedDaySynced && (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <GoogleFitItemButton
-              synced={false}
               onSync={async () => {
                 await syncNutritionDayToGoogleFit(selectedDate);
                 setSummary(getNutritionSummary(selectedDate));

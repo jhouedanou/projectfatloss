@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Calendar from 'react-calendar';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -21,14 +21,14 @@ function WorkoutCalendar() {
   const [workouts, setWorkouts] = useState([]);
   const [selectedDayWorkouts, setSelectedDayWorkouts] = useState([]);
 
-  const refreshWorkouts = () => {
+  const refreshWorkouts = useCallback(() => {
     setWorkouts(getWorkoutHistory());
-  };
+  }, []);
   
   // Charger les entraînements au démarrage
   useEffect(() => {
     refreshWorkouts();
-  }, []);
+  }, [refreshWorkouts]);
   
   // Mettre à jour les entraînements du jour sélectionné
   useEffect(() => {
