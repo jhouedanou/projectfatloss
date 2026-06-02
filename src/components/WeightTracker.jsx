@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
@@ -110,11 +110,12 @@ function WeightTracker() {
     setWeightRecords(history);
   };
 
-  const visibleWeightRecords = weightRecords.filter(
-    record => !isSyncedWithGoogleFit('weight', record.id)
+  const visibleWeightRecords = useMemo(
+    () => weightRecords.filter(record => !isSyncedWithGoogleFit('weight', record.id)),
+    [weightRecords]
   );
 
-  const visibleStats = (() => {
+  const visibleStats = useMemo(() => {
     if (visibleWeightRecords.length === 0) {
       return {
         current: null,
@@ -136,7 +137,7 @@ function WeightTracker() {
       record.weight > max.weight ? record : max, visibleWeightRecords[0]);
 
     return { current, initial, change, changePercentage, lowestRecord, highestRecord };
-  })();
+  }, [visibleWeightRecords]);
   
   const handleAddWeight = (e) => {
     e.preventDefault();
@@ -186,11 +187,14 @@ function WeightTracker() {
     }
   };
   
-  const chartData = visibleWeightRecords.map(record => ({
-    date: format(new Date(record.date), 'dd/MM/yy'),
-    poids: record.weight,
-    référence: record.weight > 10 ? Math.floor(record.weight / 10) * 10 : null
-  }));
+  const chartData = useMemo(
+    () => visibleWeightRecords.map(record => ({
+      date: format(new Date(record.date), 'dd/MM/yy'),
+      poids: record.weight,
+      référence: record.weight > 10 ? Math.floor(record.weight / 10) * 10 : null
+    })),
+    [visibleWeightRecords]
+  );
   
   const formatDate = (dateString) => {
     const locale = i18n.language === 'fr' ? fr : undefined;
