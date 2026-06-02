@@ -130,7 +130,7 @@ function WeightTracker() {
     const current = visibleWeightRecords[visibleWeightRecords.length - 1];
     const initial = visibleWeightRecords[0];
     const change = current.weight - initial.weight;
-    const changePercentage = (change / initial.weight) * 100;
+    const changePercentage = initial.weight > 0 ? (change / initial.weight) * 100 : 0;
     const lowestRecord = visibleWeightRecords.reduce((min, record) =>
       record.weight < min.weight ? record : min, visibleWeightRecords[0]);
     const highestRecord = visibleWeightRecords.reduce((max, record) =>
