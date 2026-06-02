@@ -12,8 +12,7 @@ import {
 import { 
   getWeightHistory, 
   addWeightRecord, 
-  deleteWeightRecord,
-  getWeightStats
+  deleteWeightRecord
 } from '../services/WeightStorage';
 import GoogleFitSyncButton from './GoogleFitSyncButton';
 import GoogleFitItemButton from './GoogleFitItemButton';
@@ -97,7 +96,6 @@ function WeightTracker() {
   const [weightRecords, setWeightRecords] = useState([]);
   const [newWeight, setNewWeight] = useState('');
   const [notes, setNotes] = useState('');
-  const [stats, setStats] = useState({});
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showEncouragement, setShowEncouragement] = useState(false);
@@ -110,8 +108,35 @@ function WeightTracker() {
   const loadWeightData = () => {
     const history = getWeightHistory();
     setWeightRecords(history);
-    setStats(getWeightStats());
   };
+
+  const visibleWeightRecords = weightRecords.filter(
+    record => !isSyncedWithGoogleFit('weight', record.id)
+  );
+
+  const visibleStats = (() => {
+    if (visibleWeightRecords.length === 0) {
+      return {
+        current: null,
+        initial: null,
+        change: null,
+        changePercentage: null,
+        lowestRecord: null,
+        highestRecord: null
+      };
+    }
+
+    const current = visibleWeightRecords[visibleWeightRecords.length - 1];
+    const initial = visibleWeightRecords[0];
+    const change = current.weight - initial.weight;
+    const changePercentage = (change / initial.weight) * 100;
+    const lowestRecord = visibleWeightRecords.reduce((min, record) =>
+      record.weight < min.weight ? record : min, visibleWeightRecords[0]);
+    const highestRecord = visibleWeightRecords.reduce((max, record) =>
+      record.weight > max.weight ? record : max, visibleWeightRecords[0]);
+
+    return { current, initial, change, changePercentage, lowestRecord, highestRecord };
+  })();
   
   const handleAddWeight = (e) => {
     e.preventDefault();
@@ -161,7 +186,7 @@ function WeightTracker() {
     }
   };
   
-  const chartData = weightRecords.map(record => ({
+  const chartData = visibleWeightRecords.map(record => ({
     date: format(new Date(record.date), 'dd/MM/yy'),
     poids: record.weight,
     référence: record.weight > 10 ? Math.floor(record.weight / 10) * 10 : null
@@ -220,27 +245,27 @@ function WeightTracker() {
       </div>
       
       {/* Statistiques de poids */}
-      {stats.current && (
+      {visibleStats.current && (
         <div className="weight-stats">
           <div className="stat-card current-weight">
             <div className="stat-title">{t('weight.currentWeight', { defaultValue: 'Poids Actuel' })}</div>
-            <div className="stat-value">{stats.current.weight} <span style={{ fontSize: '1rem', color: '#71717a' }}>kg</span></div>
-            <div className="stat-date">{formatDate(stats.current.date)}</div>
+            <div className="stat-value">{visibleStats.current.weight} <span style={{ fontSize: '1rem', color: '#71717a' }}>kg</span></div>
+            <div className="stat-date">{formatDate(visibleStats.current.date)}</div>
           </div>
           
-          {stats.initial && stats.current.id !== stats.initial.id && (
-            <div className={`stat-card weight-change ${stats.change <= 0 ? 'positive' : 'negative'}`}>
+          {visibleStats.initial && visibleStats.current.id !== visibleStats.initial.id && (
+            <div className={`stat-card weight-change ${visibleStats.change <= 0 ? 'positive' : 'negative'}`}>
               <div className="stat-title" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                {stats.change <= 0 ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
+                {visibleStats.change <= 0 ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
                 {t('weight.evolution', { defaultValue: 'Évolution' })}
               </div>
               <div className="stat-value">
-                {stats.change > 0 ? '+' : ''}
-                {stats.change.toFixed(1)} <span style={{ fontSize: '1rem', color: 'inherit' }}>kg</span>
+                {visibleStats.change > 0 ? '+' : ''}
+                {visibleStats.change.toFixed(1)} <span style={{ fontSize: '1rem', color: 'inherit' }}>kg</span>
               </div>
               <div className="stat-percentage">
-                {stats.change > 0 ? '+' : ''}
-                {stats.changePercentage.toFixed(1)}%
+                {visibleStats.change > 0 ? '+' : ''}
+                {visibleStats.changePercentage.toFixed(1)}%
               </div>
             </div>
           )}
@@ -248,19 +273,19 @@ function WeightTracker() {
           <div className="stat-card min-max">
             <div className="min-weight">
               <span className="stat-label">{t('weight.min', { defaultValue: 'Minimum' })}</span>
-              <span className="stat-value">{stats.lowestRecord.weight} kg</span>
+              <span className="stat-value">{visibleStats.lowestRecord.weight} kg</span>
             </div>
             <div style={{ width: '1px', height: '100%', background: 'rgba(255,255,255,0.1)' }}></div>
             <div className="max-weight">
               <span className="stat-label">{t('weight.max', { defaultValue: 'Maximum' })}</span>
-              <span className="stat-value">{stats.highestRecord.weight} kg</span>
+              <span className="stat-value">{visibleStats.highestRecord.weight} kg</span>
             </div>
           </div>
         </div>
       )}
       
       {/* Graphique d'évolution */}
-      {weightRecords.length > 0 ? (
+      {visibleWeightRecords.length > 0 ? (
         <div className="weight-chart">
           <h3>
             <Activity size={20} color="var(--vermilion)" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
@@ -303,17 +328,21 @@ function WeightTracker() {
       )}
       
       {/* Historique des enregistrements */}
-      {weightRecords.length > 0 && (
+      {visibleWeightRecords.length > 0 && (
         <div className="weight-history">
           <h3>{t('weight.history', { defaultValue: 'Historique des Pesées' })}</h3>
           <GoogleFitSyncButton
             getUnsyncedCount={() => getUnsyncedWeights().length}
-            onSync={syncAllWeights}
+            onSync={async () => {
+              const result = await syncAllWeights();
+              loadWeightData();
+              return result;
+            }}
             noun="pesée"
             nounPlural="pesées"
           />
           <div className="weight-records-list">
-            {weightRecords.slice().reverse().map(record => (
+            {visibleWeightRecords.slice().reverse().map(record => (
               <div key={record.id} className="weight-record">
                 <div className="record-info">
                   <div className="record-weight">{record.weight} <span style={{ fontSize: '0.9rem', color: '#71717a', fontWeight: 600 }}>kg</span></div>
@@ -323,7 +352,10 @@ function WeightTracker() {
                 <div className="record-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <GoogleFitItemButton
                     synced={isSyncedWithGoogleFit('weight', record.id)}
-                    onSync={() => syncWeightToGoogleFit(record)}
+                    onSync={async () => {
+                      await syncWeightToGoogleFit(record);
+                      loadWeightData();
+                    }}
                     title="Synchroniser cette pesée avec Google Fit"
                   />
                   <button

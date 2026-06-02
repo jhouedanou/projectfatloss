@@ -20,11 +20,14 @@ function WorkoutCalendar() {
   const [value, setValue] = useState(new Date());
   const [workouts, setWorkouts] = useState([]);
   const [selectedDayWorkouts, setSelectedDayWorkouts] = useState([]);
+
+  const refreshWorkouts = () => {
+    setWorkouts(getWorkoutHistory());
+  };
   
   // Charger les entraînements au démarrage
   useEffect(() => {
-    const history = getWorkoutHistory();
-    setWorkouts(history);
+    refreshWorkouts();
   }, []);
   
   // Mettre à jour les entraînements du jour sélectionné
@@ -33,7 +36,7 @@ function WorkoutCalendar() {
       const selected = value.toDateString();
       const dayWorkouts = workouts.filter(workout => {
         const workoutDate = new Date(workout.date);
-        return workoutDate.toDateString() === selected;
+        return workoutDate.toDateString() === selected && !isSyncedWithGoogleFit('workout', workout.id);
       });
       
       setSelectedDayWorkouts(dayWorkouts);
@@ -48,14 +51,14 @@ function WorkoutCalendar() {
     const dateStr = date.toDateString();
     const hasWorkout = workouts.some(workout => {
       const workoutDate = new Date(workout.date);
-      return workoutDate.toDateString() === dateStr;
+      return workoutDate.toDateString() === dateStr && !isSyncedWithGoogleFit('workout', workout.id);
     });
     
     if (hasWorkout) {
       // Trouver tous les entraînements pour cette date
       const dayWorkouts = workouts.filter(workout => {
         const workoutDate = new Date(workout.date);
-        return workoutDate.toDateString() === dateStr;
+        return workoutDate.toDateString() === dateStr && !isSyncedWithGoogleFit('workout', workout.id);
       });
       
       // Calculer les calories totales pour cette date
@@ -83,7 +86,11 @@ function WorkoutCalendar() {
 
       <GoogleFitSyncButton
         getUnsyncedCount={() => getUnsyncedWorkouts().length}
-        onSync={syncAllWorkouts}
+        onSync={async () => {
+          const result = await syncAllWorkouts();
+          refreshWorkouts();
+          return result;
+        }}
         noun="séance"
         nounPlural="séances"
       />
@@ -107,7 +114,10 @@ function WorkoutCalendar() {
                 <span className="workout-time">{format(new Date(workout.date), 'HH:mm', { locale: fr })}</span>
                 <GoogleFitItemButton
                   synced={isSyncedWithGoogleFit('workout', workout.id)}
-                  onSync={() => syncWorkoutToGoogleFit(workout)}
+                  onSync={async () => {
+                    await syncWorkoutToGoogleFit(workout);
+                    refreshWorkouts();
+                  }}
                   title="Synchroniser cette séance avec Google Fit"
                 />
               </div>

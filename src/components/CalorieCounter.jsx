@@ -285,6 +285,7 @@ const CalorieCounter = () => {
   const remainingCalories = Math.max(0, summary.goal - summary.calories);
   const isGoalExceeded = summary.calories > summary.goal;
   const progressPercent = Math.min(100, (summary.calories / summary.goal) * 100);
+  const isSelectedDaySynced = isSyncedWithGoogleFit('nutrition', selectedDate);
 
   // Macro Target percentages (Standard guidelines: 30% Protein, 45% Carbs, 25% Fat)
   const proteinGoal = Math.round((summary.goal * 0.30) / 4);
@@ -347,15 +348,20 @@ const CalorieCounter = () => {
 
       {/* Synchronisation Google Fit */}
       <div className="gfit-nutrition-sync" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <GoogleFitItemButton
-            synced={isSyncedWithGoogleFit('nutrition', selectedDate)}
-            onSync={() => syncNutritionDayToGoogleFit(selectedDate)}
-            allowResync
-            title="Synchroniser cette journée avec Google Fit"
-          />
-          <span style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>Synchroniser ce jour</span>
-        </div>
+        {!isSelectedDaySynced && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <GoogleFitItemButton
+              synced={false}
+              onSync={async () => {
+                await syncNutritionDayToGoogleFit(selectedDate);
+                setSummary(getNutritionSummary(selectedDate));
+              }}
+              allowResync
+              title="Synchroniser cette journée avec Google Fit"
+            />
+            <span style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>Synchroniser ce jour</span>
+          </div>
+        )}
         <GoogleFitSyncButton
           getUnsyncedCount={() => getUnsyncedNutritionDays().length}
           onSync={syncAllNutritionDays}
