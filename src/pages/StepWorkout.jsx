@@ -1140,10 +1140,7 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     }
     
     // Fonctionnalité d'annonce vocale désactivée
-    // Dépendances primitives (nom de l'exercice) plutôt que l'objet `exo` pour
-    // éviter de réinitialiser le compteur si la référence change sans que
-    // l'exercice ait réellement changé.
-  }, [exo?.name, setNum, totalSets]);
+  }, [exo, setNum, totalSets]);
 
   // Timer dégressif pour exercices avec duration spécifique
   useEffect(() => {
