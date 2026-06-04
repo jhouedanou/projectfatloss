@@ -399,37 +399,37 @@
 @media (min-width: 768px) {
   /* Le conteneur .day-content est plafonné à 800px (index.css) : on
      l'élargit pendant la séance pour que la fiche occupe mieux l'écran. */
-  .day-content {
+  .day-content.step-workout {
     max-width: 960px;
   }
 
-  .day-content .exercise-detail-wrapper {
+  .day-content.step-workout .exercise-detail-wrapper {
     width: 100%;
     max-width: 760px;
     margin-left: auto;
     margin-right: auto;
   }
 
-  .day-content .exercise-detail-card {
+  .day-content.step-workout .exercise-detail-card {
     padding: 40px !important;
   }
 
   /* Illustration plus grande pour profiter de la largeur disponible */
-  .exercise-illustration {
+  .day-content.step-workout .exercise-illustration {
     max-width: 360px !important;
   }
 }
 
 @media (min-width: 1024px) {
-  .day-content {
+  .day-content.step-workout {
     max-width: 1100px;
   }
 
-  .day-content .exercise-detail-wrapper {
+  .day-content.step-workout .exercise-detail-wrapper {
     max-width: 860px;
   }
 
-  .exercise-illustration {
+  .day-content.step-workout .exercise-illustration {
     max-width: 420px !important;
   }
 }
