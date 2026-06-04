@@ -1,5 +1,5 @@
 // Correction des bugs liés à pause/isPaused - v1.0.1
-import React, { useState, useEffect, useRef, createContext, useCallback } from 'react';
+import React, { useState, useEffect, useRef, createContext, useCallback, useMemo } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell } from 'lucide-react';
@@ -591,7 +591,12 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const isFirstRender = useRef(true);
   let beepTimeouts = [];
   
-  const workoutPlan = getWorkoutPlan();
+  // Mémoïser le plan : getWorkoutPlan() lit localStorage et, en cas de plan
+  // personnalisé, JSON.parse renvoie de nouvelles références à chaque appel.
+  // Sans mémoïsation, `day`/`exo` changeraient d'identité à chaque rendu, ce
+  // qui relancerait le compteur de répétitions (effet de reset basé sur `exo`)
+  // notamment en mode auto où le parent se re-rend souvent.
+  const workoutPlan = useMemo(() => getWorkoutPlan(), []);
   const day = workoutPlan?.[dayIndex];
   const total = day?.exercises?.length || 0;
   const exo = day?.exercises?.[step];
@@ -1135,7 +1140,10 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     }
     
     // Fonctionnalité d'annonce vocale désactivée
-  }, [exo, setNum, totalSets]);
+    // Dépendances primitives (nom de l'exercice) plutôt que l'objet `exo` pour
+    // éviter de réinitialiser le compteur si la référence change sans que
+    // l'exercice ait réellement changé.
+  }, [exo?.name, setNum, totalSets]);
 
   // Timer dégressif pour exercices avec duration spécifique
   useEffect(() => {
@@ -1357,9 +1365,10 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   return (
     // pb généreux : réserve l'espace occupé par les contrôles flottants fixes
     // (bottom: 30px) pour que la ligne de répétitions ne passe pas dessous.
-    <Box sx={{ p: 2, pb: '140px' }}>
+    <Box className="exercise-detail-wrapper" sx={{ p: 2, pb: '140px' }}>
       <Paper
         elevation={3}
+        className="exercise-detail-card"
         sx={{
           p: 3,
           mb: 2,
@@ -1484,11 +1493,11 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
             )}
           </Box>
         )}
-        <div style={{ 
-          width: '100%', 
-          maxWidth: '280px', 
-          aspectRatio: '1/1', 
-          borderRadius: '16px', 
+        <div className="exercise-illustration" style={{
+          width: '100%',
+          maxWidth: '280px',
+          aspectRatio: '1/1',
+          borderRadius: '16px',
           overflow: 'hidden', 
           border: '1px solid rgba(255, 255, 255, 0.08)', 
           background: '#070707', 
