@@ -910,7 +910,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
   return (
     <div 
-      className="day-content" 
+      className="day-content step-workout" 
       style={{
         paddingTop: 'env(safe-area-inset-top, 20px)',
         paddingBottom: 'env(safe-area-inset-bottom, 20px)',
