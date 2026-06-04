@@ -136,27 +136,51 @@ const WorkoutContext = createContext({
   autoMode: false,
 });
 
-// Créer un contexte audio unique pour toute l'application
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+// Contexte audio unique, créé paresseusement au premier usage.
+// IMPORTANT : ne PAS instancier au chargement du module. Sur certains
+// navigateurs (politique d'autoplay, AudioContext indisponible, modes
+// restreints…) `new AudioContext()` peut lever une exception ; comme ce code
+// s'exécute pendant l'évaluation du module (avant le montage de React), cela
+// fait planter tout le graphe d'import et aboutit à une page blanche que
+// l'ErrorBoundary ne peut pas intercepter.
+let audioContext = null;
+
+function getAudioContext() {
+  if (typeof window === 'undefined') return null;
+  const AudioCtor = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtor) return null;
+  if (!audioContext) {
+    try {
+      audioContext = new AudioCtor();
+    } catch (error) {
+      console.warn('AudioContext indisponible:', error);
+      return null;
+    }
+  }
+  return audioContext;
+}
 
 function playBeep() {
   try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
     // Créer un oscillateur pour générer le son
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
     // Connecter les nœuds
     oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
+    gainNode.connect(ctx.destination);
+
     // Configurer le son
     oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    
+    oscillator.frequency.setValueAtTime(800, ctx.currentTime);
+    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+
     // Jouer le son
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.1);
+    oscillator.stop(ctx.currentTime + 0.1);
   } catch (error) {
     console.error("Erreur lors de la lecture du son:", error);
   }
