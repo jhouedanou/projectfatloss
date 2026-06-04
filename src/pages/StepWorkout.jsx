@@ -977,8 +977,9 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         />
 
         {!pause ? (
-          <StepSet 
+          <StepSet
             exo={day.exercises[step]}
+            step={step}
             setNum={setNum}
             totalSets={totalSets}
             onDone={handleSetComplete}
@@ -1040,7 +1041,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode }) {
+function StepSet({ exo, step, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode }) {
   const [timer, setTimer] = useState(() => {
     if (exo.timer) {
       return exo.duration || 30;
@@ -1140,10 +1141,11 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
     }
     
     // Fonctionnalité d'annonce vocale désactivée
-    // Dépendances primitives (nom de l'exercice) plutôt que l'objet `exo` pour
-    // éviter de réinitialiser le compteur si la référence change sans que
-    // l'exercice ait réellement changé.
-  }, [exo?.name, setNum, totalSets]);
+    // Identifiant stable de la série en cours (jour + index d'exercice + série)
+    // plutôt que l'objet `exo` ou son nom : on réinitialise dès que l'exercice
+    // ou la série change réellement — y compris pour deux exercices homonymes —
+    // sans dépendre d'une référence d'objet qui pourrait changer sans raison.
+  }, [dayIndex, step, setNum, totalSets]);
 
   // Timer dégressif pour exercices avec duration spécifique
   useEffect(() => {
@@ -1365,12 +1367,22 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   return (
     // pb généreux : réserve l'espace occupé par les contrôles flottants fixes
     // (bottom: 30px) pour que la ligne de répétitions ne passe pas dessous.
-    <Box className="exercise-detail-wrapper" sx={{ p: 2, pb: '140px' }}>
+    <Box
+      className="exercise-detail-wrapper"
+      sx={{
+        p: 2,
+        pb: '140px',
+        // Élargir la fiche sur tablette/desktop (cf. .day-content élargi en CSS)
+        width: '100%',
+        maxWidth: { xs: '100%', md: 760, lg: 860 },
+        mx: 'auto'
+      }}
+    >
       <Paper
         elevation={3}
         className="exercise-detail-card"
         sx={{
-          p: 3,
+          p: { xs: 3, md: 5 },
           mb: 2,
           position: 'relative',
           minHeight: 300,
@@ -1493,27 +1505,31 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
             )}
           </Box>
         )}
-        <div className="exercise-illustration" style={{
-          width: '100%',
-          maxWidth: '280px',
-          aspectRatio: '1/1',
-          borderRadius: '16px',
-          overflow: 'hidden', 
-          border: '1px solid rgba(255, 255, 255, 0.08)', 
-          background: '#070707', 
-          marginBottom: '20px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
-          position: 'relative'
-        }}>
-          <img 
-            src={getAssetPath(`/illustrations/${getExerciseIllustration(iconType, exo.name)}`)} 
-            alt={exo.name} 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+        <Box
+          className="exercise-illustration"
+          sx={{
+            width: '100%',
+            // Illustration agrandie sur tablette/desktop (remplace les overrides CSS !important)
+            maxWidth: { xs: 280, md: 360, lg: 420 },
+            aspectRatio: '1/1',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: '#070707',
+            mb: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
+            position: 'relative'
+          }}
+        >
+          <img
+            src={getAssetPath(`/illustrations/${getExerciseIllustration(iconType, exo.name)}`)}
+            alt={exo.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
-        </div>
+        </Box>
         
         <Typography 
           variant="h6" 
