@@ -31,7 +31,26 @@ const formatTime = (seconds) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-const PAUSE_DURATION_SECONDS = 10;
+// Durées de repos adaptées : repos plus long entre exercices pour récupérer
+// de la force, et repos entre séries qui augmente avec la fatigue cumulée.
+const SET_PAUSE_BASE_SECONDS = 15;        // repos de base entre deux séries
+const SET_PAUSE_INCREMENT_SECONDS = 5;    // +5s par série déjà réalisée
+const SET_PAUSE_MAX_SECONDS = 40;         // plafond du repos entre séries
+const EXERCISE_PAUSE_SECONDS = 45;        // repos entre exercices (récupération force)
+const PAUSE_DURATION_SECONDS = SET_PAUSE_BASE_SECONDS; // valeur par défaut historique
+
+// Calcule la durée de pause en fonction du contexte (changement d'exercice ou
+// de série) afin d'avoir plus de force pour l'effort suivant.
+function getPauseDuration({ isExerciseTransition, setNum = 0 }) {
+  if (isExerciseTransition) {
+    return EXERCISE_PAUSE_SECONDS;
+  }
+  const reps = Math.max(0, setNum);
+  return Math.min(
+    SET_PAUSE_BASE_SECONDS + reps * SET_PAUSE_INCREMENT_SECONDS,
+    SET_PAUSE_MAX_SECONDS
+  );
+}
 
 // Correction de l'import du fichier JSON
 // import iconsMap from '../../public/exo-icons.json'; // ❌ Incorrect
@@ -154,8 +173,8 @@ function calculateWeight(equipment) {
 }
 
 function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode }) {
-  const defaultTime = PAUSE_DURATION_SECONDS;
-  
+  const defaultTime = getPauseDuration({ isExerciseTransition, setNum });
+
   const [time, setTime] = useState(defaultTime);
   
   const currentExercise = day.exercises[step];
@@ -853,7 +872,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     if (showPreWorkout) return;
     if (pause && !workoutCompleted) {
       const pauseData = {
-        remainingTime: PAUSE_DURATION_SECONDS,
+        remainingTime: getPauseDuration({ isExerciseTransition, setNum }),
         nextExercise: step < total - 1 ? day?.exercises?.[step + 1] : null,
         currentSet: setNum + 1,
         totalSets: totalSets,
@@ -862,7 +881,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       notificationService.showPauseNotification(pauseData);
     }
-  }, [pause, workoutCompleted, autoMode, step, total, day?.exercises, setNum, totalSets, showPreWorkout]);
+  }, [pause, workoutCompleted, autoMode, step, total, day?.exercises, setNum, totalSets, showPreWorkout, isExerciseTransition]);
 
   if (!dataReady) {
     return (
@@ -1336,12 +1355,14 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
   }, [autoMode, currentRep, exo.nbRep, hasTimer, isChrono, caloriesPerSet, onCaloriesBurned, onDone]);
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          p: 3, 
-          mb: 2, 
+    // pb généreux : réserve l'espace occupé par les contrôles flottants fixes
+    // (bottom: 30px) pour que la ligne de répétitions ne passe pas dessous.
+    <Box sx={{ p: 2, pb: '140px' }}>
+      <Paper
+        elevation={3}
+        sx={{
+          p: 3,
+          mb: 2,
           position: 'relative',
           minHeight: 300,
           display: 'flex',
@@ -1350,30 +1371,63 @@ function StepSet({ exo, setNum, totalSets, onDone, onCaloriesBurned, onExerciseC
           justifyContent: 'space-between'
         }}
       >
-        {/* Overlay OK désactivé pour les exercices chrono */}
+        {/* Overlay OK désactivé pour les exercices chrono.
+            En mode auto, l'overlay devient transparent et non bloquant pour
+            ne pas masquer les instructions de l'exercice : seul le compteur de
+            répétitions reste visible dans une pastille en haut de la carte. */}
         {showOverlay && !hasTimer && !isChrono && (
-          <Box 
+          <Box
             sx={{
               position: 'absolute',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              backgroundColor: autoMode ? 'transparent' : 'rgba(0, 0, 0, 0.8)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: autoMode ? 'flex-start' : 'center',
+              pointerEvents: autoMode ? 'none' : 'auto',
+              p: autoMode ? 2 : 0,
               color: 'white',
               zIndex: 1
             }}
           >
             {countdown !== null ? (
-              <Typography variant="h3" component="div" sx={{ mb: 2 }}>
+              <Typography
+                variant="h3"
+                component="div"
+                sx={{
+                  mb: 2,
+                  ...(autoMode && {
+                    px: 3,
+                    py: 1,
+                    borderRadius: '100px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.72)',
+                    backdropFilter: 'blur(8px)',
+                    fontSize: '2rem'
+                  })
+                }}
+              >
                 {countdown > 0 ? countdown : "Go!"}
               </Typography>
             ) : currentRep < exo.nbRep ? (
-              <Typography variant="h4" component="div" sx={{ mb: 2 }}>
+              <Typography
+                variant="h4"
+                component="div"
+                sx={{
+                  mb: 2,
+                  ...(autoMode && {
+                    px: 3,
+                    py: 1,
+                    borderRadius: '100px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.72)',
+                    backdropFilter: 'blur(8px)',
+                    fontSize: '1.5rem'
+                  })
+                }}
+              >
                 Répétition {currentRep + 1} / {exo.nbRep}
               </Typography>
             ) : (
