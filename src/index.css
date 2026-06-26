@@ -1,6 +1,8 @@
 :root {
   /* Notre nouvelle palette de couleurs */
   --vermilion: #f03d32ff;
+  --accent-rgb: 240, 61, 50;        /* #f03d32 décomposé pour rgba() */
+  --illustration-surface: #101013;  /* fond sombre des illustrations d'exercice */
   --vermilion-2: #f13d30ff;
   --cinnabar: #f34430ff;
   --cinnabar-2: #f6452fff;
@@ -66,23 +68,23 @@
   --card-bg: rgba(24, 24, 27, 0.8);
   --card-shadow: rgba(240, 61, 50, 0.15);
   --text-secondary: #a1a1aa; 
-  --text-tertiary: #71717a; 
+  --text-tertiary: #82828b; /* éclairci pour contraste AA (>=4.5) sur fond et cartes */
   --button-bg: #f03d32ff;
   --button-text: #ffffff;
   --button-active: #c41e0b;
   --series-text: #ff9800; /* Orange vibrant */
   --color-neutral-200: rgba(255, 255, 255, 0.05);
   --color-neutral-300: rgba(255, 255, 255, 0.1);
-  background-color: #09090b; 
+  background-color: var(--bg-primary); 
 }
 
 /* S'assurer que tous les éléments du corps en mode sombre ont un fond cohérent */
 .dark-theme .app {
-  background-color: #09090b;
+  background-color: var(--bg-primary);
 }
 
 .dark-theme .day-content {
-  background-color: #09090b;
+  background-color: var(--bg-primary);
 }
 
 /* Transitions */
@@ -95,7 +97,7 @@
 
 html.dark-theme, 
 body.dark-theme {
-  background-color: #09090b;
+  background-color: var(--bg-primary);
   color: var(--seashell);
 }
 
@@ -1581,9 +1583,9 @@ gap:1rem;
 }
 
 @keyframes pulse-glow {
-  0% { box-shadow: 0 0 0 0 rgba(240, 61, 50, 0.28); }
-  70% { box-shadow: 0 0 0 8px rgba(240, 61, 50, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(240, 61, 50, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.28); }
+  70% { box-shadow: 0 0 0 8px rgba(var(--accent-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
 }
 
 .rest-btn {

@@ -118,7 +118,7 @@ function DayPills({ days, current, setCurrent, setStepMode }) {
               ? 'rgba(255, 255, 255, 0.02)'
               : 'transparent',
           color: isActive ? '#fff' : (isCompleted ? '#aaa' : '#666'),
-          boxShadow: isActive ? '0 2px 8px rgba(240, 61, 50, 0.25)' : 'none',
+          boxShadow: isActive ? '0 2px 8px rgba(var(--accent-rgb), 0.25)' : 'none',
         }}
       >
         <IconComponent size={18} color={iconColor} strokeWidth={isActive ? 2.5 : 2} />
