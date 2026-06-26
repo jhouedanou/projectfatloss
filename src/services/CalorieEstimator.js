@@ -29,12 +29,12 @@ export function getUserProfile() {
       return {
         weightKg: p.weightKg || DEFAULT_WEIGHT_KG,
         heightCm: p.heightCm || DEFAULT_HEIGHT_CM,
-        ageYears: p.ageYears || 35,
+        ageYears: p.ageYears || 42,
         sex: p.sex || 'M'
       };
     }
   } catch (e) {}
-  return { weightKg: DEFAULT_WEIGHT_KG, heightCm: DEFAULT_HEIGHT_CM, ageYears: 35, sex: 'M' };
+  return { weightKg: DEFAULT_WEIGHT_KG, heightCm: DEFAULT_HEIGHT_CM, ageYears: 42, sex: 'M' };
 }
 
 export function setUserProfile(profile) {
@@ -103,7 +103,7 @@ if (typeof window !== 'undefined' && window.localStorage) {
       setUserProfile({
         weightKg: DEFAULT_WEIGHT_KG,
         heightCm: DEFAULT_HEIGHT_CM,
-        ageYears: 35,
+        ageYears: 42,
         sex: 'M'
       });
     }
