@@ -1044,6 +1044,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         {!pause ? (
           <StepSet
             exo={day.exercises[step]}
+            exercises={day.exercises}
             step={step}
             setNum={setNum}
             totalSets={totalSets}
@@ -1106,7 +1107,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, step, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode }) {
+function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode }) {
   const [timer, setTimer] = useState(() => {
     if (exo.timer) {
       return exo.duration || 30;
@@ -1594,7 +1595,7 @@ function StepSet({ exo, step, setNum, totalSets, onDone, onCaloriesBurned, onExe
             borderRadius: '16px',
             overflow: 'hidden',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            background: '#070707',
+            background: '#101013',
             mb: '14px',
             display: 'flex',
             alignItems: 'center',
@@ -1815,7 +1816,9 @@ function StepSet({ exo, step, setNum, totalSets, onDone, onCaloriesBurned, onExe
           </Box>
         )}
         {/* Boutons flottants pour toutes les actions */}
-        <FloatingButtons 
+        <FloatingButtons
+          exercises={exercises}
+          currentStep={step}
           onYouTube={handleYouTube}
           onToggleRhythm={!hasTimer && !isChrono ? handlePulse : null} // Masquer le rythme pour les exercices avec timer
           onNext={() => {
