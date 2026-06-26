@@ -1595,7 +1595,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
             borderRadius: '16px',
             overflow: 'hidden',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            background: '#101013',
+            background: 'var(--illustration-surface, #101013)',
             mb: '14px',
             display: 'flex',
             alignItems: 'center',
