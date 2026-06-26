@@ -198,10 +198,25 @@
 .hd-caffeine-desc {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
-  margin: 6px 0 14px;
+  margin: 6px 0 10px;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+.hd-caffeine-hint {
+  font-size: 0.78rem;
+  color: rgba(240, 61, 50, 0.9);
+  margin: 0 0 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.hd-caffeine-second {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 6px;
+}
+body:not(.dark-theme) .hd-caffeine-hint { color: #c41e0b; }
+body:not(.dark-theme) .hd-caffeine-second { color: rgba(0, 0, 0, 0.55); }
 .hd-caffeine-status {
   font-size: 0.95rem;
   font-weight: 700;
@@ -285,6 +300,22 @@
 }
 .hd-caffeine-btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+.hd-caffeine-btn-secondary:active {
+  transform: scale(0.97);
+}
+.hd-caffeine-reminder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
+  min-height: 44px;
+}
+body:not(.dark-theme) .hd-caffeine-btn-secondary {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a1a1a;
 }
 
 .hd-primary-action {

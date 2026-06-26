@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Coffee, Flame, Scale as ScaleIcon, Flag, Activity } from 'lucide-react';
+import { Pill, Flame, Scale as ScaleIcon, Flag, Activity, CalendarPlus } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
+import { SECOND_DOSE_MS, downloadLipo6Reminder } from '../utils/lipo6Reminder';
 import './HomeDashboard.css';
 
 const CAFFEINE_KEY = 'caffeineIntakeAt';
+// Lipo 6 Black Ultra Concentrate : pic d'énergie ~30-60 min après la prise à jeun.
 const WINDOW_MIN_MS = 30 * 60 * 1000;
-const WINDOW_MAX_MS = 45 * 60 * 1000;
-const WINDOW_EXPIRE_MS = 90 * 60 * 1000;
+const WINDOW_MAX_MS = 60 * 60 * 1000;
+const WINDOW_EXPIRE_MS = 120 * 60 * 1000;
 
 function startOfWeek(d = new Date()) {
   const day = (d.getDay() + 6) % 7;
@@ -24,6 +26,7 @@ function fmtMMSS(ms) {
   const s = total % 60;
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
+
 
 function Ring({ percent, label, sub }) {
   const size = 156;
@@ -125,7 +128,12 @@ export default function HomeDashboard({ onStartWorkout }) {
     setCaffeineAt(null);
   };
 
-  let caffeineStatus = t('home.caffeine.idle', { defaultValue: 'Boisson énergisante non prise' });
+  const handleAddReminder = () => {
+    if (!caffeineAt) return;
+    downloadLipo6Reminder(caffeineAt);
+  };
+
+  let caffeineStatus = t('home.caffeine.idle', { defaultValue: 'Lipo 6 non prise' });
   let caffeineTimer = '';
   if (beforeWindow) {
     caffeineStatus = t('home.caffeine.waiting', { defaultValue: 'Patientez avant la séance' });
@@ -134,7 +142,7 @@ export default function HomeDashboard({ onStartWorkout }) {
     caffeineStatus = t('home.caffeine.ready', { defaultValue: 'Fenêtre idéale — go !' });
     caffeineTimer = fmtMMSS(WINDOW_MAX_MS - elapsed);
   } else if (afterWindow && !expired) {
-    caffeineStatus = t('home.caffeine.fading', { defaultValue: 'Effet en baisse — commencez vite' });
+    caffeineStatus = t('home.caffeine.fading', { defaultValue: 'Pic en baisse — commencez vite' });
     caffeineTimer = `+${fmtMMSS(elapsed - WINDOW_MAX_MS)}`;
   } else if (expired) {
     caffeineStatus = t('home.caffeine.expired', { defaultValue: 'Fenêtre dépassée' });
@@ -190,17 +198,20 @@ export default function HomeDashboard({ onStartWorkout }) {
 
       <div className={`hd-caffeine ${inWindow ? 'ready' : ''} ${beforeWindow ? 'waiting' : ''} ${afterWindow ? 'fading' : ''} ${expired ? 'expired' : ''}`}>
         <div className="hd-caffeine-head">
-          <Coffee size={22} />
-          <div className="hd-caffeine-title">{t('home.caffeine.heading', { defaultValue: 'Boisson énergisante' })}</div>
+          <Pill size={22} />
+          <div className="hd-caffeine-title">{t('home.caffeine.heading', { defaultValue: 'Lipo 6 Black' })}</div>
         </div>
 
         {!caffeineAt && (
           <>
             <p className="hd-caffeine-desc">
-              {t('home.caffeine.help', { defaultValue: 'Pic de caféine entre 30 et 45 min après ingestion. Touchez pour démarrer le chrono.' })}
+              {t('home.caffeine.help', { defaultValue: 'Gélule à jeun, 30 à 60 min avant la séance pour un pic d\'énergie maximal. Touchez quand vous l\'avez prise.' })}
+            </p>
+            <p className="hd-caffeine-hint">
+              {t('home.caffeine.protocol', { defaultValue: 'Jours d\'entraînement : 1 gélule avant la séance, 1 gélule ~6 h plus tard, toujours hors repas.' })}
             </p>
             <button className="hd-caffeine-btn" onClick={handleTakeDrink}>
-              {t('home.caffeine.take', { defaultValue: 'J\'ai pris ma boisson' })}
+              {t('home.caffeine.take', { defaultValue: 'J\'ai pris ma gélule' })}
             </button>
           </>
         )}
@@ -209,6 +220,14 @@ export default function HomeDashboard({ onStartWorkout }) {
           <>
             <div className="hd-caffeine-status">{caffeineStatus}</div>
             <div className="hd-caffeine-timer">{caffeineTimer}</div>
+            <div className="hd-caffeine-second">
+              {t('home.caffeine.second', { defaultValue: '2e gélule (hors repas) vers' })}{' '}
+              {new Date(caffeineAt + SECOND_DOSE_MS).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+            </div>
+            <button className="hd-caffeine-btn-secondary hd-caffeine-reminder" onClick={handleAddReminder}>
+              <CalendarPlus size={16} style={{ marginRight: 6 }} />
+              {t('home.caffeine.reminder', { defaultValue: 'Ajouter le rappel à l\'agenda' })}
+            </button>
             <div className="hd-caffeine-bar">
               <div
                 className="hd-caffeine-bar-fill"

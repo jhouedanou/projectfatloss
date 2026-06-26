@@ -4,7 +4,7 @@
   padding: 15px;
   max-width: 600px;
   margin: 0 auto;
-  padding-bottom: 40px;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Date nav bar */

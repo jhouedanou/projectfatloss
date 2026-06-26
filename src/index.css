@@ -86,7 +86,10 @@
 }
 
 /* Transitions */
-* {
+/* Transition de thème scopée aux surfaces + éléments interactifs
+   (évite la taxe de repaint d'un sélecteur universel sur mobile). */
+.app, .day-content, .hero-section, .exercise-card-premium, .hd-card, .hd-caffeine,
+.carousel-item, .card, button, input, textarea, select {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -100,6 +103,7 @@ html, body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg-primary);
   transition: background-color 0.3s ease;
 }
@@ -115,6 +119,7 @@ body {
   line-height: 1.6;
   font-size: 16px;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -134,6 +139,7 @@ h6 { font-size: 1rem; }
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-primary);
@@ -145,9 +151,25 @@ h6 { font-size: 1rem; }
 .app {
   background-color: var(--bg-primary);
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   overflow-x: hidden;
   position: relative;
+}
+
+/* Tablette / desktop : app mobile-first centrée en colonne lisible
+   plutôt qu'étirée sur toute la largeur. La nav et le CTA fixes sont
+   recadrés à la même largeur (voir App.jsx / .sticky-btn-wrapper). */
+@media (min-width: 768px) {
+  .app {
+    max-width: 768px;
+    margin-inline: auto;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+  .sticky-btn-wrapper {
+    max-width: 768px;
+    margin-inline: auto;
+  }
 }
 
 /* Header et navigation - remplacé par la bottom navigation MUI */
@@ -672,6 +694,7 @@ gap:1rem;
   padding-bottom: 90px;
   background-color: var(--bg-primary);
   min-height: calc(100vh - 140px);
+  min-height: calc(100dvh - 140px);
 }
 
 /* Styles pour le contenu de la section poids */
@@ -680,6 +703,7 @@ gap:1rem;
   padding-bottom: 90px;
   background-color: var(--bg-primary);
   min-height: calc(100vh - 140px);
+  min-height: calc(100dvh - 140px);
 }
 
 /* Sélecteur de langue */
@@ -995,6 +1019,7 @@ gap:1rem;
   align-items: center;
   justify-content: center;
   height: 100vh;
+  height: 100dvh;
   width: 100%;
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -1422,6 +1447,21 @@ gap:1rem;
   gap: 16px;
 }
 
+/* Tablette : 2 colonnes d'exercices + hero plus grand pour exploiter la largeur */
+@media (min-width: 768px) {
+  .exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+  }
+  .hero-title {
+    font-size: 3rem;
+  }
+  .sticky-start-btn {
+    max-width: 760px;
+  }
+}
+
 .exercise-card-premium {
   position: relative;
   background: rgba(24, 24, 27, 0.6);
@@ -1505,10 +1545,10 @@ gap:1rem;
 /* Sticky Start Button */
 .sticky-btn-wrapper {
   position: fixed;
-  bottom: 88px; /* Above Bottom Nav */
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* Above Bottom Nav + home indicator */
   left: 0;
   right: 0;
-  padding: 0 20px;
+  padding: 0 max(20px, env(safe-area-inset-left, 0px)) 0 max(20px, env(safe-area-inset-right, 0px));
   z-index: 100;
   display: flex;
   justify-content: center;
