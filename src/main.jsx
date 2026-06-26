@@ -34,8 +34,8 @@ class ErrorBoundary extends React.Component {
         <div style={{ 
           padding: '20px', 
           textAlign: 'center', 
-          minHeight: '100vh', 
-          display: 'flex', 
+          minHeight: '100dvh',
+          display: 'flex',
           flexDirection: 'column', 
           justifyContent: 'center',
           backgroundColor: '#f5f5f5'

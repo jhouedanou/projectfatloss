@@ -10,7 +10,7 @@
   color: #fff;
   margin: 16px auto;
   max-width: 600px;
-  padding-bottom: 80px;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
 }
 
 .stats-title {

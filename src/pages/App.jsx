@@ -254,8 +254,8 @@ export default function App() {
         width: '100%', 
         overflowX: 'hidden', 
         position: 'relative',
-        minHeight: '100vh',
-        paddingBottom: stepMode ? 0 : '72px',
+        minHeight: '100dvh',
+        paddingBottom: stepMode ? 0 : 'calc(72px + env(safe-area-inset-bottom))',
       }}>
         {!stepMode && (
           <Header
@@ -497,17 +497,20 @@ export default function App() {
 
         {/* Bottom Navigation Bar - cachée en mode workout actif */}
         {!stepMode && (
-          <Paper 
-            sx={{ 
-              position: 'fixed', 
-              bottom: 0, 
-              left: 0, 
-              right: 0, 
+          <Paper
+            sx={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              maxWidth: '768px',
+              mx: 'auto',
               zIndex: 1100,
               borderTop: (theme) => `1px solid ${alpha(theme.palette.divider, 0.12)}`,
               backdropFilter: 'blur(20px)',
               backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.92),
-            }} 
+              pb: 'env(safe-area-inset-bottom)',
+            }}
             elevation={8}
           >
             <Box sx={{ display: 'flex', height: '68px', alignItems: 'stretch' }}>

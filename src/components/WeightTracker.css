@@ -1,7 +1,7 @@
 /* Styles pour le composant de suivi de poids */
 
 .weight-tracker {
-  padding: 15px;
+  padding: 15px 15px calc(96px + env(safe-area-inset-bottom, 0px));
   max-width: 800px;
   margin: 0 auto;
 }

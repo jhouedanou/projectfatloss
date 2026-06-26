@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef, createContext, useCallback, useMemo } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell } from 'lucide-react';
+import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell, CalendarPlus } from 'lucide-react';
+import { getFirstDoseAt, downloadLipo6Reminder } from '../utils/lipo6Reminder';
 const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon from '../components/ExoIcon';
@@ -222,7 +223,9 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [onEnd]); // Retirer 'time' des dépendances pour éviter le redémarrage
+    // Démarre une seule fois au montage de la pause : évite tout relancement du
+    // compte à rebours quand le parent re-render (ex. bascule du mode auto).
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="pause-screen">
@@ -273,6 +276,13 @@ function CalorieDisplay({ calories, visible }) {
 function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
   const [isLoadingFit, setIsLoadingFit] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
+  const [reminderAdded, setReminderAdded] = useState(false);
+  const lipo6FirstDose = getFirstDoseAt();
+
+  const handleAddLipo6Reminder = () => {
+    downloadLipo6Reminder(lipo6FirstDose);
+    setReminderAdded(true);
+  };
 
   function calculateWeight(equipment) {
     const match = equipment && equipment.match(/(\d+)\s*kg/i);
@@ -523,6 +533,37 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
             {isLoadingFit ? 'Synchronisation...' : isSynced ? '✓ SYNCHRONISÉ AVEC GOOGLE FIT' : 'SYNCHRONISER AVEC GOOGLE FIT'}
           </button>
         </div>
+
+        {/* Rappel Lipo 6 — 2e gélule (si 1re prise enregistrée aujourd'hui) */}
+        {lipo6FirstDose && (
+          <div style={{ margin: '0 0 16px 0', width: '100%' }}>
+            <button
+              onClick={handleAddLipo6Reminder}
+              disabled={reminderAdded}
+              style={{
+                width: '100%',
+                minHeight: '48px',
+                padding: '13px 16px',
+                borderRadius: '14px',
+                border: reminderAdded ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(240,61,50,0.4)',
+                background: reminderAdded ? 'rgba(16,185,129,0.08)' : 'rgba(240,61,50,0.1)',
+                color: reminderAdded ? '#10b981' : '#f87171',
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                fontFamily: "'Outfit', sans-serif",
+                letterSpacing: '0.3px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                cursor: reminderAdded ? 'default' : 'pointer',
+              }}
+            >
+              <CalendarPlus size={18} />
+              {reminderAdded ? 'RAPPEL AJOUTÉ À L\'AGENDA' : 'RAPPEL 2e GÉLULE LIPO 6 (+6 H)'}
+            </button>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -938,7 +979,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       style={{
         paddingTop: 'env(safe-area-inset-top, 20px)',
         paddingBottom: 'env(safe-area-inset-bottom, 20px)',
-        minHeight: '100vh',
+        minHeight: '100dvh',
       }}
     >
       <div className="action-buttons workout-topbar">
@@ -1388,6 +1429,20 @@ function StepSet({ exo, step, setNum, totalSets, onDone, onCaloriesBurned, onExe
     }
   }, [autoMode, currentRep, exo.nbRep, hasTimer, isChrono, caloriesPerSet, onCaloriesBurned, onDone]);
 
+  // Désactivation du mode auto : stopper proprement tout rythme automatique en
+  // cours (décompte, pulsation, overlay) au lieu d'en relancer un.
+  useEffect(() => {
+    if (!autoMode) {
+      setCountdown(null);
+      setIsPulsing(false);
+      setShowOverlay(false);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  }, [autoMode]);
+
   return (
     // pb généreux : réserve l'espace occupé par les contrôles flottants fixes
     // (bottom: 30px) pour que la ligne de répétitions ne passe pas dessous.
@@ -1395,7 +1450,7 @@ function StepSet({ exo, step, setNum, totalSets, onDone, onCaloriesBurned, onExe
       className="exercise-detail-wrapper"
       sx={{
         p: 2,
-        pb: '140px',
+        pb: 'calc(170px + env(safe-area-inset-bottom, 0px))',
         // Élargir la fiche sur tablette/desktop (cf. .day-content élargi en CSS)
         width: '100%',
         maxWidth: { xs: '100%', md: 760, lg: 860 },
@@ -1533,14 +1588,14 @@ function StepSet({ exo, step, setNum, totalSets, onDone, onCaloriesBurned, onExe
           className="exercise-illustration"
           sx={{
             width: '100%',
-            // Illustration agrandie sur tablette/desktop (remplace les overrides CSS !important)
-            maxWidth: { xs: 280, md: 360, lg: 420 },
+            // Illustration réduite pour que les instructions ne passent pas sous les contrôles fixes.
+            maxWidth: { xs: 200, md: 260, lg: 300 },
             aspectRatio: '1/1',
             borderRadius: '16px',
             overflow: 'hidden',
             border: '1px solid rgba(255, 255, 255, 0.08)',
             background: '#070707',
-            mb: '20px',
+            mb: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

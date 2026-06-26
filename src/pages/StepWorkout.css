@@ -27,12 +27,12 @@
 
 .day-content .workout-topbar {
   position: sticky;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   z-index: 1000;
   width: 100%;
-  max-width: 460px;
+  max-width: 760px;
   margin: 0 auto 10px;
-  padding: 14px 18px 12px;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 18px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -59,9 +59,9 @@
 
 .workout-logo-chip,
 .workout-icon-btn {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -69,6 +69,12 @@
   border-radius: 12px;
   box-sizing: border-box;
   line-height: 1;
+}
+
+.workout-icon-btn:active,
+.timer-btn:active,
+.workout-logo-chip:active {
+  transform: scale(0.94);
 }
 
 .workout-logo-chip {
@@ -121,7 +127,7 @@
 
 .workout-day-title {
   width: 100%;
-  max-width: 460px;
+  max-width: 760px;
   margin: 0 auto 10px;
   padding: 0 18px;
   box-sizing: border-box;
@@ -153,6 +159,7 @@
 .step-workout-container {
   background-color: #0f0f0f;
   min-height: 100vh;
+  min-height: 100dvh;
   padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
 }
 
@@ -251,7 +258,18 @@
   align-items: center;
   justify-content: center;
   min-height: 50vh;
+  min-height: 50dvh;
   color: #fff;
+}
+
+/* Tablette : aligner le bandeau et le titre sur la largeur de la carte */
+@media (min-width: 900px) {
+  .day-content .workout-topbar,
+  .workout-day-title { max-width: 760px; }
+}
+@media (min-width: 1200px) {
+  .day-content .workout-topbar,
+  .workout-day-title { max-width: 860px; }
 }
 
 .pause-header {
