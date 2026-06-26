@@ -1594,7 +1594,7 @@ function StepSet({ exo, step, setNum, totalSets, onDone, onCaloriesBurned, onExe
             borderRadius: '16px',
             overflow: 'hidden',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            background: '#070707',
+            background: '#101013',
             mb: '14px',
             display: 'flex',
             alignItems: 'center',
