@@ -60,6 +60,11 @@ function getUserWeight() {
 function metFromExercise(exo) {
   const name = (exo.name || '').toLowerCase();
 
+  // Vélo sur le programme CAL 1 du Domyos EB900 : programme "Calories" à
+  // résistance élevée, effort vigoureux et régulier. MET 7.0 (Compendium :
+  // vélo stationnaire vigoureux ~100 W). Séances courtes de 10 min en fin de
+  // séance de muscu.
+  if (name.includes('vélo') || name.includes('velo')) return 7.0;
   if (name.includes('burpee') || name.includes('thruster') || name.includes('complexe')) return 8.0;
   if (name.includes('squat sauté') || name.includes('saut')) return 8.0;
   if (name.includes('soulevé') || name.includes('squat') || name.includes('fente')) return 6.0;
