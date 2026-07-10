@@ -3,9 +3,24 @@
  * Utilise l'API Web Speech de Google intégrée dans les navigateurs modernes
  */
 
+// Clé de persistance du réglage activé/désactivé (mémorisé entre les sessions)
+const SPEECH_ENABLED_KEY = 'speech_enabled';
+
+/**
+ * Lit l'état activé/désactivé mémorisé dans le localStorage.
+ * @returns {boolean} true par défaut (annonces activées) si aucun réglage enregistré.
+ */
+function loadStoredEnabled() {
+  try {
+    const stored = localStorage.getItem(SPEECH_ENABLED_KEY);
+    if (stored !== null) return stored === 'true';
+  } catch (e) {}
+  return true;
+}
+
 // Configuration initiale de la voix - RÉACTIVÉE POUR LES EXERCICES
 let voiceConfig = {
-  enabled: true,           // Activée par défaut
+  enabled: loadStoredEnabled(), // Activée par défaut, mémorisée entre les sessions
   volume: 0.8,             // Volume (0 à 1)
   rate: 1.0,               // Vitesse de parole (0.1 à 10)
   pitch: 1.0,              // Tonalité (0 à 2)
@@ -106,6 +121,21 @@ function speak(text, options = {}) {
  */
 function setEnabled(enabled) {
   voiceConfig.enabled = !!enabled;
+  try {
+    localStorage.setItem(SPEECH_ENABLED_KEY, String(voiceConfig.enabled));
+  } catch (e) {}
+  // Couper immédiatement toute annonce en cours si on désactive
+  if (!voiceConfig.enabled && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+  return voiceConfig.enabled;
+}
+
+/**
+ * Indique si la synthèse vocale est actuellement activée.
+ * @returns {boolean}
+ */
+function isEnabled() {
   return voiceConfig.enabled;
 }
 
@@ -147,16 +177,26 @@ function announceExercise(exercise, setNum = 0, totalSets = 1, isPaused = false)
 
   // Extraire les informations de l'exercice
   const name = exercise.name || '';
-  
-  // Construire le texte à annoncer - simplifié selon la demande
+
+  // Annoncer l'exercice puis la série en cours
   let text = `${name}.`;
-  
-  // Ajouter l'information sur la série en cours seulement si c'est la première série
-  if (setNum === 0 && totalSets > 1) {
-    text += ` ${totalSets} séries à effectuer.`;
+  if (totalSets > 1) {
+    text += ` Série ${setNum + 1} sur ${totalSets}.`;
   }
-  
+
   speak(text);
+}
+
+/**
+ * Annonce uniquement la série en cours (changement de série au sein d'un même exercice)
+ * @param {number} setNum - Index de la série actuelle (0 = première)
+ * @param {number} totalSets - Nombre total de séries
+ */
+function announceSet(setNum = 0, totalSets = 1) {
+  if (!voiceConfig.enabled || !voiceConfig.exerciseEnabled) return;
+  if (totalSets <= 1) return;
+
+  speak(`Série ${setNum + 1} sur ${totalSets}.`);
 }
 
 /**
@@ -204,10 +244,12 @@ export {
   initSpeechService,
   speak,
   setEnabled,
+  isEnabled,
   updateConfig,
   getConfig,
   getVoices,
   announceExercise,
+  announceSet,
   announcePause,
   announceCount,
   announceRepetition,

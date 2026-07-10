@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, createContext, useCallback, useMemo } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell, CalendarPlus } from 'lucide-react';
+import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell, CalendarPlus, Volume2, VolumeX } from 'lucide-react';
 import { getFirstDoseAt, downloadLipo6Reminder } from '../utils/lipo6Reminder';
 const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
@@ -12,7 +12,7 @@ import ProgressTracker from '../components/ProgressTracker';
 import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
 import DayPills from '../components/DayPills';
 import { getWorkoutPlan } from '../services/WorkoutCustomization';
-import { initSpeechService, announceExercise, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled } from '../services/SpeechService';
+import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
 import { useTranslation } from 'react-i18next';
@@ -653,7 +653,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     cancelAction: () => {}
   });
   const [showAutoModeDialog, setShowAutoModeDialog] = useState(false);
-  const isFirstRender = useRef(true);
+  // Synthèse vocale : état activé/désactivé (mémorisé dans le SpeechService/localStorage)
+  const [speechEnabled, setSpeechEnabledState] = useState(() => isSpeechEnabled());
+  // Suivi de l'exercice / la série déjà annoncés pour éviter les doublons
+  const prevStepRef = useRef(-1);
+  const prevSetRef = useRef(-1);
   let beepTimeouts = [];
   
   // Mémoïser le plan : getWorkoutPlan() lit localStorage et, en cas de plan
@@ -687,22 +691,29 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     setSetNum(0);
     setPendingTransitionType(null);
     setTotalCaloriesBurned(0);
+    // Réinitialiser le suivi des annonces pour ré-annoncer le 1er exercice du jour
+    prevStepRef.current = -1;
+    prevSetRef.current = -1;
   },[dayIndex]);
 
-  // Annoncer l'exercice uniquement au début de chaque nouvel exercice
-  const prevStepRef = useRef(step);
-
+  // Annonce vocale française : nom de l'exercice + série au début de chaque
+  // exercice, puis numéro de série à chaque nouvelle série du même exercice.
+  // Silencieux pendant les pauses et l'écran de préparation.
   useEffect(() => {
-    const isNewExercise = prevStepRef.current !== step;
+    if (!exo || pause || showPreWorkout) return;
 
-    if (isNewExercise && exo && !isFirstRender.current && !pause) {
-      if (setNum === 0) {
-        announceExercise(exo, setNum, totalSets, pause);
-      }
+    const isNewExercise = prevStepRef.current !== step;
+    const isNewSet = prevSetRef.current !== setNum;
+
+    if (isNewExercise) {
+      announceExercise(exo, setNum, totalSets, pause);
+    } else if (isNewSet) {
+      announceSet(setNum, totalSets);
     }
 
     prevStepRef.current = step;
-  }, [exo, step, setNum, totalSets, pause]);
+    prevSetRef.current = setNum;
+  }, [exo, step, setNum, totalSets, pause, showPreWorkout]);
   
   const applyPendingAdvance = useCallback(() => {
     if (pendingTransitionType === 'exercise') {
@@ -822,6 +833,14 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // Fonction pour toggler le mode automatique
   const handleToggleAutoMode = () => {
     setAutoMode(prev => !prev);
+  };
+
+  // Activer / désactiver la synthèse vocale (annonce exercice + série).
+  // Le réglage est mémorisé par le SpeechService (localStorage).
+  const handleToggleSpeech = () => {
+    const next = !speechEnabled;
+    setSpeechEnabledState(next);
+    setSpeechEnabled(next); // persiste + coupe toute annonce en cours si désactivé
   };
 
   const handleBackClick = () => {
@@ -1001,8 +1020,17 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         </div>
         
         <div className="workout-topbar-actions">
-          <button 
-            className={`timer-btn workout-icon-btn ${autoMode ? 'is-active' : ''}`} 
+          <button
+            className={`timer-btn workout-icon-btn ${speechEnabled ? 'is-active' : ''}`}
+            onClick={handleToggleSpeech}
+            title={speechEnabled ? "Désactiver les annonces vocales" : "Activer les annonces vocales"}
+            aria-label={speechEnabled ? "Desactiver les annonces vocales" : "Activer les annonces vocales"}
+            aria-pressed={speechEnabled}
+          >
+            {speechEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          </button>
+          <button
+            className={`timer-btn workout-icon-btn ${autoMode ? 'is-active' : ''}`}
             onClick={handleToggleAutoMode}
             title={autoMode ? "Désactiver le mode automatique" : "Activer le mode automatique"}
             aria-label={autoMode ? "Desactiver le mode automatique" : "Activer le mode automatique"}
