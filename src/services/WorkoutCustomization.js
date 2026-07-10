@@ -36,6 +36,72 @@ export const saveWorkoutPlan = (workoutPlan) => {
   }
 };
 
+// --- Vélo optionnel (cardio de fin de séance) ---------------------------------
+// Le vélo peut être inclus ou non dans chaque séance sans modifier le programme
+// (le réglage est global et réversible, mémorisé dans le localStorage).
+
+const VELO_ENABLED_KEY = 'velo_enabled';
+
+/** Détecte une séance de vélo (cardio fin de séance) d'après son nom. */
+const isVeloExercise = (exercise) =>
+  (exercise?.name || '').toLowerCase().includes('vélo');
+
+/**
+ * Indique si le vélo de fin de séance est actif (inclus dans les séances).
+ * @returns {boolean} true par défaut si aucun réglage enregistré.
+ */
+export const isVeloEnabled = () => {
+  try {
+    const stored = localStorage.getItem(VELO_ENABLED_KEY);
+    return stored === null ? true : stored === 'true';
+  } catch (error) {
+    return true;
+  }
+};
+
+/**
+ * Active ou désactive le vélo de fin de séance (réglage global mémorisé).
+ * @param {boolean} enabled
+ * @returns {boolean} succès de l'écriture
+ */
+export const setVeloEnabled = (enabled) => {
+  try {
+    localStorage.setItem(VELO_ENABLED_KEY, String(!!enabled));
+    return true;
+  } catch (error) {
+    console.error('Erreur lors de l\'enregistrement du réglage vélo:', error);
+    return false;
+  }
+};
+
+/**
+ * Indique si un jour donné contient une séance de vélo (dans le plan brut,
+ * indépendamment du réglage activé/désactivé). Sert à savoir s'il faut
+ * proposer l'interrupteur pour ce jour.
+ * @param {number} dayIndex
+ * @returns {boolean}
+ */
+export const dayHasVelo = (dayIndex) => {
+  const plan = getWorkoutPlan();
+  const day = plan?.[dayIndex];
+  return !!day && (day.exercises || []).some(isVeloExercise);
+};
+
+/**
+ * Programme effectif pour l'affichage et la séance : identique au plan
+ * personnalisé/par défaut, mais sans le vélo si celui-ci est désactivé.
+ * N'altère jamais le plan enregistré (le WorkoutCustomizer garde le plan complet).
+ * @returns {Array}
+ */
+export const getActiveWorkoutPlan = () => {
+  const plan = getWorkoutPlan();
+  if (isVeloEnabled()) return plan;
+  return plan.map((day) => ({
+    ...day,
+    exercises: (day.exercises || []).filter((exercise) => !isVeloExercise(exercise)),
+  }));
+};
+
 /**
  * Modifier un exercice dans le programme
  * @param {number} dayIndex - Index du jour à modifier

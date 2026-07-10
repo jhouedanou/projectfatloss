@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { 
@@ -13,7 +13,7 @@ import {
 import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft, Apple, Bike } from 'lucide-react';
 import { createAppTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
-import { getWorkoutPlan } from '../services/WorkoutCustomization'; 
+import { getActiveWorkoutPlan, isVeloEnabled, setVeloEnabled, dayHasVelo } from '../services/WorkoutCustomization';
 import StepWorkout from './StepWorkout';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import WorkoutStats from '../components/WorkoutStats';
@@ -72,6 +72,10 @@ export default function App() {
   const [appTheme, setAppTheme] = useState(() => createAppTheme(true));
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
+  // Vélo de fin de séance optionnel (réglage global mémorisé)
+  const [veloEnabled, setVeloEnabledState] = useState(() => isVeloEnabled());
+  // Le jour courant propose-t-il un vélo (dans le plan brut) ? Sinon pas d'interrupteur.
+  const currentDayHasVelo = useMemo(() => dayHasVelo(current), [current, showCustomizer]);
 
   // Auth Supabase : suit l'état de connexion et synchronise à la connexion
   useEffect(() => {
@@ -96,7 +100,7 @@ export default function App() {
   useEffect(() => {
     try {
       setIsLoading(true);
-      const plan = getWorkoutPlan();
+      const plan = getActiveWorkoutPlan();
       
       if (!plan || plan.length === 0) {
         setWorkoutPlan(initialWorkoutPlan);
@@ -142,7 +146,7 @@ export default function App() {
   const handleCloseCustomizer = () => {
     setShowCustomizer(false);
     try {
-      const plan = getWorkoutPlan();
+      const plan = getActiveWorkoutPlan();
       if (plan && plan.length > 0) {
         setWorkoutPlan(plan);
       }
@@ -150,7 +154,22 @@ export default function App() {
       console.error('Erreur lors du rechargement du plan:', error);
     }
   };
-  
+
+  // Active/désactive le vélo de fin de séance et recharge le plan affiché.
+  const handleToggleVelo = () => {
+    const next = !veloEnabled;
+    setVeloEnabledState(next);
+    setVeloEnabled(next);
+    try {
+      const plan = getActiveWorkoutPlan();
+      if (plan && plan.length > 0) {
+        setWorkoutPlan(plan);
+      }
+    } catch (error) {
+      console.error('Erreur lors du rechargement du plan:', error);
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem('currentWorkoutDay', current.toString());
   }, [current]);
@@ -367,6 +386,62 @@ export default function App() {
                         </div>
                       ) : (
                         <div className="exercises-container">
+                          {/* Interrupteur : vélo de fin de séance optionnel */}
+                          {currentDayHasVelo && (
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '12px',
+                              padding: '14px 16px',
+                              margin: '0 0 16px 0',
+                              borderRadius: '16px',
+                              background: 'rgba(255, 255, 255, 0.03)',
+                              border: '1px solid rgba(255, 255, 255, 0.08)',
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                                <Bike size={20} color={veloEnabled ? '#3B82F6' : '#71717a'} />
+                                <div style={{ minWidth: 0 }}>
+                                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
+                                    Vélo en fin de séance
+                                  </div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #a1a1aa)' }}>
+                                    {veloEnabled ? 'Inclus dans la séance' : 'Retiré de la séance'}
+                                  </div>
+                                </div>
+                              </div>
+                              <button
+                                onClick={handleToggleVelo}
+                                role="switch"
+                                aria-checked={veloEnabled}
+                                aria-label="Activer ou désactiver le vélo de fin de séance"
+                                style={{
+                                  position: 'relative',
+                                  width: '48px',
+                                  height: '28px',
+                                  flexShrink: 0,
+                                  borderRadius: '100px',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  background: veloEnabled ? '#3B82F6' : 'rgba(255, 255, 255, 0.18)',
+                                  transition: 'background 0.25s ease',
+                                }}
+                              >
+                                <span style={{
+                                  position: 'absolute',
+                                  top: '3px',
+                                  left: veloEnabled ? '23px' : '3px',
+                                  width: '22px',
+                                  height: '22px',
+                                  borderRadius: '50%',
+                                  background: '#fff',
+                                  transition: 'left 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+                                }} />
+                              </button>
+                            </div>
+                          )}
                           {/* Liste d'exercices avec numérotation géante */}
                           <div className="exercise-grid">
                             {workoutPlan[current].exercises.map((exo, index) => (
