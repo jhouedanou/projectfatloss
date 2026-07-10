@@ -11,7 +11,7 @@ import FloatingButtons from '../components/FloatingButtons/FloatingButtons';
 import ProgressTracker from '../components/ProgressTracker';
 import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
 import DayPills from '../components/DayPills';
-import { getWorkoutPlan } from '../services/WorkoutCustomization';
+import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
 import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
@@ -665,7 +665,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // Sans mémoïsation, `day`/`exo` changeraient d'identité à chaque rendu, ce
   // qui relancerait le compteur de répétitions (effet de reset basé sur `exo`)
   // notamment en mode auto où le parent se re-rend souvent.
-  const workoutPlan = useMemo(() => getWorkoutPlan(), []);
+  // Plan effectif : exclut le vélo de fin de séance s'il est désactivé.
+  const workoutPlan = useMemo(() => getActiveWorkoutPlan(), []);
   const day = workoutPlan?.[dayIndex];
   const total = day?.exercises?.length || 0;
   const exo = day?.exercises?.[step];
