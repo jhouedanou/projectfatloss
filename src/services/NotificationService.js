@@ -8,6 +8,12 @@
 const NOTIFICATION_SETTINGS_KEY = 'notification_settings';
 const DEFAULT_TIME = '16:00'; // 4h par défaut
 
+// URL du service worker relative à la base de déploiement.
+// En prod GitHub Pages, import.meta.env.BASE_URL vaut '/projectfatloss/' →
+// '/projectfatloss/sw.js'. En dev, '/' → '/sw.js'. Un chemin codé en dur
+// '/sw.js' pointerait sur la racine du domaine (404 sous /projectfatloss/).
+const SW_URL = `${import.meta.env.BASE_URL}sw.js`;
+
 /**
  * Détecte le type de plateforme et navigateur avec support Android 15
  */
@@ -379,7 +385,7 @@ class NotificationService {
     try {
       // Enregistrer le service worker si pas déjà fait
       if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.register('/sw.js');
+        const registration = await navigator.serviceWorker.register(SW_URL);
         this.serviceWorker = registration;
         console.log('NotificationService: Service Worker enregistré');
         
@@ -668,7 +674,7 @@ export async function initNotificationService() {
       try {
         const registration = await navigator.serviceWorker.getRegistration();
         if (!registration) {
-          await navigator.serviceWorker.register('/sw.js');
+          await navigator.serviceWorker.register(SW_URL);
           console.log('Service Worker enregistré pour les notifications');
         }
       } catch (error) {
