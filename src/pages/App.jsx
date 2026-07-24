@@ -10,10 +10,11 @@ import {
   Box,
   alpha
 } from '@mui/material';
-import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft, Apple, Bike } from 'lucide-react';
+import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft, Apple, Bike, Camera } from 'lucide-react';
 import { createAppTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import { getActiveWorkoutPlan, isVeloEnabled, setVeloEnabled, dayHasVelo } from '../services/WorkoutCustomization';
+import { isCameraRepEnabled, setCameraRepEnabled } from '../services/CameraRepService';
 import StepWorkout from './StepWorkout';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import WorkoutStats from '../components/WorkoutStats';
@@ -76,6 +77,8 @@ export default function App() {
   const [veloEnabled, setVeloEnabledState] = useState(() => isVeloEnabled());
   // Le jour courant propose-t-il un vélo (dans le plan brut) ? Sinon pas d'interrupteur.
   const currentDayHasVelo = useMemo(() => dayHasVelo(current), [current, showCustomizer]);
+  // Comptage des répétitions par la caméra (réglage global mémorisé)
+  const [cameraRepEnabled, setCameraRepEnabledState] = useState(() => isCameraRepEnabled());
 
   // Auth Supabase : suit l'état de connexion et synchronise à la connexion
   useEffect(() => {
@@ -153,6 +156,13 @@ export default function App() {
     } catch (error) {
       console.error('Erreur lors du rechargement du plan:', error);
     }
+  };
+
+  // Active/désactive le comptage des répétitions par la caméra.
+  const handleToggleCameraRep = () => {
+    const next = !cameraRepEnabled;
+    setCameraRepEnabledState(next);
+    setCameraRepEnabled(next);
   };
 
   // Active/désactive le vélo de fin de séance et recharge le plan affiché.
@@ -442,6 +452,60 @@ export default function App() {
                               </button>
                             </div>
                           )}
+                          {/* Interrupteur : comptage des répétitions par la caméra */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            padding: '14px 16px',
+                            margin: '0 0 16px 0',
+                            borderRadius: '16px',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                              <Camera size={20} color={cameraRepEnabled ? '#4CAF50' : '#71717a'} />
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
+                                  Compter les reps avec la caméra
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #a1a1aa)' }}>
+                                  {cameraRepEnabled ? 'Caméra proposée pendant les séries' : 'Désactivé'}
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              onClick={handleToggleCameraRep}
+                              role="switch"
+                              aria-checked={cameraRepEnabled}
+                              aria-label="Activer ou désactiver le comptage des répétitions par la caméra"
+                              style={{
+                                position: 'relative',
+                                width: '48px',
+                                height: '28px',
+                                flexShrink: 0,
+                                borderRadius: '100px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0,
+                                background: cameraRepEnabled ? '#4CAF50' : 'rgba(255, 255, 255, 0.18)',
+                                transition: 'background 0.25s ease',
+                              }}
+                            >
+                              <span style={{
+                                position: 'absolute',
+                                top: '3px',
+                                left: cameraRepEnabled ? '23px' : '3px',
+                                width: '22px',
+                                height: '22px',
+                                borderRadius: '50%',
+                                background: '#fff',
+                                transition: 'left 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+                              }} />
+                            </button>
+                          </div>
                           {/* Liste d'exercices avec numérotation géante */}
                           <div className="exercise-grid">
                             {workoutPlan[current].exercises.map((exo, index) => (

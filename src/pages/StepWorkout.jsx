@@ -21,6 +21,9 @@ import { getExerciseIconsPath, getAssetPath } from '../utils/paths';
 import GoogleFitService from '../services/GoogleFitService';
 import PreWorkout from '../components/PreWorkout';
 import { getCaloriesForSet } from '../services/CalorieEstimator';
+import WebcamRepCounter from '../components/WebcamRepCounter';
+import { isCameraCountable } from '../services/RepPatternRules';
+import { isCameraRepEnabled } from '../services/CameraRepService';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -1177,6 +1180,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   const [currentRep, setCurrentRep] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
   const [countdown, setCountdown] = useState(null); // null = pas de décompte, sinon 3,2,1
+  const [cameraActive, setCameraActive] = useState(false); // comptage reps par webcam
   const timerRef = useRef(null);
 
   // Nouvelle logique pour déterminer quels exercices utilisent le chronomètre
@@ -1199,6 +1203,9 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   
   // Détecter si l'exercice utilise le chronomètre
   const isChrono = isDay7ChronoExercise || hasTimerProperty || hasZeroReps;
+
+  // L'exercice est-il comptable par la caméra (patron de mouvement reconnu) ?
+  const cameraCountable = !isChrono && isCameraCountable(exo);
 
   // Exercices à faire sur chaque membre (nécessitant deux fois le rythme)
   const doubleSidedExercises = [
@@ -1233,6 +1240,8 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     setCurrentRep(0);
     setShowOverlay(false);
     setCountdown(null);
+    // Activer la caméra si le réglage global est ON et l'exercice comptable
+    setCameraActive(isCameraRepEnabled() && cameraCountable);
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -1281,9 +1290,18 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     };
   }, [timerRunning, exo.duration]);
 
+  // Répétition détectée par la caméra : incrémente le compteur, borne à nbRep
+  const handleCameraRep = () => {
+    setCurrentRep((prev) => {
+      if (prev >= exo.nbRep) return prev;
+      playBeep();
+      return prev + 1;
+    });
+  };
+
   // Lancer le décompte avant le rythme (désactivé pour les exercices chronométrés)
   const handlePulse = () => {
-    if (hasTimer || isChrono) return; // Désactiver le rythme pour les exercices chronométrés
+    if (hasTimer || isChrono || cameraActive) return; // pas de rythme auto si caméra active
     
     if (!isPulsing && countdown === null) {
       setCountdown(3);
@@ -1443,7 +1461,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
 
   // Mode automatique: démarrer automatiquement le rythme si pas de timer/chrono
   useEffect(() => {
-    if (autoMode && !hasTimer && !isChrono && !isPaused) {
+    if (autoMode && !hasTimer && !isChrono && !isPaused && !cameraActive) {
       // Démarrer automatiquement le rythme après 2 secondes
       const autoStartTimer = setTimeout(() => {
         if (!isPulsing && countdown === null) {
@@ -1454,7 +1472,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
       
       return () => clearTimeout(autoStartTimer);
     }
-  }, [autoMode, hasTimer, isChrono, isPaused, isPulsing, countdown]);
+  }, [autoMode, hasTimer, isChrono, isPaused, isPulsing, countdown, cameraActive]);
 
   // Mode automatique: terminer automatiquement l'exercice après les répétitions
   useEffect(() => {
@@ -1697,7 +1715,31 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         >
           {exo.desc}
         </Typography>
-        
+
+        {/* Comptage des répétitions par la caméra (webcam + pose) */}
+        {cameraCountable && (
+          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
+            {cameraActive ? (
+              <WebcamRepCounter
+                exo={exo}
+                currentRep={currentRep}
+                targetReps={exo.nbRep}
+                onRep={handleCameraRep}
+                onClose={() => setCameraActive(false)}
+              />
+            ) : (
+              <Button
+                variant="outlined"
+                startIcon={<MonitorPlay size={18} />}
+                onClick={() => setCameraActive(true)}
+                sx={{ borderColor: 'rgba(76,175,80,0.5)', color: '#4CAF50' }}
+              >
+                Compter les reps avec la caméra
+              </Button>
+            )}
+          </Box>
+        )}
+
         {/* Timer spécial pour exercices avec duration fixe */}
         {exo.duration && !isChrono ? (
           <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

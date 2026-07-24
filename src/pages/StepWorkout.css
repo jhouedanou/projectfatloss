@@ -83,12 +83,12 @@
 }
 
 .workout-logo-chip img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  border-radius: 8px;
-  object-fit: cover;
-  margin: 0;
+    width: 73px;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    object-fit: cover;
+    margin: 0;
 }
 
 .workout-icon-btn,
