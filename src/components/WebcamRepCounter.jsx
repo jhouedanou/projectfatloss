@@ -50,9 +50,9 @@ export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, 
           setErrorMsg('Caméra non supportée par ce navigateur.');
           return;
         }
-        // 1. Caméra
+        // 1. Caméra — contraintes minimales pour éviter OverconstrainedError
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+          video: { facingMode: 'user' },
           audio: false,
         });
         if (cancelled) {
@@ -62,7 +62,13 @@ export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, 
         streamRef.current = stream;
         const video = videoRef.current;
         video.srcObject = stream;
-        await video.play();
+        // play() peut rejeter sur iOS hors geste utilisateur : non bloquant,
+        // le flux est déjà attaché (autorisation accordée).
+        try {
+          await video.play();
+        } catch (playErr) {
+          /* lecture reprise automatiquement par l'élément vidéo */
+        }
 
         // 2. Modèle de pose (peut prendre quelques secondes au 1er lancement)
         const landmarker = await loadPoseLandmarker();
@@ -118,7 +124,7 @@ export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, 
   return (
     <div className="webcam-rep-counter">
       <div className="wrc-video-wrap">
-        <video ref={videoRef} className="wrc-video" playsInline muted />
+        <video ref={videoRef} className="wrc-video" playsInline muted autoPlay />
         <button className="wrc-close" onClick={onClose} aria-label="Fermer la caméra">
           <X size={18} />
         </button>
