@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, createContext, useCallback, useMemo
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell, CalendarPlus, Volume2, VolumeX } from 'lucide-react';
-import { getFirstDoseAt, downloadLipo6Reminder } from '../utils/lipo6Reminder';
+import { getLastDoseAt, isTakenToday, downloadCreatineReminder } from '../utils/creatineReminder';
 const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon from '../components/ExoIcon';
@@ -277,10 +277,11 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
   const [isLoadingFit, setIsLoadingFit] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
   const [reminderAdded, setReminderAdded] = useState(false);
-  const lipo6FirstDose = getFirstDoseAt();
+  const creatineLastDose = getLastDoseAt();
+  const creatineTakenToday = isTakenToday(creatineLastDose);
 
-  const handleAddLipo6Reminder = () => {
-    downloadLipo6Reminder(lipo6FirstDose);
+  const handleAddCreatineReminder = () => {
+    downloadCreatineReminder(creatineLastDose || Date.now());
     setReminderAdded(true);
   };
 
@@ -534,11 +535,11 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
           </button>
         </div>
 
-        {/* Rappel Lipo 6 — 2e gélule (si 1re prise enregistrée aujourd'hui) */}
-        {lipo6FirstDose && (
+        {/* Rappel créatine — dose quotidienne de 5 g (proposé tant qu'elle n'est pas prise) */}
+        {!creatineTakenToday && (
           <div style={{ margin: '0 0 16px 0', width: '100%' }}>
             <button
-              onClick={handleAddLipo6Reminder}
+              onClick={handleAddCreatineReminder}
               disabled={reminderAdded}
               style={{
                 width: '100%',
@@ -560,7 +561,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
               }}
             >
               <CalendarPlus size={18} />
-              {reminderAdded ? 'RAPPEL AJOUTÉ À L\'AGENDA' : 'RAPPEL 2e GÉLULE LIPO 6 (+6 H)'}
+              {reminderAdded ? 'RAPPEL AJOUTÉ À L\'AGENDA' : 'RAPPEL CRÉATINE 5 G (QUOTIDIEN)'}
             </button>
           </div>
         )}

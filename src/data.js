@@ -1,11 +1,13 @@
 /**
- * PROGRAMME PERTE DE GRAS — refonte v2 (profil > 135 kg, confirmé, dos solide).
- * Split Push / Pull / Legs / Push / Pull (Lundi → Vendredi). Samedi marche, Dimanche repos.
+ * PROGRAMME PERTE DE GRAS — musculation 7 jours / 7 (profil > 135 kg, confirmé, dos solide).
+ * Split Push A / Pull A / Legs A / Push B / Pull B / Legs B / Full body — aucun jour de repos,
+ * aucune séance de marche : chaque jour est une séance de musculation d'environ 1 heure.
  * 4 semaines : Adaptation → Accumulation → Intensification → Allègement (deload actif).
- * Adapté : 100% debout/banc (aucun appui au sol), ZÉRO saut (low-impact), hinge surélevé 2x/sem.
+ * Adapté : 100% debout/banc (aucun appui au sol), ZÉRO saut (low-impact), hinge surélevé.
  * Matériel : haltères 5/10/15 kg, barre 30 kg, veste lestée 10 kg, poids chevilles 2×4 + 2×2 kg.
- * Chaque séance Lun-Ven brûle >= 500 kcal (compteur MET, s'adapte au poids — lit ~700-1100 à ton gabarit).
- * Généré par scratchpad/gen2.mjs — ne pas éditer à la main.
+ * Le vélo de fin de séance (10 min, prog. CAL 1) est optionnel : l'heure de musculation tient sans lui.
+ * Supplémentation : créatine monohydrate 5 g/jour (voir src/utils/creatineReminder.js).
+ * Généré par scripts/gen-plan.mjs — ne pas éditer à la main.
  */
 const fullPlan = [
   {
@@ -56,11 +58,11 @@ const fullPlan = [
       },
       {
         name: 'Élévations latérales haltères',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -70,11 +72,11 @@ const fullPlan = [
       },
       {
         name: 'Extension triceps nuque haltère',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Debout ou assis, haltère derrière la nuque à deux mains, tendez les bras vers le haut. Triceps.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -83,12 +85,40 @@ const fullPlan = [
         }
       },
       {
+        name: 'Écarté haltères sur banc',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Sur banc, bras légèrement fléchis, ouvrez les haltères en arc de cercle puis refermez au-dessus de la poitrine. Étirement des pectoraux.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Fly',
+          muscleGroups: ['chest', 'shoulders']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '4 × 15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Haltère 15 kg',
         desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
         caloriesPerSet: [13, 15],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -98,11 +128,11 @@ const fullPlan = [
       },
       {
         name: 'Relevés de genoux debout',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Poids chevilles 4 kg',
         desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -114,7 +144,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -176,11 +206,11 @@ const fullPlan = [
       },
       {
         name: 'Curl biceps haltères',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 15 kg',
         desc: 'Debout, fléchissez les coudes pour monter les haltères vers les épaules sans balancer. Biceps.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -189,12 +219,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Curl marteau haltères',
+        sets: '4 × 15',
+        equip: 'Haltères 15 kg',
+        desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Hammer Curl',
+          muscleGroups: ['biceps', 'forearms']
+        }
+      },
+      {
         name: 'Oiseau haltères (arrière épaule)',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -203,12 +247,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Shrugs barre (haussements)',
+        sets: '4 × 15',
+        equip: 'Barre 30 kg',
+        desc: 'Debout, barre devant, haussez les épaules vers les oreilles sans plier les bras. Trapèzes.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Barbell Shrugs',
+          muscleGroups: ['trapezius', 'back']
+        }
+      },
+      {
         name: 'Woodchopper haltère',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Haltère 10 kg',
         desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -218,11 +276,11 @@ const fullPlan = [
       },
       {
         name: 'Marche du fermier (farmer carry)',
-        sets: '3 × 60 s',
+        sets: '4 × 60 s',
         equip: 'Haltères 15 kg',
         desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
         caloriesPerSet: [11, 12],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 0,
         timer: true,
         duration: 60,
@@ -236,7 +294,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -251,7 +309,7 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 3: LEGS (Quadriceps, Fessiers, Mollets) — S1 Adaptation',
+    title: 'JOUR 3: LEGS A (Quadriceps, Fessiers, Mollets) — S1 Adaptation',
     isRestDay: false,
     exercises: [
       {
@@ -266,20 +324,6 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Barbell Squat',
           muscleGroups: ['quadriceps', 'glutes', 'hamstrings']
-        }
-      },
-      {
-        name: 'Fentes avant alternées haltères',
-        sets: '4 × 12 (tempo 3-1-1) /côté',
-        equip: 'Haltères 15 kg',
-        desc: 'Un pas en avant, descendez le genou arrière vers le sol sans le poser, puis remontez. Alternez. Quadriceps, fessiers, équilibre.',
-        caloriesPerSet: [21, 24],
-        totalSets: 8,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Walking Lunges',
-          muscleGroups: ['quadriceps', 'glutes']
         }
       },
       {
@@ -312,11 +356,11 @@ const fullPlan = [
       },
       {
         name: 'Squat sumo haltère',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltère 15 kg',
         desc: 'Pieds très écartés, pointes vers l\'extérieur, haltère tenu entre les jambes. Adducteurs + fessiers. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -325,12 +369,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Mollets debout lestés',
+        sets: '4 × 15',
+        equip: 'Veste lestée 10 kg',
+        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Calf Raise',
+          muscleGroups: ['calves']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Haltère 15 kg',
         desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
         caloriesPerSet: [13, 15],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -340,11 +398,11 @@ const fullPlan = [
       },
       {
         name: 'Woodchopper haltère',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Haltère 10 kg',
         desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -356,7 +414,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -418,11 +476,11 @@ const fullPlan = [
       },
       {
         name: 'Élévations frontales haltères',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Debout, montez les haltères devant vous jusqu\'aux épaules. Deltoïde antérieur.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -431,12 +489,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Élévations latérales haltères',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Lateral Raises',
+          muscleGroups: ['shoulders']
+        }
+      },
+      {
         name: 'Oiseau haltères (arrière épaule)',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -445,12 +517,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Kickback triceps haltère',
+        sets: '4 × 15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
         name: 'Woodchopper haltère',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Haltère 10 kg',
         desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -460,11 +546,11 @@ const fullPlan = [
       },
       {
         name: 'Relevés de genoux debout',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Poids chevilles 4 kg',
         desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -476,7 +562,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -538,11 +624,11 @@ const fullPlan = [
       },
       {
         name: 'Shrugs barre (haussements)',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Barre 30 kg',
         desc: 'Debout, barre devant, haussez les épaules vers les oreilles sans plier les bras. Trapèzes.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -552,11 +638,11 @@ const fullPlan = [
       },
       {
         name: 'Curl concentré haltère',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Haltère 15 kg',
         desc: 'Assis sur banc, coude calé contre la cuisse, fléchissez le bras lentement. Isolation du biceps.',
         caloriesPerSet: [12, 14],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -565,12 +651,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Oiseau haltères (arrière épaule)',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Rear Delt Raise',
+          muscleGroups: ['shoulders', 'back']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Haltère 15 kg',
         desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
         caloriesPerSet: [13, 15],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -579,12 +679,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Relevés de genoux debout',
+        sets: '4 × 15 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Knee Raises',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
         name: 'Marche du fermier (farmer carry)',
-        sets: '3 × 60 s',
+        sets: '4 × 60 s',
         equip: 'Haltères 15 kg',
         desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
         caloriesPerSet: [11, 12],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 0,
         timer: true,
         duration: 60,
@@ -598,7 +712,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -613,48 +727,275 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 6: MARCHE (Récupération active) — S1',
+    title: 'JOUR 6: LEGS B (Ischios, Fessiers, Mollets) — S1 Adaptation',
     isRestDay: false,
     exercises: [
       {
-        name: 'Marche rapide',
-        sets: '45 min',
-        equip: 'Veste lestée 10 kg (optionnel)',
-        desc: '45 min de marche rapide, idéalement en côte ou avec la veste lestée. Récupération active à fort débit lipidique, zéro impact.',
-        caloriesPerSet: [478, 532],
-        totalSets: 1,
-        nbRep: 0,
-        timer: true,
-        duration: 2700,
+        name: 'Squat gobelet haltère',
+        sets: '4 × 12 (tempo 3-1-1)',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
+        caloriesPerSet: [21, 24],
+        totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Brisk Walk',
-          muscleGroups: ['full_body']
+          name: 'Goblet Squat',
+          muscleGroups: ['quadriceps', 'glutes', 'core']
         }
       },
       {
-        name: 'Mobilité articulaire',
-        sets: '10 min',
-        equip: 'Aucun',
-        desc: '10 min de mobilité debout (épaules, hanches, chevilles). Entretient l\'amplitude, limite les blessures.',
-        caloriesPerSet: [106, 118],
+        name: 'Fentes arrière alternées haltères',
+        sets: '4 × 12 (tempo 3-1-1) /côté',
+        equip: 'Haltères 15 kg',
+        desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
+        caloriesPerSet: [21, 24],
+        totalSets: 8,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Reverse Lunges',
+          muscleGroups: ['glutes', 'hamstrings', 'quadriceps']
+        }
+      },
+      {
+        name: 'Soulevé de terre roumain unilatéral haltère',
+        sets: '4 × 12 (tempo 3-1-1) /côté',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout sur une jambe (main libre en appui léger si besoin), poussez la hanche en arrière et descendez l\'haltère le long de la jambe d\'appui, dos droit. Ischios, fessiers, équilibre.',
+        caloriesPerSet: [21, 24],
+        totalSets: 8,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Single Leg Romanian Deadlift',
+          muscleGroups: ['hamstrings', 'glutes', 'core']
+        }
+      },
+      {
+        name: 'Mollets debout lestés',
+        sets: '4 × 15',
+        equip: 'Veste lestée 10 kg',
+        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Calf Raise',
+          muscleGroups: ['calves']
+        }
+      },
+      {
+        name: 'Extension de hanche debout',
+        sets: '4 × 15 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, tendez la jambe vers l\'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Hip Extension',
+          muscleGroups: ['glutes', 'hamstrings']
+        }
+      },
+      {
+        name: 'Woodchopper haltère',
+        sets: '4 × 15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Woodchopper',
+          muscleGroups: ['obliques', 'abdominals', 'core']
+        }
+      },
+      {
+        name: 'Marche du fermier (farmer carry)',
+        sets: '4 × 60 s',
+        equip: 'Haltères 15 kg',
+        desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
+        caloriesPerSet: [11, 12],
+        totalSets: 4,
+        nbRep: 0,
+        timer: true,
+        duration: 60,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Farmer Carry',
+          muscleGroups: ['core', 'forearms', 'trapezius']
+        }
+      },
+      {
+        name: 'Vélo (cardio fin de séance)',
+        sets: '10 min (prog. CAL 1)',
+        equip: 'Vélo',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
+        caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
         timer: true,
         duration: 600,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Joint Mobility',
-          muscleGroups: ['full_body']
+          name: 'Stationary Cycling',
+          muscleGroups: ['quadriceps', 'glutes', 'cardio']
         }
       },
     ],
   },
   {
-    title: 'JOUR 7: REPOS COMPLET — S1',
-    isRestDay: true,
+    title: 'JOUR 7: FULL BODY (Bras, Épaules, Gainage) — S1 Adaptation',
+    isRestDay: false,
     exercises: [
-
+      {
+        name: 'Développé couché haltères',
+        sets: '4 × 12 (tempo 3-1-1)',
+        equip: 'Haltères 15 kg',
+        desc: 'Sur banc plat, poussez les haltères vers le haut en contrôlant la descente, amplitude complète. Pectoraux, triceps.',
+        caloriesPerSet: [21, 24],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Bench Press',
+          muscleGroups: ['chest', 'triceps', 'shoulders']
+        }
+      },
+      {
+        name: 'Tirage menton barre (upright row)',
+        sets: '4 × 12 (tempo 3-1-1)',
+        equip: 'Barre 30 kg',
+        desc: 'Debout, barre devant les cuisses, tirez-la vers le menton coudes hauts, sans monter au-delà des épaules. Trapèzes et deltoïdes.',
+        caloriesPerSet: [21, 24],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Upright Row',
+          muscleGroups: ['shoulders', 'trapezius']
+        }
+      },
+      {
+        name: 'Curl marteau haltères',
+        sets: '4 × 12 (tempo 3-1-1)',
+        equip: 'Haltères 15 kg',
+        desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Hammer Curl',
+          muscleGroups: ['biceps', 'forearms']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '4 × 15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
+        name: 'Écarté haltères sur banc',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Sur banc, bras légèrement fléchis, ouvrez les haltères en arc de cercle puis refermez au-dessus de la poitrine. Étirement des pectoraux.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Fly',
+          muscleGroups: ['chest', 'shoulders']
+        }
+      },
+      {
+        name: 'Élévations latérales haltères',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Lateral Raises',
+          muscleGroups: ['shoulders']
+        }
+      },
+      {
+        name: 'Crunch latéral debout (side bend)',
+        sets: '4 × 15 /côté',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
+        caloriesPerSet: [13, 15],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Side Bend',
+          muscleGroups: ['obliques', 'abdominals']
+        }
+      },
+      {
+        name: 'Relevés de genoux debout',
+        sets: '4 × 15 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Knee Raises',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Marche du fermier (farmer carry)',
+        sets: '4 × 60 s',
+        equip: 'Haltères 15 kg',
+        desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
+        caloriesPerSet: [11, 12],
+        totalSets: 4,
+        nbRep: 0,
+        timer: true,
+        duration: 60,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Farmer Carry',
+          muscleGroups: ['core', 'forearms', 'trapezius']
+        }
+      },
+      {
+        name: 'Vélo (cardio fin de séance)',
+        sets: '10 min (prog. CAL 1)',
+        equip: 'Vélo',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
+        caloriesPerSet: [165, 185],
+        totalSets: 1,
+        nbRep: 0,
+        timer: true,
+        duration: 600,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Stationary Cycling',
+          muscleGroups: ['quadriceps', 'glutes', 'cardio']
+        }
+      },
     ],
   },
   {
@@ -705,11 +1046,11 @@ const fullPlan = [
       },
       {
         name: 'Élévations latérales haltères',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -719,11 +1060,11 @@ const fullPlan = [
       },
       {
         name: 'Extension triceps nuque haltère',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Debout ou assis, haltère derrière la nuque à deux mains, tendez les bras vers le haut. Triceps.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -732,12 +1073,40 @@ const fullPlan = [
         }
       },
       {
+        name: 'Écarté haltères sur banc',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Sur banc, bras légèrement fléchis, ouvrez les haltères en arc de cercle puis refermez au-dessus de la poitrine. Étirement des pectoraux.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Fly',
+          muscleGroups: ['chest', 'shoulders']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '4 × 15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
-        sets: '3 × 18 /côté',
+        sets: '4 × 18 /côté',
         equip: 'Haltère 15 kg',
         desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
         caloriesPerSet: [13, 15],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 18,
         googleFitActivity: {
           type: 'strength_training',
@@ -747,11 +1116,11 @@ const fullPlan = [
       },
       {
         name: 'Relevés de genoux debout',
-        sets: '3 × 18 /côté',
+        sets: '4 × 18 /côté',
         equip: 'Poids chevilles 4 kg',
         desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 18,
         googleFitActivity: {
           type: 'strength_training',
@@ -763,7 +1132,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -825,11 +1194,11 @@ const fullPlan = [
       },
       {
         name: 'Curl biceps haltères',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 15 kg',
         desc: 'Debout, fléchissez les coudes pour monter les haltères vers les épaules sans balancer. Biceps.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -838,12 +1207,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Curl marteau haltères',
+        sets: '4 × 15',
+        equip: 'Haltères 15 kg',
+        desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Hammer Curl',
+          muscleGroups: ['biceps', 'forearms']
+        }
+      },
+      {
         name: 'Oiseau haltères (arrière épaule)',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -852,12 +1235,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Shrugs barre (haussements)',
+        sets: '4 × 15',
+        equip: 'Barre 30 kg',
+        desc: 'Debout, barre devant, haussez les épaules vers les oreilles sans plier les bras. Trapèzes.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Barbell Shrugs',
+          muscleGroups: ['trapezius', 'back']
+        }
+      },
+      {
         name: 'Woodchopper haltère',
-        sets: '3 × 18 /côté',
+        sets: '4 × 18 /côté',
         equip: 'Haltère 10 kg',
         desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 18,
         googleFitActivity: {
           type: 'strength_training',
@@ -867,11 +1264,11 @@ const fullPlan = [
       },
       {
         name: 'Marche du fermier (farmer carry)',
-        sets: '3 × 60 s',
+        sets: '4 × 60 s',
         equip: 'Haltères 15 kg',
         desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
         caloriesPerSet: [11, 12],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 0,
         timer: true,
         duration: 60,
@@ -885,7 +1282,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -900,7 +1297,7 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 10: LEGS (Quadriceps, Fessiers, Mollets) — S2 Accumulation',
+    title: 'JOUR 10: LEGS A (Quadriceps, Fessiers, Mollets) — S2 Accumulation',
     isRestDay: false,
     exercises: [
       {
@@ -915,20 +1312,6 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Barbell Squat',
           muscleGroups: ['quadriceps', 'glutes', 'hamstrings']
-        }
-      },
-      {
-        name: 'Fentes avant alternées haltères',
-        sets: '5 × 12-15 /côté',
-        equip: 'Haltères 15 kg',
-        desc: 'Un pas en avant, descendez le genou arrière vers le sol sans le poser, puis remontez. Alternez. Quadriceps, fessiers, équilibre.',
-        caloriesPerSet: [21, 24],
-        totalSets: 10,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Walking Lunges',
-          muscleGroups: ['quadriceps', 'glutes']
         }
       },
       {
@@ -961,11 +1344,11 @@ const fullPlan = [
       },
       {
         name: 'Squat sumo haltère',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltère 15 kg',
         desc: 'Pieds très écartés, pointes vers l\'extérieur, haltère tenu entre les jambes. Adducteurs + fessiers. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -974,12 +1357,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Mollets debout lestés',
+        sets: '4 × 15',
+        equip: 'Veste lestée 10 kg',
+        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Calf Raise',
+          muscleGroups: ['calves']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
-        sets: '3 × 18 /côté',
+        sets: '4 × 18 /côté',
         equip: 'Haltère 15 kg',
         desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
         caloriesPerSet: [13, 15],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 18,
         googleFitActivity: {
           type: 'strength_training',
@@ -989,11 +1386,11 @@ const fullPlan = [
       },
       {
         name: 'Woodchopper haltère',
-        sets: '3 × 18 /côté',
+        sets: '4 × 18 /côté',
         equip: 'Haltère 10 kg',
         desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 18,
         googleFitActivity: {
           type: 'strength_training',
@@ -1005,7 +1402,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -1067,11 +1464,11 @@ const fullPlan = [
       },
       {
         name: 'Élévations frontales haltères',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Debout, montez les haltères devant vous jusqu\'aux épaules. Deltoïde antérieur.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -1080,12 +1477,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Élévations latérales haltères',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Lateral Raises',
+          muscleGroups: ['shoulders']
+        }
+      },
+      {
         name: 'Oiseau haltères (arrière épaule)',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Haltères 10 kg',
         desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -1094,12 +1505,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Kickback triceps haltère',
+        sets: '4 × 15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
         name: 'Woodchopper haltère',
-        sets: '3 × 18 /côté',
+        sets: '4 × 18 /côté',
         equip: 'Haltère 10 kg',
         desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 18,
         googleFitActivity: {
           type: 'strength_training',
@@ -1109,11 +1534,11 @@ const fullPlan = [
       },
       {
         name: 'Relevés de genoux debout',
-        sets: '3 × 18 /côté',
+        sets: '4 × 18 /côté',
         equip: 'Poids chevilles 4 kg',
         desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 18,
         googleFitActivity: {
           type: 'strength_training',
@@ -1125,7 +1550,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -1187,11 +1612,11 @@ const fullPlan = [
       },
       {
         name: 'Shrugs barre (haussements)',
-        sets: '3 × 15',
+        sets: '4 × 15',
         equip: 'Barre 30 kg',
         desc: 'Debout, barre devant, haussez les épaules vers les oreilles sans plier les bras. Trapèzes.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -1201,11 +1626,11 @@ const fullPlan = [
       },
       {
         name: 'Curl concentré haltère',
-        sets: '3 × 15 /côté',
+        sets: '4 × 15 /côté',
         equip: 'Haltère 15 kg',
         desc: 'Assis sur banc, coude calé contre la cuisse, fléchissez le bras lentement. Isolation du biceps.',
         caloriesPerSet: [12, 14],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -1214,12 +1639,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Oiseau haltères (arrière épaule)',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Rear Delt Raise',
+          muscleGroups: ['shoulders', 'back']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
-        sets: '3 × 18 /côté',
+        sets: '4 × 18 /côté',
         equip: 'Haltère 15 kg',
         desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
         caloriesPerSet: [13, 15],
-        totalSets: 6,
+        totalSets: 8,
         nbRep: 18,
         googleFitActivity: {
           type: 'strength_training',
@@ -1228,12 +1667,26 @@ const fullPlan = [
         }
       },
       {
+        name: 'Relevés de genoux debout',
+        sets: '4 × 18 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 8,
+        nbRep: 18,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Knee Raises',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
         name: 'Marche du fermier (farmer carry)',
-        sets: '3 × 60 s',
+        sets: '4 × 60 s',
         equip: 'Haltères 15 kg',
         desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
         caloriesPerSet: [11, 12],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 0,
         timer: true,
         duration: 60,
@@ -1247,7 +1700,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -1262,48 +1715,275 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 13: MARCHE (Récupération active) — S2',
+    title: 'JOUR 13: LEGS B (Ischios, Fessiers, Mollets) — S2 Accumulation',
     isRestDay: false,
     exercises: [
       {
-        name: 'Marche rapide',
-        sets: '45 min',
-        equip: 'Veste lestée 10 kg',
-        desc: '45 min de marche rapide, idéalement en côte ou avec la veste lestée. Récupération active à fort débit lipidique, zéro impact.',
-        caloriesPerSet: [478, 532],
-        totalSets: 1,
-        nbRep: 0,
-        timer: true,
-        duration: 2700,
+        name: 'Squat gobelet haltère',
+        sets: '5 × 12-15',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
+        caloriesPerSet: [21, 24],
+        totalSets: 5,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Brisk Walk',
-          muscleGroups: ['full_body']
+          name: 'Goblet Squat',
+          muscleGroups: ['quadriceps', 'glutes', 'core']
         }
       },
       {
-        name: 'Mobilité articulaire',
-        sets: '10 min',
-        equip: 'Aucun',
-        desc: '10 min de mobilité debout (épaules, hanches, chevilles). Entretient l\'amplitude, limite les blessures.',
-        caloriesPerSet: [106, 118],
+        name: 'Fentes arrière alternées haltères',
+        sets: '5 × 12-15 /côté',
+        equip: 'Haltères 15 kg',
+        desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
+        caloriesPerSet: [21, 24],
+        totalSets: 10,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Reverse Lunges',
+          muscleGroups: ['glutes', 'hamstrings', 'quadriceps']
+        }
+      },
+      {
+        name: 'Soulevé de terre roumain unilatéral haltère',
+        sets: '5 × 12-15 /côté',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout sur une jambe (main libre en appui léger si besoin), poussez la hanche en arrière et descendez l\'haltère le long de la jambe d\'appui, dos droit. Ischios, fessiers, équilibre.',
+        caloriesPerSet: [21, 24],
+        totalSets: 10,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Single Leg Romanian Deadlift',
+          muscleGroups: ['hamstrings', 'glutes', 'core']
+        }
+      },
+      {
+        name: 'Mollets debout lestés',
+        sets: '4 × 15',
+        equip: 'Veste lestée 10 kg',
+        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Calf Raise',
+          muscleGroups: ['calves']
+        }
+      },
+      {
+        name: 'Extension de hanche debout',
+        sets: '4 × 15 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, tendez la jambe vers l\'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Hip Extension',
+          muscleGroups: ['glutes', 'hamstrings']
+        }
+      },
+      {
+        name: 'Woodchopper haltère',
+        sets: '4 × 18 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 8,
+        nbRep: 18,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Woodchopper',
+          muscleGroups: ['obliques', 'abdominals', 'core']
+        }
+      },
+      {
+        name: 'Marche du fermier (farmer carry)',
+        sets: '4 × 60 s',
+        equip: 'Haltères 15 kg',
+        desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
+        caloriesPerSet: [11, 12],
+        totalSets: 4,
+        nbRep: 0,
+        timer: true,
+        duration: 60,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Farmer Carry',
+          muscleGroups: ['core', 'forearms', 'trapezius']
+        }
+      },
+      {
+        name: 'Vélo (cardio fin de séance)',
+        sets: '10 min (prog. CAL 1)',
+        equip: 'Vélo',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
+        caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
         timer: true,
         duration: 600,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Joint Mobility',
-          muscleGroups: ['full_body']
+          name: 'Stationary Cycling',
+          muscleGroups: ['quadriceps', 'glutes', 'cardio']
         }
       },
     ],
   },
   {
-    title: 'JOUR 14: REPOS COMPLET — S2',
-    isRestDay: true,
+    title: 'JOUR 14: FULL BODY (Bras, Épaules, Gainage) — S2 Accumulation',
+    isRestDay: false,
     exercises: [
-
+      {
+        name: 'Développé couché haltères',
+        sets: '5 × 12-15',
+        equip: 'Haltères 15 kg',
+        desc: 'Sur banc plat, poussez les haltères vers le haut en contrôlant la descente, amplitude complète. Pectoraux, triceps.',
+        caloriesPerSet: [21, 24],
+        totalSets: 5,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Bench Press',
+          muscleGroups: ['chest', 'triceps', 'shoulders']
+        }
+      },
+      {
+        name: 'Tirage menton barre (upright row)',
+        sets: '5 × 12-15',
+        equip: 'Barre 30 kg',
+        desc: 'Debout, barre devant les cuisses, tirez-la vers le menton coudes hauts, sans monter au-delà des épaules. Trapèzes et deltoïdes.',
+        caloriesPerSet: [21, 24],
+        totalSets: 5,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Upright Row',
+          muscleGroups: ['shoulders', 'trapezius']
+        }
+      },
+      {
+        name: 'Curl marteau haltères',
+        sets: '5 × 12-15',
+        equip: 'Haltères 15 kg',
+        desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
+        caloriesPerSet: [16, 18],
+        totalSets: 5,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Hammer Curl',
+          muscleGroups: ['biceps', 'forearms']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '4 × 15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
+        name: 'Écarté haltères sur banc',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Sur banc, bras légèrement fléchis, ouvrez les haltères en arc de cercle puis refermez au-dessus de la poitrine. Étirement des pectoraux.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Fly',
+          muscleGroups: ['chest', 'shoulders']
+        }
+      },
+      {
+        name: 'Élévations latérales haltères',
+        sets: '4 × 15',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Lateral Raises',
+          muscleGroups: ['shoulders']
+        }
+      },
+      {
+        name: 'Crunch latéral debout (side bend)',
+        sets: '4 × 18 /côté',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
+        caloriesPerSet: [13, 15],
+        totalSets: 8,
+        nbRep: 18,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Side Bend',
+          muscleGroups: ['obliques', 'abdominals']
+        }
+      },
+      {
+        name: 'Relevés de genoux debout',
+        sets: '4 × 18 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 8,
+        nbRep: 18,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Knee Raises',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Marche du fermier (farmer carry)',
+        sets: '4 × 60 s',
+        equip: 'Haltères 15 kg',
+        desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
+        caloriesPerSet: [11, 12],
+        totalSets: 4,
+        nbRep: 0,
+        timer: true,
+        duration: 60,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Farmer Carry',
+          muscleGroups: ['core', 'forearms', 'trapezius']
+        }
+      },
+      {
+        name: 'Vélo (cardio fin de séance)',
+        sets: '10 min (prog. CAL 1)',
+        equip: 'Vélo',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
+        caloriesPerSet: [165, 185],
+        totalSets: 1,
+        nbRep: 0,
+        timer: true,
+        duration: 600,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Stationary Cycling',
+          muscleGroups: ['quadriceps', 'glutes', 'cardio']
+        }
+      },
     ],
   },
   {
@@ -1381,6 +2061,34 @@ const fullPlan = [
         }
       },
       {
+        name: 'Écarté haltères sur banc',
+        sets: '4 × 12-15',
+        equip: 'Haltères 10 kg',
+        desc: 'Sur banc, bras légèrement fléchis, ouvrez les haltères en arc de cercle puis refermez au-dessus de la poitrine. Étirement des pectoraux.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Fly',
+          muscleGroups: ['chest', 'shoulders']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '4 × 12-15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
         sets: '4 × 20 /côté',
         equip: 'Haltère 15 kg',
@@ -1412,7 +2120,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -1487,6 +2195,20 @@ const fullPlan = [
         }
       },
       {
+        name: 'Curl marteau haltères',
+        sets: '4 × 12-15',
+        equip: 'Haltères 15 kg',
+        desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Hammer Curl',
+          muscleGroups: ['biceps', 'forearms']
+        }
+      },
+      {
         name: 'Oiseau haltères (arrière épaule)',
         sets: '4 × 12-15',
         equip: 'Haltères 10 kg',
@@ -1498,6 +2220,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Rear Delt Raise',
           muscleGroups: ['shoulders', 'back']
+        }
+      },
+      {
+        name: 'Shrugs barre (haussements)',
+        sets: '4 × 12-15',
+        equip: 'Barre 30 kg',
+        desc: 'Debout, barre devant, haussez les épaules vers les oreilles sans plier les bras. Trapèzes.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Barbell Shrugs',
+          muscleGroups: ['trapezius', 'back']
         }
       },
       {
@@ -1534,7 +2270,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -1549,7 +2285,7 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 17: LEGS (Quadriceps, Fessiers, Mollets) — S3 Intensification',
+    title: 'JOUR 17: LEGS A (Quadriceps, Fessiers, Mollets) — S3 Intensification',
     isRestDay: false,
     exercises: [
       {
@@ -1564,20 +2300,6 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Barbell Squat',
           muscleGroups: ['quadriceps', 'glutes', 'hamstrings']
-        }
-      },
-      {
-        name: 'Fentes avant alternées haltères',
-        sets: '5 × 10-12 (tempo lent) /côté',
-        equip: 'Haltères 15 kg',
-        desc: 'Un pas en avant, descendez le genou arrière vers le sol sans le poser, puis remontez. Alternez. Quadriceps, fessiers, équilibre.',
-        caloriesPerSet: [21, 24],
-        totalSets: 10,
-        nbRep: 10,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Walking Lunges',
-          muscleGroups: ['quadriceps', 'glutes']
         }
       },
       {
@@ -1597,7 +2319,7 @@ const fullPlan = [
       {
         name: 'Montées sur banc lestées',
         sets: '5 × 10-12 (tempo lent) /côté',
-        equip: 'Veste lestée 10 kg + Haltères 15 kg',
+        equip: 'Haltères 15 kg',
         desc: 'Montez complètement sur un banc/marche stable, jambe motrice, contrôlez la descente. Alternez. Bas du corps fonctionnel, zéro impact.',
         caloriesPerSet: [16, 18],
         totalSets: 10,
@@ -1620,6 +2342,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Sumo Squat',
           muscleGroups: ['glutes', 'adductors', 'quadriceps']
+        }
+      },
+      {
+        name: 'Mollets debout lestés',
+        sets: '4 × 12-15',
+        equip: 'Veste lestée 10 kg',
+        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Calf Raise',
+          muscleGroups: ['calves']
         }
       },
       {
@@ -1654,7 +2390,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -1729,6 +2465,20 @@ const fullPlan = [
         }
       },
       {
+        name: 'Élévations latérales haltères',
+        sets: '4 × 12-15',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Lateral Raises',
+          muscleGroups: ['shoulders']
+        }
+      },
+      {
         name: 'Oiseau haltères (arrière épaule)',
         sets: '4 × 12-15',
         equip: 'Haltères 10 kg',
@@ -1740,6 +2490,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Rear Delt Raise',
           muscleGroups: ['shoulders', 'back']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '4 × 12-15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
         }
       },
       {
@@ -1774,7 +2538,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -1863,6 +2627,20 @@ const fullPlan = [
         }
       },
       {
+        name: 'Oiseau haltères (arrière épaule)',
+        sets: '4 × 12-15',
+        equip: 'Haltères 10 kg',
+        desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Rear Delt Raise',
+          muscleGroups: ['shoulders', 'back']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
         sets: '4 × 20 /côté',
         equip: 'Haltère 15 kg',
@@ -1874,6 +2652,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Standing Side Bend',
           muscleGroups: ['obliques', 'abdominals']
+        }
+      },
+      {
+        name: 'Relevés de genoux debout',
+        sets: '4 × 20 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 8,
+        nbRep: 20,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Knee Raises',
+          muscleGroups: ['abdominals', 'core']
         }
       },
       {
@@ -1896,7 +2688,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -1911,48 +2703,275 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 20: MARCHE (Récupération active) — S3',
+    title: 'JOUR 20: LEGS B (Ischios, Fessiers, Mollets) — S3 Intensification',
     isRestDay: false,
     exercises: [
       {
-        name: 'Marche rapide',
-        sets: '45 min',
-        equip: 'Veste lestée 10 kg',
-        desc: '45 min de marche rapide, idéalement en côte ou avec la veste lestée. Récupération active à fort débit lipidique, zéro impact.',
-        caloriesPerSet: [478, 532],
-        totalSets: 1,
-        nbRep: 0,
-        timer: true,
-        duration: 2700,
+        name: 'Squat gobelet haltère',
+        sets: '5 × 10-12 (tempo lent)',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
+        caloriesPerSet: [21, 24],
+        totalSets: 5,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Brisk Walk',
-          muscleGroups: ['full_body']
+          name: 'Goblet Squat',
+          muscleGroups: ['quadriceps', 'glutes', 'core']
         }
       },
       {
-        name: 'Mobilité articulaire',
-        sets: '10 min',
-        equip: 'Aucun',
-        desc: '10 min de mobilité debout (épaules, hanches, chevilles). Entretient l\'amplitude, limite les blessures.',
-        caloriesPerSet: [106, 118],
+        name: 'Fentes arrière alternées haltères',
+        sets: '5 × 10-12 (tempo lent) /côté',
+        equip: 'Haltères 15 kg',
+        desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
+        caloriesPerSet: [21, 24],
+        totalSets: 10,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Reverse Lunges',
+          muscleGroups: ['glutes', 'hamstrings', 'quadriceps']
+        }
+      },
+      {
+        name: 'Soulevé de terre roumain unilatéral haltère',
+        sets: '5 × 10-12 (tempo lent) /côté',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout sur une jambe (main libre en appui léger si besoin), poussez la hanche en arrière et descendez l\'haltère le long de la jambe d\'appui, dos droit. Ischios, fessiers, équilibre.',
+        caloriesPerSet: [21, 24],
+        totalSets: 10,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Single Leg Romanian Deadlift',
+          muscleGroups: ['hamstrings', 'glutes', 'core']
+        }
+      },
+      {
+        name: 'Mollets debout lestés',
+        sets: '4 × 12-15',
+        equip: 'Veste lestée 10 kg',
+        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Calf Raise',
+          muscleGroups: ['calves']
+        }
+      },
+      {
+        name: 'Extension de hanche debout',
+        sets: '4 × 12-15 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, tendez la jambe vers l\'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Hip Extension',
+          muscleGroups: ['glutes', 'hamstrings']
+        }
+      },
+      {
+        name: 'Woodchopper haltère',
+        sets: '4 × 20 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 8,
+        nbRep: 20,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Woodchopper',
+          muscleGroups: ['obliques', 'abdominals', 'core']
+        }
+      },
+      {
+        name: 'Marche du fermier (farmer carry)',
+        sets: '4 × 60 s',
+        equip: 'Haltères 15 kg',
+        desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
+        caloriesPerSet: [11, 12],
+        totalSets: 4,
+        nbRep: 0,
+        timer: true,
+        duration: 60,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Farmer Carry',
+          muscleGroups: ['core', 'forearms', 'trapezius']
+        }
+      },
+      {
+        name: 'Vélo (cardio fin de séance)',
+        sets: '10 min (prog. CAL 1)',
+        equip: 'Vélo',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
+        caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
         timer: true,
         duration: 600,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Joint Mobility',
-          muscleGroups: ['full_body']
+          name: 'Stationary Cycling',
+          muscleGroups: ['quadriceps', 'glutes', 'cardio']
         }
       },
     ],
   },
   {
-    title: 'JOUR 21: REPOS COMPLET — S3',
-    isRestDay: true,
+    title: 'JOUR 21: FULL BODY (Bras, Épaules, Gainage) — S3 Intensification',
+    isRestDay: false,
     exercises: [
-
+      {
+        name: 'Développé couché haltères',
+        sets: '5 × 10-12 (tempo lent)',
+        equip: 'Haltères 15 kg',
+        desc: 'Sur banc plat, poussez les haltères vers le haut en contrôlant la descente, amplitude complète. Pectoraux, triceps.',
+        caloriesPerSet: [21, 24],
+        totalSets: 5,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Bench Press',
+          muscleGroups: ['chest', 'triceps', 'shoulders']
+        }
+      },
+      {
+        name: 'Tirage menton barre (upright row)',
+        sets: '5 × 10-12 (tempo lent)',
+        equip: 'Barre 30 kg',
+        desc: 'Debout, barre devant les cuisses, tirez-la vers le menton coudes hauts, sans monter au-delà des épaules. Trapèzes et deltoïdes.',
+        caloriesPerSet: [21, 24],
+        totalSets: 5,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Upright Row',
+          muscleGroups: ['shoulders', 'trapezius']
+        }
+      },
+      {
+        name: 'Curl marteau haltères',
+        sets: '5 × 10-12 (tempo lent)',
+        equip: 'Haltères 15 kg',
+        desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
+        caloriesPerSet: [16, 18],
+        totalSets: 5,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Hammer Curl',
+          muscleGroups: ['biceps', 'forearms']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '4 × 12-15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 8,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
+        name: 'Écarté haltères sur banc',
+        sets: '4 × 12-15',
+        equip: 'Haltères 10 kg',
+        desc: 'Sur banc, bras légèrement fléchis, ouvrez les haltères en arc de cercle puis refermez au-dessus de la poitrine. Étirement des pectoraux.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Fly',
+          muscleGroups: ['chest', 'shoulders']
+        }
+      },
+      {
+        name: 'Élévations latérales haltères',
+        sets: '4 × 12-15',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Lateral Raises',
+          muscleGroups: ['shoulders']
+        }
+      },
+      {
+        name: 'Crunch latéral debout (side bend)',
+        sets: '4 × 20 /côté',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
+        caloriesPerSet: [13, 15],
+        totalSets: 8,
+        nbRep: 20,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Side Bend',
+          muscleGroups: ['obliques', 'abdominals']
+        }
+      },
+      {
+        name: 'Relevés de genoux debout',
+        sets: '4 × 20 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 8,
+        nbRep: 20,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Knee Raises',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Marche du fermier (farmer carry)',
+        sets: '4 × 60 s',
+        equip: 'Haltères 15 kg',
+        desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
+        caloriesPerSet: [11, 12],
+        totalSets: 4,
+        nbRep: 0,
+        timer: true,
+        duration: 60,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Farmer Carry',
+          muscleGroups: ['core', 'forearms', 'trapezius']
+        }
+      },
+      {
+        name: 'Vélo (cardio fin de séance)',
+        sets: '10 min (prog. CAL 1)',
+        equip: 'Vélo',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
+        caloriesPerSet: [165, 185],
+        totalSets: 1,
+        nbRep: 0,
+        timer: true,
+        duration: 600,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Stationary Cycling',
+          muscleGroups: ['quadriceps', 'glutes', 'cardio']
+        }
+      },
     ],
   },
   {
@@ -2030,6 +3049,34 @@ const fullPlan = [
         }
       },
       {
+        name: 'Écarté haltères sur banc',
+        sets: '3 × 15 (allégé)',
+        equip: 'Haltères 10 kg',
+        desc: 'Sur banc, bras légèrement fléchis, ouvrez les haltères en arc de cercle puis refermez au-dessus de la poitrine. Étirement des pectoraux.',
+        caloriesPerSet: [16, 18],
+        totalSets: 3,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Fly',
+          muscleGroups: ['chest', 'shoulders']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '3 × 15 (allégé) /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 6,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
         sets: '3 × 15 /côté',
         equip: 'Haltère 15 kg',
@@ -2061,7 +3108,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -2136,6 +3183,20 @@ const fullPlan = [
         }
       },
       {
+        name: 'Curl marteau haltères',
+        sets: '3 × 15 (allégé)',
+        equip: 'Haltères 15 kg',
+        desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
+        caloriesPerSet: [16, 18],
+        totalSets: 3,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Hammer Curl',
+          muscleGroups: ['biceps', 'forearms']
+        }
+      },
+      {
         name: 'Oiseau haltères (arrière épaule)',
         sets: '3 × 15 (allégé)',
         equip: 'Haltères 10 kg',
@@ -2147,6 +3208,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Rear Delt Raise',
           muscleGroups: ['shoulders', 'back']
+        }
+      },
+      {
+        name: 'Shrugs barre (haussements)',
+        sets: '3 × 15 (allégé)',
+        equip: 'Barre 30 kg',
+        desc: 'Debout, barre devant, haussez les épaules vers les oreilles sans plier les bras. Trapèzes.',
+        caloriesPerSet: [16, 18],
+        totalSets: 3,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Barbell Shrugs',
+          muscleGroups: ['trapezius', 'back']
         }
       },
       {
@@ -2183,7 +3258,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -2198,7 +3273,7 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 24: LEGS (Quadriceps, Fessiers, Mollets) — S4 Allègement (deload actif)',
+    title: 'JOUR 24: LEGS A (Quadriceps, Fessiers, Mollets) — S4 Allègement (deload actif)',
     isRestDay: false,
     exercises: [
       {
@@ -2213,20 +3288,6 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Barbell Squat',
           muscleGroups: ['quadriceps', 'glutes', 'hamstrings']
-        }
-      },
-      {
-        name: 'Fentes avant alternées haltères',
-        sets: '3 × 12 (allégé) /côté',
-        equip: 'Haltères 15 kg',
-        desc: 'Un pas en avant, descendez le genou arrière vers le sol sans le poser, puis remontez. Alternez. Quadriceps, fessiers, équilibre.',
-        caloriesPerSet: [21, 24],
-        totalSets: 6,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Walking Lunges',
-          muscleGroups: ['quadriceps', 'glutes']
         }
       },
       {
@@ -2246,7 +3307,7 @@ const fullPlan = [
       {
         name: 'Montées sur banc lestées',
         sets: '3 × 12 (allégé) /côté',
-        equip: 'Veste lestée 10 kg + Haltères 15 kg',
+        equip: 'Haltères 15 kg',
         desc: 'Montez complètement sur un banc/marche stable, jambe motrice, contrôlez la descente. Alternez. Bas du corps fonctionnel, zéro impact.',
         caloriesPerSet: [16, 18],
         totalSets: 6,
@@ -2269,6 +3330,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Sumo Squat',
           muscleGroups: ['glutes', 'adductors', 'quadriceps']
+        }
+      },
+      {
+        name: 'Mollets debout lestés',
+        sets: '3 × 15 (allégé)',
+        equip: 'Veste lestée 10 kg',
+        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
+        caloriesPerSet: [12, 14],
+        totalSets: 3,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Calf Raise',
+          muscleGroups: ['calves']
         }
       },
       {
@@ -2303,7 +3378,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -2378,6 +3453,20 @@ const fullPlan = [
         }
       },
       {
+        name: 'Élévations latérales haltères',
+        sets: '3 × 15 (allégé)',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
+        caloriesPerSet: [12, 14],
+        totalSets: 3,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Lateral Raises',
+          muscleGroups: ['shoulders']
+        }
+      },
+      {
         name: 'Oiseau haltères (arrière épaule)',
         sets: '3 × 15 (allégé)',
         equip: 'Haltères 10 kg',
@@ -2389,6 +3478,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Rear Delt Raise',
           muscleGroups: ['shoulders', 'back']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '3 × 15 (allégé) /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 6,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
         }
       },
       {
@@ -2423,7 +3526,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -2512,6 +3615,20 @@ const fullPlan = [
         }
       },
       {
+        name: 'Oiseau haltères (arrière épaule)',
+        sets: '3 × 15 (allégé)',
+        equip: 'Haltères 10 kg',
+        desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
+        caloriesPerSet: [12, 14],
+        totalSets: 3,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Rear Delt Raise',
+          muscleGroups: ['shoulders', 'back']
+        }
+      },
+      {
         name: 'Crunch latéral debout (side bend)',
         sets: '3 × 15 /côté',
         equip: 'Haltère 15 kg',
@@ -2523,6 +3640,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Standing Side Bend',
           muscleGroups: ['obliques', 'abdominals']
+        }
+      },
+      {
+        name: 'Relevés de genoux debout',
+        sets: '3 × 15 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 6,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Knee Raises',
+          muscleGroups: ['abdominals', 'core']
         }
       },
       {
@@ -2545,7 +3676,7 @@ const fullPlan = [
         name: 'Vélo (cardio fin de séance)',
         sets: '10 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol.',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
         caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
@@ -2560,50 +3691,277 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 27: MARCHE (Récupération active) — S4',
+    title: 'JOUR 27: LEGS B (Ischios, Fessiers, Mollets) — S4 Allègement (deload actif)',
     isRestDay: false,
     exercises: [
       {
-        name: 'Marche rapide',
-        sets: '45 min',
-        equip: 'Veste lestée 10 kg',
-        desc: '45 min de marche rapide, idéalement en côte ou avec la veste lestée. Récupération active à fort débit lipidique, zéro impact.',
-        caloriesPerSet: [478, 532],
-        totalSets: 1,
-        nbRep: 0,
-        timer: true,
-        duration: 2700,
+        name: 'Squat gobelet haltère',
+        sets: '3 × 12 (allégé)',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
+        caloriesPerSet: [21, 24],
+        totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Brisk Walk',
-          muscleGroups: ['full_body']
+          name: 'Goblet Squat',
+          muscleGroups: ['quadriceps', 'glutes', 'core']
         }
       },
       {
-        name: 'Mobilité articulaire',
-        sets: '10 min',
-        equip: 'Aucun',
-        desc: '10 min de mobilité debout (épaules, hanches, chevilles). Entretient l\'amplitude, limite les blessures.',
-        caloriesPerSet: [106, 118],
+        name: 'Fentes arrière alternées haltères',
+        sets: '3 × 12 (allégé) /côté',
+        equip: 'Haltères 15 kg',
+        desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
+        caloriesPerSet: [21, 24],
+        totalSets: 6,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Reverse Lunges',
+          muscleGroups: ['glutes', 'hamstrings', 'quadriceps']
+        }
+      },
+      {
+        name: 'Soulevé de terre roumain unilatéral haltère',
+        sets: '3 × 12 (allégé) /côté',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout sur une jambe (main libre en appui léger si besoin), poussez la hanche en arrière et descendez l\'haltère le long de la jambe d\'appui, dos droit. Ischios, fessiers, équilibre.',
+        caloriesPerSet: [21, 24],
+        totalSets: 6,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Single Leg Romanian Deadlift',
+          muscleGroups: ['hamstrings', 'glutes', 'core']
+        }
+      },
+      {
+        name: 'Mollets debout lestés',
+        sets: '3 × 15 (allégé)',
+        equip: 'Veste lestée 10 kg',
+        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
+        caloriesPerSet: [12, 14],
+        totalSets: 3,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Calf Raise',
+          muscleGroups: ['calves']
+        }
+      },
+      {
+        name: 'Extension de hanche debout',
+        sets: '3 × 15 (allégé) /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, tendez la jambe vers l\'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.',
+        caloriesPerSet: [12, 14],
+        totalSets: 6,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Hip Extension',
+          muscleGroups: ['glutes', 'hamstrings']
+        }
+      },
+      {
+        name: 'Woodchopper haltère',
+        sets: '3 × 15 /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 6,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Woodchopper',
+          muscleGroups: ['obliques', 'abdominals', 'core']
+        }
+      },
+      {
+        name: 'Marche du fermier (farmer carry)',
+        sets: '3 × 60 s',
+        equip: 'Haltères 15 kg',
+        desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
+        caloriesPerSet: [11, 12],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 60,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Farmer Carry',
+          muscleGroups: ['core', 'forearms', 'trapezius']
+        }
+      },
+      {
+        name: 'Vélo (cardio fin de séance)',
+        sets: '10 min (prog. CAL 1)',
+        equip: 'Vélo',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
+        caloriesPerSet: [165, 185],
         totalSets: 1,
         nbRep: 0,
         timer: true,
         duration: 600,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Joint Mobility',
-          muscleGroups: ['full_body']
+          name: 'Stationary Cycling',
+          muscleGroups: ['quadriceps', 'glutes', 'cardio']
         }
       },
     ],
   },
   {
-    title: 'JOUR 28: REPOS COMPLET — S4',
-    isRestDay: true,
+    title: 'JOUR 28: FULL BODY (Bras, Épaules, Gainage) — S4 Allègement (deload actif)',
+    isRestDay: false,
     exercises: [
-
+      {
+        name: 'Développé couché haltères',
+        sets: '3 × 12 (allégé)',
+        equip: 'Haltères 15 kg',
+        desc: 'Sur banc plat, poussez les haltères vers le haut en contrôlant la descente, amplitude complète. Pectoraux, triceps.',
+        caloriesPerSet: [21, 24],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Bench Press',
+          muscleGroups: ['chest', 'triceps', 'shoulders']
+        }
+      },
+      {
+        name: 'Tirage menton barre (upright row)',
+        sets: '3 × 12 (allégé)',
+        equip: 'Barre 30 kg',
+        desc: 'Debout, barre devant les cuisses, tirez-la vers le menton coudes hauts, sans monter au-delà des épaules. Trapèzes et deltoïdes.',
+        caloriesPerSet: [21, 24],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Upright Row',
+          muscleGroups: ['shoulders', 'trapezius']
+        }
+      },
+      {
+        name: 'Curl marteau haltères',
+        sets: '3 × 12 (allégé)',
+        equip: 'Haltères 15 kg',
+        desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
+        caloriesPerSet: [16, 18],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Hammer Curl',
+          muscleGroups: ['biceps', 'forearms']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '3 × 15 (allégé) /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 6,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
+        name: 'Écarté haltères sur banc',
+        sets: '3 × 15 (allégé)',
+        equip: 'Haltères 10 kg',
+        desc: 'Sur banc, bras légèrement fléchis, ouvrez les haltères en arc de cercle puis refermez au-dessus de la poitrine. Étirement des pectoraux.',
+        caloriesPerSet: [16, 18],
+        totalSets: 3,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Fly',
+          muscleGroups: ['chest', 'shoulders']
+        }
+      },
+      {
+        name: 'Élévations latérales haltères',
+        sets: '3 × 15 (allégé)',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
+        caloriesPerSet: [12, 14],
+        totalSets: 3,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Lateral Raises',
+          muscleGroups: ['shoulders']
+        }
+      },
+      {
+        name: 'Crunch latéral debout (side bend)',
+        sets: '3 × 15 /côté',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
+        caloriesPerSet: [13, 15],
+        totalSets: 6,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Side Bend',
+          muscleGroups: ['obliques', 'abdominals']
+        }
+      },
+      {
+        name: 'Relevés de genoux debout',
+        sets: '3 × 15 /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 6,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Knee Raises',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
+        name: 'Marche du fermier (farmer carry)',
+        sets: '3 × 60 s',
+        equip: 'Haltères 15 kg',
+        desc: 'Un haltère lourd dans chaque main, marchez 60 s tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
+        caloriesPerSet: [11, 12],
+        totalSets: 3,
+        nbRep: 0,
+        timer: true,
+        duration: 60,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Farmer Carry',
+          muscleGroups: ['core', 'forearms', 'trapezius']
+        }
+      },
+      {
+        name: 'Vélo (cardio fin de séance)',
+        sets: '10 min (prog. CAL 1)',
+        equip: 'Vélo',
+        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance qui remplace le HIIT, sans impact ni appui au sol. Optionnel : désactivable dans les réglages, la musculation seule fait déjà l\'heure.',
+        caloriesPerSet: [165, 185],
+        totalSets: 1,
+        nbRep: 0,
+        timer: true,
+        duration: 600,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Stationary Cycling',
+          muscleGroups: ['quadriceps', 'glutes', 'cardio']
+        }
+      },
     ],
-  }
+  },
 ];
 
 export const days = fullPlan;

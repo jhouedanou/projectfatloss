@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { Pill, Flame, Scale as ScaleIcon, Flag, Activity, CalendarPlus } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
-import { SECOND_DOSE_MS, downloadLipo6Reminder } from '../utils/lipo6Reminder';
+import {
+  CREATINE_INTAKE_KEY,
+  CREATINE_DOSE_G,
+  DAILY_DOSE_MS,
+  isTakenToday,
+  downloadCreatineReminder,
+} from '../utils/creatineReminder';
 import './HomeDashboard.css';
-
-const CAFFEINE_KEY = 'caffeineIntakeAt';
-// Lipo 6 Black Ultra Concentrate : pic d'énergie ~30-60 min après la prise à jeun.
-const WINDOW_MIN_MS = 30 * 60 * 1000;
-const WINDOW_MAX_MS = 60 * 60 * 1000;
-const WINDOW_EXPIRE_MS = 120 * 60 * 1000;
 
 function startOfWeek(d = new Date()) {
   const day = (d.getDay() + 6) % 7;
@@ -20,11 +20,12 @@ function startOfWeek(d = new Date()) {
   return out;
 }
 
-function fmtMMSS(ms) {
+// Compte à rebours lisible (Hh MM) jusqu'à la prochaine dose de créatine.
+function fmtHM(ms) {
   const total = Math.max(0, Math.floor(ms / 1000));
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  return `${h}h ${m.toString().padStart(2, '0')}`;
 }
 
 
@@ -62,8 +63,8 @@ function Ring({ percent, label, sub }) {
 
 export default function HomeDashboard({ onStartWorkout }) {
   const { t } = useTranslation();
-  const [caffeineAt, setCaffeineAt] = useState(() => {
-    const v = localStorage.getItem(CAFFEINE_KEY);
+  const [creatineAt, setCreatineAt] = useState(() => {
+    const v = localStorage.getItem(CREATINE_INTAKE_KEY);
     return v ? parseInt(v, 10) : null;
   });
   const [now, setNow] = useState(Date.now());
@@ -78,7 +79,7 @@ export default function HomeDashboard({ onStartWorkout }) {
 
   const weekStart = startOfWeek();
   const weekWorkouts = history.filter(w => new Date(w.date) >= weekStart);
-  const target = 5;
+  const target = 7; // musculation 7 jours / 7
   const done = weekWorkouts.length;
   const percent = Math.min(100, (done / target) * 100);
 
@@ -111,42 +112,29 @@ export default function HomeDashboard({ onStartWorkout }) {
     return s;
   }, [history]);
 
-  const elapsed = caffeineAt ? now - caffeineAt : null;
-  const inWindow = elapsed != null && elapsed >= WINDOW_MIN_MS && elapsed <= WINDOW_MAX_MS;
-  const beforeWindow = elapsed != null && elapsed < WINDOW_MIN_MS;
-  const afterWindow = elapsed != null && elapsed > WINDOW_MAX_MS;
-  const expired = elapsed != null && elapsed > WINDOW_EXPIRE_MS;
+  const takenToday = isTakenToday(creatineAt, now);
+  const elapsed = creatineAt ? now - creatineAt : null;
+  const nextDoseIn = takenToday ? Math.max(0, DAILY_DOSE_MS - elapsed) : 0;
 
-  const handleTakeDrink = () => {
+  const handleTakeDose = () => {
     const ts = Date.now();
-    localStorage.setItem(CAFFEINE_KEY, ts.toString());
-    setCaffeineAt(ts);
+    localStorage.setItem(CREATINE_INTAKE_KEY, ts.toString());
+    setCreatineAt(ts);
   };
 
-  const handleResetDrink = () => {
-    localStorage.removeItem(CAFFEINE_KEY);
-    setCaffeineAt(null);
+  const handleResetDose = () => {
+    localStorage.removeItem(CREATINE_INTAKE_KEY);
+    setCreatineAt(null);
   };
 
   const handleAddReminder = () => {
-    if (!caffeineAt) return;
-    downloadLipo6Reminder(caffeineAt);
+    downloadCreatineReminder(creatineAt || Date.now());
   };
 
-  let caffeineStatus = t('home.caffeine.idle', { defaultValue: 'Lipo 6 non prise' });
-  let caffeineTimer = '';
-  if (beforeWindow) {
-    caffeineStatus = t('home.caffeine.waiting', { defaultValue: 'Patientez avant la séance' });
-    caffeineTimer = `-${fmtMMSS(WINDOW_MIN_MS - elapsed)}`;
-  } else if (inWindow) {
-    caffeineStatus = t('home.caffeine.ready', { defaultValue: 'Fenêtre idéale — go !' });
-    caffeineTimer = fmtMMSS(WINDOW_MAX_MS - elapsed);
-  } else if (afterWindow && !expired) {
-    caffeineStatus = t('home.caffeine.fading', { defaultValue: 'Pic en baisse — commencez vite' });
-    caffeineTimer = `+${fmtMMSS(elapsed - WINDOW_MAX_MS)}`;
-  } else if (expired) {
-    caffeineStatus = t('home.caffeine.expired', { defaultValue: 'Fenêtre dépassée' });
-  }
+  const creatineStatus = takenToday
+    ? t('home.creatine.done', { defaultValue: 'Dose du jour prise ✓' })
+    : t('home.creatine.todo', { defaultValue: 'Dose du jour à prendre' });
+  const creatineTimer = takenToday ? fmtHM(nextDoseIn) : '';
 
   return (
     <div className="hd-root">
@@ -196,53 +184,58 @@ export default function HomeDashboard({ onStartWorkout }) {
         </div>
       </div>
 
-      <div className={`hd-caffeine ${inWindow ? 'ready' : ''} ${beforeWindow ? 'waiting' : ''} ${afterWindow ? 'fading' : ''} ${expired ? 'expired' : ''}`}>
-        <div className="hd-caffeine-head">
+      <div className={`hd-creatine ${takenToday ? 'ready' : 'waiting'}`}>
+        <div className="hd-creatine-head">
           <Pill size={22} />
-          <div className="hd-caffeine-title">{t('home.caffeine.heading', { defaultValue: 'Lipo 6 Black' })}</div>
+          <div className="hd-creatine-title">
+            {t('home.creatine.heading', { defaultValue: 'Créatine monohydrate' })}
+          </div>
         </div>
 
-        {!caffeineAt && (
+        {!takenToday && (
           <>
-            <p className="hd-caffeine-desc">
-              {t('home.caffeine.help', { defaultValue: 'Gélule à jeun, 30 à 60 min avant la séance pour un pic d\'énergie maximal. Touchez quand vous l\'avez prise.' })}
+            <p className="hd-creatine-desc">
+              {t('home.creatine.help', { defaultValue: `${CREATINE_DOSE_G} g par jour avec un grand verre d'eau. Aucune fenêtre à respecter : seule la régularité compte.` })}
             </p>
-            <p className="hd-caffeine-hint">
-              {t('home.caffeine.protocol', { defaultValue: 'Jours d\'entraînement : 1 gélule avant la séance, 1 gélule ~6 h plus tard, toujours hors repas.' })}
+            <p className="hd-creatine-hint">
+              {t('home.creatine.protocol', { defaultValue: 'Tous les jours, entraînement ou non. Idéalement à la même heure, après la séance.' })}
             </p>
-            <button className="hd-caffeine-btn" onClick={handleTakeDrink}>
-              {t('home.caffeine.take', { defaultValue: 'J\'ai pris ma gélule' })}
+            <button className="hd-creatine-btn" onClick={handleTakeDose}>
+              {t('home.creatine.take', { defaultValue: `J'ai pris mes ${CREATINE_DOSE_G} g` })}
+            </button>
+            <button className="hd-creatine-btn-secondary hd-creatine-reminder" onClick={handleAddReminder}>
+              <CalendarPlus size={16} style={{ marginRight: 6 }} />
+              {t('home.creatine.reminder', { defaultValue: 'Ajouter le rappel quotidien à l\'agenda' })}
             </button>
           </>
         )}
 
-        {caffeineAt && (
+        {takenToday && (
           <>
-            <div className="hd-caffeine-status">{caffeineStatus}</div>
-            <div className="hd-caffeine-timer">{caffeineTimer}</div>
-            <div className="hd-caffeine-second">
-              {t('home.caffeine.second', { defaultValue: '2e gélule (hors repas) vers' })}{' '}
-              {new Date(caffeineAt + SECOND_DOSE_MS).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+            <div className="hd-creatine-status">{creatineStatus}</div>
+            <div className="hd-creatine-timer">{creatineTimer}</div>
+            <div className="hd-creatine-next">
+              {t('home.creatine.next', { defaultValue: 'Prochaine dose vers' })}{' '}
+              {new Date(creatineAt + DAILY_DOSE_MS).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
             </div>
-            <button className="hd-caffeine-btn-secondary hd-caffeine-reminder" onClick={handleAddReminder}>
+            <button className="hd-creatine-btn-secondary hd-creatine-reminder" onClick={handleAddReminder}>
               <CalendarPlus size={16} style={{ marginRight: 6 }} />
-              {t('home.caffeine.reminder', { defaultValue: 'Ajouter le rappel à l\'agenda' })}
+              {t('home.creatine.reminder', { defaultValue: 'Ajouter le rappel quotidien à l\'agenda' })}
             </button>
-            <div className="hd-caffeine-bar">
+            <div className="hd-creatine-bar">
               <div
-                className="hd-caffeine-bar-fill"
-                style={{ width: `${Math.min(100, ((elapsed || 0) / WINDOW_MAX_MS) * 100)}%` }}
+                className="hd-creatine-bar-fill"
+                style={{ width: `${Math.min(100, ((elapsed || 0) / DAILY_DOSE_MS) * 100)}%` }}
               />
-              <div className="hd-caffeine-bar-window" />
             </div>
-            <div className="hd-caffeine-actions">
-              <button className="hd-caffeine-btn-secondary" onClick={handleResetDrink}>
-                {t('home.caffeine.reset', { defaultValue: 'Réinitialiser' })}
+            <div className="hd-creatine-actions">
+              <button className="hd-creatine-btn-secondary" onClick={handleResetDose}>
+                {t('home.creatine.reset', { defaultValue: 'Réinitialiser' })}
               </button>
-              {(inWindow || afterWindow) && !expired && onStartWorkout && (
-                <button className="hd-caffeine-btn" onClick={onStartWorkout}>
+              {onStartWorkout && (
+                <button className="hd-creatine-btn" onClick={onStartWorkout}>
                   <Activity size={16} style={{ marginRight: 6 }} />
-                  {t('home.caffeine.go', { defaultValue: 'Démarrer la séance' })}
+                  {t('home.creatine.go', { defaultValue: 'Démarrer la séance' })}
                 </button>
               )}
             </div>

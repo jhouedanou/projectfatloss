@@ -17,7 +17,8 @@ import {
 } from '../services/GoogleFitSync';
 import './CardioTracker.css';
 
-// MET approximatifs : marche ~3.5, vélo ~7.5
+// MET approximatif du vélo. La marche a été retirée du programme : on ne
+// peut plus enregistrer de nouvelle marche, seules les anciennes restent lisibles.
 const MET = { walk: 3.5, bike: 7.5 };
 
 const estimateCalories = (type, durationMin, weightKg) => {
@@ -34,7 +35,7 @@ const fmtDate = (iso) => {
 const CardioTracker = () => {
   const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState(null);
-  const [type, setType] = useState('walk');
+  const [type] = useState('bike');
   const [duration, setDuration] = useState('');
   const [distance, setDistance] = useState('');
   const [calories, setCalories] = useState('');
@@ -76,7 +77,7 @@ const CardioTracker = () => {
 
   return (
     <div className="cardio-tracker">
-      <h2 className="cardio-title">Cardio — Marche & Vélo</h2>
+      <h2 className="cardio-title">Cardio — Vélo</h2>
 
       {stats && (
         <div className="cardio-stats">
@@ -85,34 +86,13 @@ const CardioTracker = () => {
             <div><strong>{Math.round(stats.totalCalories)}</strong><span>kcal brûlées</span></div>
           </div>
           <div className="cardio-stat">
-            <Footprints size={18} color="#10B981" />
-            <div><strong>{stats.byType.walk.count}</strong><span>marches</span></div>
-          </div>
-          <div className="cardio-stat">
             <Bike size={18} color="#3B82F6" />
-            <div><strong>{stats.byType.bike.count}</strong><span>vélo</span></div>
+            <div><strong>{stats.byType.bike.count}</strong><span>séances vélo</span></div>
           </div>
         </div>
       )}
 
       <form className="cardio-form" onSubmit={handleAdd}>
-        <div className="cardio-type-toggle">
-          <button
-            type="button"
-            className={type === 'walk' ? 'active' : ''}
-            onClick={() => setType('walk')}
-          >
-            <Footprints size={18} /> Marche
-          </button>
-          <button
-            type="button"
-            className={type === 'bike' ? 'active' : ''}
-            onClick={() => setType('bike')}
-          >
-            <Bike size={18} /> Vélo
-          </button>
-        </div>
-
         <div className="cardio-inputs">
           <label>
             <Clock size={14} /> Durée (min)
