@@ -273,7 +273,7 @@ function CalorieDisplay({ calories, visible }) {
 }
 
 
-function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
+function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout }) {
   const [isLoadingFit, setIsLoadingFit] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
   const [reminderAdded, setReminderAdded] = useState(false);
@@ -340,7 +340,8 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
         sets: parseSets(exercise.sets),
         weightLifted: calculateWeight(exercise.equip)
       })),
-      duration: day.exercises.length * 180 // Estimation de la durée : 3 minutes par exercice
+      // Durée réelle mesurée (minutes) si disponible, sinon estimation (3 min/exercice)
+      duration: duration != null ? duration : day.exercises.length * 3
     };
     
     // Sauvegarder localement
@@ -659,6 +660,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // Suivi de l'exercice / la série déjà annoncés pour éviter les doublons
   const prevStepRef = useRef(-1);
   const prevSetRef = useRef(-1);
+  // Horodatage de début de séance pour mesurer la durée réelle
+  const workoutStartRef = useRef(Date.now());
+  // Durée en minutes (l'affichage des stats interprète totalDuration en minutes)
+  const getElapsedMinutes = () =>
+    Math.max(0, Math.round((Date.now() - workoutStartRef.current) / 60000));
   let beepTimeouts = [];
   
   // Mémoïser le plan : getWorkoutPlan() lit localStorage et, en cas de plan
@@ -888,9 +894,10 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
               sets: parseSets(exercise.sets),
               weightLifted: calculateWeight(exercise.equip)
             })),
-            fatBurnerMode: autoMode
+            fatBurnerMode: autoMode,
+            duration: getElapsedMinutes()
           };
-          
+
           // Sauvegarder d'abord localement
           const savedWorkout = saveWorkout(workoutData);
           
@@ -912,6 +919,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
   const handleStartWorkout = () => {
     setShowPreWorkout(false);
+    // Redémarrer le chrono au lancement effectif (si écran pré-séance affiché)
+    workoutStartRef.current = Date.now();
     // L'entraînement se lance automatiquement
   };
 
@@ -1103,9 +1112,10 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       </>
       
       {workoutCompleted && (
-        <EndOfDayModal 
-          day={day} 
-          totalCalories={totalCaloriesBurned} 
+        <EndOfDayModal
+          day={day}
+          totalCalories={totalCaloriesBurned}
+          duration={getElapsedMinutes()}
           onClose={handleCloseEndOfDayModal}
           onSaveWorkout={handleSaveWorkout}
         />
