@@ -47,6 +47,10 @@ export const PATTERNS = {
   row: { joint: 'elbow', flexAngle: 85, extAngle: 150, countOn: 'flex' },
   pulldown: { joint: 'elbow', flexAngle: 70, extAngle: 155, countOn: 'flex' },
   lateralRaise: { joint: 'shoulderAbd', flexAngle: 25, extAngle: 80, countOn: 'extend' },
+  // Extension triceps (nuque / kickback) : coude qui se déplie
+  tricepsExt: { joint: 'elbow', flexAngle: 70, extAngle: 155, countOn: 'extend' },
+  // Relevé de genou debout : hanche qui se plie (cuisse qui monte)
+  kneeRaise: { joint: 'hip', flexAngle: 110, extAngle: 160, countOn: 'flex' },
 };
 
 /**
@@ -59,13 +63,22 @@ const KEYWORD_MAP = [
   ['developpe couche', 'pressBench'],
   ['developpe incline', 'pressBench'],
   ['developpe militaire', 'pressOverhead'],
+  ['developpe arnold', 'pressOverhead'],
   ['developpe epaules', 'pressOverhead'],
   ['developpe haltere', 'pressOverhead'],
+  ['push press', 'pressOverhead'],
   ['developpe', 'pressOverhead'],
   ['military', 'pressOverhead'],
   ['overhead', 'pressOverhead'],
+  ['arnold', 'pressOverhead'],
   ['pompe', 'pushup'],
   ['pushup', 'pushup'],
+  // Triceps (extension du coude)
+  ['extension triceps', 'tricepsExt'],
+  ['triceps nuque', 'tricepsExt'],
+  ['kickback', 'tricepsExt'],
+  // Écarté / fly (ouverture des bras) — approximé par l'abduction d'épaule
+  ['ecarte', 'lateralRaise'],
   // Bras
   ['curl', 'curl'],
   ['biceps', 'curl'],
@@ -81,11 +94,15 @@ const KEYWORD_MAP = [
   ['rowing', 'row'],
   ['rameur', 'row'],
   // Jambes
+  ['releves de genoux', 'kneeRaise'],
+  ['releve de genou', 'kneeRaise'],
   ['fente', 'lunge'],
   ['split squat', 'lunge'],
   ['step-up', 'squat'],
   ['step up', 'squat'],
   ['stepup', 'squat'],
+  ['montees sur banc', 'squat'],
+  ['montee sur banc', 'squat'],
   ['squat', 'squat'],
   ['goblet', 'squat'],
   ['presse', 'squat'],
@@ -121,9 +138,10 @@ export function getRepPattern(exo) {
   if (exo.timer === true || exo.nbRep === 0) return null;
 
   const name = normalize(exo.name);
-  // Exclusions explicites (non fiables en pose 2D)
-  const EXCLUDE = ['mollet', 'gainage', 'planche', 'etirement', 'mobilite', 'velo', 'cardio', 'crunch abdo'];
-  if (EXCLUDE.some((k) => name.includes(k))) return null;
+  // Exclusions explicites (non fiables en pose 2D). Match sur début de mot pour
+  // éviter les faux positifs (ex. « velo » dans « deVELOppe »).
+  const EXCLUDE = ['mollet', 'gainage', 'planche', 'etirement', 'mobilite', 'velo', 'cardio', 'crunch', 'abdo', 'gainer', 'shrug', 'farmer', 'carry'];
+  if (EXCLUDE.some((k) => new RegExp('\\b' + k).test(name))) return null;
 
   for (const [keyword, patternKey] of KEYWORD_MAP) {
     if (name.includes(keyword)) {

@@ -23,7 +23,6 @@ import PreWorkout from '../components/PreWorkout';
 import { getCaloriesForSet } from '../services/CalorieEstimator';
 import WebcamRepCounter from '../components/WebcamRepCounter';
 import { isCameraCountable } from '../services/RepPatternRules';
-import { isCameraRepEnabled } from '../services/CameraRepService';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -680,6 +679,14 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const day = workoutPlan?.[dayIndex];
   const total = day?.exercises?.length || 0;
   const exo = day?.exercises?.[step];
+
+  // Caméra : décision prise UNE fois au lancement de la séance.
+  // null = pas encore demandé, true/false = choix de l'utilisateur.
+  const [cameraSessionEnabled, setCameraSessionEnabled] = useState(null);
+  const dayHasCountable = useMemo(
+    () => !!day?.exercises?.some((e) => isCameraCountable(e)),
+    [day]
+  );
   
   // Utiliser totalSets de l'exercice en priorité, sinon calculer
   const baseTotalSets = exo?.totalSets ?? parseSets(exo?.sets || '1');
@@ -1096,6 +1103,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             isPaused={pause}
             dayIndex={dayIndex}
             autoMode={autoMode}
+            cameraEnabled={cameraSessionEnabled === true}
           />
         ) : (
           <Pause 
@@ -1124,6 +1132,26 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         />
       )}
       
+      {/* Prompt unique au lancement : activer la caméra pour cette séance ? */}
+      <Dialog
+        open={cameraSessionEnabled === null && dayHasCountable && !showPreWorkout && !workoutCompleted}
+        onClose={() => setCameraSessionEnabled(false)}
+      >
+        <DialogTitle>Compter les reps avec la caméra ?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Pour cette séance, la caméra peut compter automatiquement vos répétitions
+            sur les exercices compatibles. Placez-vous de profil, corps entier visible.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCameraSessionEnabled(false)}>Non merci</Button>
+          <Button onClick={() => setCameraSessionEnabled(true)} variant="contained" color="primary">
+            Activer la caméra
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Boîte de dialogue des paramètres de synthèse vocale */}
       {/* Dialogue de paramètres vocaux supprimé */}
 
@@ -1150,7 +1178,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode }) {
+function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode, cameraEnabled = false }) {
   const [timer, setTimer] = useState(() => {
     if (exo.timer) {
       return exo.duration || 30;
@@ -1241,7 +1269,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     setShowOverlay(false);
     setCountdown(null);
     // Activer la caméra si le réglage global est ON et l'exercice comptable
-    setCameraActive(isCameraRepEnabled() && cameraCountable);
+    setCameraActive(cameraEnabled && cameraCountable);
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -1261,6 +1289,12 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     // ou la série change réellement — y compris pour deux exercices homonymes —
     // sans dépendre d'une référence d'objet qui pourrait changer sans raison.
   }, [dayIndex, step, setNum, totalSets]);
+
+  // Activer/désactiver la caméra quand la décision de séance change (prompt de
+  // lancement résolu après le montage du 1er exercice) ou l'exercice change.
+  useEffect(() => {
+    setCameraActive(cameraEnabled && cameraCountable);
+  }, [cameraEnabled, cameraCountable]);
 
   // Timer dégressif pour exercices avec duration spécifique
   useEffect(() => {
@@ -1474,19 +1508,33 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     }
   }, [autoMode, hasTimer, isChrono, isPaused, isPulsing, countdown, cameraActive]);
 
-  // Mode automatique: terminer automatiquement l'exercice après les répétitions
+  // Caméra : à la fin des répétitions détectées, afficher l'écran « OK / Suivant »
+  // pendant 5 secondes puis passer automatiquement à l'exercice suivant.
   useEffect(() => {
-    if (autoMode && currentRep === exo.nbRep && !hasTimer && !isChrono) {
+    if (cameraActive && exo.nbRep > 0 && currentRep >= exo.nbRep && !isChrono && !isDoubleSided) {
+      setShowOverlay(true);
+      const t = setTimeout(() => {
+        handleNext();
+      }, 5000);
+      return () => clearTimeout(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraActive, currentRep, exo.nbRep, isChrono, isDoubleSided]);
+
+  // Mode automatique: terminer automatiquement l'exercice après les répétitions
+  // (ignoré si la caméra gère la fin : elle a son propre délai de 5 s ci-dessus)
+  useEffect(() => {
+    if (autoMode && !cameraActive && currentRep === exo.nbRep && !hasTimer && !isChrono) {
       // Attendre 1 seconde puis terminer automatiquement
       const autoFinishTimer = setTimeout(() => {
         const calories = caloriesPerSet;
         onCaloriesBurned(calories);
         onDone();
       }, 1000);
-      
+
       return () => clearTimeout(autoFinishTimer);
     }
-  }, [autoMode, currentRep, exo.nbRep, hasTimer, isChrono, caloriesPerSet, onCaloriesBurned, onDone]);
+  }, [autoMode, cameraActive, currentRep, exo.nbRep, hasTimer, isChrono, caloriesPerSet, onCaloriesBurned, onDone]);
 
   // Désactivation du mode auto : stopper proprement tout rythme automatique en
   // cours (décompte, pulsation, overlay) au lieu d'en relancer un.
