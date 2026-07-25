@@ -463,9 +463,13 @@ function buildExercise(entry, week) {
   }
 
   const scheme = week[entry.tier];
-  const suffix = entry.side ? ' /côté' : '';
+  // Exercices « alternés » : les deux côtés travaillent dans la MÊME série
+  // (un pas gauche, un pas droit…), donc pas de doublement des séries ni de
+  // marqueur « /côté » (qui déclencherait le passage côté par côté dans l'app).
+  const alternating = entry.side && /altern/i.test(entry.name);
+  const suffix = entry.side ? (alternating ? ' en alternance' : ' /côté') : '';
   exercise.sets = `${scheme.sets}${suffix}`;
-  exercise.totalSets = entry.side ? scheme.n * 2 : scheme.n;
+  exercise.totalSets = entry.side && !alternating ? scheme.n * 2 : scheme.n;
   exercise.nbRep = scheme.rep;
   if (base.timer) {
     exercise.timer = true;

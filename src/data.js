@@ -746,11 +746,11 @@ const fullPlan = [
       },
       {
         name: 'Fentes arrière alternées haltères',
-        sets: '4 × 12 (tempo 3-1-1) /côté',
+        sets: '4 × 12 (tempo 3-1-1) en alternance',
         equip: 'Haltères 15 kg',
         desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
         caloriesPerSet: [21, 24],
-        totalSets: 8,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1734,11 +1734,11 @@ const fullPlan = [
       },
       {
         name: 'Fentes arrière alternées haltères',
-        sets: '5 × 12-15 /côté',
+        sets: '5 × 12-15 en alternance',
         equip: 'Haltères 15 kg',
         desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
         caloriesPerSet: [21, 24],
-        totalSets: 10,
+        totalSets: 5,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2722,11 +2722,11 @@ const fullPlan = [
       },
       {
         name: 'Fentes arrière alternées haltères',
-        sets: '5 × 10-12 (tempo lent) /côté',
+        sets: '5 × 10-12 (tempo lent) en alternance',
         equip: 'Haltères 15 kg',
         desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
         caloriesPerSet: [21, 24],
-        totalSets: 10,
+        totalSets: 5,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -3710,11 +3710,11 @@ const fullPlan = [
       },
       {
         name: 'Fentes arrière alternées haltères',
-        sets: '3 × 12 (allégé) /côté',
+        sets: '3 × 12 (allégé) en alternance',
         equip: 'Haltères 15 kg',
         desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
         caloriesPerSet: [21, 24],
-        totalSets: 6,
+        totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',

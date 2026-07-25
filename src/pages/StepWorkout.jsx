@@ -1817,25 +1817,37 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
           sx={{
             width: '100%',
             // Illustration réduite pour que les instructions ne passent pas sous les contrôles fixes.
-            maxWidth: { xs: 200, md: 260, lg: 300 },
-            aspectRatio: '1/1',
+            // Caméra active : l'aperçu remplace l'illustration, un peu plus large.
+            maxWidth: cameraActive ? 360 : { xs: 200, md: 260, lg: 300 },
+            aspectRatio: cameraActive ? 'auto' : '1/1',
             borderRadius: '16px',
             overflow: 'hidden',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            background: 'var(--illustration-surface, #101013)',
+            border: cameraActive ? 'none' : '1px solid rgba(255, 255, 255, 0.08)',
+            background: cameraActive ? 'transparent' : 'var(--illustration-surface, #101013)',
             mb: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
+            boxShadow: cameraActive ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.45)',
             position: 'relative'
           }}
         >
-          <img
-            src={getAssetPath(`/illustrations/${getExerciseIllustration(iconType, exo.name)}`)}
-            alt={exo.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          {cameraActive ? (
+            <WebcamRepCounter
+              exo={exo}
+              currentRep={currentRep}
+              targetReps={exo.nbRep}
+              onRep={handleCameraRep}
+              onClose={() => setCameraActive(false)}
+              resetKey={isDoubleSided ? side : null}
+            />
+          ) : (
+            <img
+              src={getAssetPath(`/illustrations/${getExerciseIllustration(iconType, exo.name)}`)}
+              alt={exo.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          )}
         </Box>
         
         <Typography 
@@ -1885,28 +1897,17 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
           {exo.desc}
         </Typography>
 
-        {/* Comptage des répétitions par la caméra (webcam + pose) */}
-        {cameraCountable && (
+        {/* Comptage caméra : l'aperçu remplace l'illustration ci-dessus quand actif */}
+        {cameraCountable && !cameraActive && (
           <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
-            {cameraActive ? (
-              <WebcamRepCounter
-                exo={exo}
-                currentRep={currentRep}
-                targetReps={exo.nbRep}
-                onRep={handleCameraRep}
-                onClose={() => setCameraActive(false)}
-                resetKey={isDoubleSided ? side : null}
-              />
-            ) : (
-              <Button
-                variant="outlined"
-                startIcon={<MonitorPlay size={18} />}
-                onClick={() => setCameraActive(true)}
-                sx={{ borderColor: 'rgba(76,175,80,0.5)', color: '#4CAF50' }}
-              >
-                Compter les reps avec la caméra
-              </Button>
-            )}
+            <Button
+              variant="outlined"
+              startIcon={<MonitorPlay size={18} />}
+              onClick={() => setCameraActive(true)}
+              sx={{ borderColor: 'rgba(76,175,80,0.5)', color: '#4CAF50' }}
+            >
+              Compter les reps avec la caméra
+            </Button>
           </Box>
         )}
 
