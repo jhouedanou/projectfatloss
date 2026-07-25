@@ -66,9 +66,11 @@ export const PATTERNS = {
   curl: { metric: 'angle', joint: 'elbow', min: 55, max: 150, countOn: 'min', framing: 'upper', strictTorso: true },
 
   // --- Épaules / poitrine en isolation (rotation autour de l'épaule) ---
-  lateralRaise: { metric: 'angle', joint: 'shoulderAbd', min: 25, max: 80, countOn: 'max', framing: 'upper', strictTorso: true },
-  frontRaise: { metric: 'angle', joint: 'shoulderAbd', min: 25, max: 80, countOn: 'max', framing: 'upper', strictTorso: true },
-  rearDelt: { metric: 'angle', joint: 'shoulderAbd', min: 25, max: 75, countOn: 'max', framing: 'upper' },
+  // hardEnd 'max' : l'effort est à la borne HAUTE (monter le bras), le repos à
+  // la borne basse — l'inverse des squats/développés (défaut : 'min').
+  lateralRaise: { metric: 'angle', joint: 'shoulderAbd', min: 25, max: 80, countOn: 'max', framing: 'upper', strictTorso: true, hardEnd: 'max' },
+  frontRaise: { metric: 'angle', joint: 'shoulderAbd', min: 25, max: 80, countOn: 'max', framing: 'upper', strictTorso: true, hardEnd: 'max' },
+  rearDelt: { metric: 'angle', joint: 'shoulderAbd', min: 25, max: 75, countOn: 'max', framing: 'upper', hardEnd: 'max' },
   fly: { metric: 'angle', joint: 'shoulderH', min: 100, max: 150, countOn: 'min', framing: 'upper' },
   pullover: { metric: 'angle', joint: 'shoulderAbd', min: 100, max: 160, countOn: 'min', framing: 'upper' },
 
@@ -77,7 +79,7 @@ export const PATTERNS = {
   // Bornes exprimées en fractions de la longueur du torse, relatives au repos.
   shrug: { metric: 'shrug', min: -0.085, max: -0.02, countOn: 'min', framing: 'head', relative: true, smoothing: 0.3 },
   // Inclinaison latérale du buste, en degrés absolus (0 = debout droit).
-  sideBend: { metric: 'sideBend', min: 5, max: 17, countOn: 'max', framing: 'upper' },
+  sideBend: { metric: 'sideBend', min: 5, max: 17, countOn: 'max', framing: 'upper', hardEnd: 'max' },
 };
 
 /**
@@ -318,4 +320,28 @@ export function getRepPattern(exo) {
 /** True si l'exercice peut être compté par la caméra. */
 export function isCameraCountable(exo) {
   return getRepPattern(exo) !== null;
+}
+
+/**
+ * Fraction de la plage abandonnée du côté « difficile » du mouvement, pour
+ * tolérer une amplitude réduite (ex. squat sans descente complète).
+ */
+const AMPLITUDE_RELAX = { full: 0, partial: 0.35, mini: 0.55 };
+
+/**
+ * Adapte un patron à une amplitude réduite : la borne « difficile » (point
+ * profond/contracté — `hardEnd`, 'min' par défaut) est rapprochée de l'autre
+ * borne d'une fraction de la plage. La borne de repos reste inchangée.
+ * @param {Object} pattern - un patron de PATTERNS
+ * @param {'full'|'partial'|'mini'} level
+ * @returns {Object} copie ajustée du patron (le patron d'origine n'est pas modifié)
+ */
+export function applyAmplitude(pattern, level) {
+  const relax = AMPLITUDE_RELAX[level] || 0;
+  if (!relax) return pattern;
+  const range = pattern.max - pattern.min;
+  if (pattern.hardEnd === 'max') {
+    return { ...pattern, max: pattern.max - range * relax };
+  }
+  return { ...pattern, min: pattern.min + range * relax };
 }

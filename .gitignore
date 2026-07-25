@@ -45,3 +45,9 @@ coverage/
 # BrowserSync
 .browserSync/
 .vite_cache/
+
+# Wear OS (Android) — artefacts de build uniquement, pas les sources
+wear/.gradle/
+wear/build/
+wear/app/build/
+wear/local.properties

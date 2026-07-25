@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Fat Loss</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #000; color: #fff;
+    font-family: sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  .screen {
+    display: none;
+    position: absolute; inset: 0;
+    flex-direction: column;
+    align-items: center;
+  }
+  .screen.active { display: flex; }
+
+  /* Écran rond : contenu en retrait des bords */
+  .scroll {
+    width: 100%; height: 100%;
+    overflow-y: auto;
+    padding: 14% 12% 18% 12%;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  h1 { font-size: 18px; text-align: center; color: #FFB300; margin-bottom: 10px; }
+  .sub { font-size: 12px; text-align: center; color: #999; margin-bottom: 12px; }
+
+  .item {
+    background: #1A1A2E;
+    border-radius: 16px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  .item:active { background: #2A2A4E; }
+  .item .meta { font-size: 11px; color: #FFB300; margin-top: 2px; }
+  .item.done { opacity: 0.45; }
+  .week-tag { font-size: 10px; color: #777; text-transform: uppercase; margin: 8px 0 4px 4px; }
+
+  .backbtn {
+    position: absolute; top: 6%; left: 50%;
+    transform: translateX(-50%);
+    background: none; border: none;
+    color: #888; font-size: 13px;
+    padding: 4px 12px; z-index: 5;
+  }
+
+  /* --- Compteur --- */
+  #counter { justify-content: center; text-align: center; padding: 10% 8%; }
+  #exName { font-size: 13px; color: #ccc; max-height: 2.7em; overflow: hidden; padding: 0 10%; }
+  #setInfo { font-size: 12px; color: #FFB300; margin-top: 2px; }
+  #repCount { font-size: 84px; font-weight: bold; line-height: 1; margin: 2px 0; }
+  #repTarget { font-size: 13px; color: #888; }
+  .btnrow { display: flex; gap: 10px; margin-top: 8px; align-items: center; }
+  .rbtn {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: none; font-size: 22px;
+    background: #1A1A2E; color: #fff;
+  }
+  .rbtn:active { background: #2A2A4E; }
+  .rbtn.ok { background: #1B5E20; width: 54px; height: 54px; font-size: 24px; }
+  .chip {
+    font-size: 11px; padding: 4px 10px; border-radius: 12px;
+    background: #333; color: #aaa; border: none; margin-top: 8px;
+  }
+  .chip.on { background: #FF6F00; color: #fff; }
+  #levelbar {
+    position: absolute; bottom: 7%; left: 25%; width: 50%;
+    height: 5px; background: #222; border-radius: 3px; overflow: hidden;
+  }
+  #levelfill { height: 100%; width: 0%; background: #FFB300; transition: width 0.1s linear; }
+
+  /* --- Réglages --- */
+  #settings .row { width: 100%; margin-bottom: 14px; text-align: center; }
+  #settings label { display: block; font-size: 12px; color: #999; margin-bottom: 6px; }
+  #sens { width: 90%; accent-color: #FFB300; }
+  .modebtns { display: flex; gap: 8px; justify-content: center; }
+  .modebtns button {
+    padding: 8px 14px; border-radius: 14px; border: none;
+    background: #1A1A2E; color: #aaa; font-size: 13px;
+  }
+  .modebtns button.sel { background: #FF6F00; color: #fff; }
+
+  /* --- Repos --- */
+  #rest { justify-content: center; }
+  #restTime { font-size: 64px; font-weight: bold; color: #4FC3F7; }
+  #rest .sub { margin-top: 4px; }
+  .bigbtn {
+    margin-top: 14px; padding: 10px 24px;
+    border-radius: 20px; border: none;
+    background: #1A1A2E; color: #fff; font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Liste des jours -->
+<div id="home" class="screen active">
+  <div class="scroll">
+    <h1>💪 Fat Loss</h1>
+    <div id="dayList"></div>
+    <button class="bigbtn" style="width:100%" onclick="AndroidBridge.exitApp()">Quitter</button>
+  </div>
+</div>
+
+<!-- Exercices du jour -->
+<div id="day" class="screen">
+  <button class="backbtn" onclick="show('home')">‹ Jours</button>
+  <div class="scroll" style="padding-top:16%">
+    <h1 id="dayTitle" style="font-size:14px"></h1>
+    <div id="exList"></div>
+  </div>
+</div>
+
+<!-- Compteur de répétitions -->
+<div id="counter" class="screen">
+  <button class="backbtn" onclick="leaveCounter()">‹ Exos</button>
+  <div style="margin-top:14%"></div>
+  <div id="exName"></div>
+  <div id="setInfo"></div>
+  <div id="repCount">0</div>
+  <div id="repTarget"></div>
+  <div class="btnrow">
+    <button class="rbtn" onclick="adjustRep(-1)">−</button>
+    <button class="rbtn ok" onclick="finishSet()">✓</button>
+    <button class="rbtn" onclick="adjustRep(1)">+</button>
+  </div>
+  <button id="autoChip" class="chip on" onclick="toggleAuto()">AUTO : capteur ON</button>
+  <button class="chip" onclick="show('settings')">⚙ Réglages</button>
+  <div id="levelbar"><div id="levelfill"></div></div>
+</div>
+
+<!-- Réglages détection -->
+<div id="settings" class="screen">
+  <button class="backbtn" onclick="applySettings()">‹ Retour</button>
+  <div class="scroll" style="padding-top:20%; text-align:center">
+    <div class="row">
+      <label>Capteur</label>
+      <div class="modebtns">
+        <button id="modeAccel" class="sel" onclick="setMode('accel')">Accéléro</button>
+        <button id="modeGyro" onclick="setMode('gyro')">Gyro</button>
+      </div>
+    </div>
+    <div class="row">
+      <label>Amplitude du mouvement</label>
+      <div class="modebtns">
+        <button id="ampFull" class="sel" onclick="setAmp(1)">Complète</button>
+        <button id="ampPart" onclick="setAmp(0.6)">Partielle</button>
+        <button id="ampMini" onclick="setAmp(0.35)">Mini</button>
+      </div>
+      <label style="margin-top:4px; font-size:10px">squats partiels → Partielle ou Mini</label>
+    </div>
+    <div class="row">
+      <label>Sensibilité : <span id="sensVal">1.0</span></label>
+      <input type="range" id="sens" min="3" max="30" value="10"
+             oninput="document.getElementById('sensVal').textContent=(this.value/10).toFixed(1)">
+    </div>
+    <div class="row">
+      <label>Repos entre séries : <span id="restVal">90</span> s</label>
+      <input type="range" id="restLen" min="30" max="180" step="15" value="90" style="width:90%; accent-color:#4FC3F7"
+             oninput="document.getElementById('restVal').textContent=this.value">
+    </div>
+  </div>
+</div>
+
+<!-- Minuteur de repos -->
+<div id="rest" class="screen">
+  <div class="sub">REPOS</div>
+  <div id="restTime">90</div>
+  <div class="sub" id="restNext"></div>
+  <button class="bigbtn" onclick="endRest()">Passer</button>
+</div>
+
+<script>
+'use strict';
+
+var plan = [];
+try { plan = JSON.parse(AndroidBridge.getPlan()); } catch (e) { plan = []; }
+
+var state = {
+  dayIdx: parseInt(localStorage.getItem('dayIdx') || '0', 10),
+  exIdx: 0,
+  set: 1,
+  reps: 0,
+  auto: true,
+  mode: localStorage.getItem('mode') || 'accel',
+  sens: parseFloat(localStorage.getItem('sens') || '1'),
+  amp: parseFloat(localStorage.getItem('amp') || '1'),
+  restLen: parseInt(localStorage.getItem('restLen') || '90', 10),
+  doneToday: {}
+};
+var restTimer = null;
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+/* ---------- Liste des jours ---------- */
+function shortTitle(t) {
+  var m = t.match(/JOUR\s*(\d+)\s*:\s*([^(—]+)/);
+  return m ? ('J' + m[1] + ' · ' + m[2].trim()) : t;
+}
+function weekOf(t) {
+  var m = t.match(/S(\d)\s/);
+  return m ? m[1] : (t.match(/—\s*S(\d)/) || [])[1];
+}
+function renderHome() {
+  var html = '', lastWeek = null;
+  plan.forEach(function (d, i) {
+    var w = weekOf(d.title);
+    if (w && w !== lastWeek) {
+      lastWeek = w;
+      html += '<div class="week-tag">Semaine ' + w + '</div>';
+    }
+    var mark = (i === state.dayIdx) ? ' style="border:1px solid #FFB300"' : '';
+    html += '<div class="item"' + mark + ' onclick="openDay(' + i + ')">' + shortTitle(d.title) +
+            '<div class="meta">' + d.exercises.length + ' exercices</div></div>';
+  });
+  document.getElementById('dayList').innerHTML = html;
+}
+
+/* ---------- Exercices du jour ---------- */
+function openDay(i) {
+  state.dayIdx = i;
+  localStorage.setItem('dayIdx', String(i));
+  state.doneToday = {};
+  var d = plan[i];
+  document.getElementById('dayTitle').textContent = shortTitle(d.title);
+  var html = '';
+  d.exercises.forEach(function (ex, j) {
+    html += '<div class="item' + (state.doneToday[j] ? ' done' : '') + '" id="exitem' + j +
+            '" onclick="openCounter(' + j + ')">' + ex.name +
+            '<div class="meta">' + ex.sets + ' × ' + ex.reps + (ex.equip ? ' · ' + ex.equip : '') + '</div></div>';
+  });
+  document.getElementById('exList').innerHTML = html;
+  show('day');
+}
+
+/* ---------- Compteur ---------- */
+function cur() { return plan[state.dayIdx].exercises[state.exIdx]; }
+
+function openCounter(j) {
+  state.exIdx = j;
+  state.set = 1;
+  state.reps = 0;
+  AndroidBridge.setKeepScreenOn(true);
+  renderCounter();
+  show('counter');
+  if (state.auto) { startDetect(); }
+}
+
+function renderCounter() {
+  var ex = cur();
+  document.getElementById('exName').textContent = ex.name;
+  document.getElementById('setInfo').textContent = 'Série ' + state.set + ' / ' + ex.sets;
+  document.getElementById('repCount').textContent = state.reps;
+  document.getElementById('repTarget').textContent = 'objectif ' + ex.reps + ' reps';
+  var c = document.getElementById('repCount');
+  c.style.color = state.reps >= ex.reps ? '#66BB6A' : '#fff';
+}
+
+function startDetect() { AndroidBridge.startDetection(state.mode, state.sens, state.amp); }
+function stopDetect() { AndroidBridge.stopDetection(); }
+
+/* Appelé par le natif à chaque répétition détectée */
+window.onRep = function () {
+  if (!document.getElementById('counter').classList.contains('active')) { return; }
+  state.reps++;
+  renderCounter();
+  if (state.reps === cur().reps) { AndroidBridge.vibrate(300); }
+};
+
+/* Niveau du signal capteur (barre de debug/réglage) */
+window.onLevel = function (level, threshold) {
+  var pct = Math.min(100, (level / (threshold * 1.5)) * 100);
+  document.getElementById('levelfill').style.width = pct + '%';
+  document.getElementById('levelfill').style.background = level > threshold ? '#66BB6A' : '#FFB300';
+};
+
+function adjustRep(d) {
+  state.reps = Math.max(0, state.reps + d);
+  renderCounter();
+}
+
+function toggleAuto() {
+  state.auto = !state.auto;
+  var chip = document.getElementById('autoChip');
+  chip.classList.toggle('on', state.auto);
+  chip.textContent = state.auto ? 'AUTO : capteur ON' : 'AUTO : OFF (manuel)';
+  if (state.auto) { startDetect(); } else { stopDetect(); document.getElementById('levelfill').style.width = '0%'; }
+}
+
+function leaveCounter() {
+  stopDetect();
+  AndroidBridge.setKeepScreenOn(false);
+  openDay(state.dayIdx);
+}
+
+/* ---------- Fin de série / repos ---------- */
+function finishSet() {
+  stopDetect();
+  var ex = cur();
+  if (state.set >= ex.sets) {
+    state.doneToday[state.exIdx] = true;
+    AndroidBridge.vibrate(500);
+    nextExercise();
+    return;
+  }
+  state.set++;
+  state.reps = 0;
+  startRest();
+}
+
+function nextExercise() {
+  var exs = plan[state.dayIdx].exercises;
+  if (state.exIdx + 1 < exs.length) {
+    openCounter(state.exIdx + 1);
+  } else {
+    AndroidBridge.setKeepScreenOn(false);
+    openDay(state.dayIdx);
+  }
+}
+
+function startRest() {
+  var t = state.restLen;
+  document.getElementById('restTime').textContent = t;
+  document.getElementById('restNext').textContent = cur().name + ' · série ' + state.set + '/' + cur().sets;
+  show('rest');
+  restTimer = setInterval(function () {
+    t--;
+    document.getElementById('restTime').textContent = t;
+    if (t <= 3 && t > 0) { AndroidBridge.vibrate(80); }
+    if (t <= 0) { endRest(); }
+  }, 1000);
+}
+
+function endRest() {
+  if (restTimer) { clearInterval(restTimer); restTimer = null; }
+  AndroidBridge.vibrate(400);
+  renderCounter();
+  show('counter');
+  if (state.auto) { startDetect(); }
+}
+
+/* ---------- Réglages ---------- */
+function setMode(m) {
+  state.mode = m;
+  document.getElementById('modeAccel').classList.toggle('sel', m === 'accel');
+  document.getElementById('modeGyro').classList.toggle('sel', m === 'gyro');
+}
+
+function setAmp(a) {
+  state.amp = a;
+  document.getElementById('ampFull').classList.toggle('sel', a === 1);
+  document.getElementById('ampPart').classList.toggle('sel', a === 0.6);
+  document.getElementById('ampMini').classList.toggle('sel', a === 0.35);
+}
+
+function applySettings() {
+  state.sens = parseInt(document.getElementById('sens').value, 10) / 10;
+  state.restLen = parseInt(document.getElementById('restLen').value, 10);
+  localStorage.setItem('mode', state.mode);
+  localStorage.setItem('sens', String(state.sens));
+  localStorage.setItem('amp', String(state.amp));
+  localStorage.setItem('restLen', String(state.restLen));
+  show('counter');
+  if (state.auto) { startDetect(); }
+}
+
+/* Init réglages depuis le stockage */
+document.getElementById('sens').value = Math.round(state.sens * 10);
+document.getElementById('sensVal').textContent = state.sens.toFixed(1);
+document.getElementById('restLen').value = state.restLen;
+document.getElementById('restVal').textContent = state.restLen;
+setMode(state.mode);
+setAmp(state.amp);
+renderHome();
+</script>
+</body>
+</html>

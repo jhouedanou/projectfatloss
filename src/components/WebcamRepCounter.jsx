@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Camera, X, AlertTriangle } from 'lucide-react';
 import { loadPoseLandmarker, createRepEngine } from '../services/PoseRepCounter';
-import { getRepPattern } from '../services/RepPatternRules';
+import { getRepPattern, applyAmplitude } from '../services/RepPatternRules';
+import { getCameraAmplitude } from '../services/CameraRepService';
 import { POSE_CONNECTIONS, vis } from '../services/PoseLandmarks';
 import './WebcamRepCounter.css';
 
@@ -40,6 +41,9 @@ export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, 
   const [progress, setProgress] = useState(0);
   const [tracking, setTracking] = useState(false);
   const [flash, setFlash] = useState(false);
+  // Amplitude choisie au lancement de la séance (dialog caméra) : borne
+  // « difficile » du patron relâchée pour compter les reps partielles.
+  const amplitude = getCameraAmplitude();
 
   /**
    * Projette les landmarks normalisés sur le canvas en tenant compte du
@@ -105,7 +109,10 @@ export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, 
       setErrorMsg("Cet exercice n'est pas comptable par la caméra.");
       return;
     }
-    engineRef.current = createRepEngine(rule);
+    engineRef.current = createRepEngine({
+      ...rule,
+      pattern: applyAmplitude(rule.pattern, getCameraAmplitude()),
+    });
     lastFrameTimeRef.current = -1;
 
     async function start() {
@@ -229,6 +236,7 @@ export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, 
           </div>
         )}
 
+
         {status === 'loading' && (
           <div className="wrc-overlay-msg">Chargement du modèle…</div>
         )}
@@ -258,6 +266,7 @@ export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, 
           {tracking && !cue
             ? 'Posture détectée — le comptage est actif.'
             : 'Placez-vous de profil, corps entier visible dans le cadre.'}
+          {amplitude !== 'full' ? ' Amplitude réduite : reps partielles comptées.' : ''}
         </p>
       )}
     </div>

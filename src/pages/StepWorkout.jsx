@@ -1,6 +1,6 @@
 // Correction des bugs liés à pause/isPaused - v1.0.1
 import React, { useState, useEffect, useRef, createContext, useCallback, useMemo } from 'react';
-import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell, CalendarPlus, Volume2, VolumeX } from 'lucide-react';
 import { getLastDoseAt, isTakenToday, downloadCreatineReminder } from '../utils/creatineReminder';
@@ -23,6 +23,7 @@ import PreWorkout from '../components/PreWorkout';
 import { getCaloriesForSet } from '../services/CalorieEstimator';
 import WebcamRepCounter from '../components/WebcamRepCounter';
 import { isCameraCountable } from '../services/RepPatternRules';
+import { getCameraAmplitude, setCameraAmplitude, AMPLITUDE_LABELS } from '../services/CameraRepService';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -683,6 +684,14 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // Caméra : décision prise UNE fois au lancement de la séance.
   // null = pas encore demandé, true/false = choix de l'utilisateur.
   const [cameraSessionEnabled, setCameraSessionEnabled] = useState(null);
+  // Amplitude du mouvement pour la détection (squats partiels…), choisie au
+  // lancement de la séance et mémorisée entre les séances.
+  const [cameraAmplitude, setCameraAmplitudeState] = useState(getCameraAmplitude());
+  const handleAmplitudeChange = (_e, value) => {
+    if (!value) return; // ToggleButtonGroup renvoie null si on re-clique le bouton actif
+    setCameraAmplitudeState(value);
+    setCameraAmplitude(value);
+  };
   const dayHasCountable = useMemo(
     () => !!day?.exercises?.some((e) => isCameraCountable(e)),
     [day]
@@ -1143,6 +1152,22 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             Pour cette séance, la caméra peut compter automatiquement vos répétitions
             sur les exercices compatibles. Placez-vous de profil, corps entier visible.
           </DialogContentText>
+          <DialogContentText sx={{ mt: 2, mb: 1, fontSize: '0.85rem' }}>
+            Amplitude du mouvement — si vous ne descendez pas complètement
+            (squats partiels…), choisissez Partielle ou Mini :
+          </DialogContentText>
+          <ToggleButtonGroup
+            value={cameraAmplitude}
+            exclusive
+            onChange={handleAmplitudeChange}
+            size="small"
+            fullWidth
+            color="primary"
+          >
+            {Object.entries(AMPLITUDE_LABELS).map(([value, label]) => (
+              <ToggleButton key={value} value={value}>{label}</ToggleButton>
+            ))}
+          </ToggleButtonGroup>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCameraSessionEnabled(false)}>Non merci</Button>
