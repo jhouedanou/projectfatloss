@@ -24,8 +24,11 @@ const DRAW_MIN_VISIBILITY = 0.5;
  *  - targetReps  : objectif (nbRep)
  *  - onRep       : appelé à chaque répétition détectée
  *  - onClose     : ferme la caméra
+ *  - resetKey    : toute valeur qui change remet le compteur à zéro sans
+ *                  redémarrer la caméra (ex. passage au second côté d'un
+ *                  exercice unilatéral : le membre suivi change)
  */
-export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, onRep, onClose }) {
+export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, onRep, onClose, resetKey = null }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -214,6 +217,14 @@ export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, 
     // On ne relance que si l'exercice change (nom)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exo?.name, draw]);
+
+  // Remise à zéro de la machine à états sans couper le flux vidéo : le côté
+  // actif détecté, la ligne de base et l'armement du mouvement repartent de
+  // zéro pour le nouveau membre.
+  useEffect(() => {
+    if (resetKey === null) return;
+    if (engineRef.current) engineRef.current.reset();
+  }, [resetKey]);
 
   const live = status === 'ready';
 
