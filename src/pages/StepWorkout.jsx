@@ -12,7 +12,7 @@ import ProgressTracker from '../components/ProgressTracker';
 import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
 import DayPills from '../components/DayPills';
 import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
-import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
+import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceSideChange, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +42,10 @@ const SET_PAUSE_INCREMENT_SECONDS = 5;    // +5s par série déjà réalisée
 const SET_PAUSE_MAX_SECONDS = 40;         // plafond du repos entre séries
 const EXERCISE_PAUSE_SECONDS = 45;        // repos entre exercices (récupération force)
 const PAUSE_DURATION_SECONDS = SET_PAUSE_BASE_SECONDS; // valeur par défaut historique
+
+// Exercices unilatéraux (« /côté », « /jambe ») : délai avant le passage
+// automatique au second côté, le temps de changer de bras ou de jambe.
+const SIDE_SWITCH_DELAY_SECONDS = 3;
 
 // Calcule la durée de pause en fonction du contexte (changement d'exercice ou
 // de série) afin d'avoir plus de force pour l'effort suivant.
@@ -1277,6 +1281,11 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   const [chrono, setChrono] = useState(0);
   const [chronoRunning, setChronoRunning] = useState(false);
   const [side, setSide] = useState(0); // 0: premier côté, 1: deuxième côté
+  // Décompte avant le passage automatique au second côté (null = inactif)
+  const [sideSwitchCountdown, setSideSwitchCountdown] = useState(null);
+  // Le rythme automatique était-il lancé sur le premier côté ? Si oui, on le
+  // relance sur le second pour ne pas laisser l'utilisateur sans cadence.
+  const wasPulsingRef = useRef(false);
   const chronoInterval = useRef(null);
   
   // Timer pour exercices avec duration
@@ -1293,6 +1302,8 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     setCurrentRep(0);
     setShowOverlay(false);
     setCountdown(null);
+    setSideSwitchCountdown(null);
+    wasPulsingRef.current = false;
     // Activer la caméra si le réglage global est ON et l'exercice comptable
     setCameraActive(cameraEnabled && cameraCountable);
     if (timerRef.current) {
@@ -1457,7 +1468,8 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   useEffect(() => {
     setChrono(0);
     setSide(0);
-    
+    setSideSwitchCountdown(null);
+
     // Démarrer automatiquement le timer pour les exercices qui en ont besoin
     if ((hasTimer || isChrono) && !isPaused) {
       // Délai court pour laisser l'interface se charger
@@ -1476,6 +1488,82 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
       // Ne pas redémarrer automatiquement ici, laisser l'utilisateur contrôler
     }
   }, [side, isDoubleSided, hasTimer, isChrono]);
+
+  // Mémoriser que le rythme automatique tournait sur le côté en cours, pour le
+  // relancer à l'identique après le changement de côté.
+  useEffect(() => {
+    if (isPulsing) wasPulsingRef.current = true;
+  }, [isPulsing]);
+
+  // Passage au second côté d'un exercice unilatéral : remet le compteur, le
+  // timer et la détection caméra à zéro, puis relance la cadence si elle
+  // tournait. Appelé par le décompte automatique comme par le bouton manuel.
+  const switchToSecondSide = useCallback(() => {
+    const resumeRhythm = wasPulsingRef.current && !cameraActive && !hasTimer && !isChrono;
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setSideSwitchCountdown(null);
+    setIsPulsing(false);
+    setCurrentRep(0);
+    setSide(1);
+    wasPulsingRef.current = false;
+
+    // Exercice unilatéral chronométré : le second côté repart sur un timer neuf.
+    if (exo.duration) {
+      setExerciseTimer(exo.duration);
+      setTimerRunning(true);
+    }
+
+    if (resumeRhythm) {
+      setCountdown(3);
+      setShowOverlay(true);
+    } else {
+      setShowOverlay(false);
+    }
+  }, [cameraActive, hasTimer, isChrono, exo.duration]);
+
+  // Détection de la fin du premier côté : reps atteintes (rythme, caméra ou
+  // comptage manuel) ou timer écoulé. On enchaîne automatiquement au lieu
+  // d'attendre un appui sur « Passer au second côté ».
+  useEffect(() => {
+    if (!isDoubleSided || side !== 0 || isPaused) return;
+    if (sideSwitchCountdown !== null) return;
+
+    const repsDone = !isChrono && !hasTimer && exo.nbRep > 0 && currentRep >= exo.nbRep;
+    const timedSideDone = !!exo.duration && !isChrono && exerciseTimer === 0;
+    if (!repsDone && !timedSideDone) return;
+
+    setSideSwitchCountdown(SIDE_SWITCH_DELAY_SECONDS);
+    announceSideChange(1);
+  }, [
+    isDoubleSided,
+    side,
+    isPaused,
+    sideSwitchCountdown,
+    isChrono,
+    hasTimer,
+    currentRep,
+    exo.nbRep,
+    exo.duration,
+    exerciseTimer,
+  ]);
+
+  // Décompte « changez de côté » : un bip par seconde, puis bascule.
+  useEffect(() => {
+    if (sideSwitchCountdown === null || isPaused) return;
+    if (sideSwitchCountdown > 0) {
+      playBeep();
+      const t = setTimeout(
+        () => setSideSwitchCountdown((c) => (c === null ? null : c - 1)),
+        1000
+      );
+      return () => clearTimeout(t);
+    }
+    switchToSecondSide();
+  }, [sideSwitchCountdown, isPaused, switchToSecondSide]);
 
   // Nouveau : bouton "Suivant" sur l'overlay OK
   const handleNext = () => {
@@ -1535,8 +1623,11 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
 
   // Caméra : à la fin des répétitions détectées, afficher l'écran « OK / Suivant »
   // pendant 5 secondes puis passer automatiquement à l'exercice suivant.
+  // Sur un exercice unilatéral, seul le second côté termine la série : le
+  // premier déclenche le passage automatique à l'autre côté.
   useEffect(() => {
-    if (cameraActive && exo.nbRep > 0 && currentRep >= exo.nbRep && !isChrono && !isDoubleSided) {
+    const lastSideDone = !isDoubleSided || side === 1;
+    if (cameraActive && exo.nbRep > 0 && currentRep >= exo.nbRep && !isChrono && lastSideDone) {
       setShowOverlay(true);
       const t = setTimeout(() => {
         handleNext();
@@ -1544,12 +1635,15 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
       return () => clearTimeout(t);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cameraActive, currentRep, exo.nbRep, isChrono, isDoubleSided]);
+  }, [cameraActive, currentRep, exo.nbRep, isChrono, isDoubleSided, side]);
 
   // Mode automatique: terminer automatiquement l'exercice après les répétitions
   // (ignoré si la caméra gère la fin : elle a son propre délai de 5 s ci-dessus)
   useEffect(() => {
-    if (autoMode && !cameraActive && currentRep === exo.nbRep && !hasTimer && !isChrono) {
+    // Un exercice unilatéral n'est terminé qu'après le second côté : sinon on
+    // laisse le passage automatique de côté faire son travail.
+    const lastSideDone = !isDoubleSided || side === 1;
+    if (autoMode && !cameraActive && currentRep === exo.nbRep && !hasTimer && !isChrono && lastSideDone) {
       // Attendre 1 seconde puis terminer automatiquement
       const autoFinishTimer = setTimeout(() => {
         const calories = caloriesPerSet;
@@ -1559,7 +1653,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
 
       return () => clearTimeout(autoFinishTimer);
     }
-  }, [autoMode, cameraActive, currentRep, exo.nbRep, hasTimer, isChrono, caloriesPerSet, onCaloriesBurned, onDone]);
+  }, [autoMode, cameraActive, currentRep, exo.nbRep, hasTimer, isChrono, isDoubleSided, side, caloriesPerSet, onCaloriesBurned, onDone]);
 
   // Désactivation du mode auto : stopper proprement tout rythme automatique en
   // cours (décompte, pulsation, overlay) au lieu d'en relancer un.
@@ -1673,19 +1767,21 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
                       Côté {side + 1} sur 2 terminé
                     </Typography>
                     {side === 0 ? (
-                      <Button 
-                        variant="contained" 
-                        color="info"
-                        onClick={() => {
-                          setShowOverlay(false);
-                          setSide(1);
-                          setCurrentRep(0);
-                          setIsPulsing(false);
-                        }}
-                        sx={{ minWidth: 200 }}
-                      >
-                        Passer au second côté
-                      </Button>
+                      <>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: '#3b82f6' }}>
+                          {sideSwitchCountdown > 0
+                            ? `Changez de côté… ${sideSwitchCountdown}`
+                            : 'Changez de côté !'}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          color="info"
+                          onClick={switchToSecondSide}
+                          sx={{ minWidth: 200 }}
+                        >
+                          Passer maintenant
+                        </Button>
+                      </>
                     ) : (
                       <Button 
                         variant="contained" 
@@ -1799,6 +1895,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
                 targetReps={exo.nbRep}
                 onRep={handleCameraRep}
                 onClose={() => setCameraActive(false)}
+                resetKey={isDoubleSided ? side : null}
               />
             ) : (
               <Button
@@ -1968,6 +2065,14 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               <Timer size={18} color="#a1a1aa" />
               <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>{exo.sets}</Typography>
             </Box>
+            {/* Exercice unilatéral : le côté en cours change tout seul, il doit
+                rester lisible d'un coup d'œil pendant l'effort. */}
+            {isDoubleSided && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(59, 130, 246, 0.15)', px: 2, py: 1, borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.4)' }}>
+                <Repeat size={18} color="#3b82f6" />
+                <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>Côté {side + 1} / 2</Typography>
+              </Box>
+            )}
           </Box>
         )}
         {/* Boutons flottants pour toutes les actions */}
