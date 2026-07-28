@@ -1,0 +1,8 @@
+{
+  "appId": "com.jhouedanou.projectfatloss",
+  "appName": "Project Fat Loss",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}
