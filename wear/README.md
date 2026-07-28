@@ -5,12 +5,19 @@ Version montre de l'application Project Fat Loss : programme 7 j/7 (4 semaines) 
 
 ## Architecture
 
-- `app/src/main/assets/index.html` — interface (écran rond 384×384, adaptée de la PWA)
 - `app/src/main/assets/plan.json` — programme compact, généré depuis `src/data.js`
-- `MainActivity.java` — WebView plein écran + détection native des reps
+- `MainActivity.java` — UI 100 % native (vues programmatiques, design en pixels sur
+  base 384×384 mis à l'échelle sur la résolution réelle) + détection native des reps
   (capteur `LINEAR_ACCELERATION` ou `GYROSCOPE`, lissage EMA, machine à états
   seuil haut/bas, intervalle mini 1,2 s anti double-comptage). Chaque rep détectée
-  vibre et est poussée au JS via `window.onRep()`.
+  vibre et incrémente le compteur.
+
+> **Pourquoi pas de WebView ?** Wear OS ne déclare pas la feature système
+> `android.software.webview` : `WebViewFactory.getProvider()` lève
+> `UnsupportedOperationException` dès la construction d'un `WebView`, même si un
+> APK WebView est sideloadé (vérifiable : `adb shell pm list features` ne liste
+> pas `webview`). L'interface HTML d'origine a donc été portée en vues natives,
+> à iso-design et iso-comportement.
 
 ## Régénérer les données du programme
 
