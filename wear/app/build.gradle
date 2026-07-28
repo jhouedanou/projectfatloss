@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.jhouedanou.projectfatloss.wear'
+    namespace 'com.houedanou.fatloss.wear'
     compileSdk 34
 
     defaultConfig {
-        applicationId 'com.jhouedanou.projectfatloss.wear'
+        applicationId 'com.houedanou.fatloss.wear'
         minSdk 30
         targetSdk 33
         versionCode 2

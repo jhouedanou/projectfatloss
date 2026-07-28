@@ -1,4 +1,4 @@
-package com.jhouedanou.projectfatloss.wear;
+package com.houedanou.fatloss.wear;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
