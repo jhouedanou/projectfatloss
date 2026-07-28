@@ -318,7 +318,8 @@ const WEEKS = [
 
 // ---------------------------------------------------------------------------
 // Les 7 séances de la semaine — musculation tous les jours, ~60 min chacune.
-// tier : main | access | core | carry. side:true => série par côté (x2).
+// tier : main | access | core | carry. side:true => exercice unilatéral
+// (les deux côtés s'enchaînent dans la MÊME série, sans doubler totalSets).
 // ---------------------------------------------------------------------------
 
 const m = (name, side = false) => ({ name, tier: 'main', side });
@@ -463,13 +464,16 @@ function buildExercise(entry, week) {
   }
 
   const scheme = week[entry.tier];
-  // Exercices « alternés » : les deux côtés travaillent dans la MÊME série
-  // (un pas gauche, un pas droit…), donc pas de doublement des séries ni de
-  // marqueur « /côté » (qui déclencherait le passage côté par côté dans l'app).
+  // Exercices unilatéraux : l'app enchaîne déjà les deux côtés DANS la même
+  // série (le marqueur « /côté » déclenche le passage automatique au second
+  // côté), donc totalSets reste le nombre de séries affiché — le doubler
+  // ferait faire deux fois le travail prévu. Les exercices « alternés »
+  // (un pas gauche, un pas droit…) travaillent aussi les deux côtés dans la
+  // même série, sans marqueur « /côté ».
   const alternating = entry.side && /altern/i.test(entry.name);
   const suffix = entry.side ? (alternating ? ' en alternance' : ' /côté') : '';
   exercise.sets = `${scheme.sets}${suffix}`;
-  exercise.totalSets = entry.side && !alternating ? scheme.n * 2 : scheme.n;
+  exercise.totalSets = scheme.n;
   exercise.nbRep = scheme.rep;
   if (base.timer) {
     exercise.timer = true;
@@ -500,11 +504,13 @@ const SET_PAUSE_INCREMENT = 5;
 const SET_PAUSE_MAX = 40;
 const EXERCISE_PAUSE = 45;
 
-/** Secondes de travail estimées pour une série (tempo lent = 5 s/rep, sinon 3 s). */
+/** Secondes de travail estimées pour une série (tempo lent = 5 s/rep, sinon 3 s).
+ *  Une série « /côté » enchaîne les deux côtés : travail doublé + 3 s de bascule. */
 function setWorkSeconds(exercise) {
   if (exercise.timer) return exercise.duration;
   const slow = /tempo/.test(exercise.sets);
-  return exercise.nbRep * (slow ? 5 : 3);
+  const perSide = exercise.nbRep * (slow ? 5 : 3);
+  return exercise.sets.includes('/côté') ? perSide * 2 + 3 : perSide;
 }
 
 /** Minutes estimées de musculation (vélo exclu) pour une séance. */

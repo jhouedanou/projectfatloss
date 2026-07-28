@@ -134,7 +134,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -148,7 +148,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -162,7 +162,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -228,7 +228,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Un genou et une main sur le banc, tirez l'haltère vers la hanche, coude près du corps. Appui sur banc, pas au sol.",
           caloriesPerSet: [21, 24],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -298,7 +298,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -366,7 +366,7 @@ class DefaultWorkoutData {
           equip: "Haltères 15 kg",
           desc: "Pied arrière surélevé sur le banc, descendez sur la jambe avant. Très efficace quadriceps et fessiers. Debout, zéro impact.",
           caloriesPerSet: [21, 24],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -380,7 +380,7 @@ class DefaultWorkoutData {
           equip: "Haltères 15 kg",
           desc: "Montez complètement sur un banc/marche stable, jambe motrice, contrôlez la descente. Alternez. Bas du corps fonctionnel, zéro impact.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -422,7 +422,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -436,7 +436,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -558,7 +558,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -572,7 +572,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -586,7 +586,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -680,7 +680,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Assis sur banc, coude calé contre la cuisse, fléchissez le bras lentement. Isolation du biceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -708,7 +708,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -722,7 +722,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -804,7 +804,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout sur une jambe (main libre en appui léger si besoin), poussez la hanche en arrière et descendez l'haltère le long de la jambe d'appui, dos droit. Ischios, fessiers, équilibre.",
           caloriesPerSet: [21, 24],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -832,7 +832,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, tendez la jambe vers l'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -846,7 +846,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -942,7 +942,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -984,7 +984,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -998,7 +998,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1136,7 +1136,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1150,7 +1150,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1164,7 +1164,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1230,7 +1230,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Un genou et une main sur le banc, tirez l'haltère vers la hanche, coude près du corps. Appui sur banc, pas au sol.",
           caloriesPerSet: [21, 24],
-          totalSets: 10,
+          totalSets: 5,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1300,7 +1300,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1368,7 +1368,7 @@ class DefaultWorkoutData {
           equip: "Haltères 15 kg",
           desc: "Pied arrière surélevé sur le banc, descendez sur la jambe avant. Très efficace quadriceps et fessiers. Debout, zéro impact.",
           caloriesPerSet: [21, 24],
-          totalSets: 10,
+          totalSets: 5,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1382,7 +1382,7 @@ class DefaultWorkoutData {
           equip: "Haltères 15 kg",
           desc: "Montez complètement sur un banc/marche stable, jambe motrice, contrôlez la descente. Alternez. Bas du corps fonctionnel, zéro impact.",
           caloriesPerSet: [16, 18],
-          totalSets: 10,
+          totalSets: 5,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1424,7 +1424,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1438,7 +1438,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1560,7 +1560,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1574,7 +1574,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1588,7 +1588,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1682,7 +1682,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Assis sur banc, coude calé contre la cuisse, fléchissez le bras lentement. Isolation du biceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1710,7 +1710,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1724,7 +1724,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1806,7 +1806,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout sur une jambe (main libre en appui léger si besoin), poussez la hanche en arrière et descendez l'haltère le long de la jambe d'appui, dos droit. Ischios, fessiers, équilibre.",
           caloriesPerSet: [21, 24],
-          totalSets: 10,
+          totalSets: 5,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1834,7 +1834,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, tendez la jambe vers l'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1848,7 +1848,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1944,7 +1944,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -1986,7 +1986,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2000,7 +2000,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 18,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2138,7 +2138,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2152,7 +2152,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2166,7 +2166,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2232,7 +2232,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Un genou et une main sur le banc, tirez l'haltère vers la hanche, coude près du corps. Appui sur banc, pas au sol.",
           caloriesPerSet: [21, 24],
-          totalSets: 10,
+          totalSets: 5,
           nbRep: 10,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2302,7 +2302,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2370,7 +2370,7 @@ class DefaultWorkoutData {
           equip: "Haltères 15 kg",
           desc: "Pied arrière surélevé sur le banc, descendez sur la jambe avant. Très efficace quadriceps et fessiers. Debout, zéro impact.",
           caloriesPerSet: [21, 24],
-          totalSets: 10,
+          totalSets: 5,
           nbRep: 10,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2384,7 +2384,7 @@ class DefaultWorkoutData {
           equip: "Haltères 15 kg",
           desc: "Montez complètement sur un banc/marche stable, jambe motrice, contrôlez la descente. Alternez. Bas du corps fonctionnel, zéro impact.",
           caloriesPerSet: [16, 18],
-          totalSets: 10,
+          totalSets: 5,
           nbRep: 10,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2426,7 +2426,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2440,7 +2440,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2562,7 +2562,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2576,7 +2576,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2590,7 +2590,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2684,7 +2684,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Assis sur banc, coude calé contre la cuisse, fléchissez le bras lentement. Isolation du biceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2712,7 +2712,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2726,7 +2726,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2808,7 +2808,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout sur une jambe (main libre en appui léger si besoin), poussez la hanche en arrière et descendez l'haltère le long de la jambe d'appui, dos droit. Ischios, fessiers, équilibre.",
           caloriesPerSet: [21, 24],
-          totalSets: 10,
+          totalSets: 5,
           nbRep: 10,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2836,7 +2836,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, tendez la jambe vers l'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2850,7 +2850,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2946,7 +2946,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -2988,7 +2988,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3002,7 +3002,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 8,
+          totalSets: 4,
           nbRep: 20,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3140,7 +3140,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3154,7 +3154,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3168,7 +3168,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3234,7 +3234,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Un genou et une main sur le banc, tirez l'haltère vers la hanche, coude près du corps. Appui sur banc, pas au sol.",
           caloriesPerSet: [21, 24],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3304,7 +3304,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3372,7 +3372,7 @@ class DefaultWorkoutData {
           equip: "Haltères 15 kg",
           desc: "Pied arrière surélevé sur le banc, descendez sur la jambe avant. Très efficace quadriceps et fessiers. Debout, zéro impact.",
           caloriesPerSet: [21, 24],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3386,7 +3386,7 @@ class DefaultWorkoutData {
           equip: "Haltères 15 kg",
           desc: "Montez complètement sur un banc/marche stable, jambe motrice, contrôlez la descente. Alternez. Bas du corps fonctionnel, zéro impact.",
           caloriesPerSet: [16, 18],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3428,7 +3428,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3442,7 +3442,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3564,7 +3564,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3578,7 +3578,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3592,7 +3592,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3686,7 +3686,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Assis sur banc, coude calé contre la cuisse, fléchissez le bras lentement. Isolation du biceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3714,7 +3714,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3728,7 +3728,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3810,7 +3810,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout sur une jambe (main libre en appui léger si besoin), poussez la hanche en arrière et descendez l'haltère le long de la jambe d'appui, dos droit. Ischios, fessiers, équilibre.",
           caloriesPerSet: [21, 24],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 12,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3838,7 +3838,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, tendez la jambe vers l'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.",
           caloriesPerSet: [12, 14],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3852,7 +3852,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Debout, amenez l'haltère en diagonale de la hanche basse vers l'épaule opposée puis inversez. Rotation du tronc, debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3948,7 +3948,7 @@ class DefaultWorkoutData {
           equip: "Haltère 10 kg",
           desc: "Buste penché, coude collé au corps et fixe, tendez l'avant-bras vers l'arrière puis revenez. Isolation triceps.",
           caloriesPerSet: [12, 14],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -3990,7 +3990,7 @@ class DefaultWorkoutData {
           equip: "Haltère 15 kg",
           desc: "Debout, un haltère d'un côté, inclinez le buste latéralement puis redressez en contractant l'oblique. Debout, aucun appui au sol.",
           caloriesPerSet: [13, 15],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
@@ -4004,7 +4004,7 @@ class DefaultWorkoutData {
           equip: "Poids chevilles 4 kg",
           desc: "Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.",
           caloriesPerSet: [16, 18],
-          totalSets: 6,
+          totalSets: 3,
           nbRep: 15,
           googleFitActivity: GoogleFitActivity(
             type: "strength_training",
