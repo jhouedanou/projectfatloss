@@ -10,7 +10,7 @@
     <application
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
-        android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+        android:theme="@style/AppTheme">
 
         <!-- Application autonome : ne nécessite pas l'app compagnon sur le téléphone -->
         <meta-data

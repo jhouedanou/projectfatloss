@@ -16,7 +16,9 @@ import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -118,8 +120,10 @@ public class MainActivity extends Activity implements SensorEventListener {
     private FrameLayout root;
     private int screen = SCREEN_HOME;
 
+    private GestureDetector backSwipeDetector;
+
     // Vues de l'écran compteur / repos / réglages mises à jour dynamiquement
-    private TextView setInfoView, repCountView, repTargetView, autoChipView, restTimeView;
+    private TextView setInfoView, repCountView, autoChipView, restTimeView;
     private View levelFillView;
     private GradientDrawable levelFillDrawable;
     private TextView modeAccelBtn, modeGyroBtn;
@@ -154,7 +158,35 @@ public class MainActivity extends Activity implements SensorEventListener {
         root = new FrameLayout(this);
         root.setBackgroundColor(COL_BG);
         setContentView(root);
+
+        // Balayage vers la droite depuis le bord gauche = écran précédent (le
+        // swipe-to-dismiss système est désactivé dans le thème, sinon il
+        // fermerait l'app vers le cadran). Exiger le départ au bord évite tout
+        // conflit avec les sliders des réglages et le défilement des listes.
+        backSwipeDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                if (e1 == null || e2 == null) {
+                    return false;
+                }
+                float dx = e2.getX() - e1.getX();
+                float dy = e2.getY() - e1.getY();
+                if (e1.getX() <= px(40) && dx > px(80)
+                        && Math.abs(dx) > 2 * Math.abs(dy) && velocityX > 0) {
+                    onBackPressed();
+                    return true;
+                }
+                return false;
+            }
+        });
+
         showHome();
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        backSwipeDetector.onTouchEvent(ev);
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
@@ -215,7 +247,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         keepScreenOn(false);
 
         LinearLayout col = column();
-        col.addView(title("💪 Fat Loss", 22, COL_ACCENT), matchWrap(0, 0, 0, 10));
+        col.addView(title("💪 Fat Loss", 32, COL_ACCENT), matchWrap(0, 0, 0, 12));
 
         String lastWeek = null;
         for (int i = 0; i < plan.length(); i++) {
@@ -225,7 +257,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             String w = weekOf(t);
             if (w != null && !w.equals(lastWeek)) {
                 lastWeek = w;
-                TextView tag = text("SEMAINE " + w, 12, COL_MUTED3);
+                TextView tag = text("SEMAINE " + w, 20, COL_MUTED3);
                 col.addView(tag, matchWrap(4, 8, 0, 4));
             }
             int count = d.optJSONArray("exercises") != null ? d.optJSONArray("exercises").length() : 0;
@@ -254,8 +286,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         JSONArray exs = d != null ? d.optJSONArray("exercises") : null;
 
         LinearLayout col = column();
-        col.addView(title(d != null ? shortTitle(d.optString("title", "")) : "", 17, COL_ACCENT),
-                matchWrap(0, 0, 0, 10));
+        col.addView(title(d != null ? shortTitle(d.optString("title", "")) : "", 26, COL_ACCENT),
+                matchWrap(0, 0, 0, 12));
 
         if (exs != null) {
             for (int j = 0; j < exs.length(); j++) {
@@ -295,41 +327,45 @@ public class MainActivity extends Activity implements SensorEventListener {
         col.setOrientation(LinearLayout.VERTICAL);
         col.setGravity(Gravity.CENTER_HORIZONTAL);
 
-        TextView exName = text(ex.optString("name", ""), 16, COL_TXT_SOFT);
+        // Nom sur une ligne et infos série + objectif fusionnées : à l'échelle
+        // Wear OS (~2× le design HTML d'origine), c'est ce qui permet à l'écran
+        // de tenir dans les 384 px entre le bouton retour et la barre de niveau.
+        TextView exName = text(ex.optString("name", ""), 22, COL_TXT_SOFT);
         exName.setGravity(Gravity.CENTER);
-        exName.setMaxLines(2);
+        exName.setMaxLines(1);
         exName.setEllipsize(TextUtils.TruncateAt.END);
         exName.setPadding(px(38), 0, px(38), 0);
         col.addView(exName, wrapWrap(0, 0, 0, 0));
 
-        setInfoView = text("", 15, COL_ACCENT);
+        setInfoView = text("", 20, COL_ACCENT);
         col.addView(setInfoView, wrapWrap(0, 2, 0, 0));
 
-        repCountView = text("0", 76, COL_WHITE);
+        repCountView = text("0", 92, COL_WHITE);
         repCountView.setTypeface(Typeface.DEFAULT_BOLD);
+        repCountView.setIncludeFontPadding(false);
         col.addView(repCountView, wrapWrap(0, 2, 0, 2));
-
-        repTargetView = text("", 15, COL_MUTED2);
-        col.addView(repTargetView, wrapWrap(0, 0, 0, 0));
 
         LinearLayout btnRow = new LinearLayout(this);
         btnRow.setOrientation(LinearLayout.HORIZONTAL);
         btnRow.setGravity(Gravity.CENTER_VERTICAL);
-        LinearLayout.LayoutParams minusLp = new LinearLayout.LayoutParams(px(48), px(48));
-        LinearLayout.LayoutParams okLp = new LinearLayout.LayoutParams(px(56), px(56));
-        okLp.leftMargin = px(10);
-        LinearLayout.LayoutParams plusLp = new LinearLayout.LayoutParams(px(48), px(48));
-        plusLp.leftMargin = px(10);
-        btnRow.addView(roundButton("−", 24, COL_ITEM, v -> adjustRep(-1)), minusLp);
-        btnRow.addView(roundButton("✓", 26, COL_OK, v -> finishSet()), okLp);
-        btnRow.addView(roundButton("+", 24, COL_ITEM, v -> adjustRep(1)), plusLp);
-        col.addView(btnRow, wrapWrap(0, 8, 0, 0));
+        LinearLayout.LayoutParams minusLp = new LinearLayout.LayoutParams(px(64), px(64));
+        LinearLayout.LayoutParams okLp = new LinearLayout.LayoutParams(px(76), px(76));
+        okLp.leftMargin = px(12);
+        LinearLayout.LayoutParams plusLp = new LinearLayout.LayoutParams(px(64), px(64));
+        plusLp.leftMargin = px(12);
+        btnRow.addView(roundButton("−", 28, COL_ITEM, v -> adjustRep(-1)), minusLp);
+        btnRow.addView(roundButton("✓", 32, COL_OK, v -> finishSet()), okLp);
+        btnRow.addView(roundButton("+", 28, COL_ITEM, v -> adjustRep(1)), plusLp);
+        col.addView(btnRow, wrapWrap(0, 6, 0, 0));
 
+        LinearLayout chipRow = new LinearLayout(this);
+        chipRow.setOrientation(LinearLayout.HORIZONTAL);
+        chipRow.setGravity(Gravity.CENTER_VERTICAL);
         autoChipView = chip("", v -> toggleAuto());
         styleAutoChip();
-        col.addView(autoChipView, wrapWrap(0, 6, 0, 0));
-
-        col.addView(chip("⚙ Réglages", v -> showSettings()), wrapWrap(0, 6, 0, 0));
+        chipRow.addView(autoChipView, wrapWrap(0, 0, 0, 0));
+        chipRow.addView(chip("⚙", v -> showSettings()), wrapWrap(8, 0, 0, 0));
+        col.addView(chipRow, wrapWrap(0, 6, 0, 0));
 
         FrameLayout layer = new FrameLayout(this);
         FrameLayout.LayoutParams colLp = new FrameLayout.LayoutParams(
@@ -342,17 +378,17 @@ public class MainActivity extends Activity implements SensorEventListener {
         FrameLayout bar = new FrameLayout(this);
         GradientDrawable barBg = new GradientDrawable();
         barBg.setColor(COL_BAR_BG);
-        barBg.setCornerRadius(px(3));
+        barBg.setCornerRadius(px(4));
         bar.setBackground(barBg);
         levelFillDrawable = new GradientDrawable();
         levelFillDrawable.setColor(COL_ACCENT);
-        levelFillDrawable.setCornerRadius(px(3));
+        levelFillDrawable.setCornerRadius(px(4));
         levelFillView = new View(this);
         levelFillView.setBackground(levelFillDrawable);
         bar.addView(levelFillView, new FrameLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT));
-        FrameLayout.LayoutParams barLp = new FrameLayout.LayoutParams(px(192), px(5));
+        FrameLayout.LayoutParams barLp = new FrameLayout.LayoutParams(px(220), px(8));
         barLp.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-        barLp.bottomMargin = px(27);
+        barLp.bottomMargin = px(22);
         layer.addView(bar, barLp);
 
         show(SCREEN_COUNTER, layer);
@@ -362,10 +398,10 @@ public class MainActivity extends Activity implements SensorEventListener {
     private void updateCounterViews() {
         JSONObject ex = currentExercise();
         int target = ex.optInt("reps", 0);
-        setInfoView.setText(String.format(Locale.FRANCE, "Série %d / %d", setNo, ex.optInt("sets", 0)));
+        setInfoView.setText(String.format(Locale.FRANCE, "Série %d/%d · %d reps",
+                setNo, ex.optInt("sets", 0), target));
         repCountView.setText(String.valueOf(reps));
         repCountView.setTextColor(reps >= target ? COL_SUCCESS : COL_WHITE);
-        repTargetView.setText(String.format(Locale.FRANCE, "objectif %d reps", target));
     }
 
     private void adjustRep(int d) {
@@ -389,7 +425,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         autoChipView.setTextColor(auto ? COL_WHITE : COL_TXT_CHIP);
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(auto ? COL_CHIP_ON : COL_CHIP_OFF);
-        bg.setCornerRadius(px(12));
+        bg.setCornerRadius(px(18));
         autoChipView.setBackground(bg);
     }
 
@@ -434,12 +470,12 @@ public class MainActivity extends Activity implements SensorEventListener {
         col.setOrientation(LinearLayout.VERTICAL);
         col.setGravity(Gravity.CENTER_HORIZONTAL);
 
-        col.addView(text("REPOS", 14, COL_MUTED), wrapWrap(0, 0, 0, 0));
-        restTimeView = text(String.valueOf(restLen), 64, COL_REST);
+        col.addView(text("REPOS", 22, COL_MUTED), wrapWrap(0, 0, 0, 0));
+        restTimeView = text(String.valueOf(restLen), 96, COL_REST);
         restTimeView.setTypeface(Typeface.DEFAULT_BOLD);
         col.addView(restTimeView, wrapWrap(0, 0, 0, 0));
         col.addView(text(ex.optString("name", "") + " · série " + setNo + "/" + ex.optInt("sets", 0),
-                14, COL_MUTED), wrapWrap(0, 4, 0, 0));
+                22, COL_MUTED), wrapWrap(0, 4, 0, 0));
         col.addView(bigButton("Passer", v -> endRest()), wrapWrap(0, 14, 0, 0));
 
         FrameLayout layer = new FrameLayout(this);
@@ -492,7 +528,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         LinearLayout col = column();
         col.setGravity(Gravity.CENTER_HORIZONTAL);
 
-        col.addView(text("Capteur", 15, COL_MUTED), wrapWrap(0, 0, 0, 6));
+        col.addView(text("Capteur", 24, COL_MUTED), wrapWrap(0, 0, 0, 8));
         LinearLayout modeRow = new LinearLayout(this);
         modeRow.setOrientation(LinearLayout.HORIZONTAL);
         modeAccelBtn = modeButton("Accéléro", v -> setMode("accel"));
@@ -501,20 +537,22 @@ public class MainActivity extends Activity implements SensorEventListener {
         modeRow.addView(modeGyroBtn, wrapWrap(8, 0, 0, 0));
         col.addView(modeRow, wrapWrap(0, 0, 0, 14));
 
-        col.addView(text("Amplitude du mouvement", 15, COL_MUTED), wrapWrap(0, 0, 0, 6));
-        LinearLayout ampRow = new LinearLayout(this);
-        ampRow.setOrientation(LinearLayout.HORIZONTAL);
+        col.addView(text("Amplitude du mouvement", 24, COL_MUTED), wrapWrap(0, 0, 0, 8));
+        // À l'échelle Wear, les trois boutons ne tiennent plus sur une ligne : pile verticale.
+        LinearLayout ampCol = new LinearLayout(this);
+        ampCol.setOrientation(LinearLayout.VERTICAL);
+        ampCol.setGravity(Gravity.CENTER_HORIZONTAL);
         String[] ampNames = {"Complète", "Partielle", "Mini"};
         ampBtns = new TextView[AMP_VALUES.length];
         for (int i = 0; i < AMP_VALUES.length; i++) {
             final float a = AMP_VALUES[i];
             ampBtns[i] = modeButton(ampNames[i], v -> setAmp(a));
-            ampRow.addView(ampBtns[i], wrapWrap(i == 0 ? 0 : 8, 0, 0, 0));
+            ampCol.addView(ampBtns[i], wrapWrap(0, i == 0 ? 0 : 6, 0, 0));
         }
-        col.addView(ampRow, wrapWrap(0, 0, 0, 4));
-        col.addView(text("squats partiels → Partielle ou Mini", 12, COL_MUTED), wrapWrap(0, 0, 0, 14));
+        col.addView(ampCol, wrapWrap(0, 0, 0, 6));
+        col.addView(text("squats partiels → Partielle ou Mini", 18, COL_MUTED), wrapWrap(0, 0, 0, 14));
 
-        sensLabel = text("", 15, COL_MUTED);
+        sensLabel = text("", 24, COL_MUTED);
         col.addView(sensLabel, wrapWrap(0, 0, 0, 6));
         sensBar = new SeekBar(this);
         sensBar.setMin(3);
@@ -537,7 +575,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         col.addView(sensBar, matchWrap(0, 0, 0, 14));
         updateSensLabel();
 
-        restLabel = text("", 15, COL_MUTED);
+        restLabel = text("", 24, COL_MUTED);
         col.addView(restLabel, wrapWrap(0, 0, 0, 6));
         restBar = new SeekBar(this);
         restBar.setMin(0);
@@ -596,7 +634,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     private void styleSelectable(TextView btn, boolean selected) {
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(selected ? COL_CHIP_ON : COL_ITEM);
-        bg.setCornerRadius(px(14));
+        bg.setCornerRadius(px(18));
         btn.setBackground(bg);
         btn.setTextColor(selected ? COL_WHITE : COL_TXT_CHIP);
     }
@@ -726,7 +764,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     private void setLevelWidth(float fraction) {
         ViewGroup.LayoutParams lp = levelFillView.getLayoutParams();
-        lp.width = Math.round(fraction * px(192));
+        lp.width = Math.round(fraction * px(220));
         levelFillView.setLayoutParams(lp);
     }
 
@@ -825,24 +863,24 @@ public class MainActivity extends Activity implements SensorEventListener {
                                   View.OnClickListener onClick) {
         LinearLayout item = new LinearLayout(this);
         item.setOrientation(LinearLayout.VERTICAL);
-        item.setPadding(px(16), px(13), px(16), px(13));
+        item.setPadding(px(20), px(16), px(20), px(16));
 
         GradientDrawable normal = new GradientDrawable();
         normal.setColor(COL_ITEM);
-        normal.setCornerRadius(px(16));
+        normal.setCornerRadius(px(20));
         if (highlighted) {
-            normal.setStroke(Math.max(1, px(1)), COL_ACCENT);
+            normal.setStroke(Math.max(1, px(2)), COL_ACCENT);
         }
         GradientDrawable pressed = new GradientDrawable();
         pressed.setColor(COL_ITEM_PRESSED);
-        pressed.setCornerRadius(px(16));
+        pressed.setCornerRadius(px(20));
         StateListDrawable bg = new StateListDrawable();
         bg.addState(new int[]{android.R.attr.state_pressed}, pressed);
         bg.addState(new int[]{}, normal);
         item.setBackground(bg);
 
-        item.addView(text(name, 17, COL_WHITE), matchWrap(0, 0, 0, 0));
-        item.addView(text(meta, 14, COL_ACCENT), matchWrap(0, 2, 0, 0));
+        item.addView(text(name, 26, COL_WHITE), matchWrap(0, 0, 0, 0));
+        item.addView(text(meta, 22, COL_ACCENT), matchWrap(0, 3, 0, 0));
         if (done) {
             item.setAlpha(0.45f);
         }
@@ -852,13 +890,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     /** Bouton retour centré en haut de l'écran. */
     private TextView backButton(String label, View.OnClickListener onClick) {
-        TextView tv = text(label, 16, COL_MUTED2);
-        tv.setPadding(px(12), px(4), px(12), px(4));
+        TextView tv = text(label, 24, COL_MUTED2);
+        tv.setPadding(px(14), px(5), px(14), px(5));
         tv.setOnClickListener(onClick);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-        lp.topMargin = px(23);
+        lp.topMargin = px(26);
         tv.setLayoutParams(lp);
         return tv;
     }
@@ -882,11 +920,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     /** Petit bouton pilule (AUTO, Réglages). */
     private TextView chip(String label, View.OnClickListener onClick) {
-        TextView tv = text(label, 14, COL_TXT_CHIP);
-        tv.setPadding(px(12), px(5), px(12), px(5));
+        TextView tv = text(label, 20, COL_TXT_CHIP);
+        tv.setPadding(px(14), px(6), px(14), px(6));
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(COL_CHIP_OFF);
-        bg.setCornerRadius(px(12));
+        bg.setCornerRadius(px(18));
         tv.setBackground(bg);
         tv.setOnClickListener(onClick);
         return tv;
@@ -894,20 +932,20 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     /** Bouton de sélection des réglages (capteur, amplitude). */
     private TextView modeButton(String label, View.OnClickListener onClick) {
-        TextView tv = text(label, 16, COL_TXT_CHIP);
-        tv.setPadding(px(14), px(8), px(14), px(8));
+        TextView tv = text(label, 24, COL_TXT_CHIP);
+        tv.setPadding(px(18), px(10), px(18), px(10));
         tv.setOnClickListener(onClick);
         return tv;
     }
 
     /** Gros bouton pleine largeur (Quitter, Passer). */
     private TextView bigButton(String label, View.OnClickListener onClick) {
-        TextView tv = text(label, 17, COL_WHITE);
+        TextView tv = text(label, 26, COL_WHITE);
         tv.setGravity(Gravity.CENTER);
-        tv.setPadding(px(26), px(12), px(26), px(12));
+        tv.setPadding(px(28), px(14), px(28), px(14));
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(COL_ITEM);
-        bg.setCornerRadius(px(20));
+        bg.setCornerRadius(px(24));
         tv.setBackground(bg);
         tv.setOnClickListener(onClick);
         return tv;
