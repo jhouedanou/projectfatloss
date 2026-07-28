@@ -57,6 +57,13 @@ public class MainActivity extends Activity implements SensorEventListener {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
+        // L'UI est conçue pour 384 px CSS (meta viewport width=384). Sans wide viewport,
+        // le WebView met en page à largeur/densité (192 px CSS sur Pixel Watch, densité 2×)
+        // et l'écran compteur déborde. Overview mode ajuste le zoom pour couvrir l'écran,
+        // et l'algorithme NORMAL évite le gonflement automatique des polices.
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         webView.setBackgroundColor(0xFF000000);
         webView.addJavascriptInterface(new Bridge(), "AndroidBridge");
         setContentView(webView);
