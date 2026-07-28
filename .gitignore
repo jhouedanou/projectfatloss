@@ -46,6 +46,9 @@ coverage/
 .browserSync/
 .vite_cache/
 
+# Assets MediaPipe préparés par scripts/fetch-mediapipe-assets.mjs
+public/mediapipe/
+
 # Wear OS (Android) — artefacts de build uniquement, pas les sources
 wear/.gradle/
 wear/build/

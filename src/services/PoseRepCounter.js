@@ -34,35 +34,50 @@ import {
   vis,
 } from './PoseLandmarks';
 
-const WASM_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm';
-const MODEL_URL =
+// Assets servis par l'app elle-même (public/mediapipe/, préparés par
+// scripts/fetch-mediapipe-assets.mjs) : hors ligne dans l'APK comme en PWA.
+const LOCAL_BASE = `${import.meta.env.BASE_URL}mediapipe`;
+const LOCAL_WASM_URL = `${LOCAL_BASE}/wasm`;
+const LOCAL_MODEL_URL = `${LOCAL_BASE}/models/pose_landmarker_lite.task`;
+// Repli si les assets locaux manquent (script non exécuté, dev server nu…).
+const CDN_WASM_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm';
+const CDN_MODEL_URL =
   'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
 
 let landmarkerPromise = null;
 
 /**
- * Charge le PoseLandmarker (singleton). Réessaie en CPU si le GPU échoue.
+ * Charge le PoseLandmarker (singleton) : assets locaux d'abord, CDN en repli.
+ * Réessaie en CPU si le GPU échoue.
  * @returns {Promise<import('@mediapipe/tasks-vision').PoseLandmarker>}
  */
 export function loadPoseLandmarker() {
   if (landmarkerPromise) return landmarkerPromise;
   landmarkerPromise = (async () => {
     const { FilesetResolver, PoseLandmarker } = await import('@mediapipe/tasks-vision');
-    const vision = await FilesetResolver.forVisionTasks(WASM_URL);
-    const build = (delegate) =>
-      PoseLandmarker.createFromOptions(vision, {
-        baseOptions: { modelAssetPath: MODEL_URL, delegate },
-        runningMode: 'VIDEO',
-        numPoses: 1,
-        minPoseDetectionConfidence: 0.5,
-        minPosePresenceConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-        outputSegmentationMasks: false,
-      });
+    const attempt = async (wasmUrl, modelUrl) => {
+      const vision = await FilesetResolver.forVisionTasks(wasmUrl);
+      const build = (delegate) =>
+        PoseLandmarker.createFromOptions(vision, {
+          baseOptions: { modelAssetPath: modelUrl, delegate },
+          runningMode: 'VIDEO',
+          numPoses: 1,
+          minPoseDetectionConfidence: 0.5,
+          minPosePresenceConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+          outputSegmentationMasks: false,
+        });
+      try {
+        return await build('GPU');
+      } catch (e) {
+        return await build('CPU');
+      }
+    };
     try {
-      return await build('GPU');
+      return await attempt(LOCAL_WASM_URL, LOCAL_MODEL_URL);
     } catch (e) {
-      return await build('CPU');
+      console.warn('MediaPipe : assets locaux indisponibles, repli CDN.', e);
+      return await attempt(CDN_WASM_URL, CDN_MODEL_URL);
     }
   })();
   return landmarkerPromise;
