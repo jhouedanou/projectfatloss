@@ -115,6 +115,12 @@ public class MainActivity extends Activity implements SensorEventListener {
     private CountDownTimer restTimer;
     private int restRemaining = 0;          // secondes restantes, pour reprendre après onPause
 
+    // Mode auto (équivalent du mode auto de la PWA) : objectif atteint en
+    // détection capteur → la série se valide seule après un délai de grâce,
+    // pour laisser passer d'éventuelles reps supplémentaires.
+    private static final long AUTO_FINISH_GRACE_MS = 1500;
+    private final Runnable autoFinishRunnable = this::autoFinishSet;
+
     // --- UI ---
     private float scale;                    // px physiques par px de conception (base 384)
     private FrameLayout root;
@@ -193,6 +199,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     protected void onPause() {
         super.onPause();
         stopSensors();
+        cancelAutoFinish();
         // Le minuteur de repos ne doit pas tourner (ni vibrer) quand l'activité
         // n'est plus visible ; il reprend sur le temps restant au retour.
         if (restTimer != null) {
@@ -364,7 +371,10 @@ public class MainActivity extends Activity implements SensorEventListener {
         autoChipView = chip("", v -> toggleAuto());
         styleAutoChip();
         chipRow.addView(autoChipView, wrapWrap(0, 0, 0, 0));
-        chipRow.addView(chip("⚙", v -> showSettings()), wrapWrap(8, 0, 0, 0));
+        TextView settingsChip = chip("⚙", v -> showSettings());
+        settingsChip.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(28));
+        settingsChip.setPadding(px(16), px(4), px(16), px(4));
+        chipRow.addView(settingsChip, wrapWrap(8, 0, 0, 0));
         col.addView(chipRow, wrapWrap(0, 6, 0, 0));
 
         FrameLayout layer = new FrameLayout(this);
@@ -407,6 +417,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     private void adjustRep(int d) {
         reps = Math.max(0, reps + d);
         updateCounterViews();
+        maybeScheduleAutoFinish();
     }
 
     private void toggleAuto() {
@@ -414,7 +425,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         styleAutoChip();
         if (auto) {
             startDetection();
+            maybeScheduleAutoFinish();
         } else {
+            cancelAutoFinish();
             stopDetection();
             setLevelWidth(0f);
         }
@@ -430,6 +443,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 
     private void leaveCounter() {
+        cancelAutoFinish();
         stopDetection();
         keepScreenOn(false);
         showDay();
@@ -438,6 +452,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     /* ---------- Fin de série / repos ---------- */
 
     private void finishSet() {
+        cancelAutoFinish();
         stopDetection();
         JSONObject ex = currentExercise();
         if (setNo >= ex.optInt("sets", 1)) {
@@ -523,6 +538,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     /* ---------- Réglages détection ---------- */
 
     private void showSettings() {
+        cancelAutoFinish();
         stopDetection();
 
         LinearLayout col = column();
@@ -750,6 +766,28 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (reps == currentExercise().optInt("reps", -1)) {
             vibrateMs(300); // vibration longue à l'objectif
         }
+        maybeScheduleAutoFinish();
+    }
+
+    /** AUTO + objectif atteint → armer la validation automatique de la série. */
+    private void maybeScheduleAutoFinish() {
+        cancelAutoFinish();
+        if (auto && screen == SCREEN_COUNTER && reps >= currentExercise().optInt("reps", Integer.MAX_VALUE)) {
+            root.postDelayed(autoFinishRunnable, AUTO_FINISH_GRACE_MS);
+        }
+    }
+
+    private void cancelAutoFinish() {
+        root.removeCallbacks(autoFinishRunnable);
+    }
+
+    private void autoFinishSet() {
+        if (screen != SCREEN_COUNTER || !auto
+                || reps < currentExercise().optInt("reps", Integer.MAX_VALUE)) {
+            return;
+        }
+        vibratePattern(); // double vibration : passage automatique
+        finishSet();
     }
 
     /** Niveau du signal capteur (barre de debug/réglage en bas du compteur). */
@@ -812,6 +850,14 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     }
 
+    /** Double impulsion — signale chaque passage automatique. */
+    private void vibratePattern() {
+        if (vibrator != null && vibrator.hasVibrator()) {
+            vibrator.vibrate(VibrationEffect.createWaveform(
+                    new long[]{0, 120, 100, 120}, -1));
+        }
+    }
+
     private void keepScreenOn(boolean on) {
         if (on) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -848,6 +894,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         tv.setText(s);
         tv.setTextColor(color);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(sizeDesign));
+        tv.setTypeface(Typeface.DEFAULT_BOLD); // graisse partout : lisibilité au poignet
         return tv;
     }
 

@@ -80,9 +80,12 @@ Bouton couronne → liste des applications → **Fat Loss**.
 1. Choisir le jour (J1–J28, groupés par semaine)
 2. Choisir l'exercice → le compteur démarre avec la détection capteur **AUTO**
 3. Chaque rep détectée : vibration courte, compteur +1 (vibration longue à l'objectif)
-4. **✓** termine la série → minuteur de repos (réglable 30–180 s) → série suivante
-5. **⚙ Réglages** : capteur (accéléro/gyro), sensibilité 0.3–3.0, durée de repos
-6. Barre en bas du compteur = niveau du signal capteur (vert quand le seuil est franchi) —
+4. **Mode auto** : objectif atteint avec le capteur → la série se valide seule après
+   ~1,5 s (double vibration), repos puis série/exercice suivant s'enchaînent ;
+   **✓** reste disponible pour valider manuellement à tout moment
+5. Minuteur de repos réglable 30–180 s entre les séries
+6. **⚙ Réglages** : capteur (accéléro/gyro), sensibilité 0.3–3.0, durée de repos
+7. Barre en bas du compteur = niveau du signal capteur (vert quand le seuil est franchi) —
    utile pour régler la sensibilité ; boutons **− / +** pour corriger manuellement
 
 Astuce : la détection marche mieux avec la montre au poignet du bras qui travaille ;
