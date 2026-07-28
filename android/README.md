@@ -8,7 +8,7 @@ programme, séances guidées, **stockage local des sessions** (localStorage,
 
 ## Architecture
 
-- `capacitor.config.json` (racine du dépôt) — appId `com.jhouedanou.projectfatloss`,
+- `capacitor.config.json` (racine du dépôt) — appId `com.houedanou.fatloss`,
   webDir `dist`
 - `vite build --mode capacitor` — bundle web pour l'APK : base relative, service
   worker désactivé (les assets sont locaux)
@@ -45,9 +45,10 @@ procédure d'appairage adb en Wi-Fi, identique côté téléphone.)
 
 ## Notes
 
-- **Caméra** : accepter la permission au premier lancement. Le modèle MediaPipe
-  (WASM + pose landmarker) est chargé depuis le CDN au premier usage du compteur
-  caméra, puis mis en cache — première utilisation avec réseau requise.
+- **Caméra** : accepter la permission au premier lancement. Le runtime WASM et le
+  modèle MediaPipe sont embarqués dans l'APK (`scripts/fetch-mediapipe-assets.mjs`,
+  exécuté par `yarn cap:sync`) — le compteur caméra fonctionne entièrement hors
+  ligne ; repli CDN automatique si les assets locaux manquent.
 - **Données** : sessions et statistiques restent en local (localStorage du
   WebView), rien n'est envoyé sur un serveur.
 - Après toute modification du code web, relancer `yarn cap:sync` avant de

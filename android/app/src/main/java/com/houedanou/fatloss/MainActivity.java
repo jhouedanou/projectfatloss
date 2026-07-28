@@ -1,4 +1,4 @@
-package com.jhouedanou.projectfatloss;
+package com.houedanou.fatloss;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
