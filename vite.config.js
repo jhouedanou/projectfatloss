@@ -4,9 +4,14 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // isProd = true pour toute commande `vite build` (CI ou local), false en `vite serve` (dev).
 // Fiable contrairement à process.env.NODE_ENV qui n'est pas défini au build.
-export default defineConfig(({ command }) => {
+// Le mode `capacitor` (vite build --mode capacitor) produit le bundle embarqué
+// dans l'APK Android : base relative (servi depuis https://localhost par le
+// WebView Capacitor) et pas de service worker — le cache PWA est inutile et
+// source de confusion quand les assets sont déjà locaux.
+export default defineConfig(({ command, mode }) => {
+  const isCapacitor = mode === 'capacitor';
   const isProd = command === 'build';
-  const BASE = isProd ? '/projectfatloss/' : '/';
+  const BASE = isCapacitor ? './' : (isProd ? '/projectfatloss/' : '/');
 
   return {
   // Ajouter la base URL pour GitHub Pages
@@ -15,6 +20,9 @@ export default defineConfig(({ command }) => {
   plugins: [
     react(),
     VitePWA({
+      // Désactivé dans l'APK Capacitor : assets locaux, pas de service worker,
+      // mais le module virtuel `virtual:pwa-register` reste résolu (no-op).
+      disable: isCapacitor,
       registerType: 'autoUpdate',
       includeAssets: ['icons/bicep.svg'],
       // Utiliser generateSW au lieu de injectManifest pour plus de simplicité
