@@ -111,6 +111,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     private SharedPreferences prefs;
     private CountDownTimer restTimer;
+    private int restRemaining = 0;          // secondes restantes, pour reprendre après onPause
 
     // --- UI ---
     private float scale;                    // px physiques par px de conception (base 384)
@@ -160,6 +161,12 @@ public class MainActivity extends Activity implements SensorEventListener {
     protected void onPause() {
         super.onPause();
         stopSensors();
+        // Le minuteur de repos ne doit pas tourner (ni vibrer) quand l'activité
+        // n'est plus visible ; il reprend sur le temps restant au retour.
+        if (restTimer != null) {
+            restTimer.cancel();
+            restTimer = null;
+        }
     }
 
     @Override
@@ -167,6 +174,18 @@ public class MainActivity extends Activity implements SensorEventListener {
         super.onResume();
         if (detecting) {
             startSensors();
+        }
+        if (screen == SCREEN_REST && restRemaining > 0 && restTimer == null) {
+            startRestTimer(restRemaining);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (restTimer != null) {
+            restTimer.cancel();
+            restTimer = null;
         }
     }
 
@@ -429,19 +448,24 @@ public class MainActivity extends Activity implements SensorEventListener {
         colLp.gravity = Gravity.CENTER;
         layer.addView(col, colLp);
         show(SCREEN_REST, layer);
+        restRemaining = restLen;
+        startRestTimer(restLen);
+    }
 
-        restTimer = new CountDownTimer(restLen * 1000L, 1000) {
+    private void startRestTimer(int seconds) {
+        restTimer = new CountDownTimer(seconds * 1000L, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                int s = (int) ((millisUntilFinished + 999) / 1000);
-                restTimeView.setText(String.valueOf(s));
-                if (s <= 3) {
+                restRemaining = (int) ((millisUntilFinished + 999) / 1000);
+                restTimeView.setText(String.valueOf(restRemaining));
+                if (restRemaining <= 3) {
                     vibrateMs(80);
                 }
             }
 
             @Override
             public void onFinish() {
+                restRemaining = 0;
                 endRest();
             }
         }.start();
@@ -452,6 +476,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             restTimer.cancel();
             restTimer = null;
         }
+        restRemaining = 0;
         vibrateMs(400);
         showCounter();
         if (auto) {
