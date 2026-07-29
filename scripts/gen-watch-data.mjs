@@ -23,6 +23,10 @@ const compact = days.map((day) => ({
     sets: ex.totalSets || 4,
     reps: ex.nbRep || 12,
     equip: ex.equip || '',
+    // Exercice unilatéral (« 4 × 12 /côté ») : `reps` s'entend PAR CÔTÉ, une
+    // série = les deux côtés. Même règle de détection que la PWA
+    // (StepWorkout.jsx : isSidedExercise).
+    ...(/\/(côté|jambe|bras)/i.test(ex.sets || '') ? { side: true } : {}),
   })),
 }));
 

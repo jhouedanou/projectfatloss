@@ -83,9 +83,14 @@ Bouton couronne → liste des applications → **Fat Loss**.
 4. **Mode auto** : objectif atteint avec le capteur → la série se valide seule après
    ~1,5 s (double vibration), repos puis série/exercice suivant s'enchaînent ;
    **✓** reste disponible pour valider manuellement à tout moment
-5. Minuteur de repos réglable 30–180 s entre les séries
-6. **⚙ Réglages** : capteur (accéléro/gyro), sensibilité 0.3–3.0, durée de repos
-7. Barre en bas du compteur = niveau du signal capteur (vert quand le seuil est franchi) —
+5. **Exercices unilatéraux** (« /côté » dans le programme : fentes bulgares,
+   montées sur banc…) : l'objectif s'entend **par côté** et une série = les deux
+   côtés. L'objectif atteint sur le premier côté déclenche une **triple vibration**
+   et le compteur repart à zéro sur le second côté, **sans repos** ; la série n'est
+   validée qu'après le second côté. 3 × 12 /côté = 3 séries de 12+12, pas 6.
+6. Minuteur de repos réglable 30–180 s entre les séries
+7. **⚙ Réglages** : capteur (accéléro/gyro), sensibilité 0.3–3.0, durée de repos
+8. Barre en bas du compteur = niveau du signal capteur (vert quand le seuil est franchi) —
    utile pour régler la sensibilité ; boutons **− / +** pour corriger manuellement
 
 Astuce : la détection marche mieux avec la montre au poignet du bras qui travaille ;
