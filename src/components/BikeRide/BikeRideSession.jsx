@@ -149,14 +149,17 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     });
   }, [metrics, video, source, onFinish]);
 
-  // Une seule racine pour toutes les phases : c'est elle qui passe en plein
-  // écran. Si chaque phase avait son propre élément, le navigateur quitterait
-  // le plein écran dès que l'élément concerné sort du DOM.
+  // Racine UNIQUE et toujours montée, quelle que soit la phase — c'est
+  // l'élément qui passe en plein écran. Si chaque phase rendait son propre
+  // <div>, React démonterait l'élément plein écran au changement de phase :
+  // le navigateur quitterait alors le plein écran de lui-même (et l'affiche
+  // via un toast), y compris juste après un démarrage réussi de la sortie.
   const rootClass = `ride-root ${phase === 'riding' ? 'ride-root-riding' : 'ride-root-panel'}`;
 
+  let content;
   if (phase === 'riding') {
-    return (
-      <div className={rootClass} ref={rootRef}>
+    content = (
+      <>
         <RideVideoPlayer
           videoId={video.id}
           playerRef={playerRef}
@@ -175,41 +178,31 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
           onToggleFullscreen={() => toggleFullscreen(rootRef.current)}
           onFinish={handleFinishRide}
         />
-      </div>
+      </>
     );
-  }
-
-  if (phase === 'detect') {
-    return (
-      <div className={rootClass} ref={rootRef}>
-        <BikeDetectScreen
-          onBack={() => setPhase('setup')}
-          onUseSource={(nextSource, hasHeartRate) => {
-            setSource(nextSource);
-            if (hasHeartRate) setHrEnabled(true);
-            setStatus(`Source réglée sur ${nextSource === 'ftms' ? 'FTMS' : 'Domyos'} après détection.`);
-            setPhase('setup');
-          }}
-        />
-      </div>
+  } else if (phase === 'detect') {
+    content = (
+      <BikeDetectScreen
+        onBack={() => setPhase('setup')}
+        onUseSource={(nextSource, hasHeartRate) => {
+          setSource(nextSource);
+          if (hasHeartRate) setHrEnabled(true);
+          setStatus(`Source réglée sur ${nextSource === 'ftms' ? 'FTMS' : 'Domyos'} après détection.`);
+          setPhase('setup');
+        }}
+      />
     );
-  }
-
-  if (phase === 'summary') {
-    return (
-      <div className={rootClass} ref={rootRef}>
-        <RideSummary
-          metrics={metrics}
-          videoTitle={video.title}
-          onSave={handleSave}
-          onDiscard={() => onFinish(null)}
-        />
-      </div>
+  } else if (phase === 'summary') {
+    content = (
+      <RideSummary
+        metrics={metrics}
+        videoTitle={video.title}
+        onSave={handleSave}
+        onDiscard={() => onFinish(null)}
+      />
     );
-  }
-
-  return (
-    <div className={rootClass} ref={rootRef}>
+  } else {
+    content = (
       <div className="ride-setup">
         <header className="ride-setup-head">
           <p className="ride-eyebrow">Échauffement · {dayTitle || 'Séance'}</p>
@@ -258,6 +251,12 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
           </button>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className={rootClass} ref={rootRef}>
+      {content}
     </div>
   );
 }
