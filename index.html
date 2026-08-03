@@ -19,6 +19,37 @@
         }
       })();
     </script>
+    <script>
+      // Filet de sécurité : une erreur JS avant le rendu React laisse un écran
+      // blanc muet dans la WebView Android. Afficher l'erreur à l'écran pour
+      // pouvoir diagnostiquer sans chrome://inspect.
+      (function () {
+        function show(message) {
+          try {
+            var root = document.getElementById('root');
+            if (root && root.children.length > 0) return; // l'app a rendu : erreur non fatale
+            var box = document.getElementById('pfl-boot-error');
+            if (!box) {
+              box = document.createElement('div');
+              box.id = 'pfl-boot-error';
+              box.style.cssText = 'position:fixed;inset:12px auto auto 12px;right:12px;z-index:99999;' +
+                'background:#7a1306;color:#fff;padding:12px 14px;border-radius:10px;' +
+                'font:13px/1.5 monospace;white-space:pre-wrap;word-break:break-word;';
+              box.textContent = 'Erreur au démarrage :\n';
+              (document.body || document.documentElement).appendChild(box);
+            }
+            box.textContent += '\n' + message;
+          } catch (e) { /* jamais bloquer le boot pour l'overlay */ }
+        }
+        window.addEventListener('error', function (e) {
+          show((e.message || 'Erreur script') + (e.filename ? '\n' + e.filename + ':' + e.lineno : ''));
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          var r = e.reason;
+          show('Promise rejetée : ' + (r && (r.message || r.toString ? r.toString() : String(r))));
+        });
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#22223b" />
     <meta name="description" content="Application de suivi d'entraînement avec calcul des calories brûlées" />

@@ -11,12 +11,13 @@ import FloatingButtons from '../components/FloatingButtons/FloatingButtons';
 import ProgressTracker from '../components/ProgressTracker';
 import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
 import DayPills from '../components/DayPills';
-import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
+import { getActiveWorkoutPlan, isRideStartEnabled } from '../services/WorkoutCustomization';
+import BikeRideSession from '../components/BikeRide/BikeRideSession';
+import { addCardioSession } from '../services/CardioStorage';
 import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceSideChange, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
 import { useTranslation } from 'react-i18next';
-import YouTube from 'react-youtube';
 import { getExerciseIconsPath, getAssetPath } from '../utils/paths';
 import GoogleFitService from '../services/GoogleFitService';
 import PreWorkout from '../components/PreWorkout';
@@ -653,6 +654,9 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
   const [autoMode, setAutoMode] = useState(initialAutoMode || false); // Mode automatique pour les pauses
   const [showPreWorkout, setShowPreWorkout] = useState(false);
+  // Sortie vélo d'ouverture : affichée avant le premier exercice quand le
+  // réglage est actif (elle remplace alors le vélo de fin de séance).
+  const [showBikeRide, setShowBikeRide] = useState(() => isRideStartEnabled());
   // Synthèse vocale réactivée pour les exercices
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState({
@@ -710,6 +714,10 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
   const dataReady = !!(workoutPlan && day && exo);
 
+  // Phases qui précèdent la musculation : ni annonces vocales, ni notifications
+  // d'exercice, ni dialogue caméra tant que l'une d'elles est à l'écran.
+  const inPrePhase = showBikeRide || showPreWorkout;
+
   // Initialiser la synthèse vocale au démarrage
   useEffect(() => {
     initSpeechService();
@@ -731,7 +739,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // exercice, puis numéro de série à chaque nouvelle série du même exercice.
   // Silencieux pendant les pauses et l'écran de préparation.
   useEffect(() => {
-    if (!exo || pause || showPreWorkout) return;
+    if (!exo || pause || inPrePhase) return;
 
     const isNewExercise = prevStepRef.current !== step;
     const isNewSet = prevSetRef.current !== setNum;
@@ -744,7 +752,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
     prevStepRef.current = step;
     prevSetRef.current = setNum;
-  }, [exo, step, setNum, totalSets, pause, showPreWorkout]);
+  }, [exo, step, setNum, totalSets, pause, inPrePhase]);
   
   const applyPendingAdvance = useCallback(() => {
     if (pendingTransitionType === 'exercise') {
@@ -947,9 +955,41 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     // L'entraînement se lance automatiquement
   };
 
+  /**
+   * Fin de la sortie vélo d'ouverture. Le ride est enregistré comme séance
+   * cardio distincte (jamais ajouté aux calories de la muscu, pour ne pas
+   * compter deux fois le même effort côté Google Fit), et le chrono de la
+   * séance repart à zéro pour que les minutes de vélo ne gonflent pas la durée.
+   * @param {Object|null} ride résultat de la sortie, null si passée/non enregistrée
+   */
+  const handleRideFinished = (ride) => {
+    if (ride) {
+      try {
+        addCardioSession({
+          type: 'bike',
+          duration: ride.durationMin,
+          distance: ride.distanceKm,
+          calories: ride.calories,
+          notes: JSON.stringify({
+            source: ride.source,
+            videoId: ride.videoId,
+            videoTitle: ride.videoTitle,
+            avgWatts: ride.avgWatts,
+            avgBpm: ride.avgBpm,
+            maxSpeedKmh: ride.maxSpeedKmh,
+          }),
+        });
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement de la sortie vélo:', error);
+      }
+    }
+    setShowBikeRide(false);
+    workoutStartRef.current = Date.now();
+  };
+
   // Gestion des notifications d'exercice en cours
   useEffect(() => {
-    if (showPreWorkout) return;
+    if (inPrePhase) return;
     if (exo && !pause && !workoutCompleted) {
       const exerciseData = {
         name: exo.name,
@@ -963,11 +1003,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       notificationService.updateCurrentExercise(exerciseData);
     }
-  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, showPreWorkout]);
+  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, inPrePhase]);
 
   // Gestion des notifications d'exercice en cours avec plus de données
   useEffect(() => {
-    if (showPreWorkout) return;
+    if (inPrePhase) return;
     if (exo && !pause && !workoutCompleted) {
       const exerciseData = {
         name: exo.name,
@@ -988,11 +1028,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       notificationService.updateCurrentExercise(exerciseData);
     }
-  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, totalCaloriesBurned, showPreWorkout]);
+  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, totalCaloriesBurned, inPrePhase]);
 
   // Gestion des notifications de pause avec timer
   useEffect(() => {
-    if (showPreWorkout) return;
+    if (inPrePhase) return;
     if (pause && !workoutCompleted) {
       const pauseData = {
         remainingTime: getPauseDuration({ isExerciseTransition, setNum }),
@@ -1004,7 +1044,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       notificationService.showPauseNotification(pauseData);
     }
-  }, [pause, workoutCompleted, autoMode, step, total, day?.exercises, setNum, totalSets, showPreWorkout, isExerciseTransition]);
+  }, [pause, workoutCompleted, autoMode, step, total, day?.exercises, setNum, totalSets, inPrePhase, isExerciseTransition]);
 
   if (!dataReady) {
     return (
@@ -1012,6 +1052,17 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         <h2>Chargement...</h2>
         <p>Veuillez patienter.</p>
       </div>
+    );
+  }
+
+  // La sortie vélo ouvre la séance : elle passe avant tout le reste.
+  if (showBikeRide) {
+    return (
+      <BikeRideSession
+        dayTitle={day?.title}
+        onFinish={handleRideFinished}
+        onSkip={() => handleRideFinished(null)}
+      />
     );
   }
 
@@ -1147,7 +1198,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       
       {/* Prompt unique au lancement : activer la caméra pour cette séance ? */}
       <Dialog
-        open={cameraSessionEnabled === null && dayHasCountable && !showPreWorkout && !workoutCompleted}
+        open={cameraSessionEnabled === null && dayHasCountable && !inPrePhase && !workoutCompleted}
         onClose={() => setCameraSessionEnabled(false)}
       >
         <DialogTitle>Compter les reps avec la caméra ?</DialogTitle>

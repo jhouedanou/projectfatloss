@@ -41,4 +41,15 @@
     <!-- Comptage de répétitions par vision (getUserMedia dans le WebView) -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+
+    <!-- Vélo connecté (BLE) : la WebView n'expose pas Web Bluetooth, le scan et
+         la connexion passent par le plugin natif. Android 12+ utilise les
+         permissions runtime BLUETOOTH_SCAN / BLUETOOTH_CONNECT ; les anciennes
+         versions gardent les permissions historiques + localisation. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
 </manifest>
