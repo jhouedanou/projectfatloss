@@ -6,11 +6,11 @@ import {
   Box,
   Typography
 } from '@mui/material';
-import { ArrowLeft, Bell, User, LogOut } from 'lucide-react';
+import { ArrowLeft, Bell, User, LogOut, Sun, Moon } from 'lucide-react';
 import './Header.css';
 import { getAssetPath } from '../../utils/paths';
 
-export default function Header({ onNotificationSettings, onBack, user, onAccountClick }) {
+export default function Header({ onNotificationSettings, onBack, user, onAccountClick, darkTheme, onToggleTheme }) {
   const title = onBack ? 'Programme' : 'Project Fat Loss';
   const subtitle = onBack ? 'Retour a la vue semaine' : 'Coach entrainement';
 
@@ -53,6 +53,16 @@ export default function Header({ onNotificationSettings, onBack, user, onAccount
         </Box>
 
         <Box className="pfl-header-actions">
+          {onToggleTheme && (
+            <IconButton
+              onClick={onToggleTheme}
+              size="small"
+              className="pfl-header-icon"
+              aria-label={darkTheme ? 'Passer en mode clair' : 'Passer en mode sombre'}
+            >
+              {darkTheme ? <Sun size={19} strokeWidth={2.25} /> : <Moon size={19} strokeWidth={2.25} />}
+            </IconButton>
+          )}
           {onNotificationSettings && (
             <IconButton
               onClick={onNotificationSettings}

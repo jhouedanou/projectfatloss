@@ -20,6 +20,20 @@
       })();
     </script>
     <script>
+      // Thème appliqué AVANT le premier rendu pour éviter le flash clair/sombre.
+      // Même clé que React ('theme') ; sombre par défaut.
+      (function () {
+        try {
+          if (localStorage.getItem('theme') !== 'light') {
+            document.documentElement.classList.add('dark-theme');
+            document.addEventListener('DOMContentLoaded', function () {
+              document.body.classList.add('dark-theme');
+            });
+          }
+        } catch (e) { /* stockage indisponible : thème sombre via React */ }
+      })();
+    </script>
+    <script>
       // Filet de sécurité : une erreur JS avant le rendu React laisse un écran
       // blanc muet dans la WebView Android. Afficher l'erreur à l'écran pour
       // pouvoir diagnostiquer sans chrome://inspect.

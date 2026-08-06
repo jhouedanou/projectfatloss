@@ -123,7 +123,14 @@ export default function App() {
   const [stepMode, setStepMode] = useState(false);
   const [autoMode, setAutoMode] = useState(false);
   const [viewMode, setViewMode] = useState('workout'); 
-  const [darkTheme, setDarkTheme] = useState(true);
+  // Thème : relit la préférence sauvegardée (clé 'theme'), sombre par défaut.
+  const [darkTheme, setDarkTheme] = useState(() => {
+    try {
+      return localStorage.getItem('theme') !== 'light';
+    } catch (error) {
+      return true;
+    }
+  });
   const [showLanguageSelector, setShowLanguageSelector] = useState(() => {
     const savedPref = localStorage.getItem('showLanguageSelector');
     return false;
@@ -257,11 +264,12 @@ export default function App() {
   }, [current]);
 
   useEffect(() => {
-    if (darkTheme) {
-      document.body.classList.add('dark-theme');
-    } else {
-      document.body.classList.remove('dark-theme');
-    }
+    // La classe vit sur <body> ET <html> : le script anti-FOUC d'index.html la
+    // pose sur <html> avant React, et les variables CSS `.dark-theme {}` s'y
+    // appliquent aussi — ne retirer que celle du body laisserait le fond sombre.
+    const method = darkTheme ? 'add' : 'remove';
+    document.body.classList[method]('dark-theme');
+    document.documentElement.classList[method]('dark-theme');
     localStorage.setItem('theme', darkTheme ? 'dark' : 'light');
     setAppTheme(createAppTheme(darkTheme));
   }, [darkTheme]);
@@ -364,6 +372,8 @@ export default function App() {
             onBack={showExercises ? () => setShowExercises(false) : null}
             user={user}
             onAccountClick={() => (user ? handleLogout() : setShowLogin(true))}
+            darkTheme={darkTheme}
+            onToggleTheme={toggleTheme}
           />
         )}
 
