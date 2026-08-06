@@ -47,7 +47,66 @@ import { fullSync } from '../services/SyncService';
 import LoginForm from '../components/LoginForm';
 import CardioTracker from '../components/CardioTracker';
 
-const NOTIFICATION_DURATION = 3000; 
+const NOTIFICATION_DURATION = 3000;
+
+/** Ligne de réglage on/off utilisée pour les options vélo de la page séance. */
+function SettingToggle({ icon, title, subtitle, checked, onToggle, ariaLabel }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '12px',
+      padding: '14px 16px',
+      margin: '0 0 12px 0',
+      borderRadius: '16px',
+      background: 'rgba(255, 255, 255, 0.03)',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+        {icon}
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
+            {title}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #a1a1aa)' }}>
+            {subtitle}
+          </div>
+        </div>
+      </div>
+      <button
+        onClick={onToggle}
+        role="switch"
+        aria-checked={checked}
+        aria-label={ariaLabel}
+        style={{
+          position: 'relative',
+          width: '48px',
+          height: '28px',
+          flexShrink: 0,
+          borderRadius: '100px',
+          border: 'none',
+          cursor: 'pointer',
+          padding: 0,
+          background: checked ? '#3B82F6' : 'rgba(255, 255, 255, 0.18)',
+          transition: 'background 0.25s ease',
+        }}
+      >
+        <span style={{
+          position: 'absolute',
+          top: '3px',
+          left: checked ? '23px' : '3px',
+          width: '22px',
+          height: '22px',
+          borderRadius: '50%',
+          background: '#fff',
+          transition: 'left 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+        }} />
+      </button>
+    </div>
+  );
+}
 
 export default function App() {
   const { t } = useTranslation();
@@ -164,11 +223,8 @@ export default function App() {
     }
   };
 
-  // Active/désactive le vélo de fin de séance et recharge le plan affiché.
-  const handleToggleVelo = () => {
-    const next = !veloEnabled;
-    setVeloEnabledState(next);
-    setVeloEnabled(next);
+  // Recharge le programme affiché après un changement de réglage vélo.
+  const reloadActivePlan = () => {
     try {
       const plan = getActiveWorkoutPlan();
       if (plan && plan.length > 0) {
@@ -179,20 +235,21 @@ export default function App() {
     }
   };
 
+  // Active/désactive le vélo de fin de séance et recharge le plan affiché.
+  const handleToggleVelo = () => {
+    const next = !veloEnabled;
+    setVeloEnabledState(next);
+    setVeloEnabled(next);
+    reloadActivePlan();
+  };
+
   // Active/désactive la sortie vélo d'ouverture. Quand elle est active, le vélo
   // de fin de séance sort du programme : c'est le même effort, déplacé.
   const handleToggleRideStart = () => {
     const next = !rideStartEnabled;
     setRideStartEnabledState(next);
     setRideStartEnabled(next);
-    try {
-      const plan = getActiveWorkoutPlan();
-      if (plan && plan.length > 0) {
-        setWorkoutPlan(plan);
-      }
-    } catch (error) {
-      console.error('Erreur lors du rechargement du plan:', error);
-    }
+    reloadActivePlan();
   };
 
   useEffect(() => {
@@ -411,119 +468,30 @@ export default function App() {
                         </div>
                       ) : (
                         <div className="exercises-container">
+                          {/* Sortie vélo d'ouverture : vidéo + vélo connecté */}
+                          <SettingToggle
+                            icon={<Bike size={20} color={rideStartEnabled ? '#3B82F6' : '#71717a'} />}
+                            title="Sortie vélo en début de séance"
+                            subtitle={rideStartEnabled
+                              ? 'Vidéo + vélo connecté avant la muscu (remplace le vélo de fin)'
+                              : 'La séance commence directement par la muscu'}
+                            checked={rideStartEnabled}
+                            onToggle={handleToggleRideStart}
+                            ariaLabel="Activer ou désactiver la sortie vélo en début de séance"
+                          />
+
                           {/* Interrupteur : vélo de fin de séance optionnel */}
-                          {currentDayHasVelo && (
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '12px',
-                              padding: '14px 16px',
-                              margin: '0 0 16px 0',
-                              borderRadius: '16px',
-                              background: 'rgba(255, 255, 255, 0.03)',
-                              border: '1px solid rgba(255, 255, 255, 0.08)',
-                            }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                                <Bike size={20} color={veloEnabled ? '#3B82F6' : '#71717a'} />
-                                <div style={{ minWidth: 0 }}>
-                                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
-                                    Vélo en fin de séance
-                                  </div>
-                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #a1a1aa)' }}>
-                                    {veloEnabled ? 'Inclus dans la séance' : 'Retiré de la séance'}
-                                  </div>
-                                </div>
-                              </div>
-                              <button
-                                onClick={handleToggleVelo}
-                                role="switch"
-                                aria-checked={veloEnabled}
-                                aria-label="Activer ou désactiver le vélo de fin de séance"
-                                style={{
-                                  position: 'relative',
-                                  width: '48px',
-                                  height: '28px',
-                                  flexShrink: 0,
-                                  borderRadius: '100px',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: 0,
-                                  background: veloEnabled ? '#3B82F6' : 'rgba(255, 255, 255, 0.18)',
-                                  transition: 'background 0.25s ease',
-                                }}
-                              >
-                                <span style={{
-                                  position: 'absolute',
-                                  top: '3px',
-                                  left: veloEnabled ? '23px' : '3px',
-                                  width: '22px',
-                                  height: '22px',
-                                  borderRadius: '50%',
-                                  background: '#fff',
-                                  transition: 'left 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
-                                }} />
-                              </button>
-                            </div>
+                          {currentDayHasVelo && !rideStartEnabled && (
+                            <SettingToggle
+                              icon={<Bike size={20} color={veloEnabled ? '#3B82F6' : '#71717a'} />}
+                              title="Vélo en fin de séance"
+                              subtitle={veloEnabled ? 'Inclus dans la séance' : 'Retiré de la séance'}
+                              checked={veloEnabled}
+                              onToggle={handleToggleVelo}
+                              ariaLabel="Activer ou désactiver le vélo de fin de séance"
+                            />
                           )}
 
-                          {/* Interrupteur : sortie vélo connectée en ouverture de séance */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '12px',
-                            padding: '14px 16px',
-                            margin: '0 0 16px 0',
-                            borderRadius: '16px',
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.08)',
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                              <Bike size={20} color={rideStartEnabled ? '#22C55E' : '#71717a'} />
-                              <div style={{ minWidth: 0 }}>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
-                                  Sortie vélo en ouverture
-                                </div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #a1a1aa)' }}>
-                                  {rideStartEnabled
-                                    ? 'Vidéo + vélo Bluetooth avant la muscu (remplace le vélo de fin)'
-                                    : 'La séance démarre directement par la musculation'}
-                                </div>
-                              </div>
-                            </div>
-                            <button
-                              onClick={handleToggleRideStart}
-                              role="switch"
-                              aria-checked={rideStartEnabled}
-                              aria-label="Activer ou désactiver la sortie vélo en ouverture de séance"
-                              style={{
-                                position: 'relative',
-                                width: '48px',
-                                height: '28px',
-                                flexShrink: 0,
-                                borderRadius: '100px',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: 0,
-                                background: rideStartEnabled ? '#22C55E' : 'rgba(255, 255, 255, 0.18)',
-                                transition: 'background 0.25s ease',
-                              }}
-                            >
-                              <span style={{
-                                position: 'absolute',
-                                top: '3px',
-                                left: rideStartEnabled ? '23px' : '3px',
-                                width: '22px',
-                                height: '22px',
-                                borderRadius: '50%',
-                                background: '#fff',
-                                transition: 'left 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
-                              }} />
-                            </button>
-                          </div>
                           {/* Liste d'exercices avec numérotation géante */}
                           <div className="exercise-grid">
                             {workoutPlan[current].exercises.map((exo, index) => (

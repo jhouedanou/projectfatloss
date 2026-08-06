@@ -18,7 +18,6 @@ import { initSpeechService, announceExercise, announceSet, announcePause, announ
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
 import { useTranslation } from 'react-i18next';
-import YouTube from 'react-youtube';
 import { getExerciseIconsPath, getAssetPath } from '../utils/paths';
 import GoogleFitService from '../services/GoogleFitService';
 import PreWorkout from '../components/PreWorkout';
