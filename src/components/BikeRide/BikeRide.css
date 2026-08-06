@@ -530,8 +530,9 @@
 .ride-hud-icon {
   pointer-events: auto;
   flex: 0 0 auto;
-  width: 36px;
-  height: 36px;
+  /* Cible tactile minimale 44 px (Apple HIG / Material) */
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: rgba(10, 12, 18, 0.72);
@@ -577,6 +578,8 @@
   font-weight: 800;
   line-height: 0.95;
   letter-spacing: -0.03em;
+  /* La couleur de zone est posée en style inline ; transition douce entre zones. */
+  transition: color 0.4s ease;
 }
 
 .ride-metric-hero .ride-metric-unit {
@@ -584,6 +587,39 @@
   color: #FF6B35;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+/* Colonne à droite du chiffre héros : unité, badge de zone, W/kg, moy/max. */
+.ride-hero-side {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-start;
+}
+
+.ride-zone-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #0b0b0f;
+  padding: 2px 8px;
+  border-radius: 100px;
+  transition: background 0.4s ease;
+}
+
+/* Sous-valeur (moyenne, W/kg) sous une métrique. */
+.ride-metric-sub {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ride-metric-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .ride-metric-row {

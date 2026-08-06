@@ -76,11 +76,61 @@ function metFromExercise(exo) {
   return 4.5;
 }
 
+// ── Charge choisie par exercice (haltères 5/10/15/custom kg) ─────────────────
+// L'utilisateur peut choisir la charge sur la fiche d'exercice ; elle est
+// mémorisée par nom d'exercice et module l'estimation de calories.
+
+const EXERCISE_LOADS_KEY = 'exercise_loads';
+
+/** Charges proposées par défaut sur la fiche d'exercice. */
+export const STANDARD_LOADS_KG = [5, 10, 15];
+
+/** Charge mémorisée pour un exercice (kg), null si jamais choisie. */
+export function getExerciseLoad(exerciseName) {
+  try {
+    const map = JSON.parse(localStorage.getItem(EXERCISE_LOADS_KEY) || '{}');
+    const v = map[exerciseName];
+    return Number.isFinite(v) && v > 0 ? v : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/** Mémorise la charge choisie pour un exercice (kg). null pour revenir au défaut. */
+export function setExerciseLoad(exerciseName, kg) {
+  try {
+    const map = JSON.parse(localStorage.getItem(EXERCISE_LOADS_KEY) || '{}');
+    if (kg == null) delete map[exerciseName];
+    else map[exerciseName] = Number(kg);
+    localStorage.setItem(EXERCISE_LOADS_KEY, JSON.stringify(map));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/** Charge par défaut d'un exercice : celle inscrite dans son équipement ("2x10 kg"...). */
+export function parseEquipmentLoad(exo) {
+  const source = `${exo?.equip || ''} ${exo?.equipment || ''}`;
+  // "2x10 kg" → 20 ; "15 kg" → 15
+  const pair = source.match(/(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*kg/i);
+  if (pair) return Number(pair[1]) * Number(String(pair[2]).replace(',', '.'));
+  const single = source.match(/(\d+(?:[.,]\d+)?)\s*kg/i);
+  if (single) return Number(String(single[1]).replace(',', '.'));
+  return null;
+}
+
 /**
- * Calories pour 1 série, ajustées sur poids utilisateur.
- * Priorité au champ caloriesPerSet du data.js si présent (intention auteur),
- * mais on plafonne et on rescale au poids réel.
+ * Calories pour 1 série, ajustées sur poids utilisateur et charge choisie.
+ *
+ * Modulation par la charge : les MET de musculation supposent une charge
+ * modérée (référence 10 kg). L'énergie dépensée croît avec la charge externe
+ * rapportée au poids de corps — approximation linéaire :
+ * facteur = 1 + (charge − référence) / (2 × poids de corps).
+ * Ex. 75 kg de poids de corps, passer de 10 à 15 kg ≈ +3 % ; à 5 kg ≈ −3 %.
  */
+const REFERENCE_LOAD_KG = 10;
+
 export function getCaloriesForSet(exo, userWeightKg = null) {
   const weight = userWeightKg || getUserWeight();
   const met = metFromExercise(exo);
@@ -90,7 +140,15 @@ export function getCaloriesForSet(exo, userWeightKg = null) {
     durationMin = exo.duration / 60;
   }
 
-  const kcal = (met * 3.5 * weight) / 200 * durationMin;
+  let kcal = (met * 3.5 * weight) / 200 * durationMin;
+
+  // Charge choisie sur la fiche, sinon celle du matériel prévu au programme.
+  const load = getExerciseLoad(exo.name) ?? parseEquipmentLoad(exo);
+  if (load != null) {
+    const factor = 1 + (load - REFERENCE_LOAD_KG) / (2 * weight);
+    kcal *= Math.max(0.7, Math.min(1.6, factor));
+  }
+
   return Math.max(2, Math.round(kcal));
 }
 

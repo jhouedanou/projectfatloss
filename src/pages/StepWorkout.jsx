@@ -2,8 +2,7 @@
 import React, { useState, useEffect, useRef, createContext, useCallback, useMemo } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell, CalendarPlus, Volume2, VolumeX } from 'lucide-react';
-import { getLastDoseAt, isTakenToday, downloadCreatineReminder } from '../utils/creatineReminder';
+import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, Bell, Volume2, VolumeX } from 'lucide-react';
 const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon from '../components/ExoIcon';
@@ -21,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { getExerciseIconsPath, getAssetPath } from '../utils/paths';
 import GoogleFitService from '../services/GoogleFitService';
 import PreWorkout from '../components/PreWorkout';
-import { getCaloriesForSet } from '../services/CalorieEstimator';
+import { getCaloriesForSet, getExerciseLoad, setExerciseLoad, parseEquipmentLoad, STANDARD_LOADS_KG } from '../services/CalorieEstimator';
 import WebcamRepCounter from '../components/WebcamRepCounter';
 import { isCameraCountable } from '../services/RepPatternRules';
 import { getCameraAmplitude, setCameraAmplitude, AMPLITUDE_LABELS } from '../services/CameraRepService';
@@ -284,15 +283,6 @@ function CalorieDisplay({ calories, visible }) {
 function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout }) {
   const [isLoadingFit, setIsLoadingFit] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
-  const [reminderAdded, setReminderAdded] = useState(false);
-  const creatineLastDose = getLastDoseAt();
-  const creatineTakenToday = isTakenToday(creatineLastDose);
-
-  const handleAddCreatineReminder = () => {
-    downloadCreatineReminder(creatineLastDose || Date.now());
-    setReminderAdded(true);
-  };
-
   function calculateWeight(equipment) {
     const match = equipment && equipment.match(/(\d+)\s*kg/i);
     return match ? parseInt(match[1], 10) : 0;
@@ -543,37 +533,6 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
             {isLoadingFit ? 'Synchronisation...' : isSynced ? '✓ SYNCHRONISÉ AVEC GOOGLE FIT' : 'SYNCHRONISER AVEC GOOGLE FIT'}
           </button>
         </div>
-
-        {/* Rappel créatine — dose quotidienne de 5 g (proposé tant qu'elle n'est pas prise) */}
-        {!creatineTakenToday && (
-          <div style={{ margin: '0 0 16px 0', width: '100%' }}>
-            <button
-              onClick={handleAddCreatineReminder}
-              disabled={reminderAdded}
-              style={{
-                width: '100%',
-                minHeight: '48px',
-                padding: '13px 16px',
-                borderRadius: '14px',
-                border: reminderAdded ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(240,61,50,0.4)',
-                background: reminderAdded ? 'rgba(16,185,129,0.08)' : 'rgba(240,61,50,0.1)',
-                color: reminderAdded ? '#10b981' : '#f87171',
-                fontSize: '0.85rem',
-                fontWeight: 800,
-                fontFamily: "'Outfit', sans-serif",
-                letterSpacing: '0.3px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                cursor: reminderAdded ? 'default' : 'pointer',
-              }}
-            >
-              <CalendarPlus size={18} />
-              {reminderAdded ? 'RAPPEL AJOUTÉ À L\'AGENDA' : 'RAPPEL CRÉATINE 5 G (QUOTIDIEN)'}
-            </button>
-          </div>
-        )}
 
         {/* Action Buttons */}
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -965,7 +924,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const handleRideFinished = (ride) => {
     if (ride) {
       try {
-        addCardioSession({
+        const record = addCardioSession({
           type: 'bike',
           duration: ride.durationMin,
           distance: ride.distanceKm,
@@ -979,6 +938,16 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             maxSpeedKmh: ride.maxSpeedKmh,
           }),
         });
+        // Google Fit : pousser la séance tout de suite si un token valide
+        // existe déjà (pas de popup en plein flux de séance). Sinon elle reste
+        // dans la file « non synchronisé » du calendrier / suivi cardio.
+        import('../services/GoogleFitService')
+          .then(({ default: fit }) =>
+            fit.isSignedIn()
+              ? import('../services/GoogleFitSync').then(({ syncCardioToGoogleFit }) => syncCardioToGoogleFit(record))
+              : null
+          )
+          .catch((error) => console.warn('Sync Google Fit de la sortie vélo reportée:', error?.message));
       } catch (error) {
         console.error('Erreur lors de l\'enregistrement de la sortie vélo:', error);
       }
@@ -1290,6 +1259,31 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   const [countdown, setCountdown] = useState(null); // null = pas de décompte, sinon 3,2,1
   const [cameraActive, setCameraActive] = useState(false); // comptage reps par webcam
   const timerRef = useRef(null);
+
+  // Charge d'haltères choisie pour cet exercice (mémorisée par nom d'exercice).
+  // Elle module l'estimation de calories de chaque série (CalorieEstimator).
+  const [exerciseLoad, setExerciseLoadUi] = useState(null);
+  const [customLoadOpen, setCustomLoadOpen] = useState(false);
+  const [customLoadValue, setCustomLoadValue] = useState('');
+  useEffect(() => {
+    if (!exo) return;
+    setExerciseLoadUi(getExerciseLoad(exo.name) ?? parseEquipmentLoad(exo));
+    setCustomLoadOpen(false);
+    setCustomLoadValue('');
+  }, [exo]);
+
+  const handlePickLoad = (kg) => {
+    setExerciseLoadUi(kg);
+    setExerciseLoad(exo.name, kg);
+    setCustomLoadOpen(false);
+  };
+
+  const handleCustomLoad = () => {
+    const kg = Number(String(customLoadValue).replace(',', '.'));
+    if (Number.isFinite(kg) && kg > 0 && kg <= 200) {
+      handlePickLoad(kg);
+    }
+  };
 
   // Nouvelle logique pour déterminer quels exercices utilisent le chronomètre
   // Jour 7 (index 6) OU exercices avec nbRep: 0 OU timer: true
@@ -1867,9 +1861,10 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
           className="exercise-illustration"
           sx={{
             width: '100%',
-            // Illustration réduite pour que les instructions ne passent pas sous les contrôles fixes.
+            // Illustration compacte : la fiche entière (nom, badges, description,
+            // contrôles) doit tenir au-dessus du pli sur un écran de téléphone.
             // Caméra active : l'aperçu remplace l'illustration, un peu plus large.
-            maxWidth: cameraActive ? 360 : { xs: 200, md: 260, lg: 300 },
+            maxWidth: cameraActive ? 360 : { xs: 132, md: 180, lg: 210 },
             aspectRatio: cameraActive ? 'auto' : '1/1',
             borderRadius: '16px',
             overflow: 'hidden',
@@ -1880,7 +1875,8 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: cameraActive ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.45)',
-            position: 'relative'
+            position: 'relative',
+            mx: 'auto'
           }}
         >
           {cameraActive ? (
@@ -1913,12 +1909,73 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         >
           {exo.name}
         </Typography>
-        {/* Affichage du poids réel soulevé */}
-        {calculateWeight(exo.equipment) > 0 && (
-          <Typography variant="subtitle1" sx={{ color: '#F03D32', fontWeight: 'bold', mb: 2 }}>
-            Poids cible : {calculateWeight(exo.equipment)} kg
-          </Typography>
-        )}
+        {/* Choix de la charge : haltères standard ou charge personnalisée.
+            La sélection est mémorisée par exercice et ajuste les calories. */}
+        <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', mb: 1.5 }}>
+          {STANDARD_LOADS_KG.map((kg) => (
+            <Button
+              key={kg}
+              size="small"
+              variant={exerciseLoad === kg ? 'contained' : 'outlined'}
+              onClick={() => handlePickLoad(kg)}
+              sx={{
+                minWidth: 56,
+                borderRadius: '100px',
+                fontWeight: 700,
+                ...(exerciseLoad === kg
+                  ? { background: '#F03D32', '&:hover': { background: '#d43429' } }
+                  : { borderColor: 'rgba(255,255,255,0.25)', color: '#a1a1aa' }),
+              }}
+            >
+              {kg} kg
+            </Button>
+          ))}
+          {customLoadOpen ? (
+            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+              <input
+                type="number"
+                min="1"
+                max="200"
+                step="0.5"
+                value={customLoadValue}
+                onChange={(e) => setCustomLoadValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleCustomLoad(); }}
+                placeholder="kg"
+                autoFocus
+                style={{
+                  width: 64,
+                  padding: '6px 8px',
+                  borderRadius: 100,
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  background: 'transparent',
+                  color: 'inherit',
+                  textAlign: 'center',
+                }}
+              />
+              <Button size="small" onClick={handleCustomLoad} sx={{ minWidth: 40, fontWeight: 700 }}>OK</Button>
+            </Box>
+          ) : (
+            <Button
+              size="small"
+              variant={exerciseLoad != null && !STANDARD_LOADS_KG.includes(exerciseLoad) ? 'contained' : 'outlined'}
+              onClick={() => { setCustomLoadOpen(true); setCustomLoadValue(exerciseLoad != null ? String(exerciseLoad) : ''); }}
+              sx={{
+                minWidth: 64,
+                borderRadius: '100px',
+                fontWeight: 700,
+                ...(exerciseLoad != null && !STANDARD_LOADS_KG.includes(exerciseLoad)
+                  ? { background: '#F03D32', '&:hover': { background: '#d43429' } }
+                  : { borderColor: 'rgba(255,255,255,0.25)', color: '#a1a1aa' }),
+              }}
+            >
+              {exerciseLoad != null && !STANDARD_LOADS_KG.includes(exerciseLoad) ? `${exerciseLoad} kg` : 'Autre'}
+            </Button>
+          )}
+        </Box>
+        {/* Estimation recalculée avec la charge choisie */}
+        <Typography variant="caption" sx={{ color: '#a1a1aa', display: 'block', textAlign: 'center', mb: 1.5 }}>
+          ≈ {caloriesPerSet} kcal / série{exerciseLoad != null ? ` avec ${exerciseLoad} kg` : ''}
+        </Typography>
         
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
           {exo.equip && (
@@ -1948,19 +2005,9 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
           {exo.desc}
         </Typography>
 
-        {/* Comptage caméra : l'aperçu remplace l'illustration ci-dessus quand actif */}
-        {cameraCountable && !cameraActive && (
-          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
-            <Button
-              variant="outlined"
-              startIcon={<MonitorPlay size={18} />}
-              onClick={() => setCameraActive(true)}
-              sx={{ borderColor: 'rgba(76,175,80,0.5)', color: '#4CAF50' }}
-            >
-              Compter les reps avec la caméra
-            </Button>
-          </Box>
-        )}
+        {/* Le suivi des reps par caméra se décide UNE fois au lancement de la
+            séance (dialogue d'ouverture) — pas de bouton par exercice. Quand il
+            est actif, l'aperçu remplace l'illustration ci-dessus. */}
 
         {/* Timer spécial pour exercices avec duration fixe */}
         {exo.duration && !isChrono ? (

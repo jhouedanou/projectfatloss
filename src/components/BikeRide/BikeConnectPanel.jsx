@@ -1,5 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BleBridge from '../../services/bike/BleBridge';
+
+const DOMYOS_DEBUG_KEY = 'domyos_debug';
+
+const isDomyosDebug = () => {
+  try {
+    return localStorage.getItem(DOMYOS_DEBUG_KEY) === '1';
+  } catch (error) {
+    return false;
+  }
+};
 
 export const SOURCES = [
   { key: 'ftms', label: 'Vélo FTMS', hint: 'Standard — ou EB900 via pont qdomyos-zwift', ble: true },
@@ -22,6 +32,17 @@ export default function BikeConnectPanel({
   onDetect,
 }) {
   const bleOk = BleBridge.isSupported();
+  const [domyosDebug, setDomyosDebug] = useState(() => isDomyosDebug());
+
+  const handleDebugToggle = (checked) => {
+    setDomyosDebug(checked);
+    try {
+      if (checked) localStorage.setItem(DOMYOS_DEBUG_KEY, '1');
+      else localStorage.removeItem(DOMYOS_DEBUG_KEY);
+    } catch (error) {
+      /* stockage indisponible : le réglage ne survivra pas, tant pis */
+    }
+  };
 
   return (
     <div className="ride-connect">
@@ -54,6 +75,16 @@ export default function BikeConnectPanel({
         <input type="checkbox" checked={hrEnabled} onChange={(e) => onHrToggle(e.target.checked)} disabled={!bleOk} />
         <span>Ceinture cardio Bluetooth (prioritaire sur le capteur de poignée)</span>
       </label>
+
+      {source === 'domyos' && (
+        <label className="ride-hr-toggle">
+          <input type="checkbox" checked={domyosDebug} onChange={(e) => handleDebugToggle(e.target.checked)} />
+          <span>
+            Mode diagnostic : journalise les trames de la console (console du navigateur et
+            <code> window.__domyosFrames</code>) pour calibrer vitesse/cadence si les valeurs affichées sont fausses
+          </span>
+        </label>
+      )}
 
       {status && <p className="ride-status">{status}</p>}
       {error && <p className="ride-error">{error}</p>}

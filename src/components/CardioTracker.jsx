@@ -17,8 +17,8 @@ import {
 } from '../services/GoogleFitSync';
 import './CardioTracker.css';
 
-// MET approximatif du vélo. La marche a été retirée du programme : on ne
-// peut plus enregistrer de nouvelle marche, seules les anciennes restent lisibles.
+// MET approximatifs : marche d'un bon pas et vélo stationnaire modéré-vigoureux.
+// La marche est suivie comme un exercice à part entière, distinct du vélo.
 const MET = { walk: 3.5, bike: 7.5 };
 
 const estimateCalories = (type, durationMin, weightKg) => {
@@ -35,7 +35,7 @@ const fmtDate = (iso) => {
 const CardioTracker = () => {
   const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState(null);
-  const [type] = useState('bike');
+  const [type, setType] = useState('bike');
   const [duration, setDuration] = useState('');
   const [distance, setDistance] = useState('');
   const [calories, setCalories] = useState('');
@@ -77,7 +77,7 @@ const CardioTracker = () => {
 
   return (
     <div className="cardio-tracker">
-      <h2 className="cardio-title">Cardio — Vélo</h2>
+      <h2 className="cardio-title">Cardio — Vélo &amp; Marche</h2>
 
       {stats && (
         <div className="cardio-stats">
@@ -89,10 +89,36 @@ const CardioTracker = () => {
             <Bike size={18} color="#3B82F6" />
             <div><strong>{stats.byType.bike.count}</strong><span>séances vélo</span></div>
           </div>
+          <div className="cardio-stat">
+            <Footprints size={18} color="#22C55E" />
+            <div><strong>{stats.byType.walk.count}</strong><span>marches</span></div>
+          </div>
         </div>
       )}
 
       <form className="cardio-form" onSubmit={handleAdd}>
+        {/* Choix de l'exercice : vélo ou marche, suivis séparément */}
+        <div className="cardio-type-switch" role="radiogroup" aria-label="Type d'exercice cardio">
+          <button
+            type="button"
+            role="radio"
+            aria-checked={type === 'bike'}
+            className={`cardio-type-btn ${type === 'bike' ? 'is-active' : ''}`}
+            onClick={() => setType('bike')}
+          >
+            <Bike size={16} /> Vélo
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={type === 'walk'}
+            className={`cardio-type-btn ${type === 'walk' ? 'is-active is-walk' : ''}`}
+            onClick={() => setType('walk')}
+          >
+            <Footprints size={16} /> Marche
+          </button>
+        </div>
+
         <div className="cardio-inputs">
           <label>
             <Clock size={14} /> Durée (min)

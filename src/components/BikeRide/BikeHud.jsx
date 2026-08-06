@@ -1,4 +1,6 @@
 import React from 'react';
+import { Volume2, VolumeX, Maximize, Minimize } from 'lucide-react';
+import { getUserWeight } from '../../services/CalorieEstimator';
 
 /** mm:ss ou h:mm:ss selon la durée. */
 export const formatDuration = (totalSec) => {
@@ -12,10 +14,57 @@ export const formatDuration = (totalSec) => {
 
 const fmt = (value, digits = 0) => (value == null ? '--' : Number(value).toFixed(digits));
 
+const FTP_KEY = 'ride_ftp_watts';
+/** FTP par défaut d'un cycliste loisir — ajustable via localStorage (ride_ftp_watts). */
+const DEFAULT_FTP = 150;
+
+export const getFtp = () => {
+  try {
+    const stored = Number(localStorage.getItem(FTP_KEY));
+    return Number.isFinite(stored) && stored >= 50 && stored <= 500 ? stored : DEFAULT_FTP;
+  } catch (error) {
+    return DEFAULT_FTP;
+  }
+};
+
 /**
- * Overlay de télémétrie posé sur la vidéo.
- * La puissance domine la hiérarchie (c'est la mesure d'effort), le reste est en
- * rang secondaire. Tout est en `tabular-nums` pour que les chiffres ne dansent pas.
+ * Zones de puissance, découpage standard (Coggan, repris par Zwift) en % FTP :
+ * Z1 récupération < 60 %, Z2 endurance 60-75, Z3 tempo 76-89, Z4 seuil 90-104,
+ * Z5 VO2max 105-118, Z6 anaérobie ≥ 119. Les couleurs suivent la convention
+ * gris / bleu / vert / jaune / orange / rouge affichée par Zwift.
+ */
+const POWER_ZONES = [
+  { max: 0.6, name: 'Z1', label: 'Récup', color: '#9CA3AF' },
+  { max: 0.76, name: 'Z2', label: 'Endurance', color: '#3B82F6' },
+  { max: 0.9, name: 'Z3', label: 'Tempo', color: '#22C55E' },
+  { max: 1.05, name: 'Z4', label: 'Seuil', color: '#EAB308' },
+  { max: 1.19, name: 'Z5', label: 'VO2max', color: '#F97316' },
+  { max: Infinity, name: 'Z6', label: 'Anaérobie', color: '#EF4444' },
+];
+
+export const powerZone = (watts, ftp) => {
+  if (watts == null || !ftp) return null;
+  const ratio = watts / ftp;
+  return POWER_ZONES.find((zone) => ratio < zone.max) || POWER_ZONES[POWER_ZONES.length - 1];
+};
+
+/** Métrique secondaire avec sa valeur moyenne (ou max) en sous-titre. */
+function Metric({ value, digits = 0, unit, sub }) {
+  return (
+    <div className="ride-metric">
+      <div className="ride-metric-col">
+        <span className="ride-metric-value">{fmt(value, digits)}</span>
+        {sub != null && <span className="ride-metric-sub">{sub}</span>}
+      </div>
+      <span className="ride-metric-unit">{unit}</span>
+    </div>
+  );
+}
+
+/**
+ * Overlay de télémétrie posé sur la vidéo, calqué sur les codes des apps de
+ * home-trainer (Zwift, Kinomap) : puissance en héros colorée par zone, W/kg,
+ * métriques secondaires avec leurs moyennes, et rangée durée/distance/kcal.
  */
 export default function BikeHud({
   metrics,
@@ -30,6 +79,11 @@ export default function BikeHud({
   fullscreen,
   onToggleFullscreen,
 }) {
+  const ftp = getFtp();
+  const zone = powerZone(metrics.watts, ftp);
+  const weight = getUserWeight();
+  const wattsPerKg = metrics.watts != null && weight ? metrics.watts / weight : null;
+
   return (
     <div className="ride-hud">
       <div className="ride-hud-top">
@@ -46,7 +100,7 @@ export default function BikeHud({
           aria-label={muted ? 'Rétablir le son' : 'Couper le son'}
           title={muted ? 'Rétablir le son' : 'Couper le son'}
         >
-          {muted ? '🔇' : '🔊'}
+          {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
         </button>
         <button
           type="button"
@@ -56,7 +110,7 @@ export default function BikeHud({
           aria-label={fullscreen ? 'Quitter le plein écran' : 'Passer en plein écran'}
           title={fullscreen ? 'Quitter le plein écran' : 'Passer en plein écran'}
         >
-          {fullscreen ? '⤢' : '⛶'}
+          {fullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
         </button>
         <button type="button" className="ride-hud-finish" onClick={onFinish}>
           Terminer
@@ -65,22 +119,40 @@ export default function BikeHud({
 
       <div className="ride-hud-main">
         <div className="ride-metric ride-metric-hero">
-          <span className="ride-metric-value">{fmt(metrics.watts)}</span>
-          <span className="ride-metric-unit">watts</span>
+          <span
+            className="ride-metric-value"
+            style={zone ? { color: zone.color } : undefined}
+          >
+            {fmt(metrics.watts)}
+          </span>
+          <div className="ride-hero-side">
+            <span className="ride-metric-unit">watts</span>
+            {zone && (
+              <span className="ride-zone-badge" style={{ background: zone.color }}>
+                {zone.name} · {zone.label}
+              </span>
+            )}
+            {wattsPerKg != null && (
+              <span className="ride-metric-sub">{wattsPerKg.toFixed(1)} W/kg</span>
+            )}
+            {metrics.avgWatts != null && (
+              <span className="ride-metric-sub">moy {fmt(metrics.avgWatts)} · max {fmt(metrics.maxWatts)}</span>
+            )}
+          </div>
         </div>
         <div className="ride-metric-row">
-          <div className="ride-metric">
-            <span className="ride-metric-value">{fmt(metrics.speedKmh, 1)}</span>
-            <span className="ride-metric-unit">km/h</span>
-          </div>
-          <div className="ride-metric">
-            <span className="ride-metric-value">{fmt(metrics.bpm)}</span>
-            <span className="ride-metric-unit">bpm</span>
-          </div>
-          <div className="ride-metric">
-            <span className="ride-metric-value">{fmt(metrics.cadence)}</span>
-            <span className="ride-metric-unit">tr/min</span>
-          </div>
+          <Metric
+            value={metrics.speedKmh}
+            digits={1}
+            unit="km/h"
+            sub={metrics.avgSpeedKmh ? `moy ${fmt(metrics.avgSpeedKmh, 1)}` : null}
+          />
+          <Metric
+            value={metrics.bpm}
+            unit="bpm"
+            sub={metrics.avgBpm != null ? `moy ${fmt(metrics.avgBpm)}` : null}
+          />
+          <Metric value={metrics.cadence} unit="tr/min" />
         </div>
       </div>
 

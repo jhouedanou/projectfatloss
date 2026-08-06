@@ -14,6 +14,30 @@ import { getUserWeight } from '../../services/CalorieEstimator';
 const BIKE_MET = 7.0;
 const TICK_MS = 1000;
 
+/**
+ * Bornes de plausibilité par champ. Un décodage Domyos mal calé (offsets
+ * firmware différents) produit des valeurs absurdes — mieux vaut les jeter
+ * que de les intégrer dans distance/calories/moyennes.
+ */
+const PLAUSIBLE = {
+  speedKmh: [0, 80],
+  cadence: [0, 200],
+  watts: [0, 1500],
+  bpm: [30, 240],
+  kcalTotal: [0, 5000],
+};
+
+/** Retourne le sample filtré : les champs hors bornes deviennent null. */
+const sanitizeSample = (sample) => {
+  const out = { ...sample };
+  Object.entries(PLAUSIBLE).forEach(([key, [min, max]]) => {
+    const v = out[key];
+    if (v == null) return;
+    if (!Number.isFinite(v) || v < min || v > max) out[key] = null;
+  });
+  return out;
+};
+
 const initialState = {
   speedKmh: 0,
   cadence: null,
@@ -71,7 +95,14 @@ export default function useBikeMetrics({ adapter, hrAdapter = null, running }) {
   useEffect(() => {
     if (!adapter) return undefined;
     const unsubscribe = adapter.onMetrics((sample) => {
-      liveRef.current = { ...liveRef.current, ...sample };
+      // Filtrage de plausibilité : un champ aberrant est ignoré (il garde sa
+      // dernière valeur valide), pas intégré aux cumuls.
+      const clean = sanitizeSample(sample);
+      const next = { ...liveRef.current };
+      Object.keys(next).forEach((key) => {
+        if (clean[key] != null) next[key] = clean[key];
+      });
+      liveRef.current = next;
     });
     return unsubscribe;
   }, [adapter]);
@@ -79,7 +110,8 @@ export default function useBikeMetrics({ adapter, hrAdapter = null, running }) {
   useEffect(() => {
     if (!hrAdapter) return undefined;
     const unsubscribe = hrAdapter.onMetrics((sample) => {
-      if (sample.bpm != null) strapBpmRef.current = sample.bpm;
+      const clean = sanitizeSample(sample);
+      if (clean.bpm != null) strapBpmRef.current = clean.bpm;
     });
     return unsubscribe;
   }, [hrAdapter]);
