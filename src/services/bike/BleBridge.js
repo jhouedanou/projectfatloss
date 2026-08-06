@@ -115,7 +115,11 @@ let capacitorBle = null;
 
 async function loadCapacitorBle() {
   if (capacitorBle) return capacitorBle;
-  const mod = await import('@capacitor-community/bluetooth-le');
+  // Import indirect via une variable : le bundler web ne doit pas tenter de
+  // résoudre le plugin natif, absent des dépendances du build PWA. Ce chemin
+  // n'est atteint que dans la WebView Capacitor, où le plugin est présent.
+  const specifier = '@capacitor-community/bluetooth-le';
+  const mod = await import(/* @vite-ignore */ specifier);
   capacitorBle = mod.BleClient;
   await capacitorBle.initialize({ androidNeverForLocation: true });
   return capacitorBle;

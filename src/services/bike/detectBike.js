@@ -20,8 +20,11 @@ const OPTIONAL_SERVICES = [FTMS_SERVICE, HR_SERVICE, DOMYOS_SERVICE, 0x1816, 0x1
 
 /**
  * Se connecte à un appareil déjà choisi, lit ses services et en déduit le
- * protocole. Se déconnecte toujours : la sortie rouvrira la connexion avec
- * l'adapter adapté, sans état hérité d'un essai précédent.
+ * protocole. La connexion est LAISSÉE OUVERTE et le handle remonte dans le
+ * rapport : la sortie la reprend telle quelle. Le vélo n'accepte qu'une
+ * connexion à la fois et quitte le mode appairage une fois associé — fermer
+ * ici obligerait à ré-appairer pour démarrer la séance.
+ * L'appelant est responsable de `releaseDetectedHandle()` s'il ne l'utilise pas.
  * @param {Object} handle handle BleBridge ({device} web ou {deviceId} natif)
  */
 export async function identifyHandle(handle) {
@@ -45,10 +48,23 @@ export async function identifyHandle(handle) {
       // sont visibles : un firmware exotique ressort donc avec une liste vide.
       // Le plugin Android, lui, renvoie tout ce que l'appareil expose.
       transport: BleBridge.transportName(),
+      // Le handle reste CONNECTÉ et remonte avec le rapport : la sortie le
+      // réutilise tel quel. Le vélo n'accepte qu'une connexion à la fois et la
+      // console sort du mode appairage après la détection — se déconnecter ici
+      // obligerait l'utilisateur à ré-appairer pour démarrer la séance.
+      handle,
     };
-  } finally {
+  } catch (error) {
+    // Échec d'identification : rien à réutiliser, on libère la console pour
+    // que la tentative suivante puisse s'y connecter.
     BleBridge.disconnect(handle);
+    throw error;
   }
+}
+
+/** Ferme un handle remonté par la détection et non utilisé par la sortie. */
+export function releaseDetectedHandle(report) {
+  if (report?.handle) BleBridge.disconnect(report.handle);
 }
 
 /**

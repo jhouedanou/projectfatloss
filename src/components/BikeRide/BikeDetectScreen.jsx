@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import BleBridge from '../../services/bike/BleBridge';
-import { detectBike, identifyScannedDevice, PROTOCOL_INFO } from '../../services/bike/detectBike';
+import {
+  detectBike,
+  identifyScannedDevice,
+  releaseDetectedHandle,
+  PROTOCOL_INFO,
+} from '../../services/bike/detectBike';
 
 const STEPS = [
   'Allume la console du vélo et lance un programme (elle n\'émet rien en veille).',
@@ -44,10 +49,45 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
 
   useEffect(() => stopScan, [stopScan]);
 
+  // Handle laissé connecté par la détection : soit la sortie le reprend, soit
+  // on le referme en quittant l'écran, pour ne pas monopoliser la console.
+  const pendingHandleRef = useRef(null);
+  const handedOverRef = useRef(false);
+
   const finishIdentify = useCallback((report) => {
+    // Une identification précédente non reprise doit être libérée.
+    if (pendingHandleRef.current && pendingHandleRef.current !== report.handle) {
+      releaseDetectedHandle({ handle: pendingHandleRef.current });
+    }
+    pendingHandleRef.current = report.handle || null;
     setResult(report);
     setState('done');
   }, []);
+
+  const releasePending = useCallback(() => {
+    if (handedOverRef.current) return;
+    if (pendingHandleRef.current) {
+      releaseDetectedHandle({ handle: pendingHandleRef.current });
+      pendingHandleRef.current = null;
+    }
+  }, []);
+
+  // Démontage sans reprise (retour arrière, changement de phase) : on ferme.
+  useEffect(() => releasePending, [releasePending]);
+
+  const handleBack = useCallback(() => {
+    releasePending();
+    onBack();
+  }, [releasePending, onBack]);
+
+  const handleUseSource = useCallback(
+    (source, hasHeartRate, handle) => {
+      // La sortie devient propriétaire du handle : ne plus le fermer ici.
+      handedOverRef.current = true;
+      onUseSource(source, hasHeartRate, handle);
+    },
+    [onUseSource]
+  );
 
   const failDetect = useCallback((detectError) => {
     const message = detectError?.message || 'Détection impossible.';
@@ -229,11 +269,15 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
           </>
         )}
         {result && info?.source && (
-          <button type="button" className="ride-btn ride-btn-ghost" onClick={() => onUseSource(info.source, result.hasHeartRate)}>
+          <button
+            type="button"
+            className="ride-btn ride-btn-ghost"
+            onClick={() => handleUseSource(info.source, result.hasHeartRate, result.handle)}
+          >
             Utiliser cette source pour la sortie
           </button>
         )}
-        <button type="button" className="ride-btn ride-btn-ghost" onClick={onBack}>
+        <button type="button" className="ride-btn ride-btn-ghost" onClick={handleBack}>
           Retour
         </button>
       </div>

@@ -13,7 +13,14 @@ import {
 import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft, Apple, Bike } from 'lucide-react';
 import { createAppTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
-import { getActiveWorkoutPlan, isVeloEnabled, setVeloEnabled, dayHasVelo } from '../services/WorkoutCustomization';
+import {
+  getActiveWorkoutPlan,
+  isVeloEnabled,
+  setVeloEnabled,
+  dayHasVelo,
+  isRideStartEnabled,
+  setRideStartEnabled,
+} from '../services/WorkoutCustomization';
 import StepWorkout from './StepWorkout';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import WorkoutStats from '../components/WorkoutStats';
@@ -74,6 +81,8 @@ export default function App() {
   const [showLogin, setShowLogin] = useState(false);
   // Vélo de fin de séance optionnel (réglage global mémorisé)
   const [veloEnabled, setVeloEnabledState] = useState(() => isVeloEnabled());
+  // Sortie vélo en ouverture de séance (vidéo + vélo connecté)
+  const [rideStartEnabled, setRideStartEnabledState] = useState(() => isRideStartEnabled());
   // Le jour courant propose-t-il un vélo (dans le plan brut) ? Sinon pas d'interrupteur.
   const currentDayHasVelo = useMemo(() => dayHasVelo(current), [current, showCustomizer]);
 
@@ -160,6 +169,22 @@ export default function App() {
     const next = !veloEnabled;
     setVeloEnabledState(next);
     setVeloEnabled(next);
+    try {
+      const plan = getActiveWorkoutPlan();
+      if (plan && plan.length > 0) {
+        setWorkoutPlan(plan);
+      }
+    } catch (error) {
+      console.error('Erreur lors du rechargement du plan:', error);
+    }
+  };
+
+  // Active/désactive la sortie vélo d'ouverture. Quand elle est active, le vélo
+  // de fin de séance sort du programme : c'est le même effort, déplacé.
+  const handleToggleRideStart = () => {
+    const next = !rideStartEnabled;
+    setRideStartEnabledState(next);
+    setRideStartEnabled(next);
     try {
       const plan = getActiveWorkoutPlan();
       if (plan && plan.length > 0) {
@@ -442,6 +467,63 @@ export default function App() {
                               </button>
                             </div>
                           )}
+
+                          {/* Interrupteur : sortie vélo connectée en ouverture de séance */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            padding: '14px 16px',
+                            margin: '0 0 16px 0',
+                            borderRadius: '16px',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                              <Bike size={20} color={rideStartEnabled ? '#22C55E' : '#71717a'} />
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
+                                  Sortie vélo en ouverture
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #a1a1aa)' }}>
+                                  {rideStartEnabled
+                                    ? 'Vidéo + vélo Bluetooth avant la muscu (remplace le vélo de fin)'
+                                    : 'La séance démarre directement par la musculation'}
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              onClick={handleToggleRideStart}
+                              role="switch"
+                              aria-checked={rideStartEnabled}
+                              aria-label="Activer ou désactiver la sortie vélo en ouverture de séance"
+                              style={{
+                                position: 'relative',
+                                width: '48px',
+                                height: '28px',
+                                flexShrink: 0,
+                                borderRadius: '100px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0,
+                                background: rideStartEnabled ? '#22C55E' : 'rgba(255, 255, 255, 0.18)',
+                                transition: 'background 0.25s ease',
+                              }}
+                            >
+                              <span style={{
+                                position: 'absolute',
+                                top: '3px',
+                                left: rideStartEnabled ? '23px' : '3px',
+                                width: '22px',
+                                height: '22px',
+                                borderRadius: '50%',
+                                background: '#fff',
+                                transition: 'left 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+                              }} />
+                            </button>
+                          </div>
                           {/* Liste d'exercices avec numérotation géante */}
                           <div className="exercise-grid">
                             {workoutPlan[current].exercises.map((exo, index) => (

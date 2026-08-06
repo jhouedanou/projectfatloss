@@ -44,7 +44,7 @@ export function setUserProfile(profile) {
   } catch (e) {}
 }
 
-function getUserWeight() {
+export function getUserWeight() {
   try {
     const history = getWeightHistory();
     if (history && history.length > 0) {

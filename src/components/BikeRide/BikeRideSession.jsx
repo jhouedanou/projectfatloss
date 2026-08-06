@@ -10,6 +10,7 @@ import usePlaybackRateController from './usePlaybackRateController';
 import useRideScreen from './useRideScreen';
 import { RIDE_VIDEOS, formatVideoDuration } from '../../data/rideVideos';
 import SimulationAdapter from '../../services/bike/adapters/SimulationAdapter';
+import { releaseDetectedHandle } from '../../services/bike/detectBike';
 import './BikeRide.css';
 
 /**
@@ -38,6 +39,11 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
   const adapterRef = useRef(null);
   const hrAdapterRef = useRef(null);
   const rootRef = useRef(null);
+  // Handle BLE déjà connecté par l'écran de détection : le réutiliser évite de
+  // rouvrir le sélecteur Bluetooth au démarrage. Le vélo n'accepte qu'une
+  // connexion à la fois et sort du mode appairage une fois associé — sans ce
+  // relais, « Démarrer la sortie » redemande une association impossible.
+  const detectedHandleRef = useRef(null);
 
   const { fullscreen, enter: enterFullscreen, leave: leaveFullscreen, toggle: toggleFullscreen } = useRideScreen();
 
@@ -56,6 +62,12 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     hrAdapterRef.current?.stop();
     adapterRef.current = null;
     hrAdapterRef.current = null;
+    // Détection reprise mais sortie jamais démarrée : libérer la console,
+    // sinon elle reste occupée par une connexion fantôme.
+    if (detectedHandleRef.current) {
+      releaseDetectedHandle({ handle: detectedHandleRef.current });
+      detectedHandleRef.current = null;
+    }
   }, []);
 
   useEffect(() => stopAdapters, [stopAdapters]);
@@ -74,20 +86,38 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     enterFullscreen(rootRef.current);
     try {
       let bike;
+      // Handle repris de la détection : consommé une seule fois. S'il est
+      // devenu inutilisable (console éteinte entre-temps), on repasse par le
+      // sélecteur plutôt que d'échouer.
+      const handle = source === 'sim' ? null : detectedHandleRef.current;
       if (source === 'sim') {
         bike = new SimulationAdapter();
       } else if (source === 'ftms') {
         const { default: FtmsAdapter } = await import('../../services/bike/adapters/FtmsAdapter');
         bike = new FtmsAdapter();
-        setStatus('Sélectionne ton vélo dans la fenêtre Bluetooth…');
+        setStatus(handle ? 'Reprise de la connexion au vélo…' : 'Sélectionne ton vélo dans la fenêtre Bluetooth…');
       } else {
         const { default: DomyosAdapter } = await import('../../services/bike/adapters/DomyosAdapter');
         bike = new DomyosAdapter();
-        setStatus('Sélectionne la console Domyos dans la fenêtre Bluetooth…');
+        setStatus(
+          handle
+            ? 'Reprise de la connexion à la console…'
+            : 'Sélectionne la console Domyos dans la fenêtre Bluetooth…'
+        );
       }
 
       bike.onDisconnect?.(() => setConnected(false));
-      await bike.start();
+      try {
+        await bike.start(handle ? { handle } : undefined);
+      } catch (reuseError) {
+        if (!handle) throw reuseError;
+        // Le handle mémorisé ne répond plus : on l'abandonne et on retente
+        // proprement par le sélecteur système.
+        detectedHandleRef.current = null;
+        setStatus('Connexion perdue — sélectionne à nouveau ton vélo…');
+        await bike.start();
+      }
+      detectedHandleRef.current = null;
       adapterRef.current = bike;
       setAdapter(bike);
       setConnected(true);
@@ -184,10 +214,13 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     content = (
       <BikeDetectScreen
         onBack={() => setPhase('setup')}
-        onUseSource={(nextSource, hasHeartRate) => {
+        onUseSource={(nextSource, hasHeartRate, handle) => {
           setSource(nextSource);
           if (hasHeartRate) setHrEnabled(true);
-          setStatus(`Source réglée sur ${nextSource === 'ftms' ? 'FTMS' : 'Domyos'} après détection.`);
+          detectedHandleRef.current = handle || null;
+          setStatus(
+            `${nextSource === 'ftms' ? 'FTMS' : 'Domyos'} détecté et connecté — appuie sur « Démarrer la sortie ».`
+          );
           setPhase('setup');
         }}
       />

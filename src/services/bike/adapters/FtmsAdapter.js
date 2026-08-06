@@ -90,16 +90,29 @@ export default class FtmsAdapter {
     this._disconnectCb = cb;
   }
 
-  async start() {
+  /**
+   * @param {Object} [options]
+   * @param {Object} [options.handle] handle déjà connecté par la détection.
+   *   Fourni, il est réutilisé tel quel : ni sélecteur système, ni seconde
+   *   connexion — le vélo n'en accepte qu'une à la fois.
+   */
+  async start({ handle } = {}) {
     if (!BleBridge.isSupported()) {
       throw new Error('Bluetooth non disponible sur cette plateforme.');
     }
-    this._handle = await BleBridge.requestDevice({
-      services: [FTMS_SERVICE],
-      optionalServices: [0x180d, 0x180a],
-    });
+    if (handle) {
+      this._handle = handle;
+    } else {
+      // Aucun filtre : beaucoup de consoles (dont l'EB900 derrière un pont)
+      // n'annoncent pas 0x1826 dans leur trame d'annonce. Filtrer sur le
+      // service ferait ressortir un sélecteur vide alors que le vélo est là.
+      this._handle = await BleBridge.requestDevice({
+        services: [],
+        optionalServices: [FTMS_SERVICE, 0x180d, 0x180a],
+      });
+      await BleBridge.connect(this._handle);
+    }
     this.label = `FTMS · ${this._handle.name}`;
-    await BleBridge.connect(this._handle);
     BleBridge.onDisconnect(this._handle, () => this._disconnectCb?.());
     await BleBridge.subscribe(this._handle, FTMS_SERVICE, INDOOR_BIKE_DATA, (view) => this._onFrame(view));
   }

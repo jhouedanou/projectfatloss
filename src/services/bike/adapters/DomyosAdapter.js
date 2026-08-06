@@ -90,17 +90,29 @@ export default class DomyosAdapter {
     this._disconnectCb = cb;
   }
 
-  async start() {
+  /**
+   * @param {Object} [options]
+   * @param {Object} [options.handle] handle déjà connecté par la détection.
+   *   Fourni, il est réutilisé tel quel : ni sélecteur système, ni seconde
+   *   connexion — la console n'en accepte qu'une à la fois.
+   */
+  async start({ handle } = {}) {
     if (!BleBridge.isSupported()) {
       throw new Error('Bluetooth non disponible sur cette plateforme.');
     }
-    this._handle = await BleBridge.requestDevice({
-      services: [DOMYOS_SERVICE],
-      namePrefix: 'Domyos',
-      optionalServices: [DOMYOS_SERVICE],
-    });
+    if (handle) {
+      this._handle = handle;
+    } else {
+      // Filtre sur le nom seul : la console n'annonce pas son service ISSC
+      // dans sa trame d'annonce, un filtre `services` renverrait une liste vide.
+      this._handle = await BleBridge.requestDevice({
+        services: [],
+        namePrefix: 'Domyos',
+        optionalServices: [DOMYOS_SERVICE],
+      });
+      await BleBridge.connect(this._handle);
+    }
     this.label = `Domyos · ${this._handle.name}`;
-    await BleBridge.connect(this._handle);
     BleBridge.onDisconnect(this._handle, () => this._disconnectCb?.());
     await BleBridge.subscribe(this._handle, DOMYOS_SERVICE, DOMYOS_NOTIFY_CHAR, (view) => this._onFrame(view));
 
