@@ -144,7 +144,103 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Écran de démarrage : remplacé par React au montage. Sert aussi de
+           sentinelle au watchdog anti-page-blanche ci-dessous (#pfl-boot). -->
+      <div id="pfl-boot" aria-label="Chargement de l'application" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#22223b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;">
+        <div style="width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,.25);border-top-color:#F03D32;animation:pfl-spin 1s linear infinite;"></div>
+        <p style="margin:0;font-size:14px;opacity:.75;">Chargement…</p>
+      </div>
+    </div>
+    <style>@keyframes pfl-spin{to{transform:rotate(360deg)}}</style>
     <script type="module" src="./src/main.jsx"></script>
+    <script>
+      /*
+       * Watchdog anti-« page blanche ».
+       * Si React ne se monte jamais (bundle en cache corrompu, asset 404 après
+       * un redéploiement, erreur JS au chargement…), l'écran #pfl-boot reste
+       * affiché. On tente alors UNE récupération automatique : désinscription
+       * des service workers + purge du Cache Storage (JAMAIS le localStorage,
+       * pour préserver les données d'entraînement), puis un rechargement.
+       * Un drapeau en sessionStorage empêche toute boucle de rechargement.
+       */
+      (function () {
+        var BOOT_ID = 'pfl-boot';
+        var FLAG = 'pfl_recovery_reloaded';
+        var TIMEOUT_MS = 10000;
+
+        function appMounted() {
+          // React a remplacé le contenu de #root : l'écran de démarrage a disparu.
+          return !document.getElementById(BOOT_ID);
+        }
+
+        function purgeCachesAndSW() {
+          var jobs = [];
+          try {
+            if ('serviceWorker' in navigator) {
+              jobs.push(
+                navigator.serviceWorker.getRegistrations().then(function (regs) {
+                  return Promise.all(regs.map(function (r) { return r.unregister(); }));
+                }).catch(function () {})
+              );
+            }
+          } catch (e) {}
+          try {
+            if (window.caches && caches.keys) {
+              jobs.push(
+                caches.keys().then(function (keys) {
+                  return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+                }).catch(function () {})
+              );
+            }
+          } catch (e) {}
+          return Promise.all(jobs);
+        }
+
+        function showRecoveryUI() {
+          var root = document.getElementById('root');
+          if (!root) return;
+          root.innerHTML =
+            '<div style="position:fixed;inset:0;display:flex;flex-direction:column;' +
+            'align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;' +
+            'background:#22223b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;">' +
+            '<h2 style="margin:0;font-size:20px;">Impossible de charger l\'application</h2>' +
+            '<p style="margin:0;max-width:340px;font-size:14px;line-height:1.5;opacity:.8;">' +
+            'Une version en cache semble corrompue. Videz le cache puis rechargez.</p>' +
+            '<button id="pfl-recover-btn" style="padding:12px 22px;font-size:15px;border:none;' +
+            'border-radius:8px;background:#F03D32;color:#fff;cursor:pointer;">Vider le cache et recharger</button>' +
+            '</div>';
+          var btn = document.getElementById('pfl-recover-btn');
+          if (btn) {
+            btn.addEventListener('click', function () {
+              purgeCachesAndSW().then(function () { window.location.reload(); });
+            });
+          }
+        }
+
+        window.setTimeout(function () {
+          if (appMounted()) {
+            // Montage réussi : on efface tout drapeau de récupération résiduel.
+            try { sessionStorage.removeItem(FLAG); } catch (e) {}
+            return;
+          }
+
+          var alreadyTried = false;
+          try { alreadyTried = sessionStorage.getItem(FLAG) === '1'; } catch (e) {}
+
+          if (alreadyTried) {
+            // La récupération auto n'a pas suffi : on évite la boucle et on
+            // propose une action manuelle plutôt qu'un écran blanc.
+            showRecoveryUI();
+            return;
+          }
+
+          try { sessionStorage.setItem(FLAG, '1'); } catch (e) {}
+          console.warn('[watchdog] Application non montée après ' + TIMEOUT_MS +
+            'ms — purge du cache + rechargement.');
+          purgeCachesAndSW().then(function () { window.location.reload(); });
+        }, TIMEOUT_MS);
+      })();
+    </script>
   </body>
 </html>
