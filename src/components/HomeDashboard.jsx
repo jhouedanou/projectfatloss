@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pill, Flame, Scale as ScaleIcon, Flag, Activity, CalendarPlus } from 'lucide-react';
+import { Pill, Flame, Scale as ScaleIcon, Flag, Activity, CalendarPlus, Clock } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
+import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
+import { recommendNextSession, shortDayTitle } from '../services/RecoveryAdvisor';
 import {
   CREATINE_INTAKE_KEY,
   CREATINE_DOSE_G,
@@ -62,7 +64,7 @@ function Ring({ percent, label, sub }) {
 }
 
 export default function HomeDashboard({ onStartWorkout }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [creatineAt, setCreatineAt] = useState(() => {
     const v = localStorage.getItem(CREATINE_INTAKE_KEY);
     return v ? parseInt(v, 10) : null;
@@ -111,6 +113,25 @@ export default function HomeDashboard({ onStartWorkout }) {
     }
     return s;
   }, [history]);
+
+  // Prochain créneau conseillé (récupération) — recalculé à la minute.
+  const nowMinute = Math.floor(now / 60000);
+  const recovery = useMemo(() => {
+    const plan = getActiveWorkoutPlan();
+    const currentDayIndex = parseInt(localStorage.getItem('currentWorkoutDay') || '0', 10) || 0;
+    return recommendNextSession({ history, plan, currentDayIndex, now: new Date(nowMinute * 60000) });
+  }, [history, nowMinute]);
+
+  const locale = i18n.language && i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
+  const recoveryDayLabel = (d) => {
+    const today = new Date(now); today.setHours(0, 0, 0, 0);
+    const target = new Date(d); target.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((target - today) / 86400000);
+    if (diffDays <= 0) return t('home.recovery.today', { defaultValue: 'aujourd\'hui' });
+    if (diffDays === 1) return t('home.recovery.tomorrow', { defaultValue: 'demain' });
+    return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
+  };
+  const recoveryTimeLabel = (d) => d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
   const takenToday = isTakenToday(creatineAt, now);
   const elapsed = creatineAt ? now - creatineAt : null;
@@ -183,6 +204,56 @@ export default function HomeDashboard({ onStartWorkout }) {
           </div>
         </div>
       </div>
+
+      {recovery && (
+        <div className={`hd-recovery ${recovery.ready ? 'ready' : 'waiting'}`}>
+          <div className="hd-recovery-head">
+            <Clock size={22} />
+            <div className="hd-recovery-title">
+              {t('home.recovery.heading', { defaultValue: 'Récupération' })}
+            </div>
+          </div>
+
+          {recovery.firstSession ? (
+            <p className="hd-recovery-desc">
+              {t('home.recovery.first', { defaultValue: 'Aucune séance enregistrée — le meilleur créneau, c\'est maintenant.' })}
+            </p>
+          ) : (
+            <>
+              <div className="hd-recovery-label">
+                {t('home.recovery.nextLabel', { defaultValue: 'Prochaine séance conseillée' })}
+              </div>
+              <div className="hd-recovery-datetime">
+                {recovery.ready && new Date(now) >= recovery.recommended
+                  ? t('home.recovery.now', { defaultValue: 'Dès maintenant' })
+                  : `${recoveryDayLabel(recovery.recommended)} · ${recoveryTimeLabel(recovery.recommended)}`}
+              </div>
+              <p className="hd-recovery-hint">
+                {t('home.recovery.detail', {
+                  defaultValue: '~{{hours}} h de récupération après {{last}} · à suivre : {{next}}',
+                  hours: recovery.recoveryHours,
+                  last: shortDayTitle(recovery.lastTitle),
+                  next: shortDayTitle(recovery.nextDay.title),
+                })}
+              </p>
+              <div className="hd-recovery-bar">
+                <div
+                  className="hd-recovery-bar-fill"
+                  style={{ width: `${Math.round(recovery.progress * 100)}%` }}
+                />
+              </div>
+              <div className="hd-recovery-status">
+                {recovery.ready
+                  ? t('home.recovery.ready', { defaultValue: 'Récupéré ✓' })
+                  : t('home.recovery.progress', {
+                      defaultValue: 'Récupération : {{pct}} %',
+                      pct: Math.round(recovery.progress * 100),
+                    })}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       <div className={`hd-creatine ${takenToday ? 'ready' : 'waiting'}`}>
         <div className="hd-creatine-head">
