@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Paper, LinearProgress } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { CheckCircle2, Flame, ChevronRight, Award, Calendar, Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export default function WeekSelector({ days, current, onSelectDay }) {
   const { t } = useTranslation();
+  // Couleurs dépendantes du thème : le composant est stylé inline (sx), il ne
+  // peut pas s'appuyer sur les surcharges CSS globales du mode clair.
+  const theme = useTheme();
+  const dark = theme.palette.mode === 'dark';
+  const inkPrimary = dark ? '#fff' : '#1A1A1A';
+  const inkMuted = dark ? '#a1a1aa' : '#52525B';
+  const inkFaint = dark ? '#888' : '#6E6E76';
+  const surface = dark ? '#141414' : '#FFFFFF';
+  const line = dark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.08)';
+  const fill = (a) => (dark ? `rgba(255, 255, 255, ${a})` : `rgba(0, 0, 0, ${a})`);
   
   // Determine current week from current day index (0 to 27)
   const initialWeek = Math.floor(current / 7);
@@ -26,15 +37,15 @@ export default function WeekSelector({ days, current, onSelectDay }) {
         maxWidth: '600px',
         margin: '0 auto',
         padding: '20px 16px 120px',
-        color: '#fff',
+        color: inkPrimary,
         fontFamily: 'Inter, sans-serif',
       }}
     >
       {/* Global Progress Header */}
       <Paper
         sx={{
-          bgcolor: '#141414',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
+          bgcolor: surface,
+          border: `1px solid ${line}`,
           borderRadius: '24px',
           p: 3,
           mb: 4,
@@ -54,10 +65,10 @@ export default function WeekSelector({ days, current, onSelectDay }) {
             {globalProgress}%
           </Typography>
         </Box>
-        <Box sx={{ width: '100%', height: '6px', bgcolor: 'rgba(255, 255, 255, 0.05)', borderRadius: '10px', overflow: 'hidden', mb: 2 }}>
+        <Box sx={{ width: '100%', height: '6px', bgcolor: fill(0.06), borderRadius: '10px', overflow: 'hidden', mb: 2 }}>
           <Box sx={{ width: `${globalProgress}%`, height: '100%', bgcolor: '#F03D32', borderRadius: '10px' }} />
         </Box>
-        <Typography variant="caption" sx={{ color: '#888', fontWeight: 600 }}>
+        <Typography variant="caption" sx={{ color: inkFaint, fontWeight: 600 }}>
           JOUR {current + 1} SUR 28 • SEMAINE {initialWeek + 1} EN COURS
         </Typography>
       </Paper>
@@ -85,13 +96,13 @@ export default function WeekSelector({ days, current, onSelectDay }) {
               sx={{
                 padding: '10px 20px',
                 borderRadius: '100px',
-                bgcolor: isActive ? '#F03D32' : 'rgba(255, 255, 255, 0.03)',
+                bgcolor: isActive ? '#F03D32' : fill(0.03),
                 border: isActive 
                   ? '1px solid #F03D32' 
                   : isCurrentWeek 
                     ? '1px solid rgba(240, 61, 50, 0.3)' 
-                    : '1px solid rgba(255, 255, 255, 0.05)',
-                color: isActive ? '#fff' : '#a1a1aa',
+                    : `1px solid ${line}`,
+                color: isActive ? '#fff' : inkMuted,
                 cursor: 'pointer',
                 fontWeight: 700,
                 fontSize: '0.8rem',
@@ -101,8 +112,8 @@ export default function WeekSelector({ days, current, onSelectDay }) {
                 alignItems: 'center',
                 gap: 1,
                 '&:hover': {
-                  bgcolor: isActive ? '#F03D32' : 'rgba(255, 255, 255, 0.08)',
-                  color: '#fff'
+                  bgcolor: isActive ? '#F03D32' : fill(0.08),
+                  color: isActive || dark ? '#fff' : '#1A1A1A'
                 }
               }}
             >
@@ -134,13 +145,13 @@ export default function WeekSelector({ days, current, onSelectDay }) {
                 bgcolor: isActive 
                   ? 'rgba(240, 61, 50, 0.08)' 
                   : isCompleted 
-                    ? 'rgba(255, 255, 255, 0.01)' 
-                    : 'rgba(255, 255, 255, 0.02)',
+                    ? fill(0.01)
+                    : fill(0.02),
                 border: isActive 
                   ? '1.5px solid #F03D32' 
                   : isCompleted
                     ? '1px solid rgba(76, 175, 80, 0.2)'
-                    : '1px solid rgba(255, 255, 255, 0.05)',
+                    : `1px solid ${line}`,
                 borderRadius: '20px',
                 p: 2.5,
                 cursor: 'pointer',
@@ -153,8 +164,8 @@ export default function WeekSelector({ days, current, onSelectDay }) {
                 alignItems: 'center',
                 '&:hover': {
                   transform: 'translateY(-2px)',
-                  bgcolor: isActive ? 'rgba(240, 61, 50, 0.12)' : 'rgba(255, 255, 255, 0.04)',
-                  border: isActive ? '1.5px solid #F03D32' : '1px solid rgba(255, 255, 255, 0.15)',
+                  bgcolor: isActive ? 'rgba(240, 61, 50, 0.12)' : fill(0.04),
+                  border: isActive ? '1.5px solid #F03D32' : `1px solid ${fill(0.15)}`,
                 }
               }}
             >
@@ -172,18 +183,18 @@ export default function WeekSelector({ days, current, onSelectDay }) {
                       ? 'rgba(76, 175, 80, 0.1)' 
                       : isActive 
                         ? 'rgba(240, 61, 50, 0.2)' 
-                        : 'rgba(255, 255, 255, 0.05)',
+                        : fill(0.05),
                     border: isCompleted
                       ? '1px solid rgba(76, 175, 80, 0.3)'
                       : isActive
                         ? '1px solid #F03D32'
-                        : '1px solid rgba(255, 255, 255, 0.1)',
+                        : `1px solid ${fill(0.1)}`,
                   }}
                 >
                   {isCompleted ? (
                     <CheckCircle2 size={18} color="#4CAF50" strokeWidth={2.5} />
                   ) : isRestDay ? (
-                    <Award size={18} color={isActive ? '#F03D32' : '#888'} />
+                    <Award size={18} color={isActive ? '#F03D32' : inkFaint} />
                   ) : (
                     <Flame size={18} color={isActive ? '#F03D32' : '#a1a1aa'} />
                   )}
@@ -195,7 +206,7 @@ export default function WeekSelector({ days, current, onSelectDay }) {
                     variant="caption"
                     sx={{
                       fontWeight: 800,
-                      color: isActive ? '#F03D32' : '#888',
+                      color: isActive ? '#F03D32' : inkFaint,
                       letterSpacing: '1px',
                       textTransform: 'uppercase'
                     }}
@@ -206,7 +217,7 @@ export default function WeekSelector({ days, current, onSelectDay }) {
                     variant="subtitle1"
                     sx={{
                       fontWeight: 700,
-                      color: isRestDay ? '#4CAF50' : '#fff',
+                      color: isRestDay ? '#4CAF50' : inkPrimary,
                       fontSize: '1rem',
                       lineHeight: 1.3,
                       textTransform: 'uppercase',

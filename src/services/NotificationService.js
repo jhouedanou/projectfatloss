@@ -193,8 +193,11 @@ export async function showTestNotification() {
 export async function scheduleWorkoutNotifications() {
   try {
     console.log('Programmation des notifications quotidiennes');
-    
-    // Vérifier les permissions
+
+    // Vérifier le support puis les permissions
+    if (!('Notification' in window)) {
+      return false;
+    }
     if (Notification.permission !== 'granted') {
       console.log('Pas de permission pour programmer les notifications');
       return false;
@@ -361,7 +364,11 @@ export async function requestStandardNotificationPermission(settings) {
 class NotificationService {
   constructor() {
     this.isSupported = 'serviceWorker' in navigator && 'Notification' in window;
-    this.permission = Notification.permission;
+    // `Notification` n'est pas juste "non supporté" dans certaines WebView
+    // (Capacitor Android) : l'identifiant global n'existe pas du tout, donc
+    // y référer directement lève un ReferenceError qui plante l'app entière
+    // au chargement du module (ce singleton s'instancie en haut de fichier).
+    this.permission = this.isSupported ? Notification.permission : 'default';
     this.serviceWorker = null;
     this.currentExerciseNotificationShown = false;
     this.platform = getPlatformInfo();
@@ -690,8 +697,11 @@ export async function initNotificationService() {
 export async function testAndroid15GitHubPagesNotification() {
   try {
     console.log('Test notification Android 15 GitHub Pages');
-    
-    // Vérifier les permissions
+
+    // Vérifier le support puis les permissions
+    if (!('Notification' in window)) {
+      return false;
+    }
     if (Notification.permission !== 'granted') {
       console.log('Permission nécessaire pour le test');
       const granted = await requestNotificationPermission();

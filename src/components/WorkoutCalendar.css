@@ -126,6 +126,17 @@
   box-shadow: none;
 }
 
+/* Jour avec cardio seul (pas de muscu) : pastille bleue */
+.workout-marker.cardio-only {
+  background-color: #3B82F6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+}
+
+/* Carte cardio dans la liste du jour : liseré bleu pour la distinguer */
+.day-cardio-card {
+  border-left: 3px solid #3B82F6;
+}
+
 .calories-badge {
   font-size: 0.65rem;
   font-weight: 800;

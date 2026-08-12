@@ -6,7 +6,6 @@
  * Adapté : 100% debout/banc (aucun appui au sol), ZÉRO saut (low-impact), hinge surélevé.
  * Matériel : haltères 5/10/15 kg, barre 30 kg, veste lestée 10 kg, poids chevilles 2×4 + 2×2 kg.
  * Le vélo de fin de séance (10 min, prog. CAL 1) est optionnel : l'heure de musculation tient sans lui.
- * Supplémentation : créatine monohydrate 5 g/jour (voir src/utils/creatineReminder.js).
  * Généré par scripts/gen-plan.mjs — ne pas éditer à la main.
  */
 const fullPlan = [

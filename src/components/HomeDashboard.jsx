@@ -1,17 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pill, Flame, Scale as ScaleIcon, Flag, Activity, CalendarPlus, Clock } from 'lucide-react';
+import { Flame, Scale as ScaleIcon, Flag, Activity } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
-import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
-import { recommendNextSession, shortDayTitle } from '../services/RecoveryAdvisor';
-import {
-  CREATINE_INTAKE_KEY,
-  CREATINE_DOSE_G,
-  DAILY_DOSE_MS,
-  isTakenToday,
-  downloadCreatineReminder,
-} from '../utils/creatineReminder';
 import './HomeDashboard.css';
 
 function startOfWeek(d = new Date()) {
@@ -21,15 +12,6 @@ function startOfWeek(d = new Date()) {
   out.setDate(out.getDate() - day);
   return out;
 }
-
-// Compte à rebours lisible (Hh MM) jusqu'à la prochaine dose de créatine.
-function fmtHM(ms) {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  return `${h}h ${m.toString().padStart(2, '0')}`;
-}
-
 
 function Ring({ percent, label, sub }) {
   const size = 156;
@@ -64,18 +46,7 @@ function Ring({ percent, label, sub }) {
 }
 
 export default function HomeDashboard({ onStartWorkout }) {
-  const { t, i18n } = useTranslation();
-  const [creatineAt, setCreatineAt] = useState(() => {
-    const v = localStorage.getItem(CREATINE_INTAKE_KEY);
-    return v ? parseInt(v, 10) : null;
-  });
-  const [now, setNow] = useState(Date.now());
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
+  const { t } = useTranslation();
   const history = useMemo(() => getWorkoutHistory(), []);
   const weights = useMemo(() => getWeightHistory(), []);
 
@@ -113,49 +84,6 @@ export default function HomeDashboard({ onStartWorkout }) {
     }
     return s;
   }, [history]);
-
-  // Prochain créneau conseillé (récupération) — recalculé à la minute.
-  const nowMinute = Math.floor(now / 60000);
-  const recovery = useMemo(() => {
-    const plan = getActiveWorkoutPlan();
-    const currentDayIndex = parseInt(localStorage.getItem('currentWorkoutDay') || '0', 10) || 0;
-    return recommendNextSession({ history, plan, currentDayIndex, now: new Date(nowMinute * 60000) });
-  }, [history, nowMinute]);
-
-  const locale = i18n.language && i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
-  const recoveryDayLabel = (d) => {
-    const today = new Date(now); today.setHours(0, 0, 0, 0);
-    const target = new Date(d); target.setHours(0, 0, 0, 0);
-    const diffDays = Math.round((target - today) / 86400000);
-    if (diffDays <= 0) return t('home.recovery.today', { defaultValue: 'aujourd\'hui' });
-    if (diffDays === 1) return t('home.recovery.tomorrow', { defaultValue: 'demain' });
-    return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
-  };
-  const recoveryTimeLabel = (d) => d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
-
-  const takenToday = isTakenToday(creatineAt, now);
-  const elapsed = creatineAt ? now - creatineAt : null;
-  const nextDoseIn = takenToday ? Math.max(0, DAILY_DOSE_MS - elapsed) : 0;
-
-  const handleTakeDose = () => {
-    const ts = Date.now();
-    localStorage.setItem(CREATINE_INTAKE_KEY, ts.toString());
-    setCreatineAt(ts);
-  };
-
-  const handleResetDose = () => {
-    localStorage.removeItem(CREATINE_INTAKE_KEY);
-    setCreatineAt(null);
-  };
-
-  const handleAddReminder = () => {
-    downloadCreatineReminder(creatineAt || Date.now());
-  };
-
-  const creatineStatus = takenToday
-    ? t('home.creatine.done', { defaultValue: 'Dose du jour prise ✓' })
-    : t('home.creatine.todo', { defaultValue: 'Dose du jour à prendre' });
-  const creatineTimer = takenToday ? fmtHM(nextDoseIn) : '';
 
   return (
     <div className="hd-root">
@@ -203,115 +131,6 @@ export default function HomeDashboard({ onStartWorkout }) {
             </div>
           </div>
         </div>
-      </div>
-
-      {recovery && (
-        <div className={`hd-recovery ${recovery.ready ? 'ready' : 'waiting'}`}>
-          <div className="hd-recovery-head">
-            <Clock size={22} />
-            <div className="hd-recovery-title">
-              {t('home.recovery.heading', { defaultValue: 'Récupération' })}
-            </div>
-          </div>
-
-          {recovery.firstSession ? (
-            <p className="hd-recovery-desc">
-              {t('home.recovery.first', { defaultValue: 'Aucune séance enregistrée — le meilleur créneau, c\'est maintenant.' })}
-            </p>
-          ) : (
-            <>
-              <div className="hd-recovery-label">
-                {t('home.recovery.nextLabel', { defaultValue: 'Prochaine séance conseillée' })}
-              </div>
-              <div className="hd-recovery-datetime">
-                {recovery.ready && new Date(now) >= recovery.recommended
-                  ? t('home.recovery.now', { defaultValue: 'Dès maintenant' })
-                  : `${recoveryDayLabel(recovery.recommended)} · ${recoveryTimeLabel(recovery.recommended)}`}
-              </div>
-              <p className="hd-recovery-hint">
-                {t('home.recovery.detail', {
-                  defaultValue: '~{{hours}} h de récupération après {{last}} · à suivre : {{next}}',
-                  hours: recovery.recoveryHours,
-                  last: shortDayTitle(recovery.lastTitle),
-                  next: shortDayTitle(recovery.nextDay.title),
-                })}
-              </p>
-              <div className="hd-recovery-bar">
-                <div
-                  className="hd-recovery-bar-fill"
-                  style={{ width: `${Math.round(recovery.progress * 100)}%` }}
-                />
-              </div>
-              <div className="hd-recovery-status">
-                {recovery.ready
-                  ? t('home.recovery.ready', { defaultValue: 'Récupéré ✓' })
-                  : t('home.recovery.progress', {
-                      defaultValue: 'Récupération : {{pct}} %',
-                      pct: Math.round(recovery.progress * 100),
-                    })}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      <div className={`hd-creatine ${takenToday ? 'ready' : 'waiting'}`}>
-        <div className="hd-creatine-head">
-          <Pill size={22} />
-          <div className="hd-creatine-title">
-            {t('home.creatine.heading', { defaultValue: 'Créatine monohydrate' })}
-          </div>
-        </div>
-
-        {!takenToday && (
-          <>
-            <p className="hd-creatine-desc">
-              {t('home.creatine.help', { defaultValue: `${CREATINE_DOSE_G} g par jour avec un grand verre d'eau. Aucune fenêtre à respecter : seule la régularité compte.` })}
-            </p>
-            <p className="hd-creatine-hint">
-              {t('home.creatine.protocol', { defaultValue: 'Tous les jours, entraînement ou non. Idéalement à la même heure, après la séance.' })}
-            </p>
-            <button className="hd-creatine-btn" onClick={handleTakeDose}>
-              {t('home.creatine.take', { defaultValue: `J'ai pris mes ${CREATINE_DOSE_G} g` })}
-            </button>
-            <button className="hd-creatine-btn-secondary hd-creatine-reminder" onClick={handleAddReminder}>
-              <CalendarPlus size={16} style={{ marginRight: 6 }} />
-              {t('home.creatine.reminder', { defaultValue: 'Ajouter le rappel quotidien à l\'agenda' })}
-            </button>
-          </>
-        )}
-
-        {takenToday && (
-          <>
-            <div className="hd-creatine-status">{creatineStatus}</div>
-            <div className="hd-creatine-timer">{creatineTimer}</div>
-            <div className="hd-creatine-next">
-              {t('home.creatine.next', { defaultValue: 'Prochaine dose vers' })}{' '}
-              {new Date(creatineAt + DAILY_DOSE_MS).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-            </div>
-            <button className="hd-creatine-btn-secondary hd-creatine-reminder" onClick={handleAddReminder}>
-              <CalendarPlus size={16} style={{ marginRight: 6 }} />
-              {t('home.creatine.reminder', { defaultValue: 'Ajouter le rappel quotidien à l\'agenda' })}
-            </button>
-            <div className="hd-creatine-bar">
-              <div
-                className="hd-creatine-bar-fill"
-                style={{ width: `${Math.min(100, ((elapsed || 0) / DAILY_DOSE_MS) * 100)}%` }}
-              />
-            </div>
-            <div className="hd-creatine-actions">
-              <button className="hd-creatine-btn-secondary" onClick={handleResetDose}>
-                {t('home.creatine.reset', { defaultValue: 'Réinitialiser' })}
-              </button>
-              {onStartWorkout && (
-                <button className="hd-creatine-btn" onClick={onStartWorkout}>
-                  <Activity size={16} style={{ marginRight: 6 }} />
-                  {t('home.creatine.go', { defaultValue: 'Démarrer la séance' })}
-                </button>
-              )}
-            </div>
-          </>
-        )}
       </div>
 
       {onStartWorkout && (

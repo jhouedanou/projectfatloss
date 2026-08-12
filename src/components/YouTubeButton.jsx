@@ -41,9 +41,10 @@ function YouTubeButton({ exercise, exerciseName }) {
         variant="outlined"
         color="error"
         size="medium"
-        sx={{ 
-          borderColor: 'rgba(240, 61, 50, 0.3)', 
-          color: '#fff', 
+        sx={{
+          borderColor: 'rgba(240, 61, 50, 0.3)',
+          // Texte lisible dans les deux thèmes (blanc sur sombre, encre sur clair)
+          color: (theme) => (theme.palette.mode === 'dark' ? '#fff' : '#1A1A1A'),
           borderRadius: '12px',
           background: 'rgba(240, 61, 50, 0.05)',
           textTransform: 'uppercase',
