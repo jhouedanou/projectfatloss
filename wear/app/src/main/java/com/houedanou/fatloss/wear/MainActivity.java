@@ -107,6 +107,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     private int exIdx = 0;
     private int setNo = 1;
     private int reps = 0;
+    /** Exercices unilatéraux (« /côté ») : 0 = premier côté, 1 = second. */
+    private int side = 0;
     private boolean auto = true;
     private int restLen = 90;               // secondes, 30..180
     private final Set<Integer> doneToday = new HashSet<>();
@@ -302,6 +304,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 if (ex == null) continue;
                 String equip = ex.optString("equip", "");
                 String meta = ex.optInt("sets", 0) + " × " + ex.optInt("reps", 0)
+                        + (isSided(ex) ? " /côté" : "")
                         + (equip.isEmpty() ? "" : " · " + equip);
                 final int idx = j;
                 col.addView(listItem(ex.optString("name", ""), meta, false, doneToday.contains(j),
@@ -319,6 +322,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         exIdx = j;
         setNo = 1;
         reps = 0;
+        side = 0;
         keepScreenOn(true);
         showCounter();
         if (auto) {
@@ -408,10 +412,29 @@ public class MainActivity extends Activity implements SensorEventListener {
     private void updateCounterViews() {
         JSONObject ex = currentExercise();
         int target = ex.optInt("reps", 0);
-        setInfoView.setText(String.format(Locale.FRANCE, "Série %d/%d · %d reps",
-                setNo, ex.optInt("sets", 0), target));
+        if (isSided(ex)) {
+            // Le côté en cours doit être visible d'un coup d'œil : ligne un peu
+            // plus petite pour que tout tienne sur une seule ligne.
+            setInfoView.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(17));
+            setInfoView.setText(String.format(Locale.FRANCE, "Série %d/%d · côté %d/2 · %d reps",
+                    setNo, ex.optInt("sets", 0), side + 1, target));
+        } else {
+            setInfoView.setTextSize(TypedValue.COMPLEX_UNIT_PX, px(20));
+            setInfoView.setText(String.format(Locale.FRANCE, "Série %d/%d · %d reps",
+                    setNo, ex.optInt("sets", 0), target));
+        }
         repCountView.setText(String.valueOf(reps));
         repCountView.setTextColor(reps >= target ? COL_SUCCESS : COL_WHITE);
+    }
+
+    /** Exercice unilatéral : `reps` s'entend par côté, une série = les 2 côtés. */
+    private static boolean isSided(JSONObject ex) {
+        return ex.optBoolean("side", false);
+    }
+
+    /** Objectif atteint sur le premier côté d'un exercice unilatéral. */
+    private boolean isSideSwitchPending() {
+        return isSided(currentExercise()) && side == 0;
     }
 
     private void adjustRep(int d) {
@@ -454,6 +477,19 @@ public class MainActivity extends Activity implements SensorEventListener {
     private void finishSet() {
         cancelAutoFinish();
         stopDetection();
+        // Unilatéral : le premier côté ne termine pas la série, il enchaîne sur
+        // le second sans repos (comme le passage automatique de la PWA).
+        if (isSideSwitchPending()) {
+            side = 1;
+            reps = 0;
+            vibrateSideSwitch();
+            updateCounterViews();
+            if (auto) {
+                startDetection();
+            }
+            return;
+        }
+        side = 0;
         JSONObject ex = currentExercise();
         if (setNo >= ex.optInt("sets", 1)) {
             doneToday.add(exIdx);
@@ -786,8 +822,10 @@ public class MainActivity extends Activity implements SensorEventListener {
                 || reps < currentExercise().optInt("reps", Integer.MAX_VALUE)) {
             return;
         }
-        vibratePattern(); // double vibration : passage automatique
-        finishSet();
+        if (!isSideSwitchPending()) {
+            vibratePattern(); // double vibration : fin de série automatique
+        }
+        finishSet(); // le changement de côté a sa propre vibration
     }
 
     /** Niveau du signal capteur (barre de debug/réglage en bas du compteur). */
@@ -855,6 +893,14 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (vibrator != null && vibrator.hasVibrator()) {
             vibrator.vibrate(VibrationEffect.createWaveform(
                     new long[]{0, 120, 100, 120}, -1));
+        }
+    }
+
+    /** Triple impulsion courte — « changez de côté ». */
+    private void vibrateSideSwitch() {
+        if (vibrator != null && vibrator.hasVibrator()) {
+            vibrator.vibrate(VibrationEffect.createWaveform(
+                    new long[]{0, 70, 80, 70, 80, 70}, -1));
         }
     }
 
