@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { getUserProfile, getUserWeight, setUserProfile } from '../services/CalorieEstimator';
 import { addWeightRecord } from '../services/WeightStorage';
 import { getCalorieTarget, getProteinTargetGrams } from '../services/NutritionGoals';
+import LegalLinks from './LegalLinks';
 
 /**
  * Édition du profil (poids, taille, âge, sexe) — alimente le calcul des
@@ -110,6 +111,7 @@ const ProfileDialog = ({ open, onClose }) => {
               protein: getProteinTargetGrams(),
             })}
           </Typography>
+          <LegalLinks sx={{ mt: 1, pt: 1.5, borderTop: 1, borderColor: 'divider' }} />
         </Box>
       </DialogContent>
       <DialogActions>

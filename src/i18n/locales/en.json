@@ -152,6 +152,10 @@
     "description": "Take this day to recover. Stay hydrated and let your muscles rest.",
     "nextDay": "Skip to next day"
   },
+  "legal": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
   "profile": {
     "title": "My profile",
     "weight": "Weight (kg)",
