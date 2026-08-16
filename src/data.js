@@ -1,7 +1,8 @@
 /**
- * PROGRAMME PERTE DE POIDS — semaine type de 7 jours : 4 séances (~1 h) + 3 jours de repos.
+ * PROGRAMME PERTE DE POIDS — semaine type de 7 jours : 4 séances + 3 jours de repos.
  * Lundi FULL BODY A (poussée) / Mercredi FULL BODY B (tirage) / Vendredi FULL BODY C (jambes,
- * gainage) / Samedi VÉLO (cardio Domyos) — Mardi, Jeudi et Dimanche : récupération.
+ * gainage) / Samedi VÉLO (sortie courte 20 min) — Mardi, Jeudi et Dimanche : récupération.
+ * Le cardio est réparti sur la semaine en blocs courts (max 20 min d'affilée).
  * Adapté : profil ~147 kg, 100% debout/banc (aucun appui au sol), ZÉRO saut (low-impact).
  * Matériel : haltères 2×15 et 2×10 kg, barre 30 kg, veste lestée 10 kg, poids chevilles
  * 2×4 + 2×2 kg, vélo Domyos EB900. Progression : augmenter la charge dans l'app, pas le volume.
@@ -128,14 +129,14 @@ const fullPlan = [
       },
       {
         name: 'Vélo (cardio fin de séance)',
-        sets: '10 min (prog. CAL 1)',
+        sets: '15 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance, sans impact ni appui au sol. Optionnel : désactivable dans les réglages.',
-        caloriesPerSet: [165, 185],
+        desc: '15 min sur le programme CAL 1 du Domyos EB900 (résistance moyenne-haute), en fin de séance. Cardio court sans impact ni appui au sol. Optionnel : désactivable dans les réglages.',
+        caloriesPerSet: [248, 278],
         totalSets: 1,
         nbRep: 0,
         timer: true,
-        duration: 600,
+        duration: 900,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Stationary Cycling',
@@ -270,14 +271,14 @@ const fullPlan = [
       },
       {
         name: 'Vélo (cardio fin de séance)',
-        sets: '10 min (prog. CAL 1)',
+        sets: '15 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance, sans impact ni appui au sol. Optionnel : désactivable dans les réglages.',
-        caloriesPerSet: [165, 185],
+        desc: '15 min sur le programme CAL 1 du Domyos EB900 (résistance moyenne-haute), en fin de séance. Cardio court sans impact ni appui au sol. Optionnel : désactivable dans les réglages.',
+        caloriesPerSet: [248, 278],
         totalSets: 1,
         nbRep: 0,
         timer: true,
-        duration: 600,
+        duration: 900,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Stationary Cycling',
@@ -400,14 +401,14 @@ const fullPlan = [
       },
       {
         name: 'Vélo (cardio fin de séance)',
-        sets: '10 min (prog. CAL 1)',
+        sets: '15 min (prog. CAL 1)',
         equip: 'Vélo',
-        desc: '10 min sur le programme CAL 1 du Domyos EB900 (résistance élevée), en fin de séance. Cardio court et intense à haute résistance, sans impact ni appui au sol. Optionnel : désactivable dans les réglages.',
-        caloriesPerSet: [165, 185],
+        desc: '15 min sur le programme CAL 1 du Domyos EB900 (résistance moyenne-haute), en fin de séance. Cardio court sans impact ni appui au sol. Optionnel : désactivable dans les réglages.',
+        caloriesPerSet: [248, 278],
         totalSets: 1,
         nbRep: 0,
         timer: true,
-        duration: 600,
+        duration: 900,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Stationary Cycling',
@@ -417,51 +418,19 @@ const fullPlan = [
     ],
   },
   {
-    title: 'JOUR 6: VÉLO (Cardio Domyos) — Samedi',
+    title: 'JOUR 6: VÉLO (Sortie courte) — Samedi',
     isRestDay: false,
     exercises: [
       {
-        name: 'Vélo — échauffement',
-        sets: '8 min (résistance légère)',
+        name: 'Vélo — sortie légère',
+        sets: '20 min (résistance légère-moyenne)',
         equip: 'Vélo Domyos',
-        desc: '8 min de pédalage à résistance légère pour monter progressivement en température avant la musculation. Cadence souple, respiration confortable.',
-        caloriesPerSet: [55, 70],
+        desc: '20 min à résistance légère à moyenne, cadence confortable : vous devez pouvoir tenir une conversation. Le cardio de la semaine est réparti en petits blocs — celui-ci est le plus long.',
+        caloriesPerSet: [150, 180],
         totalSets: 1,
         nbRep: 0,
         timer: true,
-        duration: 480,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Stationary Cycling',
-          muscleGroups: ['quadriceps', 'glutes', 'cardio']
-        }
-      },
-      {
-        name: 'Vélo — corps de séance',
-        sets: '30 min (résistance moyenne-haute)',
-        equip: 'Vélo Domyos',
-        desc: '30 min en continu, résistance moyenne à moyenne-haute (prog. CAL 1 du Domyos EB900). Vous devez pouvoir parler en phrases courtes — pas plus. Cardio principal de la semaine, zéro impact.',
-        caloriesPerSet: [280, 330],
-        totalSets: 1,
-        nbRep: 0,
-        timer: true,
-        duration: 1800,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Stationary Cycling',
-          muscleGroups: ['quadriceps', 'glutes', 'cardio']
-        }
-      },
-      {
-        name: 'Vélo — retour au calme',
-        sets: '5 min (résistance légère)',
-        equip: 'Vélo Domyos',
-        desc: '5 min de pédalage très léger pour faire redescendre le rythme cardiaque en douceur.',
-        caloriesPerSet: [30, 40],
-        totalSets: 1,
-        nbRep: 0,
-        timer: true,
-        duration: 300,
+        duration: 1200,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Stationary Cycling',
