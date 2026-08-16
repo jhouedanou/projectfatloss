@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flame, Scale as ScaleIcon, Flag, Activity } from 'lucide-react';
+import { Flame, Scale as ScaleIcon, Flag, Activity, Clock } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
-import { getWorkoutPlan } from '../services/WorkoutCustomization';
+import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
+import { recommendNextSession, shortDayTitle } from '../services/RecoveryAdvisor';
 import './HomeDashboard.css';
 
 function startOfWeek(d = new Date()) {
@@ -47,16 +48,29 @@ function Ring({ percent, label, sub }) {
 }
 
 export default function HomeDashboard({ onStartWorkout }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const history = useMemo(() => getWorkoutHistory(), []);
   const weights = useMemo(() => getWeightHistory(), []);
+  // Plan et jour courant ne bougent pas pendant l'affichage du tableau de
+  // bord : lus une fois, pas à chaque tick du minuteur.
+  const plan = useMemo(() => getActiveWorkoutPlan(), []);
+  const currentDayIndex = useMemo(
+    () => parseInt(localStorage.getItem('currentWorkoutDay') || '0', 10) || 0,
+    []
+  );
+
+  // Horloge à la minute : la carte Récupération suit le temps qui passe
+  // (progression, bascule « dès maintenant ») sans recalcul à la seconde.
+  const [nowMinute, setNowMinute] = useState(() => Math.floor(Date.now() / 60000));
+  useEffect(() => {
+    const id = setInterval(() => setNowMinute(Math.floor(Date.now() / 60000)), 15000);
+    return () => clearInterval(id);
+  }, []);
 
   const weekStart = startOfWeek();
   const weekWorkouts = history.filter(w => new Date(w.date) >= weekStart);
-  const target = useMemo(
-    () => Math.max(1, getWorkoutPlan().filter((d) => !d.isRestDay).length),
-    []
-  ); // séances prévues par semaine (jours de repos exclus)
+  // Séances prévues par semaine (jours de repos exclus) : 4 avec le plan actuel.
+  const target = useMemo(() => Math.max(1, plan.filter((d) => !d.isRestDay).length), [plan]);
   const done = weekWorkouts.length;
   const percent = Math.min(100, (done / target) * 100);
 
@@ -88,6 +102,23 @@ export default function HomeDashboard({ onStartWorkout }) {
     }
     return s;
   }, [history]);
+
+  // Prochain créneau conseillé (récupération) — recalculé à la minute.
+  const recovery = useMemo(
+    () => recommendNextSession({ history, plan, currentDayIndex, now: new Date(nowMinute * 60000) }),
+    [history, plan, currentDayIndex, nowMinute]
+  );
+
+  const locale = i18n.language && i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
+  const recoveryDayLabel = (d) => {
+    const today = new Date(nowMinute * 60000); today.setHours(0, 0, 0, 0);
+    const targetDay = new Date(d); targetDay.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((targetDay - today) / 86400000);
+    if (diffDays <= 0) return t('home.recovery.today', { defaultValue: 'aujourd\'hui' });
+    if (diffDays === 1) return t('home.recovery.tomorrow', { defaultValue: 'demain' });
+    return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
+  };
+  const recoveryTimeLabel = (d) => d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="hd-root">
@@ -136,6 +167,56 @@ export default function HomeDashboard({ onStartWorkout }) {
           </div>
         </div>
       </div>
+
+      {recovery && (
+        <div className={`hd-recovery ${recovery.ready ? 'ready' : 'waiting'}`}>
+          <div className="hd-recovery-head">
+            <Clock size={22} />
+            <div className="hd-recovery-title">
+              {t('home.recovery.heading', { defaultValue: 'Récupération' })}
+            </div>
+          </div>
+
+          {recovery.firstSession ? (
+            <p className="hd-recovery-desc">
+              {t('home.recovery.first', { defaultValue: 'Aucune séance enregistrée — le meilleur créneau, c\'est maintenant.' })}
+            </p>
+          ) : (
+            <>
+              <div className="hd-recovery-label">
+                {t('home.recovery.nextLabel', { defaultValue: 'Prochaine séance conseillée' })}
+              </div>
+              <div className="hd-recovery-datetime">
+                {recovery.ready && new Date(nowMinute * 60000) >= recovery.recommended
+                  ? t('home.recovery.now', { defaultValue: 'Dès maintenant' })
+                  : `${recoveryDayLabel(recovery.recommended)} · ${recoveryTimeLabel(recovery.recommended)}`}
+              </div>
+              <p className="hd-recovery-hint">
+                {t('home.recovery.detail', {
+                  defaultValue: '~{{hours}} h de récupération après {{last}} · à suivre : {{next}}',
+                  hours: recovery.recoveryHours,
+                  last: shortDayTitle(recovery.lastTitle),
+                  next: shortDayTitle(recovery.nextDay.title),
+                })}
+              </p>
+              <div className="hd-recovery-bar">
+                <div
+                  className="hd-recovery-bar-fill"
+                  style={{ width: `${Math.round(recovery.progress * 100)}%` }}
+                />
+              </div>
+              <div className="hd-recovery-status">
+                {recovery.ready
+                  ? t('home.recovery.ready', { defaultValue: 'Récupéré ✓' })
+                  : t('home.recovery.progress', {
+                      defaultValue: 'Récupération : {{pct}} %',
+                      pct: Math.round(recovery.progress * 100),
+                    })}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {onStartWorkout && (
         <button className="hd-primary-action" onClick={onStartWorkout}>
