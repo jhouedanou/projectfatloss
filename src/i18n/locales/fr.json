@@ -156,6 +156,10 @@
     "description": "Profitez de cette journée pour récupérer. Hydratez-vous bien et reposez vos muscles.",
     "nextDay": "Passer au jour suivant"
   },
+  "legal": {
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation"
+  },
   "profile": {
     "title": "Mon profil",
     "weight": "Poids (kg)",
