@@ -25,7 +25,11 @@
 
 const BASE_RECOVERY_H = 22;
 const OVERLAP_EXTRA_MAX_H = 26;
+// Courbe convexe du recouvrement : 30 % → +0,7 h, 60 % → +5,6 h, 100 % → +26 h.
+const OVERLAP_CURVE_EXPONENT = 3;
 const INTENSITY_EXTRA_MAX_H = 6;
+// Heures ajoutées par unité de dépassement du ratio durée/médiane (plafonné).
+const INTENSITY_SLOPE_H = 12;
 const DEFAULT_START_HOUR = 18;
 const HISTORY_WINDOW = 14;
 const SLOT_TOLERANCE_H = 3;
@@ -156,10 +160,11 @@ export function recommendNextSession({ history = [], plan = [], currentDayIndex 
     .filter((d) => typeof d === 'number' && d > 0);
   const medDuration = median(durations);
   const ratio = medDuration && last.duration > 0 ? last.duration / medDuration : 1;
-  const intensityExtra = clamp((ratio - 1) * 12, 0, INTENSITY_EXTRA_MAX_H);
+  const intensityExtra = clamp((ratio - 1) * INTENSITY_SLOPE_H, 0, INTENSITY_EXTRA_MAX_H);
 
-  // Courbe cubique : 30 % → +0,7 h, 60 % → +5,6 h, 100 % → +26 h.
-  const recoveryHours = BASE_RECOVERY_H + OVERLAP_EXTRA_MAX_H * overlap ** 3 + intensityExtra;
+  const recoveryHours = BASE_RECOVERY_H
+      + OVERLAP_EXTRA_MAX_H * overlap ** OVERLAP_CURVE_EXPONENT
+      + intensityExtra;
   const earliest = new Date(lastEnd.getTime() + recoveryHours * HOUR_MS);
 
   const usualHour = usualStartHour(entries);
