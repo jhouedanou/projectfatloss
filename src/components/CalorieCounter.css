@@ -888,3 +888,40 @@
     padding: 16px;
   }
 }
+
+/* ─── Bilan énergétique (DeficitSummary) ─── */
+.deficit-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.deficit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.deficit-row-label {
+  color: #a1a1aa;
+  font-weight: 600;
+}
+
+.deficit-row-value {
+  color: #fff;
+  font-weight: 700;
+}
+
+.deficit-row-total {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+  font-size: 0.95rem;
+}
+
+.deficit-note {
+  margin: 12px 0 0;
+  font-size: 0.72rem;
+  color: #71717a;
+  line-height: 1.4;
+}

@@ -29,6 +29,7 @@ import CalorieCounter from '../components/CalorieCounter';
 import LanguageSelector from '../components/LanguageSelector';
 import WorkoutCustomizer from '../components/WorkoutCustomizer'; 
 import NotificationSettingsDialog from '../components/NotificationSettingsDialog';
+import ProfileDialog from '../components/ProfileDialog';
 import YouTubeButton from '../components/YouTubeButton';
 import { initNotificationService } from '../services/NotificationService';
 // Import de la synthèse vocale supprimé
@@ -141,6 +142,7 @@ export default function App() {
   
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [showExercises, setShowExercises] = useState(false);
   const [appTheme, setAppTheme] = useState(() => createAppTheme(true));
   const [user, setUser] = useState(null);
@@ -369,6 +371,7 @@ export default function App() {
         {!stepMode && (
           <Header
             onNotificationSettings={() => setShowNotificationSettings(true)}
+            onProfile={() => setShowProfile(true)}
             onBack={showExercises ? () => setShowExercises(false) : null}
             user={user}
             onAccountClick={() => (user ? handleLogout() : setShowLogin(true))}
@@ -729,9 +732,15 @@ export default function App() {
         )}
         
         {/* Boîte de dialogue des paramètres de notification */}
-        <NotificationSettingsDialog 
+        <NotificationSettingsDialog
           open={showNotificationSettings}
           onClose={() => setShowNotificationSettings(false)}
+        />
+
+        {/* Boîte de dialogue du profil (poids, taille, âge, sexe) */}
+        <ProfileDialog
+          open={showProfile}
+          onClose={() => setShowProfile(false)}
         />
       </div>
     </ThemeProvider>

@@ -148,8 +148,32 @@
   },
   "restDay": {
     "title": "Rest Day",
+    "subtitle": "Recovery day",
     "description": "Take this day to recover. Stay hydrated and let your muscles rest.",
     "nextDay": "Skip to next day"
+  },
+  "profile": {
+    "title": "My profile",
+    "weight": "Weight (kg)",
+    "height": "Height (cm)",
+    "age": "Age",
+    "sex": "Sex",
+    "male": "Male",
+    "female": "Female",
+    "save": "Save",
+    "cancel": "Cancel",
+    "goalPreview": "Current goal: {{kcal}} kcal/day • {{protein}} g protein"
+  },
+  "nutrition": {
+    "deficit": {
+      "title": "Energy balance",
+      "goal": "Goal",
+      "consumed": "Consumed",
+      "burned": "Burned (exercise)",
+      "deficit": "Estimated deficit",
+      "protein": "Protein",
+      "autoGoal": "Goal auto-computed from your profile and weigh-ins."
+    }
   },
   "dayPills": {
     "week": "W"
