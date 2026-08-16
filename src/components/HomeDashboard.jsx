@@ -69,8 +69,13 @@ export default function HomeDashboard({ onStartWorkout }) {
 
   const weekStart = startOfWeek();
   const weekWorkouts = history.filter(w => new Date(w.date) >= weekStart);
-  // Séances prévues par semaine (jours de repos exclus) : 4 avec le plan actuel.
-  const target = useMemo(() => Math.max(1, plan.filter((d) => !d.isRestDay).length), [plan]);
+  // Séances prévues cette semaine (jours de repos exclus) : le plan couvre
+  // plusieurs semaines, on ne compte donc que la tranche de 7 jours en cours.
+  const target = useMemo(() => {
+    const weekStartIndex = Math.floor(currentDayIndex / 7) * 7;
+    const weekDays = plan.slice(weekStartIndex, weekStartIndex + 7);
+    return Math.max(1, weekDays.filter((d) => !d.isRestDay).length);
+  }, [plan, currentDayIndex]);
   const done = weekWorkouts.length;
   const percent = Math.min(100, (done / target) * 100);
 

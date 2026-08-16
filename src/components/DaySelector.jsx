@@ -42,7 +42,7 @@ export default function DaySelector({ days, current, setCurrent, onClose }) {
       >
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '-0.5px', color: '#fff' }}>
-            PROGRAMME 7 JOURS
+            PROGRAMME {days.length} JOURS
           </Typography>
           <Typography variant="caption" sx={{ color: '#888', fontWeight: 600 }}>
             CHOISISSEZ VOTRE ENTRAÎNEMENT DU JOUR
