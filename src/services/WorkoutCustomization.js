@@ -8,12 +8,30 @@ import { days as defaultWorkoutPlan } from '../data';
 // Clé de stockage dans localStorage
 const CUSTOM_WORKOUT_KEY = 'custom_workout_plan';
 
+// Version du programme par défaut : quand elle change, un éventuel plan
+// personnalisé basé sur l'ancien programme est écarté pour que tout le monde
+// reçoive le nouveau programme (semaine type 4 séances + 3 repos).
+const PLAN_VERSION_KEY = 'plan_version';
+const PLAN_VERSION = '7d-v1';
+
+const migratePlanVersion = () => {
+  try {
+    if (localStorage.getItem(PLAN_VERSION_KEY) !== PLAN_VERSION) {
+      localStorage.removeItem(CUSTOM_WORKOUT_KEY);
+      localStorage.setItem(PLAN_VERSION_KEY, PLAN_VERSION);
+    }
+  } catch (error) {
+    // localStorage indisponible : on servira le plan par défaut de toute façon.
+  }
+};
+
 /**
  * Récupérer le programme d'entraînement (personnalisé ou par défaut)
  * @returns {Array} - Programme d'entraînement
  */
 export const getWorkoutPlan = () => {
   try {
+    migratePlanVersion();
     const storedPlan = localStorage.getItem(CUSTOM_WORKOUT_KEY);
     return storedPlan ? JSON.parse(storedPlan) : defaultWorkoutPlan;
   } catch (error) {
@@ -42,9 +60,13 @@ export const saveWorkoutPlan = (workoutPlan) => {
 
 const VELO_ENABLED_KEY = 'velo_enabled';
 
-/** Détecte une séance de vélo (cardio fin de séance) d'après son nom. */
+/**
+ * Détecte le vélo optionnel de fin de séance d'après son nom exact.
+ * Volontairement strict : l'échauffement vélo des séances de musculation et la
+ * séance vélo dédiée du samedi ne doivent JAMAIS être retirés par ce réglage.
+ */
 const isVeloExercise = (exercise) =>
-  (exercise?.name || '').toLowerCase().includes('vélo');
+  (exercise?.name || '') === 'Vélo (cardio fin de séance)';
 
 /**
  * Indique si le vélo de fin de séance est actif (inclus dans les séances).

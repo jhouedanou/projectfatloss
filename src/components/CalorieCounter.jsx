@@ -26,6 +26,7 @@ import {
   getFoodDefaultQuantity,
   formatFoodQuantity
 } from '../data/foodDatabase';
+import DeficitSummary from './DeficitSummary';
 import GoogleFitSyncButton from './GoogleFitSyncButton';
 import GoogleFitItemButton from './GoogleFitItemButton';
 import {
@@ -184,10 +185,10 @@ const CalorieCounter = () => {
     setSummary(getNutritionSummary(selectedDate));
   };
 
-  // Save Goal
+  // Save Goal (fixé à la main : on ne l'écrase plus avec l'objectif calculé)
   const handleSaveGoal = () => {
     const updatedGoal = parseInt(tempCalorieGoal) || 2000;
-    const currentLog = { ...log, calorieGoal: updatedGoal };
+    const currentLog = { ...log, calorieGoal: updatedGoal, calorieGoalManual: true };
     saveDailyNutritionLog(selectedDate, currentLog);
     setLog(currentLog);
     setSummary(getNutritionSummary(selectedDate));
@@ -344,6 +345,9 @@ const CalorieCounter = () => {
           </button>
         </div>
       </div>
+
+      {/* Bilan énergétique du jour (objectif auto, déficit, protéines) */}
+      <DeficitSummary selectedDate={selectedDate} summary={summary} />
 
       {/* Synchronisation Google Fit */}
       <div className="gfit-nutrition-sync" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>

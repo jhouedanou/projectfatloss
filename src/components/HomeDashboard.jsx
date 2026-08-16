@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Flame, Scale as ScaleIcon, Flag, Activity } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
+import { getWorkoutPlan } from '../services/WorkoutCustomization';
 import './HomeDashboard.css';
 
 function startOfWeek(d = new Date()) {
@@ -52,7 +53,10 @@ export default function HomeDashboard({ onStartWorkout }) {
 
   const weekStart = startOfWeek();
   const weekWorkouts = history.filter(w => new Date(w.date) >= weekStart);
-  const target = 7; // musculation 7 jours / 7
+  const target = useMemo(
+    () => Math.max(1, getWorkoutPlan().filter((d) => !d.isRestDay).length),
+    []
+  ); // séances prévues par semaine (jours de repos exclus)
   const done = weekWorkouts.length;
   const percent = Math.min(100, (done / target) * 100);
 

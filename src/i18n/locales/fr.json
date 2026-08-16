@@ -152,8 +152,32 @@
   },
   "restDay": {
     "title": "Jour de repos",
+    "subtitle": "Journée de récupération",
     "description": "Profitez de cette journée pour récupérer. Hydratez-vous bien et reposez vos muscles.",
     "nextDay": "Passer au jour suivant"
+  },
+  "profile": {
+    "title": "Mon profil",
+    "weight": "Poids (kg)",
+    "height": "Taille (cm)",
+    "age": "Âge",
+    "sex": "Sexe",
+    "male": "Homme",
+    "female": "Femme",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "goalPreview": "Objectif actuel : {{kcal}} kcal/jour • {{protein}} g de protéines"
+  },
+  "nutrition": {
+    "deficit": {
+      "title": "Bilan énergétique",
+      "goal": "Objectif",
+      "consumed": "Consommé",
+      "burned": "Brûlé (sport)",
+      "deficit": "Déficit estimé",
+      "protein": "Protéines",
+      "autoGoal": "Objectif calculé automatiquement d'après votre profil et vos pesées."
+    }
   },
   "dayPills": {
     "week": "S"

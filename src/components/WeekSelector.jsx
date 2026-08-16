@@ -26,7 +26,9 @@ export default function WeekSelector({ days, current, onSelectDay }) {
     setSelectedWeek(Math.floor(current / 7));
   }, [current]);
 
-  const globalProgress = Math.round((current / 28) * 100);
+  const totalDays = days.length;
+  const weekCount = Math.max(1, Math.ceil(totalDays / 7));
+  const globalProgress = Math.round((current / totalDays) * 100);
   const weekStart = selectedWeek * 7;
   const weekDays = days.slice(weekStart, weekStart + 7);
 
@@ -69,23 +71,26 @@ export default function WeekSelector({ days, current, onSelectDay }) {
           <Box sx={{ width: `${globalProgress}%`, height: '100%', bgcolor: '#F03D32', borderRadius: '10px' }} />
         </Box>
         <Typography variant="caption" sx={{ color: inkFaint, fontWeight: 600 }}>
-          JOUR {current + 1} SUR 28 • SEMAINE {initialWeek + 1} EN COURS
+          {weekCount > 1
+            ? `JOUR ${current + 1} SUR ${totalDays} • SEMAINE ${initialWeek + 1} EN COURS`
+            : `JOUR ${current + 1} SUR ${totalDays} • SEMAINE TYPE RÉPÉTÉE`}
         </Typography>
       </Paper>
 
-      {/* Week Selector Tabs */}
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          gap: 1, 
-          mb: 3, 
+      {/* Week Selector Tabs (masqués quand le programme tient sur une semaine) */}
+      {weekCount > 1 && (
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 1,
+          mb: 3,
           overflowX: 'auto',
           pb: 1,
           scrollbarWidth: 'none',
           '&::-webkit-scrollbar': { display: 'none' }
         }}
       >
-        {[0, 1, 2, 3].map((weekIndex) => {
+        {Array.from({ length: weekCount }, (_, weekIndex) => {
           const isActive = selectedWeek === weekIndex;
           const isCurrentWeek = Math.floor(current / 7) === weekIndex;
           
@@ -126,6 +131,7 @@ export default function WeekSelector({ days, current, onSelectDay }) {
           );
         })}
       </Box>
+      )}
 
       {/* Days List for the selected week */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

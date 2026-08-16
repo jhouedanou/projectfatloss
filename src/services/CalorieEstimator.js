@@ -16,7 +16,7 @@
 
 import { getWeightHistory } from './WeightStorage';
 
-const DEFAULT_WEIGHT_KG = 144;
+const DEFAULT_WEIGHT_KG = 147;
 const DEFAULT_HEIGHT_CM = 178;
 const PROFILE_KEY = 'user_profile';
 const SET_DURATION_MIN = 1.5;
