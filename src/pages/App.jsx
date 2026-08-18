@@ -483,17 +483,21 @@ export default function App() {
                         </div>
                       ) : (
                         <div className="exercises-container">
-                          {/* Sortie vélo d'ouverture : vidéo + vélo connecté */}
-                          <SettingToggle
-                            icon={<Bike size={20} color={rideStartEnabled ? '#3B82F6' : '#71717a'} />}
-                            title="Sortie vélo en début de séance"
-                            subtitle={rideStartEnabled
-                              ? 'Vidéo + vélo connecté avant la muscu (remplace le vélo de fin)'
-                              : 'La séance commence directement par la muscu'}
-                            checked={rideStartEnabled}
-                            onToggle={handleToggleRideStart}
-                            ariaLabel="Activer ou désactiver la sortie vélo en début de séance"
-                          />
+                          {/* Sortie vélo d'ouverture : vidéo + vélo connecté.
+                              Proposée uniquement si le jour contient du vélo (plan
+                              personnalisé) — le programme par défaut est 100 % muscu. */}
+                          {currentDayHasVelo && (
+                            <SettingToggle
+                              icon={<Bike size={20} color={rideStartEnabled ? '#3B82F6' : '#71717a'} />}
+                              title="Sortie vélo en début de séance"
+                              subtitle={rideStartEnabled
+                                ? 'Vidéo + vélo connecté avant la muscu (remplace le vélo de fin)'
+                                : 'La séance commence directement par la muscu'}
+                              checked={rideStartEnabled}
+                              onToggle={handleToggleRideStart}
+                              ariaLabel="Activer ou désactiver la sortie vélo en début de séance"
+                            />
+                          )}
 
                           {/* Interrupteur : vélo de fin de séance optionnel */}
                           {currentDayHasVelo && !rideStartEnabled && (

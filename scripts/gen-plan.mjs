@@ -5,18 +5,18 @@
  *   - src/data.js                                          (application web)
  *   - projectfatloss_flutter/lib/shared/data/default_workout_data.dart (application Flutter)
  *
- * Programme : 28 jours = 4 semaines de 5 séances mixtes + 2 jours de repos.
- *   Lundi    : FULL BODY A (poussée)          — muscu + vélo
- *   Mardi    : FULL BODY B (tirage)           — muscu + vélo
+ * Programme : 28 jours = 4 semaines de 5 séances de musculation + 2 jours de repos.
+ *   Lundi    : FULL BODY A (poussée)
+ *   Mardi    : FULL BODY B (tirage)
  *   Mercredi : repos
- *   Jeudi    : FULL BODY C (jambes)           — muscu + vélo
- *   Vendredi : FULL BODY D (haut du corps)    — muscu + vélo
- *   Samedi   : FULL BODY E (gainage) + sortie vélo longue
+ *   Jeudi    : FULL BODY C (jambes)
+ *   Vendredi : FULL BODY D (haut du corps)
+ *   Samedi   : FULL BODY E (gainage, fonctionnel)
  *   Dimanche : repos
  *
- * Chaque séance dure ~1 h et mélange musculation et vélo : échauffement vélo,
- * bloc de musculation, puis vélo de fin de séance (aucun bloc de vélo ne
- * dépasse 20 min d'affilée).
+ * 100 % musculation, sans vélo : le volume de répétitions est augmenté en
+ * conséquence pour que chaque séance dure ~1 h. Échauffement libre conseillé
+ * avant chaque séance (marche sur place, montées de genoux légères, 5 min).
  *
  * Les exercices tournent sur les 4 semaines : chaque schéma de mouvement
  * (poussée horizontale, tirage, hinge, fentes…) a une variante différente par
@@ -24,7 +24,7 @@
  *
  * Objectif : perte de poids durable (profil ~147 kg) — low-impact, zéro saut,
  * 100% debout ou sur banc. Matériel : haltères 2×15 et 2×10 kg, barre 30 kg,
- * veste lestée 10 kg, poids chevilles 2×4 + 2×2 kg, vélo Domyos EB900.
+ * veste lestée 10 kg, poids chevilles 2×4 + 2×2 kg.
  *
  * Usage : node scripts/gen-plan.mjs
  */
@@ -284,34 +284,6 @@ const CATALOG = {
     duration: 60,
   },
 
-  // --- Vélo (Domyos EB900) ---
-  'Vélo — échauffement': {
-    equip: 'Vélo Domyos',
-    desc: '8 min de pédalage à résistance légère pour monter progressivement en température avant la musculation. Cadence souple, respiration confortable.',
-    caloriesPerSet: [55, 70],
-    gf: ['Stationary Cycling', ['quadriceps', 'glutes', 'cardio']],
-    timer: true,
-    duration: 480,
-    setsLabel: '8 min (résistance légère)',
-  },
-  'Vélo — sortie longue': {
-    equip: 'Vélo Domyos',
-    desc: '20 min à résistance légère à moyenne, cadence confortable : vous devez pouvoir tenir une conversation. Le plus long bloc de vélo de la semaine, placé le samedi après une musculation courte.',
-    caloriesPerSet: [150, 180],
-    gf: ['Stationary Cycling', ['quadriceps', 'glutes', 'cardio']],
-    timer: true,
-    duration: 1200,
-    setsLabel: '20 min (résistance légère-moyenne)',
-  },
-  'Vélo (cardio fin de séance)': {
-    equip: 'Vélo',
-    desc: '12 min sur le programme CAL 1 du Domyos EB900 (résistance moyenne-haute), en fin de séance. Cardio court sans impact ni appui au sol. Optionnel : désactivable dans les réglages.',
-    caloriesPerSet: [198, 222],
-    gf: ['Stationary Cycling', ['quadriceps', 'glutes', 'cardio']],
-    timer: true,
-    duration: 720,
-    setsLabel: '12 min (prog. CAL 1)',
-  },
 };
 
 // Exercices travaillant un côté à la fois : l'app enchaîne les deux côtés dans
@@ -339,36 +311,36 @@ const UNILATERAL = new Set([
 const WEEKS = [
   {
     label: 'S1 Adaptation',
-    main: { sets: '3 × 10 (tempo 3-1-1)', n: 3, rep: 10 },
-    access: { sets: '3 × 12', n: 3, rep: 12 },
-    core: { sets: '3 × 12', n: 3, rep: 12 },
-    carry: { sets: '3 × 45 s', n: 3, rep: 0 },
+    main: { sets: '4 × 12 (tempo 3-1-1)', n: 4, rep: 12 },
+    access: { sets: '4 × 15', n: 4, rep: 15 },
+    core: { sets: '4 × 15', n: 4, rep: 15 },
+    carry: { sets: '4 × 45 s', n: 4, rep: 0 },
   },
   {
     label: 'S2 Accumulation',
-    main: { sets: '4 × 10 (tempo 3-1-1)', n: 4, rep: 10 },
-    access: { sets: '3 × 12', n: 3, rep: 12 },
-    core: { sets: '3 × 15', n: 3, rep: 15 },
-    carry: { sets: '3 × 60 s', n: 3, rep: 0 },
+    main: { sets: '5 × 12 (tempo 3-1-1)', n: 5, rep: 12 },
+    access: { sets: '4 × 15', n: 4, rep: 15 },
+    core: { sets: '4 × 18', n: 4, rep: 18 },
+    carry: { sets: '4 × 60 s', n: 4, rep: 0 },
   },
   {
     label: 'S3 Intensification',
-    main: { sets: '4 × 8 (tempo lent, plus lourd)', n: 4, rep: 8 },
-    access: { sets: '4 × 10', n: 4, rep: 10 },
-    core: { sets: '3 × 15', n: 3, rep: 15 },
-    carry: { sets: '3 × 60 s', n: 3, rep: 0 },
+    main: { sets: '5 × 10 (tempo lent, plus lourd)', n: 5, rep: 10 },
+    access: { sets: '5 × 12', n: 5, rep: 12 },
+    core: { sets: '4 × 20', n: 4, rep: 20 },
+    carry: { sets: '4 × 60 s', n: 4, rep: 0 },
   },
   {
     label: 'S4 Allègement',
-    main: { sets: '3 × 10 (allégé)', n: 3, rep: 10 },
-    access: { sets: '3 × 12 (allégé)', n: 3, rep: 12 },
+    main: { sets: '3 × 12 (allégé)', n: 3, rep: 12 },
+    access: { sets: '3 × 15 (allégé)', n: 3, rep: 15 },
     core: { sets: '3 × 12', n: 3, rep: 12 },
-    carry: { sets: '2 × 45 s', n: 2, rep: 0 },
+    carry: { sets: '3 × 45 s', n: 3, rep: 0 },
   },
 ];
 
 // ---------------------------------------------------------------------------
-// La semaine : 5 séances mixtes (muscu + vélo) + 2 jours de repos.
+// La semaine : 5 séances de musculation + 2 jours de repos.
 // Chaque « slot » liste 4 variantes — une par semaine — pour le même schéma
 // de mouvement : les exercices changent tout au long du mois.
 // ---------------------------------------------------------------------------
@@ -406,7 +378,7 @@ const SESSIONS = [
     title: 'FULL BODY C (Jambes, Fessiers)',
     slots: [
       slot('main', ['Squat barre', 'Fentes arrière alternées haltères', 'Squat barre', 'Squat gobelet haltère']),
-      slot('main', ['Soulevé de terre roumain (départ debout)', 'Soulevé de terre roumain unilatéral haltère', 'Soulevé de terre surélevé (rack pull)', 'Soulevé de terre roumain (départ debout)']),
+      slot('main', ['Soulevé de terre roumain (départ debout)', 'Soulevé de terre surélevé (rack pull)', 'Soulevé de terre surélevé (rack pull)', 'Soulevé de terre roumain (départ debout)']),
       slot('access', ['Montées sur banc lestées', 'Fentes bulgares haltères', 'Fentes avant alternées haltères', 'Montées sur banc lestées']),
       slot('access', ['Mollets debout lestés', 'Extension de hanche debout', 'Mollets debout lestés', 'Extension de hanche debout']),
       slot('access', ['Squat sumo haltère', 'Mollets debout lestés', 'Squat sumo haltère', 'Mollets debout lestés']),
@@ -427,11 +399,11 @@ const SESSIONS = [
   },
   {
     day: 'Samedi',
-    title: 'FULL BODY E (Gainage) + sortie vélo',
-    longRide: true,
+    title: 'FULL BODY E (Gainage, Fonctionnel)',
     slots: [
       slot('main', ['Fentes arrière alternées haltères', 'Squat sumo haltère', 'Fentes bulgares haltères', 'Squat gobelet haltère']),
       slot('access', ['Soulevé de terre roumain unilatéral haltère', 'Extension de hanche debout', 'Soulevé de terre roumain unilatéral haltère', 'Mollets debout lestés']),
+      slot('access', ['Squat gobelet haltère', 'Élévations latérales haltères', 'Fentes avant alternées haltères', 'Tirage menton barre (upright row)']),
       slot('carry', ['Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)']),
       slot('core', ['Crunch latéral debout (side bend)', 'Woodchopper haltère', 'Relevés de genoux debout', 'Woodchopper haltère']),
     ],
@@ -442,27 +414,6 @@ const SESSIONS = [
 // ---------------------------------------------------------------------------
 // Construction du plan (28 jours = 4 semaines × 7 jours, index 0 = lundi).
 // ---------------------------------------------------------------------------
-
-/** Construit un exercice de vélo (bloc chronométré, identique chaque semaine). */
-function buildBike(name) {
-  const base = CATALOG[name];
-  return {
-    name,
-    sets: base.setsLabel,
-    equip: base.equip,
-    desc: base.desc,
-    caloriesPerSet: base.caloriesPerSet,
-    totalSets: 1,
-    nbRep: 0,
-    timer: true,
-    duration: base.duration,
-    googleFitActivity: {
-      type: 'strength_training',
-      name: base.gf[0],
-      muscleGroups: base.gf[1],
-    },
-  };
-}
 
 /** Applique le schéma de séries de la semaine à la variante retenue. */
 function buildExercise(name, tier, week) {
@@ -513,11 +464,9 @@ WEEKS.forEach((week, weekIndex) => {
       return;
     }
 
-    const exercises = [
-      buildBike('Vélo — échauffement'),
-      ...session.slots.map((s) => buildExercise(s.variants[weekIndex], s.tier, week)),
-      buildBike(session.longRide ? 'Vélo — sortie longue' : 'Vélo (cardio fin de séance)'),
-    ];
+    const exercises = session.slots.map(
+      (s) => buildExercise(s.variants[weekIndex], s.tier, week)
+    );
 
     plan.push({
       title: `JOUR ${dayNumber}: ${session.title} — ${session.day} · ${week.label}`,
@@ -546,12 +495,10 @@ function setWorkSeconds(exercise) {
   return exercise.sets.includes('/côté') ? perSide * 2 + 3 : perSide;
 }
 
-/** Minutes estimées pour une séance (vélo inclus ou non). */
-function estimateMinutes(day, { withVelo = false } = {}) {
+/** Minutes estimées pour une séance. */
+function estimateMinutes(day) {
   let seconds = 0;
-  const exercises = day.exercises.filter(
-    (e) => withVelo || !e.name.toLowerCase().includes('vélo')
-  );
+  const exercises = day.exercises;
   exercises.forEach((exercise, index) => {
     for (let set = 0; set < exercise.totalSets; set += 1) {
       seconds += setWorkSeconds(exercise);
@@ -599,17 +546,17 @@ function jsExercise(exercise) {
 function renderDataJs() {
   const out = [
     '/**',
-    ' * PROGRAMME PERTE DE POIDS — 28 jours = 4 semaines de 5 séances mixtes + 2 jours de repos.',
+    ' * PROGRAMME PERTE DE POIDS — 28 jours = 4 semaines de 5 séances de musculation + 2 jours de repos.',
     ' * Lundi FULL BODY A (poussée) / Mardi FULL BODY B (tirage) / Jeudi FULL BODY C (jambes) /',
-    ' * Vendredi FULL BODY D (haut du corps) / Samedi FULL BODY E (gainage) + sortie vélo longue.',
+    ' * Vendredi FULL BODY D (haut du corps) / Samedi FULL BODY E (gainage, fonctionnel).',
     ' * Mercredi et dimanche : récupération complète.',
-    ' * Chaque séance mélange musculation et vélo (échauffement 8 min, bloc muscu, vélo de fin) :',
-    ' * aucun bloc de vélo ne dépasse 20 min d\'affilée.',
+    ' * 100 % musculation, sans vélo : le volume de répétitions est augmenté en conséquence',
+    ' * (~1 h par séance). Échauffement libre conseillé avant chaque séance (5 min).',
     ' * Les exercices tournent sur les 4 semaines (une variante par semaine et par schéma de',
     ' * mouvement) ; la charge monte S1 → S3 puis S4 allège.',
     ' * Adapté : profil ~147 kg, 100% debout/banc (aucun appui au sol), ZÉRO saut (low-impact).',
     ' * Matériel : haltères 2×15 et 2×10 kg, barre 30 kg, veste lestée 10 kg, poids chevilles',
-    ' * 2×4 + 2×2 kg, vélo Domyos EB900.',
+    ' * 2×4 + 2×2 kg.',
     ' * Généré par scripts/gen-plan.mjs — ne pas éditer à la main.',
     ' */',
     'const fullPlan = [',
@@ -665,7 +612,7 @@ function renderDart() {
   const out = [
     "import '../models/workout_model.dart';",
     '',
-    '/// Programme perte de poids — 4 semaines de 5 séances mixtes (muscu + vélo)',
+    '/// Programme perte de poids — 4 semaines de 5 séances de musculation',
     '/// et 2 jours de repos. Les exercices tournent d\'une semaine à l\'autre.',
     '/// Low-impact, 100% debout ou sur banc.',
     '/// Généré par scripts/gen-plan.mjs — ne pas éditer à la main.',
@@ -707,9 +654,5 @@ plan.forEach((day) => {
     console.log(`    repos — ${day.title}`);
     return;
   }
-  const lifting = estimateMinutes(day);
-  const total = estimateMinutes(day, { withVelo: true });
-  console.log(
-    `  ${String(lifting).padStart(3)} min muscu (total avec vélo ${String(total).padStart(2)} min) — ${day.title}`
-  );
+  console.log(`  ${String(estimateMinutes(day)).padStart(3)} min muscu — ${day.title}`);
 });
