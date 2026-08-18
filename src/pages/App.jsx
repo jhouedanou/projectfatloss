@@ -38,6 +38,7 @@ import '../components/WeightTracker.css';
 import '../components/WorkoutCustomizer.css'; 
 import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
 import HomeDashboard from '../components/HomeDashboard';
+import HomeTrackers from '../components/HomeTrackers';
 import WeekSelector from '../components/WeekSelector';
 import Header from '../components/Header/Header';
 import { getServiceWorkerPath, getAssetPath } from '../utils/paths';
@@ -419,6 +420,7 @@ export default function App() {
                     !showExercises ? (
                       <>
                         <HomeDashboard onStartWorkout={() => setShowExercises(true)} />
+                        <HomeTrackers />
                         <WeekSelector
                           days={workoutPlan}
                           current={current}

@@ -1,0 +1,341 @@
+.ht-root {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 18px 8px;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #fff;
+}
+
+.ht-card {
+  border-radius: 18px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.ht-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.ht-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  border: none;
+  border-radius: 11px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.ht-tab svg {
+  flex-shrink: 0;
+}
+.ht-tab.active {
+  background: rgba(240, 61, 50, 0.16);
+  color: #fff;
+}
+.ht-tab.active svg {
+  color: #F03D32;
+}
+
+.ht-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+.ht-card-tag {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+
+.ht-empty {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 4px 0 2px;
+  line-height: 1.45;
+}
+
+/* ---- Carte progrès du mois ---- */
+
+.ht-progress-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ht-stat {
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+.ht-stat-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.ht-stat-label {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 2px;
+}
+
+.ht-progress-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.ht-progress-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, #F03D32, #FF6B35);
+  transition: width 0.6s ease;
+}
+
+.ht-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  max-width: 340px;
+  margin: 0 auto;
+}
+.ht-month-dow {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  padding-bottom: 2px;
+}
+.ht-month-cell {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+}
+.ht-month-cell.pad {
+  background: transparent;
+}
+.ht-month-cell.future {
+  opacity: 0.35;
+}
+.ht-month-cell.today {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.ht-month-cell.lvl-1 {
+  background: rgba(240, 61, 50, 0.35);
+  color: #fff;
+}
+.ht-month-cell.lvl-2 {
+  background: rgba(240, 61, 50, 0.6);
+  color: #fff;
+}
+.ht-month-cell.lvl-3 {
+  background: #F03D32;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(240, 61, 50, 0.4);
+}
+
+/* ---- Carte groupes musculaires ---- */
+
+.ht-muscle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.ht-muscle-row {
+  display: grid;
+  grid-template-columns: minmax(84px, 110px) 1fr 40px;
+  align-items: center;
+  gap: 10px;
+}
+.ht-muscle-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ht-muscle-bar {
+  height: 12px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.ht-muscle-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.6s ease;
+}
+.ht-muscle-pct {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.75);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Carte habitudes ---- */
+
+.ht-habit-grid {
+  display: grid;
+  gap: 6px;
+  align-items: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.ht-habit-cell {
+  max-width: 44px;
+  justify-self: center;
+}
+.ht-habit-corner {
+  min-width: 0;
+}
+.ht-habit-dow {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+.ht-habit-dow.today {
+  color: #F03D32;
+}
+.ht-habit-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.ht-habit-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.ht-habit-name {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ht-habit-cell {
+  aspect-ratio: 1;
+  width: 100%;
+  min-width: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.04);
+  color: #0B0B0E;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.ht-habit-cell:not(:disabled):active {
+  transform: scale(0.9);
+}
+.ht-habit-cell.future {
+  opacity: 0.25;
+  cursor: default;
+}
+.ht-habit-cell.auto {
+  cursor: default;
+}
+.ht-habit-cell.done {
+  color: #0B0B0E;
+}
+.ht-habit-pct {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.6);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Thème clair ---- */
+
+body:not(.dark-theme) .ht-root {
+  color: #1A1A1A;
+}
+body:not(.dark-theme) .ht-card {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.07);
+  color: #1A1A1A;
+}
+body:not(.dark-theme) .ht-card-tag { color: rgba(0, 0, 0, 0.5); }
+body:not(.dark-theme) .ht-tabs {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.07);
+}
+body:not(.dark-theme) .ht-tab { color: rgba(0, 0, 0, 0.55); }
+body:not(.dark-theme) .ht-tab.active {
+  background: rgba(240, 61, 50, 0.12);
+  color: #1A1A1A;
+}
+body:not(.dark-theme) .ht-empty { color: rgba(0, 0, 0, 0.55); }
+body:not(.dark-theme) .ht-stat {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+body:not(.dark-theme) .ht-stat-label { color: rgba(0, 0, 0, 0.55); }
+body:not(.dark-theme) .ht-progress-bar { background: rgba(0, 0, 0, 0.08); }
+body:not(.dark-theme) .ht-month-dow,
+body:not(.dark-theme) .ht-habit-dow { color: rgba(0, 0, 0, 0.45); }
+body:not(.dark-theme) .ht-month-cell {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.6);
+}
+body:not(.dark-theme) .ht-month-cell.pad { background: transparent; }
+body:not(.dark-theme) .ht-month-cell.today { border-color: rgba(0, 0, 0, 0.45); }
+body:not(.dark-theme) .ht-muscle-label,
+body:not(.dark-theme) .ht-habit-name { color: rgba(0, 0, 0, 0.75); }
+body:not(.dark-theme) .ht-muscle-bar { background: rgba(0, 0, 0, 0.07); }
+body:not(.dark-theme) .ht-muscle-pct,
+body:not(.dark-theme) .ht-habit-pct { color: rgba(0, 0, 0, 0.65); }
+body:not(.dark-theme) .ht-habit-cell {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
