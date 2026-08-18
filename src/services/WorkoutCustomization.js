@@ -12,7 +12,7 @@ const CUSTOM_WORKOUT_KEY = 'custom_workout_plan';
 // personnalisé basé sur l'ancien programme est écarté pour que tout le monde
 // reçoive le nouveau programme (semaine type 4 séances + 3 repos).
 const PLAN_VERSION_KEY = 'plan_version';
-const PLAN_VERSION = '28d-v2';
+const PLAN_VERSION = '28d-v3';
 
 const migratePlanVersion = () => {
   try {
