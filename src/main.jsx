@@ -2,14 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { createAppTheme } from './theme';
+import { appTheme } from './theme';
 import App from './pages/App';
 import './index.css';
-import './styles/light-theme.css';
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
 import './i18n';
 import { registerSW } from 'virtual:pwa-register';
 import { initNotificationService } from './services/NotificationService';
@@ -39,7 +34,8 @@ class ErrorBoundary extends React.Component {
           display: 'flex',
           flexDirection: 'column', 
           justifyContent: 'center',
-          backgroundColor: '#f5f5f5'
+          backgroundColor: 'var(--bg, #000)',
+          color: 'var(--label, #fff)'
         }}>
           <h2>Oops ! Une erreur s'est produite</h2>
           <p>Veuillez rafraîchir la page ou réessayer plus tard.</p>
@@ -59,7 +55,7 @@ class ErrorBoundary extends React.Component {
           </button>
           <details style={{ marginTop: '20px', textAlign: 'left' }}>
             <summary>Détails de l'erreur</summary>
-            <pre style={{ background: '#fff', padding: '10px', borderRadius: '5px', marginTop: '10px' }}>
+            <pre style={{ background: 'var(--surface, #1c1c1e)', padding: '10px', borderRadius: '5px', marginTop: '10px' }}>
               {this.state.error?.toString()}
             </pre>
           </details>
@@ -91,15 +87,13 @@ try {
   console.warn('Service Worker non disponible:', error);
 }
 
-// Récupérer le thème initial depuis le localStorage avec fallback
-let initialDarkMode = false;
+// L'app est sombre uniquement : purge la préférence de thème héritée pour
+// qu'aucun ancien 'theme=light' ne subsiste dans le stockage.
 try {
-  initialDarkMode = localStorage.getItem('theme') !== 'light';
+  localStorage.removeItem('theme');
 } catch (error) {
   console.warn('localStorage non disponible:', error);
 }
-
-const theme = createAppTheme(initialDarkMode);
 
 // Initialiser le service de notifications de façon plus sûre
 const initNotificationsAsync = async () => {
@@ -120,7 +114,7 @@ initNotificationsAsync();
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={appTheme}>
         <CssBaseline />
         <App />
       </ThemeProvider>

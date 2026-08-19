@@ -156,11 +156,6 @@
 }
 .login-switch:hover { color: #F03D32; }
 
-/* Thème clair */
-body:not(.dark-theme) .login-card { background: #fff; border-color: rgba(0,0,0,0.06); }
-body:not(.dark-theme) .login-field { background: #f5f5f7; border-color: #e3e3e8; }
-body:not(.dark-theme) .login-field input { color: #1a1a1a; }
-
 @media (max-width: 480px) {
   .login-card { padding: 28px 20px 22px; }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark-theme">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="./logo.png" />
@@ -17,20 +17,6 @@
           }
           console.log('Base URL détectée:', window.BASE_URL);
         }
-      })();
-    </script>
-    <script>
-      // Thème appliqué AVANT le premier rendu pour éviter le flash clair/sombre.
-      // Même clé que React ('theme') ; sombre par défaut.
-      (function () {
-        try {
-          if (localStorage.getItem('theme') !== 'light') {
-            document.documentElement.classList.add('dark-theme');
-            document.addEventListener('DOMContentLoaded', function () {
-              document.body.classList.add('dark-theme');
-            });
-          }
-        } catch (e) { /* stockage indisponible : thème sombre via React */ }
       })();
     </script>
     <script>
@@ -65,7 +51,7 @@
       })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#22223b" />
+    <meta name="theme-color" content="#000000" />
     <meta name="description" content="Application de suivi d'entraînement avec calcul des calories brûlées" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -143,7 +129,7 @@
       }
     </script>
   </head>
-  <body>
+  <body class="dark-theme">
     <div id="root"></div>
     <script type="module" src="./src/main.jsx"></script>
   </body>

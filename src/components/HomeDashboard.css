@@ -267,24 +267,3 @@
     min-height: 188px;
   }
 }
-
-body:not(.dark-theme) .hd-root {
-  color: #1A1A1A;
-}
-body:not(.dark-theme) .hd-title { color: #1A1A1A; }
-body:not(.dark-theme) .hd-subtitle { color: rgba(0, 0, 0, 0.55); }
-body:not(.dark-theme) .hd-ring-wrap {
-  background: linear-gradient(160deg, rgba(240, 61, 50, 0.1), rgba(255, 107, 53, 0.04));
-  border-color: rgba(0, 0, 0, 0.06);
-}
-body:not(.dark-theme) .hd-ring-bg { stroke: rgba(0, 0, 0, 0.08); }
-body:not(.dark-theme) .hd-ring-pct,
-body:not(.dark-theme) .hd-ring-sub { color: #1A1A1A; }
-body:not(.dark-theme) .hd-ring-label { color: rgba(0, 0, 0, 0.55); }
-body:not(.dark-theme) .hd-card {
-  border-color: rgba(0, 0, 0, 0.05);
-  color: #1A1A1A;
-}
-body:not(.dark-theme) .hd-card-value { color: #1A1A1A; }
-body:not(.dark-theme) .hd-recovery-hint { color: rgba(0, 0, 0, 0.6); }
-body:not(.dark-theme) .hd-recovery-status { color: rgba(0, 0, 0, 0.65); }

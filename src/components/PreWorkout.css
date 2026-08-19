@@ -211,31 +211,3 @@
   .pfl-prewk-card { padding: 18px; }
   .pfl-prewk-btn { min-width: 0; padding: 11px 12px; font-size: 0.8rem; }
 }
-
-body:not(.dark-theme) .pfl-prewk-overlay {
-  background: rgba(20, 20, 20, 0.6);
-}
-body:not(.dark-theme) .pfl-prewk-card {
-  background: linear-gradient(160deg, #FFFFFF 0%, #F5F5F5 100%);
-  color: #1A1A1A;
-  border-color: rgba(240, 61, 50, 0.18);
-}
-body:not(.dark-theme) .pfl-prewk-title,
-body:not(.dark-theme) .pfl-prewk-timer { color: #1A1A1A; }
-body:not(.dark-theme) .pfl-prewk-status { color: rgba(0, 0, 0, 0.65); }
-body:not(.dark-theme) .pfl-prewk-close {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #1A1A1A;
-}
-body:not(.dark-theme) .pfl-prewk-progress-track { background: rgba(0, 0, 0, 0.08); }
-body:not(.dark-theme) .pfl-prewk-progress-label { color: rgba(0, 0, 0, 0.55); }
-body:not(.dark-theme) .pfl-prewk-btn.ghost {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.1);
-  color: #1A1A1A;
-}
-body:not(.dark-theme) .pfl-prewk-btn.skip {
-  border-color: rgba(0, 0, 0, 0.12);
-  color: rgba(0, 0, 0, 0.6);
-}
