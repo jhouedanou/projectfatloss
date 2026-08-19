@@ -322,7 +322,7 @@ const CalorieCounter = () => {
               r="70" 
               strokeDasharray={2 * Math.PI * 70}
               strokeDashoffset={2 * Math.PI * 70 * (1 - progressPercent / 100)}
-              style={{ stroke: isGoalExceeded ? '#EF4444' : '#F03D32' }}
+              style={{ stroke: isGoalExceeded ? '#ff453a' : '#F03D32' }}
             />
           </svg>
           <div className="circle-inner-text">
@@ -335,7 +335,7 @@ const CalorieCounter = () => {
 
         <div className="nutrition-quick-details">
           <div className="quick-metric">
-            <span className="metric-val" style={{ color: isGoalExceeded ? '#EF4444' : '#10B981' }}>
+            <span className="metric-val" style={{ color: isGoalExceeded ? '#ff453a' : '#30d158' }}>
               {isGoalExceeded ? '+' : ''}{summary.goal - summary.calories}
             </span>
             <span className="metric-lbl">{isGoalExceeded ? 'DÉPASSÉ' : 'RESTANT'}</span>
@@ -358,7 +358,7 @@ const CalorieCounter = () => {
             allowResync
             title="Synchroniser cette journée avec Google Fit"
           />
-          <span style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>Synchroniser ce jour</span>
+          <span style={{ fontSize: '0.8rem', color: 'rgba(235,235,245,0.6)' }}>Synchroniser ce jour</span>
         </div>
         <GoogleFitSyncButton
           getUnsyncedCount={() => getUnsyncedNutritionDays().length}

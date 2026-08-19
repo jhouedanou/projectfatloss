@@ -60,15 +60,15 @@ export default function DeficitSummary({ selectedDate, summary }) {
         <div className="deficit-row deficit-row-total">
           <span className="deficit-row-label">
             {inDeficit ? (
-              <TrendingDown size={15} style={{ verticalAlign: 'text-bottom', marginRight: 4, color: '#10B981' }} />
+              <TrendingDown size={15} style={{ verticalAlign: 'text-bottom', marginRight: 4, color: '#30d158' }} />
             ) : (
-              <TrendingUp size={15} style={{ verticalAlign: 'text-bottom', marginRight: 4, color: '#EF4444' }} />
+              <TrendingUp size={15} style={{ verticalAlign: 'text-bottom', marginRight: 4, color: '#ff453a' }} />
             )}
             {t('nutrition.deficit.deficit', { defaultValue: 'Déficit estimé' })}
           </span>
           <span
             className="deficit-row-value"
-            style={{ color: inDeficit ? '#10B981' : '#EF4444', fontWeight: 800 }}
+            style={{ color: inDeficit ? '#30d158' : '#ff453a', fontWeight: 800 }}
           >
             {inDeficit ? '−' : '+'}{Math.abs(deficit)} kcal
           </span>

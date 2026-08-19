@@ -17,7 +17,7 @@ const ProgressTracker = ({
     <Box
       sx={{
         width: '100%',
-        bgcolor: '#141414',
+        bgcolor: '#1c1c1e',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         borderRadius: '24px',
         padding: '16px 20px',

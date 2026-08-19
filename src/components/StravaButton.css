@@ -37,7 +37,7 @@
 }
 
 .strava-button.success {
-  background-color: #4CAF50; /* Vert */
+  background-color: var(--ok); /* Vert */
 }
 
 .strava-button.error {

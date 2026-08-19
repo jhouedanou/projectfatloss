@@ -29,7 +29,7 @@
   max-width: 500px;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
   border-radius: 24px;
-  background: linear-gradient(135deg, #18181b 0%, #111112 100%) !important;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface) 100%) !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   padding: 24px;
   margin-bottom: 32px;
@@ -99,7 +99,7 @@
   background: var(--vermilion) !important;
   color: #fff !important;
   font-weight: 800;
-  box-shadow: 0 4px 15px rgba(240, 61, 50, 0.3);
+  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
 }
 
 /* Marqueur d'entraînement sur les dates */
@@ -118,7 +118,7 @@
   background-color: var(--vermilion);
   border-radius: 50%;
   margin: 4px auto 0;
-  box-shadow: 0 0 8px rgba(240, 61, 50, 0.6);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
 }
 
 .react-calendar__tile--active .workout-marker {
@@ -128,13 +128,13 @@
 
 /* Jour avec cardio seul (pas de muscu) : pastille bleue */
 .workout-marker.cardio-only {
-  background-color: #3B82F6;
+  background-color: var(--info);
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
 }
 
 /* Carte cardio dans la liste du jour : liseré bleu pour la distinguer */
 .day-cardio-card {
-  border-left: 3px solid #3B82F6;
+  border-left: 3px solid var(--info);
 }
 
 .calories-badge {
@@ -154,7 +154,7 @@
 .selected-day-workouts {
   width: 100%;
   padding: 24px;
-  background: #18181b;
+  background: var(--surface);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 24px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);

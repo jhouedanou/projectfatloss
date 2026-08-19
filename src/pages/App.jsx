@@ -1,17 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ThemeProvider } from '@mui/material/styles';
-import { useTheme } from '@mui/material/styles';
-import { 
-  BottomNavigation, 
-  BottomNavigationAction, 
-  Paper, 
-  Fade, 
-  Slide,
-  Box,
-  alpha
-} from '@mui/material';
-import { Dumbbell, BarChart2, Scale, Sun, Moon, Settings, Calendar, Award, ArrowLeft, Apple, Bike } from 'lucide-react';
-import { createAppTheme } from '../theme';
+import { Fade } from '@mui/material';
+import { Dumbbell, BarChart2, Scale, Play, Settings, Calendar, Award, ArrowLeft, Apple, Bike, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   getActiveWorkoutPlan,
@@ -61,9 +50,9 @@ function SettingToggle({ icon, title, subtitle, checked, onToggle, ariaLabel }) 
       gap: '12px',
       padding: '14px 16px',
       margin: '0 0 12px 0',
-      borderRadius: '16px',
-      background: 'rgba(255, 255, 255, 0.03)',
-      border: '1px solid rgba(255, 255, 255, 0.08)',
+      borderRadius: 'var(--r-card)',
+      background: 'var(--surface)',
+      border: 'none',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
         {icon}
@@ -71,7 +60,7 @@ function SettingToggle({ icon, title, subtitle, checked, onToggle, ariaLabel }) 
           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
             {title}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #a1a1aa)' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, rgba(235,235,245,0.6))' }}>
             {subtitle}
           </div>
         </div>
@@ -90,7 +79,7 @@ function SettingToggle({ icon, title, subtitle, checked, onToggle, ariaLabel }) 
           border: 'none',
           cursor: 'pointer',
           padding: 0,
-          background: checked ? '#3B82F6' : 'rgba(255, 255, 255, 0.18)',
+          background: checked ? 'var(--ok)' : 'var(--surface-3)',
           transition: 'background 0.25s ease',
         }}
       >
@@ -124,15 +113,7 @@ export default function App() {
   });
   const [stepMode, setStepMode] = useState(false);
   const [autoMode, setAutoMode] = useState(false);
-  const [viewMode, setViewMode] = useState('workout'); 
-  // Thème : relit la préférence sauvegardée (clé 'theme'), sombre par défaut.
-  const [darkTheme, setDarkTheme] = useState(() => {
-    try {
-      return localStorage.getItem('theme') !== 'light';
-    } catch (error) {
-      return true;
-    }
-  });
+  const [viewMode, setViewMode] = useState('workout');
   const [showLanguageSelector, setShowLanguageSelector] = useState(() => {
     const savedPref = localStorage.getItem('showLanguageSelector');
     return false;
@@ -145,7 +126,6 @@ export default function App() {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showExercises, setShowExercises] = useState(false);
-  const [appTheme, setAppTheme] = useState(() => createAppTheme(true));
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   // Vélo de fin de séance optionnel (réglage global mémorisé)
@@ -267,25 +247,10 @@ export default function App() {
   }, [current]);
 
   useEffect(() => {
-    // La classe vit sur <body> ET <html> : le script anti-FOUC d'index.html la
-    // pose sur <html> avant React, et les variables CSS `.dark-theme {}` s'y
-    // appliquent aussi — ne retirer que celle du body laisserait le fond sombre.
-    const method = darkTheme ? 'add' : 'remove';
-    document.body.classList[method]('dark-theme');
-    document.documentElement.classList[method]('dark-theme');
-    localStorage.setItem('theme', darkTheme ? 'dark' : 'light');
-    setAppTheme(createAppTheme(darkTheme));
-  }, [darkTheme]);
-
-  useEffect(() => {
     localStorage.setItem('showLanguageSelector', showLanguageSelector);
   }, [showLanguageSelector]);
 
   // Initialisation de la synthèse vocale supprimée
-
-  const toggleTheme = () => {
-    setDarkTheme(prev => !prev);
-  };
 
   const toggleLanguageSelector = () => {
     setShowLanguageSelector(prev => !prev);
@@ -295,8 +260,19 @@ export default function App() {
     if (workoutPlan && workoutPlan.length > 0) {
       setCurrent(prev => (prev + 1) % workoutPlan.length);
     }
-    setStepMode(false); 
+    setStepMode(false);
     setShowExercises(false);
+  };
+
+  // Bouton Start central : lance la séance du jour (un jour de repos ouvre
+  // simplement la carte repos — mêmes sémantiques que le bouton de la vue jour).
+  const handleStartSession = () => {
+    setViewMode('workout');
+    setShowExercises(true);
+    if (workoutPlan && workoutPlan.length > 0 && current < workoutPlan.length
+        && !workoutPlan[current].isRestDay) {
+      setStepMode(true);
+    }
   };
   
   const handleWorkoutComplete = (workoutData) => {
@@ -357,17 +333,14 @@ export default function App() {
 
   const isPlanAvailable = workoutPlan && workoutPlan.length > 0 && current < workoutPlan.length;
 
-  const viewModeToIndex = { workout: 0, history: 1, weight: 2, calorie: 3, cardio: 4 };
-  const indexToViewMode = ['workout', 'history', 'weight', 'calorie', 'cardio'];
-
   return (
-    <ThemeProvider theme={appTheme}>
-      <div className="app" style={{ 
-        width: '100%', 
-        overflowX: 'hidden', 
+    <>
+      <div className="app" style={{
+        width: '100%',
+        overflowX: 'hidden',
         position: 'relative',
         minHeight: '100dvh',
-        paddingBottom: stepMode ? 0 : 'calc(72px + env(safe-area-inset-bottom))',
+        paddingBottom: stepMode ? 0 : 'calc(94px + env(safe-area-inset-bottom))',
       }}>
         {!stepMode && (
           <Header
@@ -376,8 +349,6 @@ export default function App() {
             onBack={showExercises ? () => setShowExercises(false) : null}
             user={user}
             onAccountClick={() => (user ? handleLogout() : setShowLogin(true))}
-            darkTheme={darkTheme}
-            onToggleTheme={toggleTheme}
           />
         )}
 
@@ -421,6 +392,26 @@ export default function App() {
                       <>
                         <HomeDashboard onStartWorkout={() => setShowExercises(true)} />
                         <HomeTrackers />
+
+                        {/* Lien rapide Cardio (sorti de la barre d'onglets) */}
+                        <div className="home-quicklinks">
+                          <button className="card press home-quicklink" onClick={() => setViewMode('cardio')}>
+                            <span className="home-quicklink-tile"><Bike size={20} /></span>
+                            <span className="home-quicklink-copy">
+                              <span className="home-quicklink-title">Cardio</span>
+                              <span className="home-quicklink-sub">Sorties vélo & marche à la demande</span>
+                            </span>
+                            <ChevronRight size={18} className="home-quicklink-chevron" />
+                          </button>
+                        </div>
+
+                        {/* En-tête de section programme + accès personnalisation */}
+                        <div className="section-head">
+                          <h2 className="section-title">Programme</h2>
+                          <button className="btn-soft" onClick={() => setShowCustomizer(true)}>
+                            <Settings size={15} /> Personnaliser
+                          </button>
+                        </div>
                         <WeekSelector
                           days={workoutPlan}
                           current={current}
@@ -434,50 +425,31 @@ export default function App() {
                       <div className="day-content">
                         <div className="hero-section">
                           <div className="hero-content">
-                            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                              <button
-                                onClick={() => setShowExercises(false)}
-                                style={{
-                                  background: 'rgba(255, 255, 255, 0.08)',
-                                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                                  color: '#fff',
-                                  padding: '8px 18px',
-                                  borderRadius: '100px',
-                                  fontSize: '0.8rem',
-                                  fontWeight: 700,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.25s ease',
-                                }}
-                              >
-                                <ArrowLeft size={14} color="#F03D32" strokeWidth={2.5} />
-                                <span>PROGRAMME</span>
-                              </button>
-                            </div>
-                            <h2 className="hero-title">{workoutPlan[current].title}</h2>
+                            <button className="btn-soft hero-back" onClick={() => setShowExercises(false)}>
+                              <ArrowLeft size={14} strokeWidth={2.5} />
+                              <span>Programme</span>
+                            </button>
+                            <h2 className="hero-title">{workoutPlan[current].title.replace(/^JOUR \d+:\s*/i, '').split(' — ')[0]}</h2>
                             <p className="hero-subtitle">
-                              {workoutPlan[current].isRestDay 
+                              {workoutPlan[current].isRestDay
                                 ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
-                                : `${workoutPlan[current].exercises.length} EXERCICES • HAUTE INTENSITÉ`}
+                                : `Jour ${current + 1} · ${workoutPlan[current].exercises.length} exercices · ~1 h`}
                             </p>
                           </div>
-                          <div className="hero-overlay"></div>
                         </div>
                       
                       {workoutPlan[current].isRestDay ? (
                         /* Affichage jour de repos */
                         <div className="rest-day-card">
-                          <Award size={80} color="#4CAF50" style={{ marginBottom: '24px' }} />
-                          <h3>{t('restDay.title', { defaultValue: 'REPOS TOTAL' })}</h3>
+                          <Award size={72} color="#30d158" style={{ marginBottom: '24px' }} />
+                          <h3>{t('restDay.title', { defaultValue: 'Repos total' })}</h3>
                           <p>{t('restDay.description', { defaultValue: 'La croissance musculaire a lieu pendant le repos. Hydratez-vous bien et préparez-vous pour demain.' })}</p>
                           <div className="sticky-btn-wrapper">
                             <button
                               className="sticky-start-btn rest-btn"
                               onClick={() => moveToNextDay()}
                             >
-                              PASSER AU JOUR SUIVANT
+                              Passer au jour suivant
                             </button>
                           </div>
                         </div>
@@ -488,7 +460,7 @@ export default function App() {
                               personnalisé) — le programme par défaut est 100 % muscu. */}
                           {currentDayHasVelo && (
                             <SettingToggle
-                              icon={<Bike size={20} color={rideStartEnabled ? '#3B82F6' : '#71717a'} />}
+                              icon={<Bike size={20} color={rideStartEnabled ? '#0a84ff' : 'rgba(235,235,245,0.32)'} />}
                               title="Sortie vélo en début de séance"
                               subtitle={rideStartEnabled
                                 ? 'Vidéo + vélo connecté avant la muscu (remplace le vélo de fin)'
@@ -502,7 +474,7 @@ export default function App() {
                           {/* Interrupteur : vélo de fin de séance optionnel */}
                           {currentDayHasVelo && !rideStartEnabled && (
                             <SettingToggle
-                              icon={<Bike size={20} color={veloEnabled ? '#3B82F6' : '#71717a'} />}
+                              icon={<Bike size={20} color={veloEnabled ? '#0a84ff' : 'rgba(235,235,245,0.32)'} />}
                               title="Vélo en fin de séance"
                               subtitle={veloEnabled ? 'Inclus dans la séance' : 'Retiré de la séance'}
                               checked={veloEnabled}
@@ -511,35 +483,33 @@ export default function App() {
                             />
                           )}
 
-                          {/* Liste d'exercices avec numérotation géante */}
-                          <div className="exercise-grid">
+                          {/* Liste groupée des exercices */}
+                          <div className="exercise-list card">
                             {workoutPlan[current].exercises.map((exo, index) => (
-                              <div key={index} className="exercise-card-premium" style={{ animationDelay: `${index * 0.1}s` }}>
-                                <div className="huge-number">{index + 1}</div>
-                                <div className="exercise-card-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                                  <div style={{ flex: 1 }}>
-                                    <h3 className="exo-name" style={{ margin: '0 0 8px 0' }}>{exo.name}</h3>
-                                    <div className="exo-tags">
-                                      <span className="tag sets-tag">{exo.sets}</span>
-                                      {exo.equip && <span className="tag equip-tag">{exo.equip}</span>}
-                                    </div>
-                                    {exo.desc && <p className="exo-desc" style={{ margin: '8px 0 0 0' }}>{exo.desc}</p>}
-                                  </div>
-                                  <div style={{ alignSelf: 'center', zIndex: 10 }}>
-                                    <YouTubeButton exercise={exo} />
-                                  </div>
+                              <div key={index} className="exercise-row">
+                                <span className="exercise-row-num">{index + 1}</span>
+                                <div className="exercise-row-copy">
+                                  <h3 className="exercise-row-name">{exo.name}</h3>
+                                  <span className="exercise-row-meta">
+                                    {exo.sets}{exo.equip ? ` · ${exo.equip}` : ''}
+                                  </span>
+                                  {exo.desc && <p className="exercise-row-desc">{exo.desc}</p>}
+                                </div>
+                                <div className="exercise-row-action">
+                                  <YouTubeButton exercise={exo} />
                                 </div>
                               </div>
                             ))}
                           </div>
-                          
+
                           {/* Sticky Start Button */}
                           <div className="sticky-btn-wrapper">
-                            <button 
-                              className="sticky-start-btn pulse-glow" 
+                            <button
+                              className="sticky-start-btn"
                               onClick={() => setStepMode(true)}
                             >
-                              COMMENCER L'ENTRAÎNEMENT
+                              <Play size={18} fill="currentColor" />
+                              Commencer l'entraînement
                             </button>
                           </div>
                         </div>
@@ -601,142 +571,47 @@ export default function App() {
           </Fade>
         </div>
         
-        {/* Bouton flottant personnaliser - repositionné au-dessus de la bottom nav */}
-        {!stepMode && viewMode === 'workout' && !showExercises && (
-          <button 
-            className="floating-customize-button"
-            onClick={() => setShowCustomizer(true)}
-            title={t('settings.customizeProgram')}
-            style={{
-              position: 'fixed',
-              bottom: '88px',
-              right: '20px',
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              background: '#F03D32',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              boxShadow: '0 6px 16px rgba(240, 61, 50, 0.35)',
-              backdropFilter: 'blur(10px)',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              zIndex: 1000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px) scale(1.1)';
-              e.currentTarget.style.boxShadow = '0 10px 24px rgba(240, 61, 50, 0.45)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.boxShadow = '0 6px 16px rgba(240, 61, 50, 0.35)';
-            }}
-          >
-            <Settings size={22} />
-          </button>
+        {/* Barre d'onglets — 2+2 autour du bouton Start central, cachée en séance */}
+        {!stepMode && (
+          <nav className="tabbar">
+            <button
+              className={`tabbar-tab${viewMode === 'workout' ? ' active' : ''}`}
+              onClick={() => { setViewMode('workout'); setShowExercises(false); }}
+            >
+              <Dumbbell size={22} />
+              <span>{t('nav.workout')}</span>
+            </button>
+            <button
+              className={`tabbar-tab${viewMode === 'history' ? ' active' : ''}`}
+              onClick={() => setViewMode('history')}
+            >
+              <BarChart2 size={22} />
+              <span>{t('nav.history')}</span>
+            </button>
+            <button
+              className="tabbar-start"
+              aria-label="Démarrer la séance du jour"
+              onClick={handleStartSession}
+            >
+              <Play size={26} fill="currentColor" />
+            </button>
+            <button
+              className={`tabbar-tab${viewMode === 'calorie' ? ' active' : ''}`}
+              onClick={() => setViewMode('calorie')}
+            >
+              <Apple size={22} />
+              <span>{t('nav.calorie', { defaultValue: 'Nutrition' })}</span>
+            </button>
+            <button
+              className={`tabbar-tab${viewMode === 'weight' ? ' active' : ''}`}
+              onClick={() => setViewMode('weight')}
+            >
+              <Scale size={22} />
+              <span>{t('nav.weight')}</span>
+            </button>
+          </nav>
         )}
 
-        {/* Bottom Navigation Bar - cachée en mode workout actif */}
-        {!stepMode && (
-          <Paper
-            sx={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              maxWidth: '768px',
-              mx: 'auto',
-              zIndex: 1100,
-              borderTop: (theme) => `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-              backdropFilter: 'blur(20px)',
-              backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.92),
-              pb: 'env(safe-area-inset-bottom)',
-            }}
-            elevation={8}
-          >
-            <Box sx={{ display: 'flex', height: '68px', alignItems: 'stretch' }}>
-              <BottomNavigation
-                value={viewModeToIndex[viewMode]}
-                onChange={(event, newValue) => {
-                  setViewMode(indexToViewMode[newValue]);
-                }}
-                sx={{
-                  flex: 1,
-                  height: '68px',
-                  backgroundColor: 'transparent',
-                  '& .MuiBottomNavigationAction-root': {
-                    minWidth: 'auto',
-                    padding: '6px 0',
-                    transition: 'all 0.2s ease-in-out',
-                    '&.Mui-selected': {
-                      '& .MuiSvgIcon-root': {
-                        transform: 'scale(1.15)',
-                      },
-                    },
-                  },
-                  '& .MuiBottomNavigationAction-label': {
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.3px',
-                    '&.Mui-selected': {
-                      fontSize: '0.72rem',
-                    },
-                  },
-                }}
-              >
-                <BottomNavigationAction 
-                  label={t('nav.workout')} 
-                  icon={<Dumbbell size={20} />} 
-                  sx={{
-                    '&.Mui-selected': {
-                      color: (theme) => theme.palette.primary.main,
-                    },
-                  }}
-                />
-                <BottomNavigationAction 
-                  label={t('nav.history')} 
-                  icon={<BarChart2 size={20} />} 
-                  sx={{
-                    '&.Mui-selected': {
-                      color: (theme) => theme.palette.secondary.main,
-                    },
-                  }}
-                />
-                <BottomNavigationAction 
-                  label={t('nav.weight')} 
-                  icon={<Scale size={20} />} 
-                  sx={{
-                    '&.Mui-selected': {
-                      color: '#10B981',
-                    },
-                  }}
-                />
-                <BottomNavigationAction
-                  label={t('nav.calorie', { defaultValue: 'Calories' })}
-                  icon={<Apple size={20} />}
-                  sx={{
-                    '&.Mui-selected': {
-                      color: '#F03D32',
-                    },
-                  }}
-                />
-                <BottomNavigationAction
-                  label={t('nav.cardio', { defaultValue: 'Cardio' })}
-                  icon={<Bike size={20} />}
-                  sx={{
-                    '&.Mui-selected': {
-                      color: '#3B82F6',
-                    },
-                  }}
-                />
-              </BottomNavigation>
-            </Box>
-          </Paper>
-        )}
-        
         {/* Boîte de dialogue des paramètres de notification */}
         <NotificationSettingsDialog
           open={showNotificationSettings}
@@ -749,6 +624,6 @@ export default function App() {
           onClose={() => setShowProfile(false)}
         />
       </div>
-    </ThemeProvider>
+    </>
   );
 }

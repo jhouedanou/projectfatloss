@@ -66,7 +66,7 @@ function WorkoutStats() {
         </div>
         <div className="stat-item stat-duration">
           <div className="stat-icon" style={{ display: 'flex', justifyContent: 'center' }}>
-            <Timer size={24} color="#4CAF50" />
+            <Timer size={24} color="#30d158" />
           </div>
           <div className="stat-value">
             {Math.floor(stats.totalDuration / 60)}h{' '}

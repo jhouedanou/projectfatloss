@@ -354,7 +354,7 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
   return (
     <div className="modal-overlay">
       <div className="modal-content" style={{
-        background: 'linear-gradient(135deg, #141416 0%, #0d0d0e 100%)',
+        background: 'linear-gradient(135deg, #1c1c1e 0%, #000000 100%)',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '24px',
         padding: '36px 24px 28px',
@@ -386,7 +386,7 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
           fontWeight: 900, 
           marginBottom: '4px', 
           letterSpacing: '-0.5px',
-          background: 'linear-gradient(135deg, #fff 30%, #a1a1aa 100%)',
+          background: 'linear-gradient(135deg, #fff 30%, rgba(235,235,245,0.6) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent'
         }}>
@@ -449,11 +449,11 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
             gap: '6px'
           }}>
             <Flame size={20} color="var(--vermilion)" />
-            <span style={{ color: '#71717a', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <span style={{ color: 'rgba(235,235,245,0.32)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Calories
             </span>
             <span style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 900, fontFamily: "'Outfit', sans-serif" }}>
-              {totalCalories} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#71717a' }}>kcal</span>
+              {totalCalories} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(235,235,245,0.32)' }}>kcal</span>
             </span>
           </div>
 
@@ -467,18 +467,18 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
             alignItems: 'center',
             gap: '6px'
           }}>
-            <Dumbbell size={20} color="#3b82f6" />
-            <span style={{ color: '#71717a', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <Dumbbell size={20} color="#0a84ff" />
+            <span style={{ color: 'rgba(235,235,245,0.32)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Volume
             </span>
             <span style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 900, fontFamily: "'Outfit', sans-serif" }}>
-              {totalWeightLifted} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#71717a' }}>kg</span>
+              {totalWeightLifted} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(235,235,245,0.32)' }}>kg</span>
             </span>
           </div>
         </div>
 
         <p className="motivation-text" style={{ 
-          color: '#a1a1aa', 
+          color: 'rgba(235,235,245,0.6)', 
           fontSize: '0.82rem', 
           lineHeight: 1.5, 
           margin: '0 0 24px 0',
@@ -500,7 +500,7 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
               background: isSynced 
                 ? 'rgba(16, 185, 129, 0.08)' 
                 : 'linear-gradient(135deg, #4285F4 0%, #357ae8 100%)',
-              color: isSynced ? '#10b981' : 'white',
+              color: isSynced ? '#30d158' : 'white',
               fontSize: '0.88rem',
               fontWeight: '800',
               fontFamily: "'Outfit', sans-serif",
@@ -542,7 +542,7 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
               padding: '14px',
               borderRadius: '14px',
               border: 'none',
-              background: 'linear-gradient(135deg, var(--vermilion), #c41e0b)',
+              background: 'linear-gradient(135deg, var(--vermilion), #c9271d)',
               color: '#fff',
               fontWeight: 800,
               fontFamily: "'Outfit', sans-serif",
@@ -572,7 +572,7 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
               borderRadius: '14px',
               border: '1px solid rgba(255, 255, 255, 0.08)',
               background: 'rgba(255, 255, 255, 0.02)',
-              color: '#a1a1aa',
+              color: 'rgba(235,235,245,0.6)',
               fontWeight: 700,
               fontFamily: "'Outfit', sans-serif",
               fontSize: '0.88rem',
@@ -589,7 +589,7 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
-              e.currentTarget.style.color = '#a1a1aa';
+              e.currentTarget.style.color = 'rgba(235,235,245,0.6)';
               e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
             }}
           >
@@ -1803,7 +1803,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               </Typography>
             ) : (
               <>
-                <Typography variant="h4" component="div" sx={{ mb: 2, color: '#4CAF50' }}>
+                <Typography variant="h4" component="div" sx={{ mb: 2, color: '#30d158' }}>
                   OK !
                 </Typography>
                 {isDoubleSided ? (
@@ -1813,7 +1813,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
                     </Typography>
                     {side === 0 ? (
                       <>
-                        <Typography variant="h5" sx={{ fontWeight: 700, color: '#3b82f6' }}>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: '#0a84ff' }}>
                           {sideSwitchCountdown > 0
                             ? `Changez de côté… ${sideSwitchCountdown}`
                             : 'Changez de côté !'}
@@ -1923,8 +1923,8 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
                 borderRadius: '100px',
                 fontWeight: 700,
                 ...(exerciseLoad === kg
-                  ? { background: '#F03D32', '&:hover': { background: '#d43429' } }
-                  : { borderColor: 'rgba(255,255,255,0.25)', color: '#a1a1aa' }),
+                  ? { background: '#F03D32', '&:hover': { background: '#c9271d' } }
+                  : { borderColor: 'rgba(255,255,255,0.25)', color: 'rgba(235,235,245,0.6)' }),
               }}
             >
               {kg} kg
@@ -1964,8 +1964,8 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
                 borderRadius: '100px',
                 fontWeight: 700,
                 ...(exerciseLoad != null && !STANDARD_LOADS_KG.includes(exerciseLoad)
-                  ? { background: '#F03D32', '&:hover': { background: '#d43429' } }
-                  : { borderColor: 'rgba(255,255,255,0.25)', color: '#a1a1aa' }),
+                  ? { background: '#F03D32', '&:hover': { background: '#c9271d' } }
+                  : { borderColor: 'rgba(255,255,255,0.25)', color: 'rgba(235,235,245,0.6)' }),
               }}
             >
               {exerciseLoad != null && !STANDARD_LOADS_KG.includes(exerciseLoad) ? `${exerciseLoad} kg` : 'Autre'}
@@ -1973,15 +1973,15 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
           )}
         </Box>
         {/* Estimation recalculée avec la charge choisie */}
-        <Typography variant="caption" sx={{ color: '#a1a1aa', display: 'block', textAlign: 'center', mb: 1.5 }}>
+        <Typography variant="caption" sx={{ color: 'rgba(235,235,245,0.6)', display: 'block', textAlign: 'center', mb: 1.5 }}>
           ≈ {caloriesPerSet} kcal / série{exerciseLoad != null ? ` avec ${exerciseLoad} kg` : ''}
         </Typography>
         
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
           {exo.equip && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 1.5, py: 0.5, borderRadius: '100px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <Dumbbell size={14} color="#a1a1aa" />
-              <Typography variant="caption" sx={{ color: '#a1a1aa', fontWeight: 600 }}>{exo.equip}</Typography>
+              <Dumbbell size={14} color="rgba(235,235,245,0.6)" />
+              <Typography variant="caption" sx={{ color: 'rgba(235,235,245,0.6)', fontWeight: 600 }}>{exo.equip}</Typography>
             </Box>
           )}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(240, 61, 50, 0.1)', px: 1.5, py: 0.5, borderRadius: '100px', border: '1px solid rgba(240, 61, 50, 0.3)' }}>
@@ -2019,12 +2019,12 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               mb: 2, 
               fontFamily: 'monospace', 
               letterSpacing: 2,
-              color: exerciseTimer <= 10 ? '#FF5252' : (timerRunning ? 'success.main' : 'text.primary')
+              color: exerciseTimer <= 10 ? '#ff453a' : (timerRunning ? 'success.main' : 'text.primary')
             }}>
               {Math.floor(exerciseTimer / 60).toString().padStart(2, '0')}:{(exerciseTimer % 60).toString().padStart(2, '0')}
             </Typography>
             {exerciseTimer <= 10 && exerciseTimer > 0 && (
-              <Typography variant="body2" sx={{ mb: 1, color: '#FF5252', fontWeight: 'bold' }}>
+              <Typography variant="body2" sx={{ mb: 1, color: '#ff453a', fontWeight: 'bold' }}>
                 ⚠️ Plus que {exerciseTimer} secondes !
               </Typography>
             )}
@@ -2061,12 +2061,12 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               mb: 2, 
               fontFamily: 'monospace', 
               letterSpacing: 2,
-              color: chrono >= 300 ? '#FF5252' : 'inherit' // Rouge quand durée maximale atteinte
+              color: chrono >= 300 ? '#ff453a' : 'inherit' // Rouge quand durée maximale atteinte
             }}>
               {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
             </Typography>
             {chrono >= 300 && (
-              <Typography variant="body2" sx={{ mb: 1, color: '#FF5252', fontWeight: 'bold' }}>
+              <Typography variant="body2" sx={{ mb: 1, color: '#ff453a', fontWeight: 'bold' }}>
                 ⚠️ Durée maximale atteinte (5 min)
               </Typography>
             )}
@@ -2102,12 +2102,12 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               mb: 2, 
               fontFamily: 'monospace', 
               letterSpacing: 2, 
-              color: chrono >= 300 ? '#FF5252' : (side === 0 ? 'primary.main' : 'success.main')
+              color: chrono >= 300 ? '#ff453a' : (side === 0 ? 'primary.main' : 'success.main')
             }}>
               {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
             </Typography>
             {chrono >= 300 && (
-              <Typography variant="body2" sx={{ mb: 1, color: '#FF5252', fontWeight: 'bold' }}>
+              <Typography variant="body2" sx={{ mb: 1, color: '#ff453a', fontWeight: 'bold' }}>
                 ⚠️ Durée maximale atteinte (5 min)
               </Typography>
             )}
@@ -2131,7 +2131,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               {side === 0 ? (
                 <button 
                   className="btn-timer-primary" 
-                  style={{ background: '#3b82f6', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)' }}
+                  style={{ background: '#0a84ff', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)' }}
                   onClick={() => { 
                     setChronoRunning(false); 
                     setSide(1); 
@@ -2157,18 +2157,18 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         ) : (
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 2, py: 1, borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <RotateCcw size={18} color="#a1a1aa" />
+              <RotateCcw size={18} color="rgba(235,235,245,0.6)" />
               <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>{exo.nbRep} Reps</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 2, py: 1, borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <Timer size={18} color="#a1a1aa" />
+              <Timer size={18} color="rgba(235,235,245,0.6)" />
               <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>{exo.sets}</Typography>
             </Box>
             {/* Exercice unilatéral : le côté en cours change tout seul, il doit
                 rester lisible d'un coup d'œil pendant l'effort. */}
             {isDoubleSided && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(59, 130, 246, 0.15)', px: 2, py: 1, borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.4)' }}>
-                <Repeat size={18} color="#3b82f6" />
+                <Repeat size={18} color="#0a84ff" />
                 <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>Côté {side + 1} / 2</Typography>
               </Box>
             )}

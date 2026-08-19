@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flame, Scale as ScaleIcon, Flag, Activity, Clock } from 'lucide-react';
+import { Flame, Scale as ScaleIcon, Flag, Clock, Dumbbell, Leaf } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
 import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
@@ -79,6 +79,30 @@ export default function HomeDashboard({ onStartWorkout }) {
   const done = weekWorkouts.length;
   const percent = Math.min(100, (done / target) * 100);
 
+  // Bande semaine : 7 cellules (lundi → dimanche) avec statut par jour.
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  const weekStrip = useMemo(() => {
+    const weekStartIndex = Math.floor(currentDayIndex / 7) * 7;
+    const doneDates = new Set(weekWorkouts.map(w => new Date(w.date).toISOString().slice(0, 10)));
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(weekStart);
+      date.setDate(date.getDate() + i);
+      const planDay = plan[weekStartIndex + i];
+      return {
+        num: date.getDate(),
+        isToday: i === todayIdx,
+        isDone: doneDates.has(date.toISOString().slice(0, 10)),
+        isRest: planDay ? planDay.isRestDay === true : false,
+      };
+    });
+  }, [plan, currentDayIndex, weekWorkouts, todayIdx]);
+
+  // Séance du jour, pour la carte « Aujourd'hui ».
+  const todayPlanDay = plan[currentDayIndex] || null;
+  const todayTitle = todayPlanDay
+    ? todayPlanDay.title.replace(/^JOUR \d+:\s*/i, '').split(' — ')[0]
+    : '';
+
   const weekCalories = weekWorkouts.reduce((s, w) => s + (w.calories || 0), 0);
 
   const currentWeight = weights.length ? weights[weights.length - 1].weight : null;
@@ -128,9 +152,45 @@ export default function HomeDashboard({ onStartWorkout }) {
   return (
     <div className="hd-root">
       <div className="hd-header">
-        <h1 className="hd-title">{t('home.title', { defaultValue: 'Aujourd\'hui' })}</h1>
-        <p className="hd-subtitle">{t('home.subtitle', { defaultValue: 'Vue d\'ensemble de la semaine' })}</p>
+        <h1 className="hd-title page-title">{t('home.title', { defaultValue: 'Aujourd\'hui' })}</h1>
+        <p className="hd-subtitle page-subtitle">{t('home.subtitle', { defaultValue: 'Vue d\'ensemble de la semaine' })}</p>
       </div>
+
+      {/* Bande semaine : lundi → dimanche */}
+      <div className="hd-week" aria-hidden="true">
+        {weekStrip.map((d, i) => (
+          <div key={i} className={`hd-week-day${d.isToday ? ' today' : ''}`}>
+            <span className="hd-week-num">{d.num}</span>
+            <span className={`hd-week-dot ${d.isDone ? 'done' : d.isRest ? 'rest' : 'up'}`} />
+          </div>
+        ))}
+      </div>
+
+      {/* Carte séance du jour */}
+      {todayPlanDay && (
+        <div className="hd-today card">
+          <span className={`hd-today-tile${todayPlanDay.isRestDay ? ' rest' : ''}`}>
+            {todayPlanDay.isRestDay ? <Leaf size={20} /> : <Dumbbell size={20} />}
+          </span>
+          <span className="hd-today-copy">
+            <span className="hd-today-title">
+              {todayPlanDay.isRestDay ? t('restDay.title', { defaultValue: 'Jour de repos' }) : todayTitle}
+            </span>
+            <span className="hd-today-sub">
+              {todayPlanDay.isRestDay
+                ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
+                : `${(todayPlanDay.exercises || []).length} exercices · ~1 h`}
+            </span>
+          </span>
+          {onStartWorkout && (
+            <button className="btn-soft" onClick={onStartWorkout}>
+              {todayPlanDay.isRestDay
+                ? t('home.view', { defaultValue: 'Voir' })
+                : t('home.start', { defaultValue: 'Démarrer' })}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="hd-top">
         <Ring
@@ -223,12 +283,6 @@ export default function HomeDashboard({ onStartWorkout }) {
         </div>
       )}
 
-      {onStartWorkout && (
-        <button className="hd-primary-action" onClick={onStartWorkout}>
-          <Activity size={18} strokeWidth={2.4} />
-          <span>{t('home.openTodayWorkout', { defaultValue: 'Voir la séance du jour' })}</span>
-        </button>
-      )}
     </div>
   );
 }

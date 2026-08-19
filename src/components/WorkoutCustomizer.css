@@ -69,7 +69,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 20px;
   cursor: pointer;
-  color: #a1a1aa;
+  color: var(--label-2);
   height: 32px;
   width: 32px;
   display: flex;
@@ -80,19 +80,19 @@
 }
 
 .close-button:hover {
-  background-color: rgba(240, 61, 50, 0.2);
+  background-color: rgba(var(--accent-rgb), 0.2);
   color: #fff;
-  border-color: rgba(240, 61, 50, 0.4);
+  border-color: rgba(var(--accent-rgb), 0.4);
 }
 
 .dark-theme .close-button:hover {
-  background-color: rgba(240, 61, 50, 0.2);
+  background-color: rgba(var(--accent-rgb), 0.2);
 }
 
 .success-message {
   background-color: rgba(76, 175, 80, 0.1);
   border: 1px solid rgba(76, 175, 80, 0.2);
-  color: #4caf50;
+  color: var(--ok);
   padding: 10px 14px;
   border-radius: 12px;
   margin-bottom: 20px;
@@ -103,9 +103,9 @@
 }
 
 .error-message {
-  background-color: rgba(240, 61, 50, 0.1);
-  border: 1px solid rgba(240, 61, 50, 0.2);
-  color: #f03d32;
+  background-color: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  color: var(--acc);
   padding: 10px 14px;
   border-radius: 12px;
   margin-bottom: 20px;
@@ -125,7 +125,7 @@
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #a1a1aa;
+  color: var(--label-2);
 }
 
 .day-selector select {
@@ -143,8 +143,8 @@
 }
 
 .day-selector select:focus {
-  border-color: #f03d32;
-  box-shadow: 0 0 0 3px rgba(240, 61, 50, 0.25);
+  border-color: var(--acc);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.25);
   background-color: rgba(0, 0, 0, 0.4);
 }
 
@@ -216,25 +216,25 @@
 .exercise-info {
   display: flex;
   font-size: 0.85rem;
-  color: #a1a1aa;
+  color: var(--label-2);
   gap: 12px;
 }
 
 .dark-theme .exercise-info {
-  color: #a1a1aa;
+  color: var(--label-2);
 }
 
 .exercise-sets {
   font-weight: 700;
-  color: #f03d32;
+  color: var(--acc);
 }
 
 .dark-theme .exercise-sets {
-  color: #f03d32;
+  color: var(--acc);
 }
 
 .exercise-equip {
-  color: #a1a1aa;
+  color: var(--label-2);
 }
 
 .exercise-actions {
@@ -245,7 +245,7 @@
 .edit-button, .delete-button {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #a1a1aa;
+  color: var(--label-2);
   cursor: pointer;
   padding: 8px;
   border-radius: 10px;
@@ -262,9 +262,9 @@
 }
 
 .delete-button:hover {
-  background-color: rgba(240, 61, 50, 0.15);
-  color: #f03d32;
-  border-color: rgba(240, 61, 50, 0.3);
+  background-color: rgba(var(--accent-rgb), 0.15);
+  color: var(--acc);
+  border-color: rgba(var(--accent-rgb), 0.3);
 }
 
 .edit-button:disabled, .delete-button:disabled {
@@ -359,11 +359,11 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #a1a1aa;
+  color: var(--label-2);
 }
 
 .dark-theme .form-group label {
-  color: #a1a1aa;
+  color: var(--label-2);
 }
 
 .form-group input, .form-group textarea, .form-group select {
@@ -380,8 +380,8 @@
 }
 
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-  border-color: #f03d32;
-  box-shadow: 0 0 0 3px rgba(240, 61, 50, 0.25);
+  border-color: var(--acc);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.25);
   background-color: rgba(0, 0, 0, 0.2);
 }
 
@@ -412,22 +412,22 @@
 }
 
 .save-button {
-  background-color: #f03d32;
+  background-color: var(--acc);
   color: white;
   border: none;
-  box-shadow: 0 4px 15px rgba(240, 61, 50, 0.3);
+  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
 }
 
 .save-button:hover {
   background-color: #d62d24;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(240, 61, 50, 0.4);
+  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.4);
 }
 
 .cancel-button {
   background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #a1a1aa;
+  color: var(--label-2);
 }
 
 .cancel-button:hover {
@@ -438,7 +438,7 @@
 
 .dark-theme .cancel-button {
   border-color: rgba(255, 255, 255, 0.15);
-  color: #a1a1aa;
+  color: var(--label-2);
 }
 
 .dark-theme .cancel-button:hover {
@@ -448,9 +448,9 @@
 .reset-button {
   width: 100%;
   padding: 12px;
-  background-color: rgba(240, 61, 50, 0.06);
-  color: #f03d32;
-  border: 1px solid rgba(240, 61, 50, 0.15);
+  background-color: rgba(var(--accent-rgb), 0.06);
+  color: var(--acc);
+  border: 1px solid rgba(var(--accent-rgb), 0.15);
   border-radius: 12px;
   cursor: pointer;
   font-family: 'Outfit', sans-serif;
@@ -463,8 +463,8 @@
 }
 
 .reset-button:hover {
-  background-color: rgba(240, 61, 50, 0.12);
-  border-color: rgba(240, 61, 50, 0.3);
+  background-color: rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--accent-rgb), 0.3);
 }
 
 .reset-button:disabled {

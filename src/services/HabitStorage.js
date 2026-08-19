@@ -15,7 +15,7 @@ const LOG_KEY = 'habit_log';
 export const HABITS = [
   { id: 'water', icon: '💧', color: '#38BDF8', labelKey: 'home.habits.water', labelFr: 'Hydratation' },
   { id: 'sleep', icon: '😴', color: '#A78BFA', labelKey: 'home.habits.sleep', labelFr: 'Sommeil 7 h+' },
-  { id: 'nutrition', icon: '🥗', color: '#4ADE80', labelKey: 'home.habits.nutrition', labelFr: 'Nutrition' },
+  { id: 'nutrition', icon: '🥗', color: '#30d158', labelKey: 'home.habits.nutrition', labelFr: 'Nutrition' },
   { id: 'walk', icon: '🚶', color: '#FBBF24', labelKey: 'home.habits.walk', labelFr: 'Marche' },
   { id: 'stretch', icon: '🧘', color: '#F472B6', labelKey: 'home.habits.stretch', labelFr: 'Étirements' },
 ];
