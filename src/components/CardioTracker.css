@@ -65,8 +65,8 @@
 }
 
 .cardio-type-toggle button.active {
-  background: #F03D32;
-  border-color: #F03D32;
+  background: var(--acc);
+  border-color: var(--acc);
   color: #fff;
 }
 
@@ -96,7 +96,7 @@
   font-size: 1rem;
 }
 
-.cardio-inputs input:focus { outline: none; border-color: #F03D32; }
+.cardio-inputs input:focus { outline: none; border-color: var(--acc); }
 
 .cardio-add-btn {
   width: 100%;
@@ -107,12 +107,12 @@
   padding: 14px;
   border: none;
   border-radius: 12px;
-  background: #F03D32;
+  background: var(--acc);
   color: #fff;
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(240, 61, 50, 0.3);
+  box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.3);
 }
 
 .cardio-list { display: flex; flex-direction: column; gap: 10px; }
@@ -141,8 +141,8 @@
   flex-shrink: 0;
   color: #fff;
 }
-.cardio-item.walk .cardio-item-icon { background: #10B981; }
-.cardio-item.bike .cardio-item-icon { background: #3B82F6; }
+.cardio-item.walk .cardio-item-icon { background: var(--ok); }
+.cardio-item.bike .cardio-item-icon { background: var(--info); }
 
 .cardio-item-main { flex: 1; min-width: 0; }
 
@@ -154,7 +154,7 @@
 .cardio-item-date { font-size: 0.75rem; color: var(--text-tertiary, #9a9aa2); text-transform: capitalize; }
 
 .cardio-item-meta { display: flex; gap: 12px; font-size: 0.8rem; color: var(--text-tertiary, #b5b5bd); }
-.cardio-item-meta .cardio-cal { color: #F03D32; font-weight: 700; }
+.cardio-item-meta .cardio-cal { color: var(--acc); font-weight: 700; }
 
 .cardio-del {
   background: transparent; border: none; color: var(--text-tertiary, #76767e);
@@ -163,7 +163,7 @@
   min-width: 44px; min-height: 44px;
   display: inline-flex; align-items: center; justify-content: center;
 }
-.cardio-del:hover { color: #F03D32; }
+.cardio-del:hover { color: var(--acc); }
 
 /* Sélecteur vélo / marche */
 .cardio-type-switch {
@@ -181,20 +181,20 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: transparent;
-  color: var(--text-secondary, #a1a1aa);
+  color: var(--text-secondary, var(--label-2));
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 .cardio-type-btn.is-active {
   background: rgba(59, 130, 246, 0.18);
-  border-color: #3B82F6;
-  color: #3B82F6;
+  border-color: var(--info);
+  color: var(--info);
 }
 .cardio-type-btn.is-active.is-walk {
   background: rgba(34, 197, 94, 0.18);
-  border-color: #22C55E;
-  color: #22C55E;
+  border-color: var(--ok);
+  color: var(--ok);
 }
 
 @media (max-width: 400px) {

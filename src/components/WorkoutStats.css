@@ -32,7 +32,7 @@
 }
 
 .stat-item {
-  background: linear-gradient(135deg, #18181b 0%, #111112 100%);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface) 100%);
   border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 20px 16px;
   border-radius: 20px;
@@ -67,11 +67,11 @@
 }
 
 .stat-calories::before {
-  background: #FF9800;
+  background: var(--warn);
 }
 
 .stat-duration::before {
-  background: #10B981;
+  background: var(--ok);
 }
 
 .stat-icon {
@@ -122,7 +122,7 @@
 
 .top-exercises {
   width: 100%;
-  background: #18181b;
+  background: var(--surface);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 24px;
   padding: 24px;
@@ -198,8 +198,8 @@
   font-size: 1.1rem;
   font-weight: 800;
   color: var(--vermilion);
-  background: rgba(240, 61, 50, 0.1);
-  border: 1px solid rgba(240, 61, 50, 0.2);
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
   padding: 6px 12px;
   border-radius: 12px;
   white-space: nowrap;

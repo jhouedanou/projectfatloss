@@ -86,11 +86,11 @@ const CardioTracker = () => {
             <div><strong>{Math.round(stats.totalCalories)}</strong><span>kcal brûlées</span></div>
           </div>
           <div className="cardio-stat">
-            <Bike size={18} color="#3B82F6" />
+            <Bike size={18} color="#0a84ff" />
             <div><strong>{stats.byType.bike.count}</strong><span>séances vélo</span></div>
           </div>
           <div className="cardio-stat">
-            <Footprints size={18} color="#22C55E" />
+            <Footprints size={18} color="#30d158" />
             <div><strong>{stats.byType.walk.count}</strong><span>marches</span></div>
           </div>
         </div>

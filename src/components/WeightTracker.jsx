@@ -224,7 +224,7 @@ function WeightTracker() {
         <div className="weight-stats">
           <div className="stat-card current-weight">
             <div className="stat-title">{t('weight.currentWeight', { defaultValue: 'Poids Actuel' })}</div>
-            <div className="stat-value">{stats.current.weight} <span style={{ fontSize: '1rem', color: '#71717a' }}>kg</span></div>
+            <div className="stat-value">{stats.current.weight} <span style={{ fontSize: '1rem', color: 'rgba(235,235,245,0.32)' }}>kg</span></div>
             <div className="stat-date">{formatDate(stats.current.date)}</div>
           </div>
           
@@ -271,12 +271,12 @@ function WeightTracker() {
               data={chartData}
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
-              <XAxis dataKey="date" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} dy={10} />
-              <YAxis domain={['dataMin - 2', 'dataMax + 2']} stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(84, 84, 88, 0.35)" vertical={false} />
+              <XAxis dataKey="date" stroke="rgba(235,235,245,0.32)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+              <YAxis domain={['dataMin - 2', 'dataMax + 2']} stroke="rgba(235,235,245,0.32)" fontSize={11} tickLine={false} axisLine={false} />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: 'rgba(20, 20, 22, 0.9)', 
+                  backgroundColor: '#1c1c1e',
                   border: '1px solid rgba(255, 255, 255, 0.1)', 
                   borderRadius: '12px',
                   color: '#fff',
@@ -289,7 +289,7 @@ function WeightTracker() {
                 stroke="var(--vermilion)" 
                 activeDot={{ r: 6, fill: 'var(--vermilion)', stroke: '#fff', strokeWidth: 2 }} 
                 strokeWidth={3}
-                dot={{ r: 3, fill: '#18181b', stroke: 'var(--vermilion)', strokeWidth: 2 }}
+                dot={{ r: 3, fill: '#1c1c1e', stroke: 'var(--vermilion)', strokeWidth: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -316,7 +316,7 @@ function WeightTracker() {
             {weightRecords.slice().reverse().map(record => (
               <div key={record.id} className="weight-record">
                 <div className="record-info">
-                  <div className="record-weight">{record.weight} <span style={{ fontSize: '0.9rem', color: '#71717a', fontWeight: 600 }}>kg</span></div>
+                  <div className="record-weight">{record.weight} <span style={{ fontSize: '0.9rem', color: 'rgba(235,235,245,0.32)', fontWeight: 600 }}>kg</span></div>
                   <div className="record-date">{formatDate(record.date)}</div>
                   {record.notes && <div className="record-notes">{record.notes}</div>}
                 </div>

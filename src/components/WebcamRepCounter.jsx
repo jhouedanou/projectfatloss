@@ -80,7 +80,7 @@ export default function WebcamRepCounter({ exo, currentRep = 0, targetReps = 0, 
     const oy = (h - dh) / 2;
     const px = (p) => [ox + p.x * dw, oy + p.y * dh];
 
-    const color = ok ? '#4CAF50' : '#FFB300';
+    const color = ok ? '#30d158' : '#FFB300';
     ctx.lineWidth = Math.max(2, 3 * dpr);
     ctx.strokeStyle = color;
     ctx.fillStyle = color;

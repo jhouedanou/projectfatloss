@@ -24,8 +24,8 @@ const MUSCLE_LABELS_FR = {
 };
 
 const MUSCLE_COLORS = [
-  '#F03D32', '#38BDF8', '#4ADE80', '#FBBF24', '#A78BFA',
-  '#F472B6', '#2DD4BF', '#FB923C', '#818CF8', '#A3E635',
+  '#F03D32', '#0a84ff', '#30d158', '#ffd60a', '#bf5af2',
+  '#ff375f', '#63e6e2', '#ff9f0a', '#5e5ce6', '#a8e05f',
 ];
 
 function startOfWeek(d = new Date()) {
@@ -295,7 +295,7 @@ function HabitTrackerCard({ history }) {
                   </button>
                 );
               })}
-              <div className="ht-habit-pct" style={{ color: pct >= 60 ? '#4ADE80' : pct >= 30 ? '#FBBF24' : 'inherit' }}>
+              <div className="ht-habit-pct" style={{ color: pct >= 60 ? '#30d158' : pct >= 30 ? '#ffd60a' : 'inherit' }}>
                 {pct}%
               </div>
             </React.Fragment>

@@ -85,7 +85,7 @@ function DayPills({ days, current, setCurrent, setStepMode }) {
       iconColor = '#F03D32';
       IconComponent = isRestDay ? Leaf : Dumbbell;
     } else if (isCompleted) {
-      iconColor = '#4CAF50';
+      iconColor = '#30d158';
       IconComponent = CheckCircle2;
     } else {
       IconComponent = isRestDay ? Leaf : Dumbbell;

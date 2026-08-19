@@ -60,7 +60,7 @@ function SettingToggle({ icon, title, subtitle, checked, onToggle, ariaLabel }) 
           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
             {title}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #a1a1aa)' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, rgba(235,235,245,0.6))' }}>
             {subtitle}
           </div>
         </div>
@@ -441,7 +441,7 @@ export default function App() {
                       {workoutPlan[current].isRestDay ? (
                         /* Affichage jour de repos */
                         <div className="rest-day-card">
-                          <Award size={72} color="var(--ok)" style={{ marginBottom: '24px' }} />
+                          <Award size={72} color="#30d158" style={{ marginBottom: '24px' }} />
                           <h3>{t('restDay.title', { defaultValue: 'Repos total' })}</h3>
                           <p>{t('restDay.description', { defaultValue: 'La croissance musculaire a lieu pendant le repos. Hydratez-vous bien et préparez-vous pour demain.' })}</p>
                           <div className="sticky-btn-wrapper">
@@ -460,7 +460,7 @@ export default function App() {
                               personnalisé) — le programme par défaut est 100 % muscu. */}
                           {currentDayHasVelo && (
                             <SettingToggle
-                              icon={<Bike size={20} color={rideStartEnabled ? '#3B82F6' : '#71717a'} />}
+                              icon={<Bike size={20} color={rideStartEnabled ? '#0a84ff' : 'rgba(235,235,245,0.32)'} />}
                               title="Sortie vélo en début de séance"
                               subtitle={rideStartEnabled
                                 ? 'Vidéo + vélo connecté avant la muscu (remplace le vélo de fin)'
@@ -474,7 +474,7 @@ export default function App() {
                           {/* Interrupteur : vélo de fin de séance optionnel */}
                           {currentDayHasVelo && !rideStartEnabled && (
                             <SettingToggle
-                              icon={<Bike size={20} color={veloEnabled ? '#3B82F6' : '#71717a'} />}
+                              icon={<Bike size={20} color={veloEnabled ? '#0a84ff' : 'rgba(235,235,245,0.32)'} />}
                               title="Vélo en fin de séance"
                               subtitle={veloEnabled ? 'Inclus dans la séance' : 'Retiré de la séance'}
                               checked={veloEnabled}

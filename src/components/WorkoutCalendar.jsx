@@ -100,7 +100,7 @@ function WorkoutCalendar() {
             <div key={`cardio-${session.id}`} className="day-workout-card day-cardio-card">
               <div className="workout-header">
                 <span className="workout-title" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                  {session.type === 'bike' ? <Bike size={16} color="#3B82F6" /> : <Footprints size={16} color="#22C55E" />}
+                  {session.type === 'bike' ? <Bike size={16} color="#0a84ff" /> : <Footprints size={16} color="#30d158" />}
                   {session.type === 'bike' ? 'Vélo' : 'Marche'}
                 </span>
                 <span className="workout-time">{format(new Date(session.date), 'HH:mm', { locale: fr })}</span>
