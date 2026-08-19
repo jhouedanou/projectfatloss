@@ -50,9 +50,9 @@ function SettingToggle({ icon, title, subtitle, checked, onToggle, ariaLabel }) 
       gap: '12px',
       padding: '14px 16px',
       margin: '0 0 12px 0',
-      borderRadius: '16px',
-      background: 'rgba(255, 255, 255, 0.03)',
-      border: '1px solid rgba(255, 255, 255, 0.08)',
+      borderRadius: 'var(--r-card)',
+      background: 'var(--surface)',
+      border: 'none',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
         {icon}
@@ -79,7 +79,7 @@ function SettingToggle({ icon, title, subtitle, checked, onToggle, ariaLabel }) 
           border: 'none',
           cursor: 'pointer',
           padding: 0,
-          background: checked ? '#3B82F6' : 'rgba(255, 255, 255, 0.18)',
+          background: checked ? 'var(--ok)' : 'var(--surface-3)',
           transition: 'background 0.25s ease',
         }}
       >
@@ -425,50 +425,31 @@ export default function App() {
                       <div className="day-content">
                         <div className="hero-section">
                           <div className="hero-content">
-                            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                              <button
-                                onClick={() => setShowExercises(false)}
-                                style={{
-                                  background: 'rgba(255, 255, 255, 0.08)',
-                                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                                  color: '#fff',
-                                  padding: '8px 18px',
-                                  borderRadius: '100px',
-                                  fontSize: '0.8rem',
-                                  fontWeight: 700,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.25s ease',
-                                }}
-                              >
-                                <ArrowLeft size={14} color="#F03D32" strokeWidth={2.5} />
-                                <span>PROGRAMME</span>
-                              </button>
-                            </div>
-                            <h2 className="hero-title">{workoutPlan[current].title}</h2>
+                            <button className="btn-soft hero-back" onClick={() => setShowExercises(false)}>
+                              <ArrowLeft size={14} strokeWidth={2.5} />
+                              <span>Programme</span>
+                            </button>
+                            <h2 className="hero-title">{workoutPlan[current].title.replace(/^JOUR \d+:\s*/i, '').split(' — ')[0]}</h2>
                             <p className="hero-subtitle">
-                              {workoutPlan[current].isRestDay 
+                              {workoutPlan[current].isRestDay
                                 ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
-                                : `${workoutPlan[current].exercises.length} EXERCICES • HAUTE INTENSITÉ`}
+                                : `Jour ${current + 1} · ${workoutPlan[current].exercises.length} exercices · ~1 h`}
                             </p>
                           </div>
-                          <div className="hero-overlay"></div>
                         </div>
                       
                       {workoutPlan[current].isRestDay ? (
                         /* Affichage jour de repos */
                         <div className="rest-day-card">
-                          <Award size={80} color="#4CAF50" style={{ marginBottom: '24px' }} />
-                          <h3>{t('restDay.title', { defaultValue: 'REPOS TOTAL' })}</h3>
+                          <Award size={72} color="var(--ok)" style={{ marginBottom: '24px' }} />
+                          <h3>{t('restDay.title', { defaultValue: 'Repos total' })}</h3>
                           <p>{t('restDay.description', { defaultValue: 'La croissance musculaire a lieu pendant le repos. Hydratez-vous bien et préparez-vous pour demain.' })}</p>
                           <div className="sticky-btn-wrapper">
                             <button
                               className="sticky-start-btn rest-btn"
                               onClick={() => moveToNextDay()}
                             >
-                              PASSER AU JOUR SUIVANT
+                              Passer au jour suivant
                             </button>
                           </div>
                         </div>
@@ -502,35 +483,33 @@ export default function App() {
                             />
                           )}
 
-                          {/* Liste d'exercices avec numérotation géante */}
-                          <div className="exercise-grid">
+                          {/* Liste groupée des exercices */}
+                          <div className="exercise-list card">
                             {workoutPlan[current].exercises.map((exo, index) => (
-                              <div key={index} className="exercise-card-premium" style={{ animationDelay: `${index * 0.1}s` }}>
-                                <div className="huge-number">{index + 1}</div>
-                                <div className="exercise-card-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                                  <div style={{ flex: 1 }}>
-                                    <h3 className="exo-name" style={{ margin: '0 0 8px 0' }}>{exo.name}</h3>
-                                    <div className="exo-tags">
-                                      <span className="tag sets-tag">{exo.sets}</span>
-                                      {exo.equip && <span className="tag equip-tag">{exo.equip}</span>}
-                                    </div>
-                                    {exo.desc && <p className="exo-desc" style={{ margin: '8px 0 0 0' }}>{exo.desc}</p>}
-                                  </div>
-                                  <div style={{ alignSelf: 'center', zIndex: 10 }}>
-                                    <YouTubeButton exercise={exo} />
-                                  </div>
+                              <div key={index} className="exercise-row">
+                                <span className="exercise-row-num">{index + 1}</span>
+                                <div className="exercise-row-copy">
+                                  <h3 className="exercise-row-name">{exo.name}</h3>
+                                  <span className="exercise-row-meta">
+                                    {exo.sets}{exo.equip ? ` · ${exo.equip}` : ''}
+                                  </span>
+                                  {exo.desc && <p className="exercise-row-desc">{exo.desc}</p>}
+                                </div>
+                                <div className="exercise-row-action">
+                                  <YouTubeButton exercise={exo} />
                                 </div>
                               </div>
                             ))}
                           </div>
-                          
+
                           {/* Sticky Start Button */}
                           <div className="sticky-btn-wrapper">
-                            <button 
-                              className="sticky-start-btn pulse-glow" 
+                            <button
+                              className="sticky-start-btn"
                               onClick={() => setStepMode(true)}
                             >
-                              COMMENCER L'ENTRAÎNEMENT
+                              <Play size={18} fill="currentColor" />
+                              Commencer l'entraînement
                             </button>
                           </div>
                         </div>
