@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, createContext, useCallback, useMemo } from 'react';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, Bell, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, Bell, Volume2, VolumeX, Glasses } from 'lucide-react';
 const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon from '../components/ExoIcon';
@@ -24,6 +24,8 @@ import { getCaloriesForSet, getExerciseLoad, setExerciseLoad, parseEquipmentLoad
 import WebcamRepCounter from '../components/WebcamRepCounter';
 import { isCameraCountable } from '../services/RepPatternRules';
 import { getCameraAmplitude, setCameraAmplitude, AMPLITUDE_LABELS } from '../services/CameraRepService';
+import { getXrProfile } from '../services/xr/XrRepRules';
+import { isXrRepSupported, startXrRepSession } from '../services/xr/XrRepSession';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -1309,6 +1311,40 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   // L'exercice est-il comptable par la caméra (patron de mouvement reconnu) ?
   const cameraCountable = !isChrono && isCameraCountable(exo);
 
+  // Mode casque (WebXR — Meta Quest) : support détecté une fois, profil par exercice.
+  const [xrSupported, setXrSupported] = useState(false);
+  const [xrActive, setXrActive] = useState(false);
+  useEffect(() => {
+    let mounted = true;
+    isXrRepSupported().then((ok) => { if (mounted) setXrSupported(ok); });
+    return () => { mounted = false; };
+  }, []);
+  const xrProfile = !isChrono ? getXrProfile(exo) : null;
+
+  // Répétition détectée par le casque : même incrément que la caméra, sans bip
+  // (la session XR émet déjà le sien dans le casque).
+  const handleXrRep = () => {
+    setCurrentRep((prev) => (prev >= exo.nbRep ? prev : prev + 1));
+  };
+
+  // Démarre la session casque — DOIT rester dans le gestionnaire de clic
+  // (WebXR exige une activation utilisateur).
+  const handleStartXr = () => {
+    if (xrActive || !xrProfile) return;
+    setXrActive(true);
+    startXrRepSession({
+      exo,
+      profile: xrProfile,
+      targetReps: exo.nbRep,
+      initialCount: currentRep,
+      onRep: handleXrRep,
+      onEnd: (finalCount, error) => {
+        setXrActive(false);
+        if (error) console.warn('Session XR non démarrée:', error?.message);
+      },
+    });
+  };
+
   // Exercices à faire sur chaque membre (nécessitant deux fois le rythme)
   const doubleSidedExercises = [
     'Planche latérale',
@@ -1976,6 +2012,31 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         <Typography variant="caption" sx={{ color: 'rgba(235,235,245,0.6)', display: 'block', textAlign: 'center', mb: 1.5 }}>
           ≈ {caloriesPerSet} kcal / série{exerciseLoad != null ? ` avec ${exerciseLoad} kg` : ''}
         </Typography>
+
+        {/* Mode casque (Meta Quest) : comptage des reps par la position de la
+            tête ou des mains, quand WebXR est disponible et l'exercice couvert. */}
+        {xrSupported && xrProfile && !hasTimer && exo.nbRep > 0 && (
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleStartXr}
+            disabled={xrActive}
+            startIcon={<Glasses size={16} />}
+            sx={{
+              display: 'flex',
+              mx: 'auto',
+              mb: 1.5,
+              borderRadius: '100px',
+              fontWeight: 600,
+              borderColor: 'rgba(240, 61, 50, 0.4)',
+              color: '#F03D32',
+            }}
+          >
+            {xrActive
+              ? 'Session casque en cours…'
+              : `Compter avec le casque (${xrProfile.source === 'head' ? 'tête' : 'mains'})`}
+          </Button>
+        )}
         
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
           {exo.equip && (
