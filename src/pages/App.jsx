@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Fade } from '@mui/material';
-import { Dumbbell, BarChart2, Scale, Play, Settings, Calendar, Award, ArrowLeft, Apple, Bike, ChevronRight } from 'lucide-react';
+import { Dumbbell, BarChart2, Scale, Play, Settings, Calendar, Award, ArrowLeft, Apple, Bike, ChevronRight, Glasses } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   getActiveWorkoutPlan,
@@ -37,67 +37,11 @@ import { onAuthChange, signOut } from '../services/AuthService';
 import { fullSync } from '../services/SyncService';
 import LoginForm from '../components/LoginForm';
 import CardioTracker from '../components/CardioTracker';
+import SettingToggle from '../components/SettingToggle';
+import ImmersiveBanner from '../components/ImmersiveBanner';
+import useImmersiveMode from '../hooks/useImmersiveMode';
 
 const NOTIFICATION_DURATION = 3000;
-
-/** Ligne de réglage on/off utilisée pour les options vélo de la page séance. */
-function SettingToggle({ icon, title, subtitle, checked, onToggle, ariaLabel }) {
-  return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '12px',
-      padding: '14px 16px',
-      margin: '0 0 12px 0',
-      borderRadius: 'var(--r-card)',
-      background: 'var(--surface)',
-      border: 'none',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-        {icon}
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary, #fff)' }}>
-            {title}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, rgba(235,235,245,0.6))' }}>
-            {subtitle}
-          </div>
-        </div>
-      </div>
-      <button
-        onClick={onToggle}
-        role="switch"
-        aria-checked={checked}
-        aria-label={ariaLabel}
-        style={{
-          position: 'relative',
-          width: '48px',
-          height: '28px',
-          flexShrink: 0,
-          borderRadius: '100px',
-          border: 'none',
-          cursor: 'pointer',
-          padding: 0,
-          background: checked ? 'var(--ok)' : 'var(--surface-3)',
-          transition: 'background 0.25s ease',
-        }}
-      >
-        <span style={{
-          position: 'absolute',
-          top: '3px',
-          left: checked ? '23px' : '3px',
-          width: '22px',
-          height: '22px',
-          borderRadius: '50%',
-          background: '#fff',
-          transition: 'left 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
-        }} />
-      </button>
-    </div>
-  );
-}
 
 export default function App() {
   const { t } = useTranslation();
@@ -134,6 +78,8 @@ export default function App() {
   const [rideStartEnabled, setRideStartEnabledState] = useState(() => isRideStartEnabled());
   // Le jour courant propose-t-il un vélo (dans le plan brut) ? Sinon pas d'interrupteur.
   const currentDayHasVelo = useMemo(() => dayHasVelo(current), [current, showCustomizer]);
+  // Mode immersif (casque VR / WebXR) : détection une fois, réglage mémorisé.
+  const immersive = useImmersiveMode();
 
   // Auth Supabase : suit l'état de connexion et synchronise à la connexion
   useEffect(() => {
@@ -391,6 +337,16 @@ export default function App() {
                     !showExercises ? (
                       <>
                         <HomeDashboard onStartWorkout={() => setShowExercises(true)} />
+
+                        {/* Casque VR détecté : proposer le mode immersif (réglage mémorisé) */}
+                        {immersive.xrMode && !immersive.bannerDismissed && (
+                          <ImmersiveBanner
+                            mode={immersive.xrMode}
+                            enabled={immersive.enabled}
+                            onToggle={() => immersive.setEnabled(!immersive.enabled)}
+                            onDismiss={immersive.dismissBanner}
+                          />
+                        )}
                         <HomeTrackers />
 
                         {/* Lien rapide Cardio (sorti de la barre d'onglets) */}
@@ -455,6 +411,20 @@ export default function App() {
                         </div>
                       ) : (
                         <div className="exercises-container">
+                          {/* Mode immersif : la séance s'affiche dans le casque (WebXR) */}
+                          {immersive.xrMode && (
+                            <SettingToggle
+                              icon={<Glasses size={20} color={immersive.enabled ? '#F03D32' : 'rgba(235,235,245,0.32)'} />}
+                              title="Mode immersif (casque)"
+                              subtitle={immersive.enabled
+                                ? 'La séance vous sera proposée dans le casque au lancement'
+                                : 'Séance à l\'écran ; le casque reste disponible depuis la séance'}
+                              checked={immersive.enabled}
+                              onToggle={() => immersive.setEnabled(!immersive.enabled)}
+                              ariaLabel="Activer ou désactiver le mode immersif"
+                            />
+                          )}
+
                           {/* Sortie vélo d'ouverture : vidéo + vélo connecté.
                               Proposée uniquement si le jour contient du vélo (plan
                               personnalisé) — le programme par défaut est 100 % muscu. */}
@@ -526,6 +496,8 @@ export default function App() {
                       onComplete={handleWorkoutComplete}
                       autoMode={autoMode}
                       onNotificationSettings={() => setShowNotificationSettings(true)}
+                      immersive={immersive.enabled}
+                      xrMode={immersive.xrMode}
                     />
                   )}
                 </>

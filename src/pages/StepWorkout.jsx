@@ -25,7 +25,8 @@ import WebcamRepCounter from '../components/WebcamRepCounter';
 import { isCameraCountable } from '../services/RepPatternRules';
 import { getCameraAmplitude, setCameraAmplitude, AMPLITUDE_LABELS } from '../services/CameraRepService';
 import { getXrProfile } from '../services/xr/XrRepRules';
-import { isXrRepSupported, startXrRepSession } from '../services/xr/XrRepSession';
+import { startXrWorkoutSession } from '../services/xr/XrWorkoutSession';
+import { resolveXrAction, EMPTY_STATE } from '../services/xr/XrWorkoutModel';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -206,7 +207,7 @@ function calculateWeight(equipment) {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode }) {
+function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode, xr }) {
   const defaultTime = getPauseDuration({ isExerciseTransition, setNum });
 
   const [time, setTime] = useState(defaultTime);
@@ -214,6 +215,12 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const currentExercise = day.exercises[step];
   const nextExercise = step < total - 1 ? day?.exercises?.[step + 1] : null;
   const isLastSet = setNum === totalSets - 1;
+
+  // Casque : afficher le compte à rebours et permettre de passer la pause.
+  useEffect(() => {
+    xr?.publish({ restLeft: time });
+  }, [xr, time]);
+  if (xr) xr.actions.current.skipRest = onSkip;
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -603,7 +610,7 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
   );
 }
 
-export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, autoMode: initialAutoMode, onNotificationSettings }) {
+export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, autoMode: initialAutoMode, onNotificationSettings, immersive = false, xrMode = null }) {
   const [dayIndex, setDayIndex] = useState(initialDayIndex || 0);
   const [step, setStep] = useState(0);
   const [pause, setPause] = useState(false);
@@ -618,6 +625,51 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // Sortie vélo d'ouverture : affichée avant le premier exercice quand le
   // réglage est actif (elle remplace alors le vélo de fin de séance).
   const [showBikeRide, setShowBikeRide] = useState(() => isRideStartEnabled());
+
+  // Mode immersif (casque VR, WebXR) : la session n'est qu'un afficheur + une
+  // entrée (gâchette / pincement / poignée). React reste la source de vérité :
+  // on lui pousse l'état à afficher, elle renvoie des actions routées vers les
+  // MÊMES handlers que les boutons 2D.
+  const [xrActive, setXrActive] = useState(false);
+  const [xrEntryDismissed, setXrEntryDismissed] = useState(false);
+  const xrSessionRef = useRef(null);            // { update, end } | null
+  const xrStateRef = useRef({ ...EMPTY_STATE }); // dernier état publié
+  const xrActionsRef = useRef({});              // handlers courants, par nom
+  const publishXr = useCallback((partial) => {
+    xrStateRef.current = { ...xrStateRef.current, ...partial };
+    xrSessionRef.current?.update(xrStateRef.current);
+  }, []);
+  const xrBridge = useMemo(
+    () => ({ publish: publishXr, actions: xrActionsRef, active: xrActive }),
+    [publishXr, xrActive]
+  );
+
+  // Démarre la session casque — DOIT rester dans le gestionnaire de clic
+  // (WebXR exige une activation utilisateur).
+  const handleEnterImmersive = () => {
+    if (xrActive || !xrMode) return;
+    setXrActive(true);
+    startXrWorkoutSession({
+      mode: xrMode,
+      getState: () => xrStateRef.current,
+      onAction: ({ type }) => {
+        const name = resolveXrAction(xrStateRef.current, type);
+        if (name) xrActionsRef.current[name]?.();
+      },
+      onEnd: (error) => {
+        xrSessionRef.current = null;
+        setXrActive(false);
+        if (error) console.warn('Mode immersif non démarré:', error?.message);
+      },
+    }).then((session) => {
+      xrSessionRef.current = session;
+      if (!session) setXrActive(false);
+    });
+  };
+  xrActionsRef.current.endSession = () => xrSessionRef.current?.end();
+
+  // Fermer la session casque si la séance est démontée (retour, fin).
+  useEffect(() => () => xrSessionRef.current?.end(), []);
   // Synthèse vocale réactivée pour les exercices
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState({
@@ -652,7 +704,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
   // Caméra : décision prise UNE fois au lancement de la séance.
   // null = pas encore demandé, true/false = choix de l'utilisateur.
-  const [cameraSessionEnabled, setCameraSessionEnabled] = useState(null);
+  const [cameraSessionEnabled, setCameraSessionEnabled] = useState(immersive && xrMode ? false : null);
   // Amplitude du mouvement pour la détection (squats partiels…), choisie au
   // lancement de la séance et mémorisée entre les séances.
   const [cameraAmplitude, setCameraAmplitudeState] = useState(getCameraAmplitude());
@@ -674,6 +726,30 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const totalSets = exo ? baseTotalSets : 1;
 
   const dataReady = !!(workoutPlan && day && exo);
+
+  // Publication de l'état de séance vers le casque (phase, progression, repos).
+  // Pendant une pause de transition, l'avance vers l'exercice suivant n'est
+  // appliquée qu'à la fin du repos (handlePauseEnd) : on annonce donc ici le
+  // « prochain » exercice sans toucher à `step`.
+  useEffect(() => {
+    if (!dataReady) return;
+    const nextExo = pause && pendingTransitionType === 'exercise' ? day.exercises[step + 1] : null;
+    publishXr({
+      dayTitle: day.title,
+      stepIndex: step,
+      total,
+      setNum,
+      totalSets,
+      calories: totalCaloriesBurned,
+      autoMode,
+      exerciseName: exo.name,
+      phase: workoutCompleted ? 'finished' : pause ? 'rest' : 'exercise',
+      isExerciseTransition,
+      restTotal: pause ? getPauseDuration({ isExerciseTransition, setNum }) : null,
+      nextExercise: nextExo ? { name: nextExo.name, sets: nextExo.sets, nbRep: nextExo.nbRep } : null,
+    });
+  }, [dataReady, day, step, total, setNum, totalSets, totalCaloriesBurned, autoMode, exo,
+    workoutCompleted, pause, isExerciseTransition, pendingTransitionType, publishXr]);
 
   // Phases qui précèdent la musculation : ni annonces vocales, ni notifications
   // d'exercice, ni dialogue caméra tant que l'une d'elles est à l'écran.
@@ -1085,6 +1161,18 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           >
             {speechEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
+          {xrMode && (
+            <button
+              className={`timer-btn workout-icon-btn ${xrActive ? 'is-active' : ''}`}
+              onClick={handleEnterImmersive}
+              disabled={xrActive}
+              title={xrActive ? 'Session casque en cours' : 'Mode immersif (casque)'}
+              aria-label="Mode immersif"
+              aria-pressed={xrActive}
+            >
+              <Glasses size={18} />
+            </button>
+          )}
           <button
             className={`timer-btn workout-icon-btn ${autoMode ? 'is-active' : ''}`}
             onClick={handleToggleAutoMode}
@@ -1115,6 +1203,29 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       </div>
 
       <h2 className="workout-day-title">{day?.title}</h2>
+
+      {/* Casque VR : carte d'entrée en mode immersif (un tap, exigé par WebXR) */}
+      {xrMode && immersive && !xrActive && !xrEntryDismissed && (
+        <div className="xr-entry-card">
+          <span className="xr-entry-tile"><Glasses size={22} /></span>
+          <div className="xr-entry-copy">
+            <div className="xr-entry-title">Mode immersif</div>
+            <div className="xr-entry-sub">
+              Affichez la séance dans le casque — gâchette ou pincement pour avancer.
+            </div>
+          </div>
+          <div className="xr-entry-actions">
+            <button className="xr-entry-later" onClick={() => setXrEntryDismissed(true)}>Plus tard</button>
+            <button className="xr-entry-enter" onClick={handleEnterImmersive}>Entrer</button>
+          </div>
+        </div>
+      )}
+      {xrActive && (
+        <div className="xr-status-strip" role="status">
+          <Glasses size={16} />
+          <span>Session casque en cours — bouton système du casque pour revenir ici.</span>
+        </div>
+      )}
       
       <>
         <ProgressTracker 
@@ -1139,6 +1250,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             dayIndex={dayIndex}
             autoMode={autoMode}
             cameraEnabled={cameraSessionEnabled === true}
+            xr={xrBridge}
           />
         ) : (
           <Pause 
@@ -1152,6 +1264,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             setNum={setNum}
             totalSets={totalSets}
             autoMode={autoMode}
+            xr={xrBridge}
           />
         )}  
 
@@ -1229,7 +1342,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode, cameraEnabled = false }) {
+function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode, cameraEnabled = false, xr = null }) {
   const [timer, setTimer] = useState(() => {
     if (exo.timer) {
       return exo.duration || 30;
@@ -1311,38 +1424,14 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   // L'exercice est-il comptable par la caméra (patron de mouvement reconnu) ?
   const cameraCountable = !isChrono && isCameraCountable(exo);
 
-  // Mode casque (WebXR — Meta Quest) : support détecté une fois, profil par exercice.
-  const [xrSupported, setXrSupported] = useState(false);
-  const [xrActive, setXrActive] = useState(false);
-  useEffect(() => {
-    let mounted = true;
-    isXrRepSupported().then((ok) => { if (mounted) setXrSupported(ok); });
-    return () => { mounted = false; };
-  }, []);
+  // Mode casque (WebXR) : profil de comptage tête/mains de cet exercice, utilisé
+  // par la session immersive quand elle est active (voir StepWorkout).
   const xrProfile = !isChrono ? getXrProfile(exo) : null;
 
   // Répétition détectée par le casque : même incrément que la caméra, sans bip
   // (la session XR émet déjà le sien dans le casque).
   const handleXrRep = () => {
     setCurrentRep((prev) => (prev >= exo.nbRep ? prev : prev + 1));
-  };
-
-  // Démarre la session casque — DOIT rester dans le gestionnaire de clic
-  // (WebXR exige une activation utilisateur).
-  const handleStartXr = () => {
-    if (xrActive || !xrProfile) return;
-    setXrActive(true);
-    startXrRepSession({
-      exo,
-      profile: xrProfile,
-      targetReps: exo.nbRep,
-      initialCount: currentRep,
-      onRep: handleXrRep,
-      onEnd: (finalCount, error) => {
-        setXrActive(false);
-        if (error) console.warn('Session XR non démarrée:', error?.message);
-      },
-    });
   };
 
   // Exercices à faire sur chaque membre (nécessitant deux fois le rythme)
@@ -1657,6 +1746,60 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
       onDone();
     }, 2000);
   };
+
+  // ── Casque VR : état publié et gestes routés vers les handlers ci-dessus ──
+  const xrKind = exo.duration && !isChrono ? 'timer' : (isChrono || hasTimer) ? 'chrono' : 'reps';
+  useEffect(() => {
+    xr?.publish({
+      kind: xrKind,
+      exerciseName: exo.name,
+      currentRep,
+      targetReps: exo.nbRep || 0,
+      countdown,
+      isPulsing,
+      side,
+      isDoubleSided: !!isDoubleSided,
+      sideSwitchCountdown,
+      chrono,
+      chronoRunning,
+      exerciseTimer,
+      timerRunning,
+      duration: exo.duration || 0,
+      showCalories,
+      caloriesToShow,
+      // Comptage automatique tête/mains seulement quand le casque est porté
+      xrProfile: xr?.active ? xrProfile : null,
+      stepIndex: step,
+      setNum,
+    });
+  }, [xr, xrKind, exo.name, exo.nbRep, exo.duration, currentRep, countdown, isPulsing, side,
+    isDoubleSided, sideSwitchCountdown, chrono, chronoRunning, exerciseTimer, timerRunning,
+    showCalories, caloriesToShow, xrProfile, step, setNum]);
+
+  // Handlers réenregistrés à chaque rendu (jamais de closure périmée).
+  if (xr) {
+    Object.assign(xr.actions.current, {
+      rep: handleXrRep,
+      addRep: () => setCurrentRep((p) => Math.min(exo.nbRep || 0, p + 1)),
+      next: handleNext,
+      switchSide: xrKind === 'chrono'
+        ? () => {
+          // Même chemin que le bouton « Côté Suivant » du chronomètre.
+          setChronoRunning(false);
+          setSide(1);
+          setChrono(0);
+          setTimeout(() => setChronoRunning(true), 1000);
+        }
+        : switchToSecondSide,
+      finishChrono: () => {
+        setChronoRunning(false);
+        setTimerRunning(false);
+        onDone();
+      },
+      toggleRhythm: handlePulse,
+      togglePause: () => (xrKind === 'timer' ? setTimerRunning((r) => !r) : setChronoRunning((r) => !r)),
+    });
+  }
   
   // Ouvrir YouTube pour l'exercice actuel
   const handleYouTube = () => {
@@ -2013,31 +2156,6 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
           ≈ {caloriesPerSet} kcal / série{exerciseLoad != null ? ` avec ${exerciseLoad} kg` : ''}
         </Typography>
 
-        {/* Mode casque (Meta Quest) : comptage des reps par la position de la
-            tête ou des mains, quand WebXR est disponible et l'exercice couvert. */}
-        {xrSupported && xrProfile && !hasTimer && exo.nbRep > 0 && (
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={handleStartXr}
-            disabled={xrActive}
-            startIcon={<Glasses size={16} />}
-            sx={{
-              display: 'flex',
-              mx: 'auto',
-              mb: 1.5,
-              borderRadius: '100px',
-              fontWeight: 600,
-              borderColor: 'rgba(240, 61, 50, 0.4)',
-              color: '#F03D32',
-            }}
-          >
-            {xrActive
-              ? 'Session casque en cours…'
-              : `Compter avec le casque (${xrProfile.source === 'head' ? 'tête' : 'mains'})`}
-          </Button>
-        )}
-        
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
           {exo.equip && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 1.5, py: 0.5, borderRadius: '100px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
