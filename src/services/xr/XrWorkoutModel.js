@@ -55,7 +55,7 @@ export const COLORS = Object.freeze({
   label3: 'rgba(235, 235, 245, 0.3)',
 });
 
-export const FOOTER = 'Bouton système du casque : quitter';
+export const FOOTER = 'Quitter : bouton système, ou regardez votre paume et pincez';
 
 /** Clé de la série en cours : sert à remettre le compteur de reps à zéro. */
 export function repKeyOf(state) {

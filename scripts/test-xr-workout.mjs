@@ -80,7 +80,7 @@ check('chrono big', buildHudModel(chrono({ chrono: 125, chronoRunning: true })).
 check('chrono en pause', buildHudModel(chrono({ chrono: 5 })).sub, 'Chronomètre — en pause');
 check('timer rouge ≤10', buildHudModel({ ...chrono(), kind: 'timer', exerciseTimer: 8, timerRunning: true, duration: 30 }).bigColor, '#ff453a');
 check('terminé', buildHudModel({ phase: 'finished', calories: 310 }).big, '310 kcal');
-check('footer', buildHudModel({}).footer, 'Bouton système du casque : quitter');
+check('footer', buildHudModel({}).footer, 'Quitter : bouton système, ou regardez votre paume et pincez');
 
 console.log(failures === 0 ? '\nTous les tests passent.' : `\n${failures} test(s) en échec.`);
 process.exit(failures === 0 ? 0 : 1);

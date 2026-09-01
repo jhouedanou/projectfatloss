@@ -36,6 +36,8 @@ const STATUS_CALIBRATING = 'Calibrage : restez immobile…';
 const STATUS_READY_HEAD = 'Prêt — à vous !';
 const STATUS_READY_HANDS = 'Prêt — mains suivies';
 const STATUS_NO_HANDS = 'Mains non détectées — gardez-les devant vous';
+const STATUS_SHOW_HANDS = 'Montrez vos mains aux caméras (hand tracking)';
+const HANDS_GRACE_MS = 2500; // délai avant de signaler des mains invisibles
 
 // ── Dessin du panneau ───────────────────────────────────────────────────────
 
@@ -175,6 +177,7 @@ async function setupSession({ session, gl, mode, getState, onAction, onEnd }) {
   // ── Compteur tête / mains, recréé à chaque nouvelle série ──
   let counter = null;
   let counterKey = null;
+  let counterStartT = null; // t de la 1re frame du compteur courant
   const isCountable = (s) =>
     s.phase === 'exercise' &&
     s.kind === 'reps' &&
@@ -197,6 +200,7 @@ async function setupSession({ session, gl, mode, getState, onAction, onEnd }) {
     const key = `${repKeyOf(state)}|${state.xrProfile.key || state.xrProfile.source}`;
     if (counter && counterKey === key) return;
     counterKey = key;
+    counterStartT = null;
     xrStatus = STATUS_CALIBRATING;
     xrStatusColor = COLORS.label2;
     hudDirty = true;
@@ -276,15 +280,24 @@ async function setupSession({ session, gl, mode, getState, onAction, onEnd }) {
       }
       counter.push({ t, headY, handsY: handsN > 0 ? handsSum / handsN : null });
 
+      // Mains attendues mais invisibles : informer sans spammer. Couvert aussi
+      // PENDANT le calibrage — sans mains, il ne peut pas progresser et
+      // l'utilisateur resterait bloqué sans explication (mode sans manettes :
+      // les mains doivent être dans le champ des caméras du casque).
+      if (counterStartT === null) counterStartT = t;
       const profile = state.xrProfile;
-      if (profile && profile.source === 'hands' && counter.state !== 'calibrating') {
-        if (handsN === 0 && xrStatus !== STATUS_NO_HANDS) {
-          xrStatus = STATUS_NO_HANDS;
-          xrStatusColor = COLORS.orange;
-          hudDirty = true;
-        } else if (handsN > 0 && xrStatus === STATUS_NO_HANDS) {
-          xrStatus = STATUS_READY_HANDS;
-          xrStatusColor = COLORS.green;
+      if (profile && profile.source === 'hands') {
+        const calibrating = counter.state === 'calibrating';
+        if (handsN === 0 && t - counterStartT > HANDS_GRACE_MS) {
+          const msg = calibrating ? STATUS_SHOW_HANDS : STATUS_NO_HANDS;
+          if (xrStatus !== msg) {
+            xrStatus = msg;
+            xrStatusColor = COLORS.orange;
+            hudDirty = true;
+          }
+        } else if (handsN > 0 && xrStatusColor === COLORS.orange) {
+          xrStatus = calibrating ? STATUS_CALIBRATING : STATUS_READY_HANDS;
+          xrStatusColor = calibrating ? COLORS.label2 : COLORS.green;
           hudDirty = true;
         }
       }
