@@ -46,7 +46,7 @@ function mat4Translation(x, y, z) {
 // ── HUD : canvas 2D → texture ───────────────────────────────────────────────
 
 const HUD_W = 640;
-const HUD_H = 320;
+const HUD_H = 360;
 
 function drawHud(ctx, { title, count, target, status, statusColor }) {
   ctx.clearRect(0, 0, HUD_W, HUD_H);
@@ -75,6 +75,10 @@ function drawHud(ctx, { title, count, target, status, statusColor }) {
   ctx.fillStyle = statusColor || 'rgba(235, 235, 245, 0.6)';
   ctx.font = '500 30px Inter, sans-serif';
   ctx.fillText(status, HUD_W / 2, 262);
+  // Aide sortie sans manettes : geste système du hand tracking
+  ctx.fillStyle = 'rgba(235, 235, 245, 0.35)';
+  ctx.font = '400 22px Inter, sans-serif';
+  ctx.fillText('Quitter : regardez votre paume et pincez', HUD_W / 2, 322);
 }
 
 // ── Shaders du quad HUD ─────────────────────────────────────────────────────
@@ -85,8 +89,8 @@ uniform mat4 uMvp;
 varying vec2 vUv;
 void main() {
   vUv = vec2(aPos.x + 0.5, 0.5 - aPos.y);
-  // Quad de 0,76 m × 0,38 m, centré sur son origine.
-  gl_Position = uMvp * vec4(aPos.x * 0.76, aPos.y * 0.38, 0.0, 1.0);
+  // Quad de 0,76 m × 0,4275 m (même ratio 16:9 que la texture du HUD).
+  gl_Position = uMvp * vec4(aPos.x * 0.76, aPos.y * 0.4275, 0.0, 1.0);
 }`;
 
 const FS = `
@@ -252,9 +256,11 @@ export async function startXrRepSession({ exo, profile, targetReps, initialCount
   });
 
   // ── Boucle de rendu ──
+  let firstFrameT = null;
   const onFrame = (t, frame) => {
     if (ended) return;
     session.requestAnimationFrame(onFrame);
+    if (firstFrameT === null) firstFrameT = t;
 
     const viewerPose = frame.getViewerPose(refSpace);
     if (!viewerPose) return;
@@ -275,16 +281,23 @@ export async function startXrRepSession({ exo, profile, targetReps, initialCount
     }
     counter.push({ t, headY, handsY: handsN > 0 ? handsSum / handsN : null });
 
-    // Mains attendues mais invisibles : informer sans spammer.
-    if (profile.source === 'hands' && handsN === 0 && counter.state !== 'calibrating' && !finishing) {
-      if (status !== 'Mains non détectées — gardez-les devant vous') {
-        status = 'Mains non détectées — gardez-les devant vous';
+    // Mains attendues mais invisibles : informer sans spammer. Le cas
+    // « hand tracking jamais actif » est couvert aussi PENDANT le calibrage —
+    // sans mains, la calibration ne peut pas progresser et l'utilisateur
+    // resterait bloqué sans explication (mode sans manettes : il faut que
+    // les mains soient dans le champ des caméras du casque).
+    if (profile.source === 'hands' && handsN === 0 && !finishing && t - firstFrameT > 2500) {
+      const msg = counter.state === 'calibrating'
+        ? 'Montrez vos mains aux caméras (hand tracking)'
+        : 'Mains non détectées — gardez-les devant vous';
+      if (status !== msg) {
+        status = msg;
         statusColor = '#ff9f0a';
         hudDirty = true;
       }
     } else if (statusColor === '#ff9f0a' && handsN > 0 && !finishing) {
-      status = 'Prêt — mains suivies';
-      statusColor = '#30d158';
+      status = counter.state === 'calibrating' ? 'Calibrage : restez immobile…' : 'Prêt — mains suivies';
+      statusColor = counter.state === 'calibrating' ? 'rgba(235, 235, 245, 0.6)' : '#30d158';
       hudDirty = true;
     }
 
