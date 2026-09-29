@@ -13,19 +13,27 @@ import YouTube from 'react-youtube';
  * automatique qu'à cette condition, et il n'y a aucun bouton de lecture natif
  * ici (`controls: 0`). Le son se rétablit depuis le bouton du HUD, qui est un
  * vrai geste utilisateur.
+ *
+ * Vidéo 360° : YouTube gère la projection ; on active le gyroscope au
+ * démarrage si demandé (`gyro`), l'orientation est ensuite pilotée par
+ * Ride360Layer et les boutons du HUD.
  */
-function RideVideoPlayer({ videoId, playerRef, onUnavailable }) {
+function RideVideoPlayer({ videoId, playerRef, onUnavailable, is360 = false, gyro = false }) {
   const handleReady = useCallback(
     (event) => {
       playerRef.current = event.target;
       try {
         event.target.mute();
         event.target.playVideo();
+        if (is360) event.target.setSphericalProperties?.({ enableOrientationSensor: gyro });
       } catch (error) {
         /* player pas prêt */
       }
     },
-    [playerRef]
+    // gyro n'est lu qu'au démarrage : le changer ensuite passe par le HUD,
+    // sans remonter l'iframe.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [playerRef, is360]
   );
 
   // 100 / 101 / 150 : vidéo absente ou lecture interdite hors du site d'origine.

@@ -30,6 +30,8 @@ export default function BikeConnectPanel({
   status,
   error,
   onDetect,
+  onDetectEb900,
+  detectingEb900 = false,
 }) {
   const bleOk = BleBridge.isSupported();
   const [domyosDebug, setDomyosDebug] = useState(() => isDomyosDebug());
@@ -66,6 +68,17 @@ export default function BikeConnectPanel({
           );
         })}
       </div>
+
+      {bleOk && onDetectEb900 && (
+        <button
+          type="button"
+          className="ride-btn ride-btn-primary ride-eb900-btn"
+          onClick={onDetectEb900}
+          disabled={detectingEb900}
+        >
+          {detectingEb900 ? 'Recherche de l\'EB900…' : 'Détecter mon Domyos EB900'}
+        </button>
+      )}
 
       <button type="button" className="ride-detect-link" onClick={onDetect}>
         Je ne sais pas laquelle choisir — détecter mon vélo

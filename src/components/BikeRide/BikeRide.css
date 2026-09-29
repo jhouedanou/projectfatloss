@@ -144,6 +144,82 @@
   color: #fff;
 }
 
+.ride-link-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ride-link-label {
+  font-size: 0.82rem;
+  color: #c3cad6;
+}
+
+.ride-link-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ride-link-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #262c37;
+  background: #10141c;
+  color: #fff;
+  font-size: 16px; /* 16 px : pas de zoom auto sur iOS */
+}
+
+.ride-link-input:focus-visible {
+  outline: 2px solid #FF6B35;
+  outline-offset: 1px;
+}
+
+.ride-link-add {
+  flex: 0 0 auto;
+}
+
+.ride-card-wrap {
+  position: relative;
+  display: flex;
+}
+
+.ride-card-wrap > .ride-card {
+  flex: 1;
+}
+
+.ride-card-360 {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #FF6B35;
+  color: #0b0b0f;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.ride-card-remove {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(4, 6, 10, 0.82);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ride-eb900-btn {
+  align-self: stretch;
+}
+
 .ride-filter-sort {
   margin-left: auto;
   border-style: dashed;
@@ -559,119 +635,293 @@
   cursor: pointer;
 }
 
-.ride-hud-main {
+/* Tableau de bord bas, façon Kinomap VR : tuiles en verre dépoli qui laissent
+   la route visible, puis la progression du parcours. */
+.ride-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.ride-dash-tiles {
+  display: grid;
+  grid-template-columns: 1.25fr 1.25fr 1fr 1fr;
+  gap: 8px;
+}
+
+.ride-tile {
+  --tile-accent: #FF6B35;
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  align-items: flex-start;
+  min-width: 0;
+  padding: 10px 14px 10px 16px;
+  border-radius: 16px;
+  background: rgba(12, 14, 20, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
 }
 
-.ride-metric {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
-}
-
-.ride-metric-hero .ride-metric-value {
-  font-size: clamp(3.2rem, 13vw, 6rem);
-  font-weight: 800;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
-  /* La couleur de zone est posée en style inline ; transition douce entre zones. */
-  transition: color 0.4s ease;
-}
-
-.ride-metric-hero .ride-metric-unit {
-  font-size: 0.9rem;
-  color: #FF6B35;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-/* Colonne à droite du chiffre héros : unité, badge de zone, W/kg, moy/max. */
-.ride-hero-side {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  align-items: flex-start;
-}
-
-.ride-zone-badge {
-  font-size: 0.68rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #0b0b0f;
-  padding: 2px 8px;
-  border-radius: 100px;
+/* Liseré coloré à gauche : zone de puissance, rouge cardio, orange par défaut. */
+.ride-tile::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--tile-accent);
   transition: background 0.4s ease;
 }
 
-/* Sous-valeur (moyenne, W/kg) sous une métrique. */
-.ride-metric-sub {
+.ride-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.62);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+.ride-tile-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: clamp(1.5rem, 4.2vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ride-tile-unit {
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.04em;
+}
+
+.ride-tile-power .ride-tile-value,
+.ride-tile-speed .ride-tile-value {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+}
+
+.ride-tile-power .ride-tile-value {
+  color: var(--tile-accent);
+  transition: color 0.4s ease;
+}
+
+.ride-tile-sub {
+  min-height: 1em;
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.6);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.ride-metric-col {
+.ride-zone-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #0b0b0f;
+  padding: 1px 7px;
+  border-radius: 100px;
+  transition: background 0.4s ease;
+}
+
+.ride-zonebar {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+}
+
+.ride-zonebar-seg {
+  height: 4px;
+  border-radius: 2px;
+  opacity: 0.22;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.ride-zonebar-seg.is-on {
+  opacity: 1;
+  transform: scaleY(1.6);
+}
+
+.ride-dash-route {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(12, 14, 20, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
 }
 
-.ride-metric-row {
+.ride-progress {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ride-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #F03D32, #FF6B35);
+  transition: width 1s linear;
+}
+
+/* Le cycliste : un point lumineux au bout de la progression. */
+.ride-progress-rider {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #FF6B35;
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.9);
+  transform: translate(-50%, -50%);
+  transition: left 1s linear;
+}
+
+.ride-dash-stats {
   display: flex;
-  gap: 18px;
   flex-wrap: wrap;
-}
-
-.ride-metric-value {
-  font-size: 1.6rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.ride-metric-unit {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.7);
+  gap: 6px 18px;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-.ride-hud-bottom {
-  display: flex;
-  gap: 22px;
-  flex-wrap: wrap;
+.ride-dash-stat strong {
+  margin-right: 4px;
+  font-size: 0.95rem;
+  font-weight: 750;
+  color: #fff;
+  letter-spacing: 0;
+  text-transform: none;
+  font-variant-numeric: tabular-nums;
 }
 
-.ride-stat {
-  display: flex;
-  flex-direction: column;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
-}
-
-.ride-stat-value {
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.ride-stat-label {
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.65);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.ride-stat-rate .ride-stat-value {
+.ride-dash-rate strong {
   color: #FF6B35;
 }
 
-.ride-stat-rate.is-paused .ride-stat-value {
+.ride-dash-rate.is-paused strong {
   color: #ffd166;
+}
+
+.ride-dash-remaining {
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .ride-dash-tiles {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ride-zone-label {
+    display: none;
+  }
+}
+
+/* Téléphone en portrait : le titre laisse la place aux commandes. */
+@media (max-width: 520px) {
+  .ride-hud-top {
+    gap: 6px;
+  }
+
+  .ride-hud-title {
+    display: none;
+  }
+
+  .ride-hud-top .ride-chip {
+    margin-right: auto;
+    max-width: 36vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ride-hud-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ride-hud-finish {
+    padding: 7px 10px;
+  }
+}
+
+/* --- 360° ----------------------------------------------------------------- */
+
+.ride-360-layer {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.ride-360-layer:active {
+  cursor: grabbing;
+}
+
+.ride-360-hint {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(10, 12, 18, 0.7);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-size: 0.85rem;
+  font-weight: 650;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: ride-360-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ride-360-pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.ride-hud-360 {
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: #FF6B35;
+  color: #0b0b0f;
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.ride-hud-icon.is-on {
+  background: #FF6B35;
+  border-color: #FF6B35;
+  color: #0b0b0f;
 }
 
 .ride-paused-banner {
@@ -739,13 +989,25 @@
 }
 
 @media (max-height: 480px) {
-  .ride-metric-hero .ride-metric-value {
-    font-size: clamp(2.4rem, 9vh, 3.6rem);
+  .ride-tile-power .ride-tile-value,
+  .ride-tile-speed .ride-tile-value {
+    font-size: clamp(1.6rem, 9vh, 2.4rem);
+  }
+
+  .ride-tile {
+    padding: 6px 12px 6px 14px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ride-card:hover {
     transform: none;
+  }
+
+  .ride-360-hint,
+  .ride-progress-fill,
+  .ride-progress-rider {
+    animation: none;
+    transition: none;
   }
 }

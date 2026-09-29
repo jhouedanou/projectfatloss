@@ -4,7 +4,9 @@ import {
   detectBike,
   identifyScannedDevice,
   releaseDetectedHandle,
-  PROTOCOL_INFO,
+  protocolInfo,
+  isDomyosDevice,
+  isEb900Name,
 } from '../../services/bike/detectBike';
 
 const STEPS = [
@@ -15,13 +17,13 @@ const STEPS = [
 
 const SCAN_DURATION_MS = 12000;
 
-const isDomyosName = (name) => /^domyos/i.test(name || '');
 
 /**
  * Écran de détection du vélo.
  *
- * App Android : scan libre — l'écran liste lui-même les appareils trouvés
- * (les Domyos en tête), un appui identifie le protocole. Navigateur : le scan
+ * App Android : scan libre lancé dès l'ouverture — l'écran liste lui-même les
+ * appareils trouvés (les Domyos en tête). Le premier Domyos EB900 repéré est
+ * identifié automatiquement ; un appui sur un autre appareil l'identifie aussi. Navigateur : le scan
  * libre est interdit par Web Bluetooth, on ouvre le sélecteur du système,
  * filtré sur « Domyos » pour que l'EB900 en mode appairage ressorte seul.
  */
@@ -33,6 +35,9 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
 
   const scanningRef = useRef(false);
   const scanTimerRef = useRef(null);
+  // Un seul essai automatique par scan : si l'identification échoue, la liste
+  // reste affichée et l'utilisateur choisit lui-même.
+  const autoPickedRef = useRef(false);
 
   const bleOk = BleBridge.isSupported();
   const canScan = bleOk && BleBridge.canScan();
@@ -122,6 +127,7 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
     setDevices([]);
     setState('scanning');
     scanningRef.current = true;
+    autoPickedRef.current = false;
     try {
       await BleBridge.scan((found) => {
         if (!found.deviceId) return;
@@ -129,8 +135,8 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
           const rest = prev.filter((d) => d.deviceId !== found.deviceId);
           const next = [...rest, { ...found, name: found.name || 'Appareil sans nom' }];
           return next.sort((a, b) => {
-            const aDomyos = isDomyosName(a.name) ? 1 : 0;
-            const bDomyos = isDomyosName(b.name) ? 1 : 0;
+            const aDomyos = isDomyosDevice(a) ? 1 : 0;
+            const bDomyos = isDomyosDevice(b) ? 1 : 0;
             if (aDomyos !== bDomyos) return bDomyos - aDomyos;
             return (b.rssi ?? -999) - (a.rssi ?? -999);
           });
@@ -161,7 +167,23 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
     [stopScan, finishIdentify, failDetect]
   );
 
-  const info = result ? PROTOCOL_INFO[result.protocol] || PROTOCOL_INFO.unknown : null;
+  // Détection automatique : dès qu'une console Domyos apparaît au scan, on
+  // l'identifie sans attendre d'appui.
+  useEffect(() => {
+    if (state !== 'scanning' || autoPickedRef.current) return;
+    const bike = devices.find((device) => isDomyosDevice(device));
+    if (!bike) return;
+    autoPickedRef.current = true;
+    handlePick(bike);
+  }, [devices, state, handlePick]);
+
+  // App Android : le scan démarre tout seul à l'ouverture de l'écran.
+  useEffect(() => {
+    if (canScan) handleScan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const info = protocolInfo(result);
 
   return (
     <div className="ride-detect">
@@ -200,13 +222,15 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
             <button
               key={device.deviceId}
               type="button"
-              className={`ride-device ${isDomyosName(device.name) ? 'is-domyos' : ''}`}
+              className={`ride-device ${isDomyosDevice(device) ? 'is-domyos' : ''}`}
               onClick={() => handlePick(device)}
               disabled={state === 'identifying'}
             >
               <span className="ride-device-name">
                 {device.name}
-                {isDomyosName(device.name) && <span className="ride-device-badge">vélo Domyos</span>}
+                {isDomyosDevice(device) && (
+                  <span className="ride-device-badge">{isEb900Name(device.name) ? 'Domyos EB900' : 'vélo Domyos'}</span>
+                )}
               </span>
               <span className="ride-device-rssi">{device.rssi != null ? `${device.rssi} dBm` : ''}</span>
             </button>
@@ -256,7 +280,7 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
               onClick={() => handleChooser(true)}
               disabled={!bleOk || state === 'identifying'}
             >
-              {state === 'identifying' ? 'Détection…' : 'Détecter mon vélo Domyos'}
+              {state === 'identifying' ? 'Détection…' : 'Détecter mon Domyos EB900'}
             </button>
             <button
               type="button"
