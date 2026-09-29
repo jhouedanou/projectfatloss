@@ -19,6 +19,25 @@ const CSC_UUID = fullUuid(0x1816); // vitesse & cadence, présent sur des capteu
 const OPTIONAL_SERVICES = [FTMS_SERVICE, HR_SERVICE, DOMYOS_SERVICE, 0x1816, 0x180a, 0x180f];
 
 /**
+ * Préfixes de nom annoncés par les consoles Domyos. Le filtre Web Bluetooth
+ * est sensible à la casse : on couvre les variantes vues selon les firmwares.
+ */
+export const DOMYOS_NAME_PREFIXES = ['Domyos', 'DOMYOS', 'domyos'];
+
+/** Le nom annoncé est-il celui d'une console Domyos ? */
+export const isDomyosName = (name) => /domyos/i.test(name || '');
+
+/** Le nom annoncé désigne-t-il précisément un EB900 ? */
+export const isEb900Name = (name) => /eb[\s_-]*900/i.test(name || '');
+
+/**
+ * Un appareil vu au scan est-il une console Domyos ? Le nom suffit en général ;
+ * à défaut, le service UART ISSC annoncé trahit la console.
+ */
+export const isDomyosDevice = ({ name, uuids = [] } = {}) =>
+  isDomyosName(name) || isEb900Name(name) || uuids.includes(DOMYOS_UUID);
+
+/**
  * Se connecte à un appareil déjà choisi, lit ses services et en déduit le
  * protocole. La connexion est LAISSÉE OUVERTE et le handle remonte dans le
  * rapport : la sortie la reprend telle quelle. Le vélo n'accepte qu'une
@@ -36,12 +55,18 @@ export async function identifyHandle(handle) {
     let protocol = 'unknown';
     if (has(FTMS_UUID)) protocol = 'ftms';
     else if (has(DOMYOS_UUID)) protocol = 'domyos';
+    // Nom Domyos mais service ISSC invisible (firmware exotique, ou service
+    // non listé par le navigateur) : on tente quand même le protocole Domyos.
+    else if (isDomyosName(handle.name) || isEb900Name(handle.name)) protocol = 'domyos';
     else if (has(HR_UUID)) protocol = 'hr';
     else if (has(CSC_UUID)) protocol = 'csc';
 
     return {
       name: handle.name || 'Appareil',
       protocol,
+      // EB900 reconnu par son nom, ou console Domyos parlant le protocole ISSC
+      // (l'EB900 est le vélo Domyos qui l'utilise).
+      isEb900: protocol === 'domyos' && (isEb900Name(handle.name) || has(DOMYOS_UUID)),
       services,
       hasHeartRate: has(HR_UUID),
       // En Web Bluetooth, seuls les services déclarés dans `optionalServices`
@@ -82,7 +107,7 @@ export async function detectBike({ domyosOnly = false } = {}) {
 
   const handle = await BleBridge.requestDevice({
     services: [],
-    namePrefix: domyosOnly ? 'Domyos' : undefined,
+    namePrefix: domyosOnly ? DOMYOS_NAME_PREFIXES : undefined,
     optionalServices: OPTIONAL_SERVICES,
   });
   return identifyHandle(handle);
@@ -96,12 +121,24 @@ export function identifyScannedDevice({ deviceId, name }) {
   return identifyHandle({ deviceId, name: name || 'Appareil' });
 }
 
+/** Message à afficher pour un rapport de détection. */
+export const protocolInfo = (report) => {
+  if (!report) return null;
+  if (report.protocol === 'domyos' && report.isEb900) return PROTOCOL_INFO.eb900;
+  return PROTOCOL_INFO[report.protocol] || PROTOCOL_INFO.unknown;
+};
+
 /** Message lisible pour chaque résultat de détection. */
 export const PROTOCOL_INFO = {
   ftms: {
     title: 'Vélo FTMS reconnu',
     body: 'Profil standard : vitesse, cadence, puissance et calories sont lues directement. C\'est le cas le plus fiable.',
     source: 'ftms',
+  },
+  eb900: {
+    title: 'Domyos EB900 reconnu',
+    body: 'Console EB900 détectée et connectée. Vitesse, cadence, calories et pouls de la poignée remontent ; la puissance est estimée. Vérifie les valeurs contre l\'écran de la console la première fois.',
+    source: 'domyos',
   },
   domyos: {
     title: 'Console Domyos reconnue',

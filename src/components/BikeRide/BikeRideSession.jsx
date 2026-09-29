@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import RideVideoPlayer from './RideVideoPlayer';
 import RideVideoPicker from './RideVideoPicker';
+import Ride360Layer, { setView } from './Ride360Layer';
 import BikeConnectPanel from './BikeConnectPanel';
 import BikeDetectScreen from './BikeDetectScreen';
 import BikeHud from './BikeHud';
@@ -10,7 +11,7 @@ import usePlaybackRateController from './usePlaybackRateController';
 import useRideScreen from './useRideScreen';
 import { RIDE_VIDEOS, formatVideoDuration } from '../../data/rideVideos';
 import SimulationAdapter from '../../services/bike/adapters/SimulationAdapter';
-import { releaseDetectedHandle } from '../../services/bike/detectBike';
+import { detectBike, protocolInfo, releaseDetectedHandle } from '../../services/bike/detectBike';
 import './BikeRide.css';
 
 /**
@@ -32,6 +33,16 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
   const [adapter, setAdapter] = useState(null);
   const [hrAdapter, setHrAdapter] = useState(null);
   const [adaptRate, setAdaptRate] = useState(true);
+  const [detectingEb900, setDetectingEb900] = useState(false);
+  // Gyroscope actif d'office sur téléphone / tablette pour les vidéos 360°.
+  const [gyro, setGyro] = useState(() => {
+    try {
+      return window.matchMedia('(pointer: coarse)').matches;
+    } catch (error) {
+      return false;
+    }
+  });
+  const [progress, setProgress] = useState({ current: 0, duration: 0 });
   // Toujours muet au démarrage : voir RideVideoPlayer.
   const [muted, setMuted] = useState(true);
 
@@ -57,6 +68,29 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     active: phase === 'riding',
   });
 
+  // Position dans la vidéo, relevée à chaque tick de métriques (1 s) pour la
+  // barre de progression du HUD.
+  useEffect(() => {
+    if (phase !== 'riding') return;
+    const player = playerRef.current;
+    if (!player?.getCurrentTime) return;
+    try {
+      setProgress({ current: player.getCurrentTime() || 0, duration: player.getDuration() || video?.durationSec || 0 });
+    } catch (error) {
+      /* player pas prêt */
+    }
+  }, [metrics.elapsedSec, phase, video]);
+
+  const handleToggleGyro = useCallback(() => {
+    const next = !gyro;
+    setGyro(next);
+    setView(playerRef.current, { enableOrientationSensor: next });
+  }, [gyro]);
+
+  const handleRecenter = useCallback(() => {
+    setView(playerRef.current, { yaw: 0, pitch: 0, roll: 0 });
+  }, []);
+
   const stopAdapters = useCallback(() => {
     adapterRef.current?.stop();
     hrAdapterRef.current?.stop();
@@ -76,6 +110,40 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     setUnavailableIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
     setError('Cette vidéo n\'est pas lisible dans l\'application. Choisis un autre parcours.');
     setPhase('setup');
+  }, []);
+
+  /**
+   * Détection en un appui : sélecteur Bluetooth filtré sur « Domyos », puis
+   * identification. La console reste connectée pour « Démarrer la sortie ».
+   */
+  const handleDetectEb900 = useCallback(async () => {
+    setError('');
+    setStatus('Sélectionne ta console Domyos dans la fenêtre Bluetooth…');
+    setDetectingEb900(true);
+    try {
+      const report = await detectBike({ domyosOnly: true });
+      const info = protocolInfo(report);
+      if (!info?.source) {
+        releaseDetectedHandle(report);
+        setStatus('');
+        setError(`${info.title} (${report.name}). ${info.body}`);
+        return;
+      }
+      if (detectedHandleRef.current && detectedHandleRef.current !== report.handle) {
+        releaseDetectedHandle({ handle: detectedHandleRef.current });
+      }
+      detectedHandleRef.current = report.handle || null;
+      setSource(info.source);
+      if (report.hasHeartRate) setHrEnabled(true);
+      setStatus(`${info.title} · ${report.name} — connecté, appuie sur « Démarrer la sortie ».`);
+    } catch (detectError) {
+      const message = detectError?.message || 'Détection impossible.';
+      setStatus('');
+      // Sélecteur fermé sans choix : pas une erreur.
+      if (!/cancel|annul/i.test(message)) setError(message);
+    } finally {
+      setDetectingEb900(false);
+    }
   }, []);
 
   const handleStart = useCallback(async () => {
@@ -194,7 +262,10 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
           videoId={video.id}
           playerRef={playerRef}
           onUnavailable={handleUnavailable}
+          is360={!!video.is360}
+          gyro={gyro}
         />
+        {video.is360 && <Ride360Layer playerRef={playerRef} />}
         <BikeHud
           metrics={metrics}
           rate={rate}
@@ -207,6 +278,11 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
           fullscreen={fullscreen}
           onToggleFullscreen={() => toggleFullscreen(rootRef.current)}
           onFinish={handleFinishRide}
+          is360={!!video.is360}
+          gyro={gyro}
+          onToggleGyro={handleToggleGyro}
+          onRecenter={handleRecenter}
+          progress={progress}
         />
       </>
     );
@@ -257,6 +333,8 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
           status={status}
           error={error}
           onDetect={() => setPhase('detect')}
+          onDetectEb900={handleDetectEb900}
+          detectingEb900={detectingEb900}
         />
 
         <label className="ride-hr-toggle">
@@ -271,7 +349,9 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
 
         {video && (
           <p className="ride-status">
-            Sélection : {video.title} · {formatVideoDuration(video.durationSec)}
+            Sélection : {video.title}
+            {video.durationSec > 0 && ` · ${formatVideoDuration(video.durationSec)}`}
+            {video.is360 && ' · 360° (glisse ou bouge le téléphone pour regarder autour)'}
           </p>
         )}
 

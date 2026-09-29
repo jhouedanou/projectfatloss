@@ -9,6 +9,7 @@
  * API commune (toutes les méthodes en Promise) :
  *   isSupported() -> boolean
  *   requestDevice({ services, namePrefix, optionalServices }) -> handle opaque
+ *     (namePrefix : chaîne ou tableau de préfixes)
  *   connect(handle)
  *   subscribe(handle, serviceUuid, charUuid, cb)   cb reçoit un DataView
  *   write(handle, serviceUuid, charUuid, Uint8Array)
@@ -59,7 +60,10 @@ const webTransport = {
   async requestDevice({ services = [], namePrefix, optionalServices = [] }) {
     const filters = [];
     if (services.length) filters.push({ services: services.map(fullUuid) });
-    if (namePrefix) filters.push({ namePrefix });
+    // Plusieurs préfixes possibles : le filtre Web Bluetooth est sensible à la
+    // casse, et un même vélo s'annonce « Domyos-… » ou « DOMYOS-… » selon le firmware.
+    const prefixes = Array.isArray(namePrefix) ? namePrefix : namePrefix ? [namePrefix] : [];
+    prefixes.forEach((prefix) => filters.push({ namePrefix: prefix }));
 
     const device = await navigator.bluetooth.requestDevice(
       filters.length
@@ -162,7 +166,8 @@ const capacitorTransport = {
     const BleClient = await loadCapacitorBle();
     const device = await BleClient.requestDevice({
       services: services.map(fullUuid),
-      namePrefix: namePrefix || undefined,
+      // Le plugin n'accepte qu'un préfixe : on garde le premier.
+      namePrefix: (Array.isArray(namePrefix) ? namePrefix[0] : namePrefix) || undefined,
       optionalServices: optionalServices.map(fullUuid),
     });
     return { deviceId: device.deviceId, name: device.name || 'Appareil BLE' };
