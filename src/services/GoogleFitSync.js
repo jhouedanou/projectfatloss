@@ -206,8 +206,9 @@ function getImportedMap() {
   return readJSON(IMPORTED_KEY, {});
 }
 
-// Rameur et rameur d'appartement : Holofit propose aussi le rameur, exclu ici.
-const ROWING_ACTIVITY_TYPES = [102, 103];
+// Rameur (53) et rameur d'appartement (54), d'après la table officielle des
+// types d'activité Google Fit : Holofit propose aussi le rameur, exclu ici.
+const ROWING_ACTIVITY_TYPES = [53, 54];
 
 /**
  * Origine d'une séance vélo Google Fit, ou null si ce n'est pas du vélo :
@@ -339,13 +340,25 @@ export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
 }
 
 /**
+ * Jour (aaaa-mm-jj, heure locale) d'une séance vélo pour la check-list :
+ * jour de DÉBUT pour une séance importée (son champ date est la fin : une
+ * sortie de 23 h 50 à 0 h 20 compte pour la veille), jour de la coche pour
+ * une séance cochée dans la check-list.
+ */
+export function bikeSessionDayKey(session) {
+  const end = new Date(session.date).getTime();
+  if (isChecklistSession(session)) return dateKey(new Date(end));
+  return dateKey(new Date(end - (Number(session.duration) || 0) * 60 * 1000));
+}
+
+/**
  * La vraie séance remplace la case cochée à la main le même jour : supprime
  * les séances vélo de la check-list des jours où une séance a été importée.
  */
 export function replaceChecklistSessions(importedRecords) {
-  const importedDays = new Set(importedRecords.map((r) => dateKey(new Date(r.date))));
+  const importedDays = new Set(importedRecords.map(bikeSessionDayKey));
   getCardioSessions()
-    .filter((s) => s.type === 'bike' && isChecklistSession(s) && importedDays.has(dateKey(new Date(s.date))))
+    .filter((s) => s.type === 'bike' && isChecklistSession(s) && importedDays.has(bikeSessionDayKey(s)))
     .forEach((s) => deleteCardioSession(s.id));
 }
 
