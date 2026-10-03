@@ -316,12 +316,14 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
     setIsLoadingFit(true);
     try {
       await GoogleFitService.signIn();
+      // Durée réelle mesurée (minutes) si disponible, sinon 45 min.
+      const durationMs = (duration > 0 ? duration : 45) * 60 * 1000;
       const sessionActivity = {
-        activityType: 97, // Strength Training in Google Fit
+        activityType: 80, // Strength training → « Musculation » dans Google Fit
         name: `Project Fat Loss - ${day?.title}`,
         description: `Séance de musculation de haute intensité. Poids total soulevé : ${totalWeightLifted} kg.`,
-        startTime: new Date().getTime() - 45 * 60 * 1000,
-        duration: 45 * 60 * 1000,
+        startTime: Date.now() - durationMs,
+        duration: durationMs,
         calories: totalCalories,
       };
       await GoogleFitService.addActivity(sessionActivity);
