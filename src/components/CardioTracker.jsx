@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Footprints, Bike, Flame, Trash2, Plus, Clock, MapPin, Download, HardDrive } from 'lucide-react';
+import { Footprints, Bike, Flame, Trash2, Plus, Clock, MapPin, Download, RefreshCw } from 'lucide-react';
 import { getStepsSummary } from '../services/StepsStorage';
 import {
   getCardioSessions,
@@ -19,7 +19,12 @@ import {
   importBikeSessionsFromGoogleFit,
   importStepsFromGoogleFit
 } from '../services/GoogleFitSync';
-import { importBikeSessionsFromDrive } from '../services/GoogleDriveImport';
+import {
+  importBikeSessionsFromDrive,
+  getDriveSyncSettings,
+  setDriveSyncSettings,
+  isPublicSyncConfigured
+} from '../services/GoogleDriveImport';
 import './CardioTracker.css';
 
 // MET approximatifs : marche d'un bon pas et vélo stationnaire modéré-vigoureux.
@@ -62,6 +67,13 @@ const CardioTracker = () => {
   const [importState, setImportState] = useState(null);
   // Import des séances vélo Health Sync depuis Google Drive : même principe
   const [driveState, setDriveState] = useState(null);
+  // Réglages de la synchro sans connexion : lien du dossier public + clé API
+  const [driveSettings, setDriveSettingsState] = useState(() => getDriveSyncSettings());
+  const [settingsDraft, setSettingsDraft] = useState(() => {
+    const { folderUrl, apiKey } = getDriveSyncSettings();
+    return { folderUrl, apiKey };
+  });
+  const [settingsSaved, setSettingsSaved] = useState(false);
   // Import des pas Google Fit : même principe
   const [stepsState, setStepsState] = useState(null);
   const [steps, setSteps] = useState(() => getStepsSummary(7));
@@ -100,10 +112,20 @@ const CardioTracker = () => {
     try {
       const result = await importBikeSessionsFromDrive();
       setDriveState({ result });
+      setDriveSettingsState(getDriveSyncSettings());
       refresh();
     } catch (error) {
       setDriveState({ error: error.message || 'Import Google Drive impossible' });
     }
+  };
+
+  const handleSaveDriveSettings = (e) => {
+    e.preventDefault();
+    setDriveSettingsState(setDriveSyncSettings({
+      folderUrl: settingsDraft.folderUrl.trim(),
+      apiKey: settingsDraft.apiKey.trim(),
+    }));
+    setSettingsSaved(true);
   };
 
   const handleImport = async () => {
@@ -212,13 +234,12 @@ const CardioTracker = () => {
           onClick={handleImportDrive}
           disabled={driveState === 'loading'}
         >
-          <HardDrive size={20} />
+          <RefreshCw size={20} className={driveState === 'loading' ? 'cardio-spin' : ''} />
           <span>
             {driveState === 'loading'
-              ? 'Lecture du dossier Health Sync…'
-              : 'Récupérer mes séances vélo depuis Google Drive (Health Sync)'}
+              ? 'Synchronisation…'
+              : 'Synchroniser avec Google Drive (Health Sync)'}
           </span>
-          <Download size={16} />
         </button>
         {driveState?.result && (
           <p className="cardio-import-msg">
@@ -229,6 +250,44 @@ const CardioTracker = () => {
           </p>
         )}
         {driveState?.error && <p className="cardio-import-msg error">{driveState.error}</p>}
+        <p className="cardio-import-msg">
+          {isPublicSyncConfigured() ? 'Dossier public : sans connexion Google' : 'Sans dossier public réglé : connexion Google demandée'}
+          {driveSettings.lastSyncAt && ` · dernière synchro ${new Date(driveSettings.lastSyncAt).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}`}
+        </p>
+
+        {/* Réglages : lien du dossier public et clé API (mémorisés sur l'appareil) */}
+        {/* Ouverts tant que rien n'est réglé, ou après une erreur (lien ou clé à corriger) */}
+        <details className="cardio-sync-settings" open={!isPublicSyncConfigured() || !!driveState?.error}>
+          <summary>Réglages de la synchro (dossier public)</summary>
+          <form onSubmit={handleSaveDriveSettings}>
+            <label>
+              Lien du dossier « Health Sync Activités »
+              <input
+                type="url"
+                value={settingsDraft.folderUrl}
+                onChange={(e) => { setSettingsDraft({ ...settingsDraft, folderUrl: e.target.value }); setSettingsSaved(false); }}
+                placeholder="https://drive.google.com/drive/folders/…"
+              />
+            </label>
+            <label>
+              Clé API Google (API Google Drive)
+              <input
+                type="password"
+                autoComplete="off"
+                value={settingsDraft.apiKey}
+                onChange={(e) => { setSettingsDraft({ ...settingsDraft, apiKey: e.target.value }); setSettingsSaved(false); }}
+                placeholder="AIza…"
+              />
+            </label>
+            <button type="submit" className="cardio-sync-save">
+              {settingsSaved ? 'Enregistré ✓' : 'Enregistrer'}
+            </button>
+            <p className="cardio-sync-hint">
+              Le dossier doit être partagé avec « Tous les utilisateurs disposant du lien ».
+              Plusieurs liens possibles, séparés par un espace.
+            </p>
+          </form>
+        </details>
 
         <button
           type="button"

@@ -14,8 +14,14 @@
  * Une même séance vue par deux sources (Strava et Google Fit) n'est importée
  * qu'une fois.
  *
- * Prérequis côté Google Cloud : l'API Google Drive activée sur le projet du
- * client OAuth, et le scope drive.readonly autorisé sur l'écran de consentement.
+ * Deux modes d'accès :
+ *   - dossier public (« Tous les utilisateurs disposant du lien ») + clé API
+ *     Google : synchronisation sans connexion (lien et clé réglés dans
+ *     l'onglet Cardio, ou clé fournie au build par VITE_GOOGLE_API_KEY) ;
+ *   - sinon, connexion Google (OAuth, drive.readonly) et recherche des
+ *     dossiers « Health Sync Activités ».
+ * Dans les deux cas, l'API Google Drive doit être activée sur le projet Google
+ * Cloud de la clé / du client OAuth.
  */
 
 import GoogleFitService, { GOOGLE_CLIENT_ID } from './GoogleFitService';
@@ -26,6 +32,7 @@ import { isChecklistSession, markCardioSynced, replaceChecklistSessions } from '
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
 const DRIVE_API = 'https://www.googleapis.com/drive/v3';
 const IMPORTED_KEY = 'pfl_drive_imported';
+const SETTINGS_KEY = 'pfl_drive_sync';
 // MET du vélo pour estimer les calories absentes (comme CalorieEstimator).
 const BIKE_MET = 7.0;
 // Deux fichiers dont les débuts sont à moins de 2 min décrivent la même séance.
@@ -64,7 +71,7 @@ function splitCsvLine(line) {
  * @returns {{ source, type, name, start: Date, seconds, distanceKm, calories }|null}
  */
 export function parseHealthSyncCsv(text) {
-  const lines = String(text || '').replace(/^﻿/, '').trim().split(/\r?\n/);
+  const lines = String(text || '').replace(/^\uFEFF/, '').trim().split(/\r?\n/);
   if (lines.length < 2) return null;
   const cols = splitCsvLine(lines[1]);
   const m = /^(\d{4})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2}):(\d{2})$/.exec((cols[3] || '').trim());
@@ -85,7 +92,46 @@ export function parseHealthSyncCsv(text) {
   };
 }
 
-// ── Accès Google Drive (jeton OAuth dédié, lecture seule) ────────────
+// ── Réglages de la synchronisation publique ─────────────────────────
+
+/** Identifiants de dossiers extraits d'un ou plusieurs liens Drive (ou ids). */
+export function parseFolderIds(text) {
+  return String(text || '')
+    .split(/[\s,;]+/)
+    .map((part) => {
+      const m = /folders\/([\w-]{10,})/.exec(part) || /[?&]id=([\w-]{10,})/.exec(part);
+      if (m) return m[1];
+      return /^[\w-]{10,}$/.test(part) ? part : null;
+    })
+    .filter(Boolean);
+}
+
+/** { folderUrl, apiKey, lastSyncAt } — la clé du build sert par défaut. */
+export function getDriveSyncSettings() {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { /* vide */ }
+  return {
+    folderUrl: saved.folderUrl || '',
+    apiKey: saved.apiKey || import.meta.env.VITE_GOOGLE_API_KEY || '',
+    lastSyncAt: saved.lastSyncAt || null,
+  };
+}
+
+export function setDriveSyncSettings(patch) {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { /* vide */ }
+  const next = { ...saved, ...patch };
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch { /* quota */ }
+  return getDriveSyncSettings();
+}
+
+/** Synchronisation sans connexion possible (dossier public + clé API) ? */
+export function isPublicSyncConfigured() {
+  const { folderUrl, apiKey } = getDriveSyncSettings();
+  return parseFolderIds(folderUrl).length > 0 && !!apiKey;
+}
+
+// ── Accès Google Drive (clé API pour un dossier public, sinon OAuth) ─
 
 let tokenClient = null;
 let accessToken = null;
@@ -120,18 +166,26 @@ async function getDriveToken() {
   });
 }
 
-async function driveFetch(path, params = {}, { text = false } = {}) {
-  const token = await getDriveToken();
-  const query = new URLSearchParams(params).toString();
-  const response = await fetch(`${DRIVE_API}/${path}${query ? `?${query}` : ''}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+/**
+ * Appel à l'API Drive. Avec `apiKey` (dossier public) : clé en paramètre,
+ * sans connexion ; sinon jeton OAuth.
+ */
+async function driveFetch(path, params = {}, { text = false, apiKey = null } = {}) {
+  const headers = {};
+  const query = new URLSearchParams(params);
+  if (apiKey) query.set('key', apiKey);
+  else headers.Authorization = `Bearer ${await getDriveToken()}`;
+  const response = await fetch(`${DRIVE_API}/${path}?${query.toString()}`, { headers });
   if (!response.ok) {
     const body = await response.text();
     let message = `Erreur HTTP ${response.status}`;
     try { message = JSON.parse(body)?.error?.message || message; } catch { /* corps non JSON */ }
     if (response.status === 403 && /has not been used|is disabled/i.test(message)) {
-      message = 'API Google Drive non activée sur le projet Google Cloud de l\'app : activez-la dans la console Google Cloud.';
+      message = 'API Google Drive non activée sur le projet Google Cloud de la clé : activez-la dans la console Google Cloud.';
+    } else if (/API key not valid|API_KEY_INVALID/i.test(message)) {
+      message = 'Clé API Google invalide.';
+    } else if (apiKey && response.status === 404) {
+      message = 'Dossier ou fichier introuvable : vérifiez le lien et que le dossier est partagé avec « Tous les utilisateurs disposant du lien ».';
     }
     throw new Error(`Google Drive (${response.status}) : ${message}`);
   }
@@ -139,7 +193,7 @@ async function driveFetch(path, params = {}, { text = false } = {}) {
 }
 
 /** Liste tous les fichiers d'une requête Drive (pagination incluse). */
-async function listFiles(q) {
+async function listFiles(q, apiKey = null) {
   const files = [];
   let pageToken;
   do {
@@ -148,7 +202,7 @@ async function listFiles(q) {
       fields: 'nextPageToken,files(id,name)',
       pageSize: '1000',
       ...(pageToken ? { pageToken } : {})
-    });
+    }, { apiKey });
     files.push(...(data.files || []));
     pageToken = data.nextPageToken;
   } while (pageToken);
@@ -160,12 +214,19 @@ async function listFiles(q) {
 /**
  * Récupère les séances vélo des dossiers d'activités Health Sync et les ajoute
  * aux séances cardio (sans doublon, et sans les renvoyer vers Google Fit).
+ * Dossier public + clé API réglés → sans connexion ; sinon connexion Google.
  * @returns {Promise<{ folders: number, found: number, imported: number, skipped: number, minutes: number }>}
  */
 export async function importBikeSessionsFromDrive() {
-  const folders = (await listFiles(
-    "mimeType='application/vnd.google-apps.folder' and name contains 'Health Sync' and trashed=false"
-  )).filter((f) => /activit/i.test(f.name));
+  const settings = getDriveSyncSettings();
+  const publicIds = parseFolderIds(settings.folderUrl);
+  const apiKey = publicIds.length && settings.apiKey ? settings.apiKey : null;
+
+  const folders = apiKey
+    ? publicIds.map((id) => ({ id }))
+    : (await listFiles(
+      "mimeType='application/vnd.google-apps.folder' and name contains 'Health Sync' and trashed=false"
+    )).filter((f) => /activit/i.test(f.name));
   if (!folders.length) {
     throw new Error('Dossier « Health Sync Activités » introuvable dans Google Drive.');
   }
@@ -173,7 +234,7 @@ export async function importBikeSessionsFromDrive() {
   // CSV d'activités vélo, repérés à leur nom avant tout téléchargement.
   const csvFiles = [];
   for (const folder of folders) {
-    const files = await listFiles(`'${folder.id}' in parents and trashed=false`);
+    const files = await listFiles(`'${folder.id}' in parents and trashed=false`, apiKey);
     files.forEach((f) => {
       const m = HEALTH_SYNC_CSV.exec(f.name);
       if (m && isBikeActivityType(m[1])) csvFiles.push(f);
@@ -186,7 +247,7 @@ export async function importBikeSessionsFromDrive() {
 
   const activities = [];
   for (const file of fresh) {
-    const activity = parseHealthSyncCsv(await driveFetch(`files/${file.id}`, { alt: 'media' }, { text: true }));
+    const activity = parseHealthSyncCsv(await driveFetch(`files/${file.id}`, { alt: 'media' }, { text: true, apiKey }));
     if (activity) activities.push({ ...activity, fileId: file.id });
     else imported[file.id] = 'ignored';
   }
@@ -243,6 +304,7 @@ export async function importBikeSessionsFromDrive() {
   });
   replaceChecklistSessions(created);
   try { localStorage.setItem(IMPORTED_KEY, JSON.stringify(imported)); } catch { /* quota */ }
+  setDriveSyncSettings({ lastSyncAt: new Date().toISOString() });
 
   return {
     folders: folders.length,

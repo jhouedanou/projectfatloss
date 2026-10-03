@@ -45,6 +45,9 @@ jobs:
 
       - name: Bundle web + assets MediaPipe + sync Capacitor
         run: yarn cap:sync
+        env:
+          # Clé API Google (Drive API) pour synchroniser un dossier Health Sync public
+          VITE_GOOGLE_API_KEY: ${{ secrets.VITE_GOOGLE_API_KEY }}
 
       - name: Compiler l'APK
         working-directory: android

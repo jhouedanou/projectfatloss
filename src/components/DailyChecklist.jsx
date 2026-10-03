@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { Check, Bike, Dumbbell, Leaf } from 'lucide-react';
+import { Check, Bike, Dumbbell, Leaf, RefreshCw } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getCardioSessions } from '../services/CardioStorage';
 import { dateKey } from '../services/HabitStorage';
 import { estimateSessionMinutes } from '../services/WeightLossPlan';
 import { getChecklistDay, isBikeItemDone, toggleBikeItem } from '../services/DailyChecklist';
+import { importBikeSessionsFromDrive, isPublicSyncConfigured } from '../services/GoogleDriveImport';
 import './DailyChecklist.css';
 
 /**
@@ -18,6 +19,10 @@ import './DailyChecklist.css';
 export default function DailyChecklist({ planDay, goal, onStartWorkout, onChange }) {
   const today = useMemo(() => new Date(), []);
   const [day, setDay] = useState(() => getChecklistDay(today));
+  // Synchro Health Sync (dossier Drive public) depuis la ligne vélo
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState(null);
+  const [syncVersion, setSyncVersion] = useState(0);
 
   const workoutDone = useMemo(
     () => getWorkoutHistory().some((w) => dateKey(new Date(w.date)) === dateKey(today)),
@@ -31,7 +36,7 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onChange
     return getCardioSessions()
       .filter((s) => s.type === 'bike' && !ownIds.has(s.id) && dateKey(new Date(s.date)) === dateKey(today))
       .reduce((sum, s) => sum + (Number(s.duration) || 0), 0);
-  }, [day, today]);
+  }, [day, today, syncVersion]);
 
   if (!planDay) return null;
 
@@ -64,6 +69,22 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onChange
     onChange && onChange();
   };
 
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncError(null);
+    try {
+      await importBikeSessionsFromDrive();
+      setDay(getChecklistDay(today));
+      setSyncVersion((v) => v + 1);
+      onChange && onChange();
+    } catch (error) {
+      setSyncError(error.message || 'Synchronisation impossible');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const canSync = isPublicSyncConfigured();
   const icons = { bike: Bike, strength: Dumbbell };
   const hintOf = (item) => (item.kind === 'bike' && bikeDoneElsewhere(item) && !isBikeItemDone(day, item.id)
     ? `${otherBikeMinutes} min importées aujourd'hui`
@@ -106,11 +127,24 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onChange
                   </span>
                   {item.kind === 'strength' && !done && <span className="dcl-start">Démarrer</span>}
                 </button>
+                {item.kind === 'bike' && canSync && (
+                  <button
+                    type="button"
+                    className="dcl-refresh"
+                    onClick={handleSync}
+                    disabled={syncing}
+                    aria-label="Synchroniser les séances vélo depuis Google Drive"
+                    title="Synchroniser les séances vélo depuis Google Drive"
+                  >
+                    <RefreshCw size={16} className={syncing ? 'spin' : ''} />
+                  </button>
+                )}
               </li>
             );
           })}
         </ul>
       )}
+      {syncError && <p className="dcl-error">{syncError}</p>}
     </div>
   );
 }
