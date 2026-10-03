@@ -395,7 +395,7 @@ export default function App() {
                                     const minutes = estimateSessionMinutes(workoutPlan[current]);
                                     const weekStart = Math.floor(current / 7) * 7;
                                     const goal = computeWeekTargets(workoutPlan.slice(weekStart, weekStart + 7));
-                                    return `Jour ${current + 1} · ~${minutes.total} min de muscu · vélo ${goal.warmup} + ${goal.main} min (check-list)`;
+                                    return `Jour ${current + 1} · ~${minutes.total} min de muscu · vélo ${goal.bikePerSession} min (check-list)`;
                                   })()}
                             </p>
                           </div>

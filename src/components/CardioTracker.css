@@ -315,16 +315,6 @@
 
 .cardio-steps-fill {
   width: 100%;
-  background: rgba(48, 209, 88, 0.55);
-  border-radius: 6px 6px 0 0;
-}
-
-.cardio-steps-fill.done {
   background: #30d158;
-}
-
-.cardio-steps-goal {
-  margin: 10px 0 0;
-  font-size: 0.75rem;
-  color: var(--text-tertiary, #9a9aa2);
+  border-radius: 6px 6px 0 0;
 }

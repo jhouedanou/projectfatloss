@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Scale as ScaleIcon, Clock, Dumbbell, Leaf, Bike, Target, Footprints } from 'lucide-react';
+import { Scale as ScaleIcon, Clock, Dumbbell, Leaf, Bike, Target } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
 import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
@@ -12,9 +12,7 @@ import {
   computeWeekTargets,
   getWeekProgress,
   startOfWeek,
-  DAILY_STEPS_TARGET,
 } from '../services/WeightLossPlan';
-import { getStepsSummary } from '../services/StepsStorage';
 import DailyChecklist from './DailyChecklist';
 import './HomeDashboard.css';
 
@@ -90,7 +88,6 @@ export default function HomeDashboard({ onStartWorkout }) {
   // Objectif en minutes (vélo + musculation légère) et minutes faites depuis lundi.
   const goal = useMemo(() => computeWeekTargets(weekPlanDays, { goalKg }), [weekPlanDays, goalKg]);
   const progress = useMemo(() => getWeekProgress(), [checklistVersion]);
-  const stepsAverage = useMemo(() => getStepsSummary(7).average, [checklistVersion]);
   const minutesDone = progress.bikeMinutes + progress.strengthMinutes;
   const percent = Math.min(100, (minutesDone / Math.max(1, goal.totalMinutes)) * 100);
 
@@ -263,7 +260,7 @@ export default function HomeDashboard({ onStartWorkout }) {
             <Bike size={16} />
             <span>
               <strong>{goal.bikeMinutes} min de vélo</strong> cette semaine
-              {goal.sessions > 0 && ` · ${goal.warmup} + ${goal.main} min les jours de séance`}
+              {goal.sessions > 0 && ` · une séance de ${goal.bikePerSession} min les jours de muscu`}
             </span>
           </li>
           {goal.extraBike > 0 && (
@@ -275,13 +272,6 @@ export default function HomeDashboard({ onStartWorkout }) {
           <li>
             <Dumbbell size={16} />
             <span><strong>{goal.strengthMinutes} min de muscu légère</strong> ({goal.sessions} séances)</span>
-          </li>
-          <li>
-            <Footprints size={16} />
-            <span>
-              <strong>{DAILY_STEPS_TARGET.toLocaleString('fr-FR')} pas par jour</strong>
-              {stepsAverage != null && ` · moyenne 7 jours : ${stepsAverage.toLocaleString('fr-FR')}`}
-            </span>
           </li>
           <li>
             <Leaf size={16} />

@@ -90,7 +90,6 @@
 
 .dcl-icon.bike { color: var(--info); }
 .dcl-icon.strength { color: var(--acc); }
-.dcl-icon.steps { color: var(--ok); }
 
 .dcl-copy {
   flex: 1;
@@ -126,36 +125,4 @@
   color: var(--acc);
   font-size: 0.8rem;
   font-weight: 600;
-}
-
-.dcl-refresh {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: var(--surface-2);
-  color: var(--label-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.dcl-refresh:disabled {
-  cursor: progress;
-}
-
-.dcl-refresh .spin {
-  animation: dcl-spin 0.9s linear infinite;
-}
-
-@keyframes dcl-spin {
-  to { transform: rotate(360deg); }
-}
-
-.dcl-error {
-  margin: 6px 0 0;
-  font-size: 0.78rem;
-  color: var(--err);
 }

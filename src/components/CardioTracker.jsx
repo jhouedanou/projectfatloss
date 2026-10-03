@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Footprints, Bike, Flame, Trash2, Plus, Clock, MapPin, Download } from 'lucide-react';
 import { getStepsSummary } from '../services/StepsStorage';
-import { DAILY_STEPS_TARGET } from '../services/WeightLossPlan';
 import {
   getCardioSessions,
   addCardioSession,
@@ -33,10 +32,11 @@ const estimateCalories = (type, durationMin, weightKg) => {
 };
 
 // Origine d'une séance (champ notes en JSON) : badge affiché dans la liste.
-const SOURCE_LABELS = { google_fit: 'Google Fit', checklist: 'Check-list' };
+const SOURCE_LABELS = { google_fit: 'Google Fit', checklist: 'Check-list', holofit: 'Holofit', strava: 'Strava' };
 const sourceLabel = (session) => {
   try {
-    return SOURCE_LABELS[JSON.parse(session?.notes || '{}').source] || null;
+    const notes = JSON.parse(session?.notes || '{}');
+    return SOURCE_LABELS[notes.origin] || SOURCE_LABELS[notes.source] || null;
   } catch {
     return null;
   }
@@ -201,7 +201,7 @@ const CardioTracker = () => {
           <span>
             {importState === 'loading'
               ? 'Récupération des sorties vélo…'
-              : 'Récupérer mes sorties vélo depuis Google Fit'}
+              : 'Récupérer mes sorties vélo (Strava, Holofit…) depuis Google Fit'}
           </span>
           <Download size={16} />
         </button>
@@ -249,19 +249,19 @@ const CardioTracker = () => {
           </span>
         </div>
         <div className="cardio-steps-bars" aria-label="Pas des 7 derniers jours">
-          {steps.days.map((d) => (
+          {steps.days.map((d, _i, days) => (
             <div key={d.key} className="cardio-steps-day" title={`${fmtSteps(d.steps)} pas`}>
               <div className="cardio-steps-track">
+                {/* Hauteur relative au meilleur jour de la semaine (pas d'objectif de pas) */}
                 <div
-                  className={`cardio-steps-fill${d.steps >= DAILY_STEPS_TARGET ? ' done' : ''}`}
-                  style={{ height: `${Math.min(100, ((d.steps || 0) / DAILY_STEPS_TARGET) * 100)}%` }}
+                  className="cardio-steps-fill"
+                  style={{ height: `${((d.steps || 0) / Math.max(1, ...days.map((x) => x.steps || 0))) * 100}%` }}
                 />
               </div>
               <span>{d.date.toLocaleDateString('fr-FR', { weekday: 'narrow' })}</span>
             </div>
           ))}
         </div>
-        <p className="cardio-steps-goal">Objectif : {fmtSteps(DAILY_STEPS_TARGET)} pas par jour</p>
       </div>
 
       <GoogleFitSyncButton
