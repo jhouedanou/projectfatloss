@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Footprints, Bike, Flame, Trash2, Plus, Clock, MapPin } from 'lucide-react';
+import { Footprints, Bike, Flame, Trash2, Plus, Clock, MapPin, Download } from 'lucide-react';
+import { getStepsSummary } from '../services/StepsStorage';
+import { DAILY_STEPS_TARGET } from '../services/WeightLossPlan';
 import {
   getCardioSessions,
   addCardioSession,
@@ -9,11 +11,14 @@ import {
 import { getWeightHistory } from '../services/WeightStorage';
 import GoogleFitSyncButton from './GoogleFitSyncButton';
 import GoogleFitItemButton from './GoogleFitItemButton';
+import GoogleFitIcon from './GoogleFitIcon';
 import {
   getUnsyncedCardio,
   syncAllCardio,
   syncCardioToGoogleFit,
-  isSyncedWithGoogleFit
+  isSyncedWithGoogleFit,
+  importBikeSessionsFromGoogleFit,
+  importStepsFromGoogleFit
 } from '../services/GoogleFitSync';
 import './CardioTracker.css';
 
@@ -26,6 +31,18 @@ const estimateCalories = (type, durationMin, weightKg) => {
   const w = weightKg || 75;
   return Math.round(MET[type] * w * (durationMin / 60));
 };
+
+// Origine d'une séance (champ notes en JSON) : badge affiché dans la liste.
+const SOURCE_LABELS = { google_fit: 'Google Fit', checklist: 'Check-list' };
+const sourceLabel = (session) => {
+  try {
+    return SOURCE_LABELS[JSON.parse(session?.notes || '{}').source] || null;
+  } catch {
+    return null;
+  }
+};
+
+const fmtSteps = (n) => (n == null ? '—' : n.toLocaleString('fr-FR'));
 
 const fmtDate = (iso) => {
   const d = new Date(iso);
@@ -40,6 +57,11 @@ const CardioTracker = () => {
   const [distance, setDistance] = useState('');
   const [calories, setCalories] = useState('');
   const [touchedCalories, setTouchedCalories] = useState(false);
+  // Import des sorties vélo Google Fit : null | 'loading' | { result } | { error }
+  const [importState, setImportState] = useState(null);
+  // Import des pas Google Fit : même principe
+  const [stepsState, setStepsState] = useState(null);
+  const [steps, setSteps] = useState(() => getStepsSummary(7));
 
   const refresh = () => {
     setSessions(getCardioSessions());
@@ -69,6 +91,30 @@ const CardioTracker = () => {
     setDuration(''); setDistance(''); setCalories(''); setTouchedCalories(false);
     refresh();
   };
+
+  const handleImport = async () => {
+    setImportState('loading');
+    try {
+      const result = await importBikeSessionsFromGoogleFit({ days: 365 });
+      setImportState({ result });
+      refresh();
+    } catch (error) {
+      setImportState({ error: error.message || 'Import Google Fit impossible' });
+    }
+  };
+
+  const handleImportSteps = async () => {
+    setStepsState('loading');
+    try {
+      const result = await importStepsFromGoogleFit({ days: 365 });
+      setStepsState({ result });
+      setSteps(getStepsSummary(7));
+    } catch (error) {
+      setStepsState({ error: error.message || 'Import Google Fit impossible' });
+    }
+  };
+
+  const fmtMinutes = (min) => (min >= 60 ? `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')}` : `${min} min`);
 
   const handleDelete = (id) => {
     deleteCardioSession(id);
@@ -143,6 +189,81 @@ const CardioTracker = () => {
         </button>
       </form>
 
+      {/* Import de l'historique vélo depuis Google Fit (12 derniers mois) */}
+      <div className="cardio-import">
+        <button
+          type="button"
+          className="cardio-import-btn"
+          onClick={handleImport}
+          disabled={importState === 'loading'}
+        >
+          <GoogleFitIcon size={20} />
+          <span>
+            {importState === 'loading'
+              ? 'Récupération des sorties vélo…'
+              : 'Récupérer mes sorties vélo depuis Google Fit'}
+          </span>
+          <Download size={16} />
+        </button>
+        {importState?.result && (
+          <p className="cardio-import-msg">
+            {importState.result.imported > 0
+              ? `${importState.result.imported} sortie${importState.result.imported > 1 ? 's' : ''} vélo importée${importState.result.imported > 1 ? 's' : ''} · ${fmtMinutes(importState.result.minutes)} de vélo`
+              : 'Aucune nouvelle sortie vélo trouvée sur les 12 derniers mois.'}
+            {importState.result.skipped > 0 && ` (${importState.result.skipped} déjà présente${importState.result.skipped > 1 ? 's' : ''})`}
+          </p>
+        )}
+        {importState?.error && <p className="cardio-import-msg error">{importState.error}</p>}
+
+        <button
+          type="button"
+          className="cardio-import-btn"
+          onClick={handleImportSteps}
+          disabled={stepsState === 'loading'}
+        >
+          <GoogleFitIcon size={20} />
+          <span>
+            {stepsState === 'loading'
+              ? 'Récupération des pas…'
+              : 'Récupérer mes pas depuis Google Fit'}
+          </span>
+          <Download size={16} />
+        </button>
+        {stepsState?.result && (
+          <p className="cardio-import-msg">
+            {stepsState.result.days > 0
+              ? `${stepsState.result.days} jour${stepsState.result.days > 1 ? 's' : ''} de pas récupéré${stepsState.result.days > 1 ? 's' : ''} sur 12 mois`
+              : 'Aucun pas trouvé sur les 12 derniers mois.'}
+          </p>
+        )}
+        {stepsState?.error && <p className="cardio-import-msg error">{stepsState.error}</p>}
+      </div>
+
+      {/* Pas des 7 derniers jours */}
+      <div className="cardio-steps">
+        <div className="cardio-steps-head">
+          <Footprints size={18} color="#30d158" />
+          <span className="cardio-steps-title">Pas</span>
+          <span className="cardio-steps-meta">
+            Aujourd'hui <strong>{fmtSteps(steps.today)}</strong> · moyenne 7 j <strong>{fmtSteps(steps.average)}</strong>
+          </span>
+        </div>
+        <div className="cardio-steps-bars" aria-label="Pas des 7 derniers jours">
+          {steps.days.map((d) => (
+            <div key={d.key} className="cardio-steps-day" title={`${fmtSteps(d.steps)} pas`}>
+              <div className="cardio-steps-track">
+                <div
+                  className={`cardio-steps-fill${d.steps >= DAILY_STEPS_TARGET ? ' done' : ''}`}
+                  style={{ height: `${Math.min(100, ((d.steps || 0) / DAILY_STEPS_TARGET) * 100)}%` }}
+                />
+              </div>
+              <span>{d.date.toLocaleDateString('fr-FR', { weekday: 'narrow' })}</span>
+            </div>
+          ))}
+        </div>
+        <p className="cardio-steps-goal">Objectif : {fmtSteps(DAILY_STEPS_TARGET)} pas par jour</p>
+      </div>
+
       <GoogleFitSyncButton
         getUnsyncedCount={() => getUnsyncedCardio().length}
         onSync={syncAllCardio}
@@ -159,7 +280,10 @@ const CardioTracker = () => {
             </div>
             <div className="cardio-item-main">
               <div className="cardio-item-top">
-                <span className="cardio-item-type">{s.type === 'walk' ? 'Marche' : 'Vélo'}</span>
+                <span className="cardio-item-type">
+                  {s.type === 'walk' ? 'Marche' : 'Vélo'}
+                  {sourceLabel(s) && <span className="cardio-item-source">{sourceLabel(s)}</span>}
+                </span>
                 <span className="cardio-item-date">{fmtDate(s.date)}</span>
               </div>
               <div className="cardio-item-meta">

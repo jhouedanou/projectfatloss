@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, ChevronRight, Leaf, Dumbbell } from 'lucide-react';
+import { estimateSessionMinutes } from '../services/WeightLossPlan';
 import './WeekSelector.css';
 
 /**
@@ -92,7 +93,7 @@ export default function WeekSelector({ days, current, onSelectDay }) {
                 <span className="ws-chip rest">Repos</span>
               ) : (
                 <span className={`ws-chip${isActive ? ' active' : ''}`}>
-                  {(day.exercises || []).length} exos
+                  ~{estimateSessionMinutes(day).total} min
                 </span>
               )}
               <ChevronRight size={17} className="ws-row-chevron" />

@@ -5,7 +5,8 @@
  *   - src/data.js                                          (application web)
  *   - projectfatloss_flutter/lib/shared/data/default_workout_data.dart (application Flutter)
  *
- * Programme : 28 jours = 4 semaines de 5 séances de musculation + 2 jours de repos.
+ * Programme : 28 jours = 4 semaines de 5 séances de musculation légère
+ * et 2 jours de repos.
  *   Lundi    : FULL BODY A (poussée)
  *   Mardi    : FULL BODY B (tirage)
  *   Mercredi : repos
@@ -14,17 +15,18 @@
  *   Samedi   : FULL BODY E (gainage, fonctionnel)
  *   Dimanche : repos
  *
- * 100 % musculation, sans vélo : le volume de répétitions est augmenté en
- * conséquence pour que chaque séance dure ~1 h. Échauffement libre conseillé
- * avant chaque séance (marche sur place, montées de genoux légères, 5 min).
- *
+ * Priorité au vélo pour perdre 3 à 4 kg par mois, mais le vélo ne fait pas
+ * partie de la séance guidée : il figure dans la check-list du jour de
+ * l'accueil, avec des minutes calculées selon l'objectif (WeightLossPlan.js).
+ * La musculation est donc légère (~20 min, 2 à 3 séries).
+
  * Les exercices tournent sur les 4 semaines : chaque schéma de mouvement
  * (poussée horizontale, tirage, hinge, fentes…) a une variante différente par
  * semaine, avec une montée en charge S1 → S3 puis un allègement en S4.
  *
  * Objectif : perte de poids durable (profil ~147 kg) — low-impact, zéro saut,
  * 100% debout ou sur banc. Matériel : haltères 2×15 et 2×10 kg, barre 30 kg,
- * veste lestée 10 kg, poids chevilles 2×4 + 2×2 kg.
+ * veste lestée 10 kg, poids chevilles 2×4 + 2×2 kg, vélo Domyos EB900.
  *
  * Usage : node scripts/gen-plan.mjs
  */
@@ -283,7 +285,6 @@ const CATALOG = {
     timer: true,
     duration: 60,
   },
-
 };
 
 // Exercices travaillant un côté à la fois : l'app enchaîne les deux côtés dans
@@ -305,42 +306,44 @@ const UNILATERAL = new Set([
 
 // ---------------------------------------------------------------------------
 // Progression sur 4 semaines : la charge monte S1 → S3, S4 allège pour
-// récupérer avant de reprendre le cycle.
+// récupérer avant de reprendre le cycle. Volume volontairement léger
+// (2-3 séries) : le vélo porte l'essentiel de la dépense calorique.
 // ---------------------------------------------------------------------------
 
 const WEEKS = [
   {
     label: 'S1 Adaptation',
-    main: { sets: '4 × 12 (tempo 3-1-1)', n: 4, rep: 12 },
-    access: { sets: '4 × 15', n: 4, rep: 15 },
-    core: { sets: '4 × 15', n: 4, rep: 15 },
-    carry: { sets: '4 × 45 s', n: 4, rep: 0 },
+    main: { sets: '3 × 12 (tempo 3-1-1)', n: 3, rep: 12 },
+    access: { sets: '2 × 15', n: 2, rep: 15 },
+    core: { sets: '2 × 15', n: 2, rep: 15 },
+    carry: { sets: '2 × 45 s', n: 2, rep: 0 },
   },
   {
     label: 'S2 Accumulation',
-    main: { sets: '5 × 12 (tempo 3-1-1)', n: 5, rep: 12 },
-    access: { sets: '4 × 15', n: 4, rep: 15 },
-    core: { sets: '4 × 18', n: 4, rep: 18 },
-    carry: { sets: '4 × 60 s', n: 4, rep: 0 },
+    main: { sets: '3 × 12 (tempo 3-1-1)', n: 3, rep: 12 },
+    access: { sets: '3 × 12', n: 3, rep: 12 },
+    core: { sets: '2 × 15', n: 2, rep: 15 },
+    carry: { sets: '3 × 45 s', n: 3, rep: 0 },
   },
   {
     label: 'S3 Intensification',
-    main: { sets: '5 × 10 (tempo lent, plus lourd)', n: 5, rep: 10 },
-    access: { sets: '5 × 12', n: 5, rep: 12 },
-    core: { sets: '4 × 20', n: 4, rep: 20 },
-    carry: { sets: '4 × 60 s', n: 4, rep: 0 },
+    main: { sets: '3 × 10 (tempo lent, plus lourd)', n: 3, rep: 10 },
+    access: { sets: '3 × 12', n: 3, rep: 12 },
+    core: { sets: '3 × 15', n: 3, rep: 15 },
+    carry: { sets: '3 × 60 s', n: 3, rep: 0 },
   },
   {
     label: 'S4 Allègement',
-    main: { sets: '3 × 12 (allégé)', n: 3, rep: 12 },
-    access: { sets: '3 × 15 (allégé)', n: 3, rep: 15 },
-    core: { sets: '3 × 12', n: 3, rep: 12 },
-    carry: { sets: '3 × 45 s', n: 3, rep: 0 },
+    main: { sets: '2 × 12 (allégé)', n: 2, rep: 12 },
+    access: { sets: '2 × 12 (allégé)', n: 2, rep: 12 },
+    core: { sets: '2 × 12', n: 2, rep: 12 },
+    carry: { sets: '2 × 45 s', n: 2, rep: 0 },
   },
 ];
 
 // ---------------------------------------------------------------------------
-// La semaine : 5 séances de musculation + 2 jours de repos.
+// La semaine : 5 séances de musculation légère + 2 jours de repos (le vélo
+// est dans la check-list du jour, hors séance guidée).
 // Chaque « slot » liste 4 variantes — une par semaine — pour le même schéma
 // de mouvement : les exercices changent tout au long du mois.
 // ---------------------------------------------------------------------------
@@ -546,17 +549,18 @@ function jsExercise(exercise) {
 function renderDataJs() {
   const out = [
     '/**',
-    ' * PROGRAMME PERTE DE POIDS — 28 jours = 4 semaines de 5 séances de musculation + 2 jours de repos.',
+    ' * PROGRAMME PERTE DE POIDS — 28 jours = 4 semaines de 5 séances de musculation légère',
+    ' * et 2 jours de repos.',
     ' * Lundi FULL BODY A (poussée) / Mardi FULL BODY B (tirage) / Jeudi FULL BODY C (jambes) /',
     ' * Vendredi FULL BODY D (haut du corps) / Samedi FULL BODY E (gainage, fonctionnel).',
     ' * Mercredi et dimanche : récupération complète.',
-    ' * 100 % musculation, sans vélo : le volume de répétitions est augmenté en conséquence',
-    ' * (~1 h par séance). Échauffement libre conseillé avant chaque séance (5 min).',
+    ' * Musculation légère (~20 min) ; le vélo est dans la check-list du jour de l\'accueil',
+    ' * (minutes calculées selon l\'objectif de 3 à 4 kg/mois).',
     ' * Les exercices tournent sur les 4 semaines (une variante par semaine et par schéma de',
     ' * mouvement) ; la charge monte S1 → S3 puis S4 allège.',
     ' * Adapté : profil ~147 kg, 100% debout/banc (aucun appui au sol), ZÉRO saut (low-impact).',
     ' * Matériel : haltères 2×15 et 2×10 kg, barre 30 kg, veste lestée 10 kg, poids chevilles',
-    ' * 2×4 + 2×2 kg.',
+    ' * 2×4 + 2×2 kg, vélo Domyos EB900.',
     ' * Généré par scripts/gen-plan.mjs — ne pas éditer à la main.',
     ' */',
     'const fullPlan = [',
@@ -612,7 +616,7 @@ function renderDart() {
   const out = [
     "import '../models/workout_model.dart';",
     '',
-    '/// Programme perte de poids — 4 semaines de 5 séances de musculation',
+    '/// Programme perte de poids — 4 semaines de 5 séances de musculation légère',
     '/// et 2 jours de repos. Les exercices tournent d\'une semaine à l\'autre.',
     '/// Low-impact, 100% debout ou sur banc.',
     '/// Généré par scripts/gen-plan.mjs — ne pas éditer à la main.',

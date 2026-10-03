@@ -7,6 +7,8 @@
  * TDEE = BMR × facteur d'activité (sédentaire/légèrement actif — le sport est
  * déjà compté à part dans le bilan énergétique, ne pas le compter deux fois).
  * Objectif calorique = TDEE − déficit quotidien, avec un plancher de sécurité.
+ * Le déficit à table est modéré (500 kcal) : le vélo apporte le reste du
+ * déficit nécessaire pour perdre 3 à 4 kg par mois (voir WeightLossPlan.js).
  *
  * Le poids vient de la dernière pesée (WeightTracker) via getUserWeight() :
  * l'objectif suit donc automatiquement la perte de poids.
@@ -15,7 +17,7 @@
 import { getUserProfile, getUserWeight } from './CalorieEstimator';
 
 export const ACTIVITY_FACTOR = 1.4;
-export const DAILY_DEFICIT_KCAL = 750;
+export const DAILY_DEFICIT_KCAL = 500;
 export const MIN_CALORIE_TARGET = 1500;
 
 export function getBMR() {

@@ -1,0 +1,161 @@
+/* Check-list du jour (accueil) */
+
+.dcl {
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.dcl-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dcl-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.dcl-count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ok);
+  font-variant-numeric: tabular-nums;
+}
+
+.dcl-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 10px;
+  font-size: 0.8rem;
+  color: var(--label-2);
+}
+
+.dcl-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dcl-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid var(--sep-op);
+}
+
+.dcl-item:first-child {
+  border-top: none;
+}
+
+.dcl-check {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 2px;
+  border: none;
+  background: none;
+  color: var(--label);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dcl-box {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--label-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  transition: background var(--t) var(--ease), border-color var(--t) var(--ease);
+}
+
+.dcl-item.done .dcl-box {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.dcl-icon {
+  flex-shrink: 0;
+}
+
+.dcl-icon.bike { color: var(--info); }
+.dcl-icon.strength { color: var(--acc); }
+.dcl-icon.steps { color: var(--ok); }
+
+.dcl-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dcl-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.dcl-item.done .dcl-label {
+  color: var(--label-2);
+  text-decoration: line-through;
+}
+
+.dcl-hint {
+  font-size: 0.78rem;
+  color: var(--label-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dcl-start {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--acc-soft);
+  color: var(--acc);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.dcl-refresh {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-2);
+  color: var(--label-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dcl-refresh:disabled {
+  cursor: progress;
+}
+
+.dcl-refresh .spin {
+  animation: dcl-spin 0.9s linear infinite;
+}
+
+@keyframes dcl-spin {
+  to { transform: rotate(360deg); }
+}
+
+.dcl-error {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: var(--err);
+}
