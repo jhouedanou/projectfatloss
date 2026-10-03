@@ -17,10 +17,13 @@
   "scripts": {
     "dev": "vite --force",
     "start": "vite --force",
-    "build": "node scripts/generate-icons.js && vite build",
+    "build": "node scripts/generate-icons.js && node scripts/fetch-mediapipe-assets.mjs && vite build",
     "preview": "vite preview",
-    "predeploy": "node scripts/generate-icons.js && vite build",
+    "predeploy": "node scripts/generate-icons.js && node scripts/fetch-mediapipe-assets.mjs && vite build",
     "deploy": "gh-pages -d dist",
+    "build:cap": "node scripts/generate-icons.js && node scripts/fetch-mediapipe-assets.mjs && vite build --mode capacitor",
+    "cap:sync": "npm run build:cap && cap sync android",
+    "fetch-mediapipe": "node scripts/fetch-mediapipe-assets.mjs",
     "generate-icons": "node scripts/generate-icons.js",
     "seed-exercises": "node scripts/seed-exercises.mjs",
     "mobile": "vite --host 0.0.0.0 --port 3000",
@@ -30,9 +33,12 @@
     "dev:full": "concurrently \"npm run dev\" \"npm run bs\" --names \"VITE,BROWSERSYNC\" --prefix-colors \"blue,green\" --kill-others-on-fail"
   },
   "dependencies": {
+    "@capacitor-community/bluetooth-le": "^6.0.0",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@fontsource/roboto": "^5.2.5",
+    "@mediapipe/tasks-vision": "^0.10.35",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
     "@supabase/supabase-js": "^2.106.2",
@@ -48,6 +54,7 @@
     "recharts": "^2.15.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.0",
     "browser-sync": "^3.0.4",
     "concurrently": "^9.1.2",

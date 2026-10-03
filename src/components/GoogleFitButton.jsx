@@ -17,12 +17,14 @@ const GoogleFitButton = ({ exercise }) => {
       await GoogleFitService.signIn();
 
       // Créer l'activité pour Google Fit
+      const durationMs = (exercise.duration || 3600) * 1000;
       const activity = {
         activityType: exercise.googleFitActivity.type,
         name: exercise.name,
         description: exercise.desc,
-        startTime: new Date().getTime(),
-        duration: (exercise.duration || 3600) * 1000, // en millisecondes
+        // L'activité se termine maintenant (Google Fit ignore les données futures).
+        startTime: Date.now() - durationMs,
+        duration: durationMs,
         calories: totalCalories,
         muscleGroups: exercise.googleFitActivity.muscleGroups
       };

@@ -1,0 +1,1013 @@
+/* Écran de sortie vélo — cockpit sombre, lisible à 1 m sur un vélo qui bouge.
+   Le rouge de l'app (#F03D32) reste l'accent ; le fond est toujours sombre,
+   y compris en thème clair : la vidéo occupe l'écran. */
+
+.ride-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  background: #07090d;
+  color: #f5f7fa;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+
+.ride-root-panel {
+  overflow-y: auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+}
+
+/* --- Écran de préparation ------------------------------------------------- */
+
+.ride-setup {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ride-setup-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ride-eyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8d97a8;
+}
+
+.ride-setup-title {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.ride-section-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8d97a8;
+}
+
+/* --- Choix du parcours ---------------------------------------------------- */
+
+.ride-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ride-picker-filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.ride-filter {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid #262c37;
+  background: #10141c;
+  color: #c3cad6;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.ride-filter.is-active {
+  background: #F03D32;
+  border-color: #F03D32;
+  color: #fff;
+}
+
+.ride-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.ride-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  border-radius: 12px;
+  border: 1px solid #1d2330;
+  background: #10141c;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.ride-card:hover {
+  transform: translateY(-1px);
+}
+
+.ride-card.is-selected {
+  border-color: #F03D32;
+  box-shadow: 0 0 0 1px #F03D32 inset;
+}
+
+.ride-card-media {
+  position: relative;
+  display: block;
+}
+
+.ride-card-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  background: #171c26;
+}
+
+.ride-card-duration {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(4, 6, 10, 0.82);
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #fff;
+}
+
+.ride-link-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ride-link-label {
+  font-size: 0.82rem;
+  color: #c3cad6;
+}
+
+.ride-link-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ride-link-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #262c37;
+  background: #10141c;
+  color: #fff;
+  font-size: 16px; /* 16 px : pas de zoom auto sur iOS */
+}
+
+.ride-link-input:focus-visible {
+  outline: 2px solid #FF6B35;
+  outline-offset: 1px;
+}
+
+.ride-link-add {
+  flex: 0 0 auto;
+}
+
+.ride-card-wrap {
+  position: relative;
+  display: flex;
+}
+
+.ride-card-wrap > .ride-card {
+  flex: 1;
+}
+
+.ride-card-360 {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #FF6B35;
+  color: #0b0b0f;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.ride-card-remove {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(4, 6, 10, 0.82);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ride-eb900-btn {
+  align-self: stretch;
+}
+
+.ride-filter-sort {
+  margin-left: auto;
+  border-style: dashed;
+}
+
+.ride-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px 12px;
+}
+
+.ride-card-title {
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.ride-card-meta {
+  font-size: 0.74rem;
+  color: #8d97a8;
+}
+
+.ride-empty {
+  color: #8d97a8;
+  font-size: 0.88rem;
+}
+
+/* --- Source des données --------------------------------------------------- */
+
+.ride-connect {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ride-source-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.ride-source {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  text-align: left;
+  border-radius: 12px;
+  border: 1px solid #1d2330;
+  background: #10141c;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ride-source.is-active {
+  border-color: #F03D32;
+  background: #17110f;
+}
+
+.ride-source:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ride-source-label {
+  font-size: 0.94rem;
+  font-weight: 650;
+}
+
+.ride-source-hint {
+  font-size: 0.74rem;
+  color: #8d97a8;
+}
+
+.ride-hr-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.86rem;
+  color: #c3cad6;
+  cursor: pointer;
+}
+
+.ride-hr-toggle.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ride-hr-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: #F03D32;
+}
+
+.ride-status {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #8d97a8;
+}
+
+.ride-error {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #ff8a7a;
+}
+
+/* --- Détection du vélo ---------------------------------------------------- */
+
+.ride-detect {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ride-detect-lede {
+  margin: 6px 0 0;
+  font-size: 0.92rem;
+  color: #8d97a8;
+}
+
+.ride-detect-link {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #FF6B35;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.ride-steps {
+  margin: 0;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #c3cad6;
+}
+
+.ride-steps li::marker {
+  color: #FF6B35;
+  font-weight: 700;
+}
+
+.ride-device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ride-device {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 11px;
+  border: 1px solid #1d2330;
+  background: #10141c;
+  color: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ride-device.is-domyos {
+  border-color: #F03D32;
+}
+
+.ride-device:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.ride-device-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.ride-device-badge {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #F03D32;
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ride-device-rssi {
+  flex: 0 0 auto;
+  font-size: 0.74rem;
+  color: #8d97a8;
+  font-variant-numeric: tabular-nums;
+}
+
+.ride-result {
+  border-radius: 14px;
+  border: 1px solid #1d2330;
+  background: #10141c;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ride-result.is-ok { border-color: #2c6b4a; }
+.ride-result.is-warn { border-color: #6b5a2c; }
+
+.ride-result-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.ride-result-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ride-result-name {
+  font-size: 0.8rem;
+  color: #8d97a8;
+}
+
+.ride-result-body {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #c3cad6;
+}
+
+.ride-result-services {
+  font-size: 0.8rem;
+  color: #8d97a8;
+}
+
+.ride-result-services summary {
+  cursor: pointer;
+}
+
+.ride-result-services ul {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  word-break: break-all;
+}
+
+/* --- Boutons -------------------------------------------------------------- */
+
+.ride-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.ride-btn {
+  min-height: 52px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ride-btn-primary {
+  background: linear-gradient(45deg, #F03D32 30%, #FF6B35 90%);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(240, 61, 50, 0.35);
+}
+
+.ride-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ride-btn-ghost {
+  background: transparent;
+  border: 1px solid #2b3341;
+  color: #c3cad6;
+}
+
+.ride-btn:focus-visible,
+.ride-card:focus-visible,
+.ride-source:focus-visible,
+.ride-filter:focus-visible,
+.ride-hud-finish:focus-visible {
+  outline: 2px solid #FF6B35;
+  outline-offset: 2px;
+}
+
+/* --- Lecture + HUD -------------------------------------------------------- */
+
+.ride-root-riding {
+  background: #000;
+}
+
+.ride-player,
+.ride-player-frame,
+.ride-player-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.ride-hud {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: max(12px, env(safe-area-inset-top)) 16px calc(14px + env(safe-area-inset-bottom));
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0) 22%,
+    rgba(0, 0, 0, 0) 62%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+.ride-hud-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ride-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(10, 12, 18, 0.72);
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ride-chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6b7482;
+}
+
+.ride-chip.is-live .ride-chip-dot {
+  background: #34d17a;
+  box-shadow: 0 0 8px rgba(52, 209, 122, 0.8);
+}
+
+.ride-hud-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ride-hud-icon {
+  pointer-events: auto;
+  flex: 0 0 auto;
+  /* Cible tactile minimale 44 px (Apple HIG / Material) */
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(10, 12, 18, 0.72);
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ride-hud-icon:focus-visible {
+  outline: 2px solid #FF6B35;
+  outline-offset: 2px;
+}
+
+.ride-hud-finish {
+  pointer-events: auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(10, 12, 18, 0.72);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+/* Tableau de bord bas, façon Kinomap VR : tuiles en verre dépoli qui laissent
+   la route visible, puis la progression du parcours. */
+.ride-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.ride-dash-tiles {
+  display: grid;
+  grid-template-columns: 1.25fr 1.25fr 1fr 1fr;
+  gap: 8px;
+}
+
+.ride-tile {
+  --tile-accent: #FF6B35;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 14px 10px 16px;
+  border-radius: 16px;
+  background: rgba(12, 14, 20, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+/* Liseré coloré à gauche : zone de puissance, rouge cardio, orange par défaut. */
+.ride-tile::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--tile-accent);
+  transition: background 0.4s ease;
+}
+
+.ride-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.62);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+.ride-tile-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: clamp(1.5rem, 4.2vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ride-tile-unit {
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.04em;
+}
+
+.ride-tile-power .ride-tile-value,
+.ride-tile-speed .ride-tile-value {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+}
+
+.ride-tile-power .ride-tile-value {
+  color: var(--tile-accent);
+  transition: color 0.4s ease;
+}
+
+.ride-tile-sub {
+  min-height: 1em;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ride-zone-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #0b0b0f;
+  padding: 1px 7px;
+  border-radius: 100px;
+  transition: background 0.4s ease;
+}
+
+.ride-zonebar {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+}
+
+.ride-zonebar-seg {
+  height: 4px;
+  border-radius: 2px;
+  opacity: 0.22;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.ride-zonebar-seg.is-on {
+  opacity: 1;
+  transform: scaleY(1.6);
+}
+
+.ride-dash-route {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(12, 14, 20, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+.ride-progress {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ride-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #F03D32, #FF6B35);
+  transition: width 1s linear;
+}
+
+/* Le cycliste : un point lumineux au bout de la progression. */
+.ride-progress-rider {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #FF6B35;
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.9);
+  transform: translate(-50%, -50%);
+  transition: left 1s linear;
+}
+
+.ride-dash-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ride-dash-stat strong {
+  margin-right: 4px;
+  font-size: 0.95rem;
+  font-weight: 750;
+  color: #fff;
+  letter-spacing: 0;
+  text-transform: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.ride-dash-rate strong {
+  color: #FF6B35;
+}
+
+.ride-dash-rate.is-paused strong {
+  color: #ffd166;
+}
+
+.ride-dash-remaining {
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .ride-dash-tiles {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ride-zone-label {
+    display: none;
+  }
+}
+
+/* Téléphone en portrait : le titre laisse la place aux commandes. */
+@media (max-width: 520px) {
+  .ride-hud-top {
+    gap: 6px;
+  }
+
+  .ride-hud-title {
+    display: none;
+  }
+
+  .ride-hud-top .ride-chip {
+    margin-right: auto;
+    max-width: 36vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ride-hud-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ride-hud-finish {
+    padding: 7px 10px;
+  }
+}
+
+/* --- 360° ----------------------------------------------------------------- */
+
+.ride-360-layer {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.ride-360-layer:active {
+  cursor: grabbing;
+}
+
+.ride-360-hint {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(10, 12, 18, 0.7);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-size: 0.85rem;
+  font-weight: 650;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: ride-360-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ride-360-pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.ride-hud-360 {
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: #FF6B35;
+  color: #0b0b0f;
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.ride-hud-icon.is-on {
+  background: #FF6B35;
+  border-color: #FF6B35;
+  color: #0b0b0f;
+}
+
+.ride-paused-banner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: rgba(10, 12, 18, 0.8);
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+/* --- Récapitulatif -------------------------------------------------------- */
+
+.ride-summary {
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ride-summary-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.ride-summary-sub {
+  margin: 0;
+  color: #8d97a8;
+  font-size: 0.88rem;
+}
+
+.ride-summary-grid {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  border: 1px solid #1d2330;
+  background: #10141c;
+  overflow: hidden;
+}
+
+.ride-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #171c26;
+}
+
+.ride-summary-row:last-child {
+  border-bottom: none;
+}
+
+.ride-summary-label {
+  color: #8d97a8;
+  font-size: 0.88rem;
+}
+
+.ride-summary-value {
+  font-weight: 700;
+}
+
+@media (max-height: 480px) {
+  .ride-tile-power .ride-tile-value,
+  .ride-tile-speed .ride-tile-value {
+    font-size: clamp(1.6rem, 9vh, 2.4rem);
+  }
+
+  .ride-tile {
+    padding: 6px 12px 6px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ride-card:hover {
+    transform: none;
+  }
+
+  .ride-360-hint,
+  .ride-progress-fill,
+  .ride-progress-rider {
+    animation: none;
+    transition: none;
+  }
+}

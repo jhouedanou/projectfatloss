@@ -1,340 +1,121 @@
 import { createTheme } from '@mui/material/styles';
 
-// Palette de couleurs Project Fat Loss
-const COLORS = {
-  // Couleur principale - Rouge/Orange de l'app
-  primary: {
-    50: '#FFF3F0',
-    100: '#FFEBE5',
-    200: '#FFD1CC',
-    300: '#FFB8B3',
-    400: '#FF8A7A',
-    500: '#F03D32', // Couleur principale
-    600: '#E02A1F',
-    700: '#C41E0B',
-    800: '#A11708',
-    900: '#7A1306',
-  },
-  
-  // Couleur secondaire - Orange chaud
-  secondary: {
-    50: '#FFF7F0',
-    100: '#FFEDE0',
-    200: '#FFD6B3',
-    300: '#FFBF85',
-    400: '#FF9147',
-    500: '#FF6B35', // Orange secondaire
-    600: '#F55A24',
-    700: '#E04A15',
-    800: '#CC3A0A',
-    900: '#B32D00',
-  },
-  
-  // Couleurs de support
-  neutral: {
-    50: '#FAFAFA',
-    100: '#F5F5F5',
-    200: '#EEEEEE',
-    300: '#E0E0E0',
-    400: '#BDBDBD',
-    500: '#9E9E9E',
-    600: '#757575',
-    700: '#616161',
-    800: '#424242',
-    900: '#212121',
-  },
-  
-  // Couleurs sémantiques
-  success: {
-    50: '#E8F5E8',
-    100: '#C8E6C9',
-    500: '#4CAF50',
-    600: '#43A047',
-    700: '#388E3C',
-  },
-  
-  warning: {
-    50: '#FFF8E1',
-    100: '#FFECB3',
-    500: '#FF9800',
-    600: '#FB8C00',
-    700: '#F57C00',
-  },
-  
-  error: {
-    50: '#FFEBEE',
-    100: '#FFCDD2',
-    500: '#F44336',
-    600: '#E53935',
-    700: '#D32F2F',
-  },
-  
-  info: {
-    50: '#E3F2FD',
-    100: '#BBDEFB',
-    500: '#2196F3',
-    600: '#1E88E5',
-    700: '#1976D2',
-  }
-};
-
-// Fonction pour créer un thème avec mode clair ou sombre
-export const createAppTheme = (darkMode) => createTheme({
+/**
+ * Thème MUI unique — sombre uniquement, aligné sur les tokens CSS
+ * d'index.css (style iOS-dark : noir pur, surfaces #1c1c1e, hairlines,
+ * accent rouge plat, aucun gradient, aucune ombre décorative).
+ */
+export const appTheme = createTheme({
   palette: {
-    mode: darkMode ? 'dark' : 'light',
+    mode: 'dark',
     primary: {
-      light: COLORS.primary[300],
-      main: COLORS.primary[500],
-      dark: COLORS.primary[700],
-      contrastText: '#FFFFFF',
+      main: '#F03D32',
+      dark: '#c9271d',
+      light: '#F03D32',
+      contrastText: '#fff',
     },
+    // Les usages résiduels de color="secondary" restent sur l'accent.
     secondary: {
-      light: COLORS.secondary[300],
-      main: COLORS.secondary[500],
-      dark: COLORS.secondary[700],
-      contrastText: '#FFFFFF',
+      main: '#F03D32',
+      dark: '#c9271d',
+      contrastText: '#fff',
     },
-    success: {
-      light: COLORS.success[100],
-      main: COLORS.success[500],
-      dark: COLORS.success[700],
-      contrastText: '#FFFFFF',
-    },
-    warning: {
-      light: COLORS.warning[100],
-      main: COLORS.warning[500],
-      dark: COLORS.warning[700],
-      contrastText: '#FFFFFF',
-    },
-    error: {
-      light: COLORS.error[100],
-      main: COLORS.error[500],
-      dark: COLORS.error[700],
-      contrastText: '#FFFFFF',
-    },
-    info: {
-      light: COLORS.info[100],
-      main: COLORS.info[500],
-      dark: COLORS.info[700],
-      contrastText: '#FFFFFF',
-    },
+    success: { main: '#30d158' },
+    warning: { main: '#ff9f0a' },
+    error: { main: '#ff453a' },
+    info: { main: '#0a84ff' },
     background: {
-      default: darkMode ? '#0A0A0A' : '#FAFAFA',
-      paper: darkMode ? '#1A1A1A' : '#FFFFFF',
-      secondary: darkMode ? '#2A2A2A' : COLORS.neutral[50],
+      default: '#000000',
+      paper: '#1c1c1e',
     },
     text: {
-      primary: darkMode ? '#FFFFFF' : COLORS.neutral[900],
-      secondary: darkMode ? COLORS.neutral[300] : COLORS.neutral[600],
-      disabled: darkMode ? COLORS.neutral[600] : COLORS.neutral[400],
+      primary: '#ffffff',
+      secondary: 'rgba(235, 235, 245, .6)',
+      disabled: 'rgba(235, 235, 245, .32)',
     },
-    divider: darkMode ? COLORS.neutral[800] : COLORS.neutral[200],
-    // Couleurs personnalisées pour l'app
-    gradient: {
-      primary: `linear-gradient(45deg, ${COLORS.primary[500]} 30%, ${COLORS.secondary[500]} 90%)`,
-      secondary: `linear-gradient(135deg, ${COLORS.secondary[400]} 0%, ${COLORS.primary[600]} 100%)`,
-      success: `linear-gradient(45deg, ${COLORS.success[500]} 30%, ${COLORS.success[600]} 90%)`,
-    },
-  },
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
-    h1: {
-      fontSize: '2.5rem',
-      fontWeight: 700,
-      lineHeight: 1.2,
-      letterSpacing: '-0.01562em',
-    },
-    h2: {
-      fontSize: '2rem',
-      fontWeight: 600,
-      lineHeight: 1.3,
-      letterSpacing: '-0.00833em',
-    },
-    h3: {
-      fontSize: '1.75rem',
-      fontWeight: 600,
-      lineHeight: 1.3,
-    },
-    h4: {
-      fontSize: '1.5rem',
-      fontWeight: 600,
-      lineHeight: 1.4,
-    },
-    h5: {
-      fontSize: '1.25rem',
-      fontWeight: 600,
-      lineHeight: 1.4,
-    },
-    h6: {
-      fontSize: '1rem',
-      fontWeight: 600,
-      lineHeight: 1.5,
-    },
-    body1: {
-      fontSize: '1rem',
-      lineHeight: 1.6,
-      letterSpacing: '0.00938em',
-    },
-    body2: {
-      fontSize: '0.875rem',
-      lineHeight: 1.5,
-      letterSpacing: '0.01071em',
-    },
-    button: {
-      fontSize: '0.875rem',
-      fontWeight: 500,
-      lineHeight: 1.75,
-      letterSpacing: '0.02857em',
-      textTransform: 'none',
-    },
-    caption: {
-      fontSize: '0.75rem',
-      lineHeight: 1.66,
-      letterSpacing: '0.03333em',
-    },
+    divider: 'rgba(84, 84, 88, .6)',
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 14,
   },
-  shadows: [
-    'none',
-    '0px 2px 4px rgba(0, 0, 0, 0.05)',
-    '0px 4px 8px rgba(0, 0, 0, 0.1)',
-    '0px 8px 16px rgba(0, 0, 0, 0.1)',
-    '0px 12px 24px rgba(0, 0, 0, 0.15)',
-    '0px 16px 32px rgba(0, 0, 0, 0.15)',
-    // ... autres ombres
-    ...Array(19).fill('0px 16px 32px rgba(0, 0, 0, 0.15)'),
-  ],
+  typography: {
+    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    h1: { fontSize: '2.125rem', fontWeight: 800, letterSpacing: '-.02em', fontFamily: '"Outfit", "Inter", sans-serif' },
+    h2: { fontSize: '1.5rem', fontWeight: 600, letterSpacing: '-.01em' },
+    h3: { fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-.01em' },
+    h4: { fontSize: '1.0625rem', fontWeight: 600 },
+    h5: { fontSize: '1rem', fontWeight: 600 },
+    h6: { fontSize: '.875rem', fontWeight: 600 },
+    body1: { fontSize: '1.0625rem', lineHeight: 1.45, letterSpacing: '-.01em' },
+    body2: { fontSize: '.9375rem', lineHeight: 1.4 },
+    button: { fontWeight: 600, textTransform: 'none', letterSpacing: 0 },
+  },
   components: {
+    MuiPaper: {
+      styleOverrides: {
+        // Tue la teinte d'élévation MUI en mode sombre : une seule
+        // valeur de surface dans toute l'app.
+        root: { backgroundImage: 'none' },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '12px',
-          textTransform: 'none',
-          fontWeight: 600,
-          padding: '12px 24px',
-          fontSize: '0.95rem',
-          transition: 'all 0.2s ease-in-out',
+          borderRadius: 12,
           boxShadow: 'none',
-          '&:hover': {
-            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
-            transform: 'translateY(-1px)',
-          },
-          '&:active': {
-            transform: 'translateY(0px)',
-          },
+          transition: 'transform 140ms cubic-bezier(.32,.72,0,1), background-color 140ms cubic-bezier(.32,.72,0,1)',
+          '&:hover': { boxShadow: 'none' },
+          '&:active': { transform: 'scale(.98)' },
         },
         contained: {
-          background: `linear-gradient(45deg, ${COLORS.primary[500]} 30%, ${COLORS.secondary[500]} 90%)`,
-          '&:hover': {
-            background: `linear-gradient(45deg, ${COLORS.primary[600]} 30%, ${COLORS.secondary[600]} 90%)`,
-          },
-        },
-        outlined: {
-          borderWidth: '2px',
-          '&:hover': {
-            borderWidth: '2px',
-          },
-        },
-        text: {
-          '&:hover': {
-            backgroundColor: 'rgba(240, 61, 50, 0.04)',
-          },
+          background: '#F03D32',
+          color: '#fff',
+          '&:hover': { background: '#c9271d', boxShadow: 'none' },
         },
       },
-      variants: [
-        {
-          props: { variant: 'gradient' },
-          style: {
-            background: `linear-gradient(45deg, ${COLORS.primary[500]} 30%, ${COLORS.secondary[500]} 90%)`,
-            color: '#FFFFFF',
-            '&:hover': {
-              background: `linear-gradient(45deg, ${COLORS.primary[600]} 30%, ${COLORS.secondary[600]} 90%)`,
-              boxShadow: '0px 6px 20px rgba(240, 61, 50, 0.3)',
-            },
-          },
-        },
-      ],
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: '16px',
-          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.05)',
-          border: `1px solid ${darkMode ? COLORS.neutral[800] : COLORS.neutral[200]}`,
-          transition: 'all 0.2s ease-in-out',
-          '&:hover': {
-            boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.1)',
-            transform: 'translateY(-2px)',
-          },
+          backgroundColor: '#1c1c1e',
+          borderRadius: 14,
+          border: 'none',
+          boxShadow: 'none',
         },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#1c1c1e',
+          backgroundImage: 'none',
+          borderRadius: 16,
+        },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: { backgroundColor: '#1c1c1e', backgroundImage: 'none', borderRadius: 12 },
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: { backgroundColor: '#1c1c1e', backgroundImage: 'none' },
       },
     },
     MuiChip: {
       styleOverrides: {
-        root: {
-          borderRadius: '8px',
-          fontWeight: 500,
-        },
-        filled: {
-          '&.MuiChip-colorPrimary': {
-            background: `linear-gradient(45deg, ${COLORS.primary[500]} 30%, ${COLORS.secondary[500]} 90%)`,
-            color: '#FFFFFF',
-          },
-        },
+        root: { borderRadius: 8, fontWeight: 600 },
+        colorPrimary: { background: '#F03D32', color: '#fff' },
       },
     },
     MuiAlert: {
       styleOverrides: {
-        root: {
-          borderRadius: '12px',
-          border: 'none',
-        },
-        standardSuccess: {
-          backgroundColor: COLORS.success[50],
-          color: COLORS.success[700],
-          '& .MuiAlert-icon': {
-            color: COLORS.success[600],
-          },
-        },
-        standardError: {
-          backgroundColor: COLORS.error[50],
-          color: COLORS.error[700],
-          '& .MuiAlert-icon': {
-            color: COLORS.error[600],
-          },
-        },
-        standardWarning: {
-          backgroundColor: COLORS.warning[50],
-          color: COLORS.warning[700],
-          '& .MuiAlert-icon': {
-            color: COLORS.warning[600],
-          },
-        },
-        standardInfo: {
-          backgroundColor: COLORS.info[50],
-          color: COLORS.info[700],
-          '& .MuiAlert-icon': {
-            color: COLORS.info[600],
-          },
-        },
-      },
-    },
-    MuiStepLabel: {
-      styleOverrides: {
-        iconContainer: {
-          '& .Mui-active': {
-            color: COLORS.primary[500],
-          },
-          '& .Mui-completed': {
-            color: COLORS.success[500],
-          },
-        },
+        standardSuccess: { backgroundColor: 'rgba(48, 209, 88, .16)', color: '#30d158' },
+        standardError: { backgroundColor: 'rgba(255, 69, 58, .16)', color: '#ff453a' },
+        standardWarning: { backgroundColor: 'rgba(255, 159, 10, .16)', color: '#ff9f0a' },
+        standardInfo: { backgroundColor: 'rgba(10, 132, 255, .16)', color: '#0a84ff' },
       },
     },
   },
 });
-
-// Export des couleurs pour utilisation directe
-export { COLORS };

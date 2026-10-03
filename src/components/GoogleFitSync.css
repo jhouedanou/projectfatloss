@@ -64,7 +64,7 @@
 .gfit-sync-error {
   margin: 0;
   font-size: 0.85rem;
-  color: #ef4444;
+  color: var(--err);
   text-align: center;
   max-width: 320px;
 }

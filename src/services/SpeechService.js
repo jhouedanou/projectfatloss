@@ -230,6 +230,18 @@ function announceRepetition(rep, total) {
 }
 
 /**
+ * Annonce le changement de côté d'un exercice unilatéral (un bras / une jambe
+ * à la fois) : le passage au second côté étant automatique, la voix prévient
+ * l'utilisateur qui a les mains prises par l'haltère.
+ * @param {number} side - Index du côté qui démarre (0 = premier, 1 = second)
+ */
+function announceSideChange(side = 1) {
+  if (!voiceConfig.enabled || !voiceConfig.exerciseEnabled) return;
+
+  speak(side === 0 ? 'Premier côté.' : 'Changez de côté. Second côté.');
+}
+
+/**
  * Annonce la fin d'un entraînement
  * @param {Object} summary - Récapitulatif de l'entraînement
  */
@@ -253,5 +265,6 @@ export {
   announcePause,
   announceCount,
   announceRepetition,
+  announceSideChange,
   announceWorkoutComplete
 };

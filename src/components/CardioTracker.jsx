@@ -17,7 +17,8 @@ import {
 } from '../services/GoogleFitSync';
 import './CardioTracker.css';
 
-// MET approximatifs : marche ~3.5, vélo ~7.5
+// MET approximatifs : marche d'un bon pas et vélo stationnaire modéré-vigoureux.
+// La marche est suivie comme un exercice à part entière, distinct du vélo.
 const MET = { walk: 3.5, bike: 7.5 };
 
 const estimateCalories = (type, durationMin, weightKg) => {
@@ -34,7 +35,7 @@ const fmtDate = (iso) => {
 const CardioTracker = () => {
   const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState(null);
-  const [type, setType] = useState('walk');
+  const [type, setType] = useState('bike');
   const [duration, setDuration] = useState('');
   const [distance, setDistance] = useState('');
   const [calories, setCalories] = useState('');
@@ -76,7 +77,7 @@ const CardioTracker = () => {
 
   return (
     <div className="cardio-tracker">
-      <h2 className="cardio-title">Cardio — Marche & Vélo</h2>
+      <h2 className="cardio-title">Cardio — Vélo &amp; Marche</h2>
 
       {stats && (
         <div className="cardio-stats">
@@ -85,31 +86,36 @@ const CardioTracker = () => {
             <div><strong>{Math.round(stats.totalCalories)}</strong><span>kcal brûlées</span></div>
           </div>
           <div className="cardio-stat">
-            <Footprints size={18} color="#10B981" />
-            <div><strong>{stats.byType.walk.count}</strong><span>marches</span></div>
+            <Bike size={18} color="#0a84ff" />
+            <div><strong>{stats.byType.bike.count}</strong><span>séances vélo</span></div>
           </div>
           <div className="cardio-stat">
-            <Bike size={18} color="#3B82F6" />
-            <div><strong>{stats.byType.bike.count}</strong><span>vélo</span></div>
+            <Footprints size={18} color="#30d158" />
+            <div><strong>{stats.byType.walk.count}</strong><span>marches</span></div>
           </div>
         </div>
       )}
 
       <form className="cardio-form" onSubmit={handleAdd}>
-        <div className="cardio-type-toggle">
+        {/* Choix de l'exercice : vélo ou marche, suivis séparément */}
+        <div className="cardio-type-switch" role="radiogroup" aria-label="Type d'exercice cardio">
           <button
             type="button"
-            className={type === 'walk' ? 'active' : ''}
-            onClick={() => setType('walk')}
+            role="radio"
+            aria-checked={type === 'bike'}
+            className={`cardio-type-btn ${type === 'bike' ? 'is-active' : ''}`}
+            onClick={() => setType('bike')}
           >
-            <Footprints size={18} /> Marche
+            <Bike size={16} /> Vélo
           </button>
           <button
             type="button"
-            className={type === 'bike' ? 'active' : ''}
-            onClick={() => setType('bike')}
+            role="radio"
+            aria-checked={type === 'walk'}
+            className={`cardio-type-btn ${type === 'walk' ? 'is-active is-walk' : ''}`}
+            onClick={() => setType('walk')}
           >
-            <Bike size={18} /> Vélo
+            <Footprints size={16} /> Marche
           </button>
         </div>
 

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Project Fat Loss</string>
+    <string name="title_activity_main">Project Fat Loss</string>
+    <string name="package_name">com.houedanou.fatloss</string>
+    <string name="custom_url_scheme">com.houedanou.fatloss</string>
+</resources>

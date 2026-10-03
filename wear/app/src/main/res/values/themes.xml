@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Le swipe-to-dismiss système ferme l'activité (retour cadran) sans passer
+         par onBackPressed. On le désactive : MainActivity gère elle-même le
+         balayage vers la droite comme un retour à l'écran précédent. -->
+    <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="android:windowSwipeToDismiss">false</item>
+    </style>
+</resources>

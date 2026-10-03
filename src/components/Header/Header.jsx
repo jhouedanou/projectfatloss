@@ -6,13 +6,14 @@ import {
   Box,
   Typography
 } from '@mui/material';
-import { ArrowLeft, Bell, User, LogOut } from 'lucide-react';
+import { ArrowLeft, Bell, User, UserCog, LogOut } from 'lucide-react';
 import './Header.css';
 import { getAssetPath } from '../../utils/paths';
 
-export default function Header({ onNotificationSettings, onBack, user, onAccountClick }) {
+export default function Header({ onNotificationSettings, onProfile, onBack, user, onAccountClick }) {
   const title = onBack ? 'Programme' : 'Project Fat Loss';
-  const subtitle = onBack ? 'Retour a la vue semaine' : 'Coach entrainement';
+  const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const subtitle = onBack ? 'Retour à la vue semaine' : today.charAt(0).toUpperCase() + today.slice(1);
 
   return (
     <AppBar 
@@ -53,6 +54,16 @@ export default function Header({ onNotificationSettings, onBack, user, onAccount
         </Box>
 
         <Box className="pfl-header-actions">
+          {onProfile && (
+            <IconButton
+              onClick={onProfile}
+              size="small"
+              className="pfl-header-icon"
+              aria-label="Mon profil"
+            >
+              <UserCog size={19} strokeWidth={2.25} />
+            </IconButton>
+          )}
           {onNotificationSettings && (
             <IconButton
               onClick={onNotificationSettings}

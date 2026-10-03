@@ -153,19 +153,19 @@ const NotificationPermissionScreen = ({ onPermissionChange }) => {
             <Box sx={{ mb: 4 }}>
               <Stack spacing={1} alignItems="flex-start" sx={{ textAlign: 'left' }}>
                 <Typography variant="body2" display="flex" alignItems="center">
-                  <span style={{ color: '#4caf50', marginRight: 8 }}>✓</span>
+                  <span style={{ color: '#30d158', marginRight: 8 }}>✓</span>
                   Rappels quotidiens personnalisés
                 </Typography>
                 <Typography variant="body2" display="flex" alignItems="center">
-                  <span style={{ color: '#4caf50', marginRight: 8 }}>✓</span>
+                  <span style={{ color: '#30d158', marginRight: 8 }}>✓</span>
                   Notifications d'exercice en cours
                 </Typography>
                 <Typography variant="body2" display="flex" alignItems="center">
-                  <span style={{ color: '#4caf50', marginRight: 8 }}>✓</span>
+                  <span style={{ color: '#30d158', marginRight: 8 }}>✓</span>
                   Suivi des séries et répétitions
                 </Typography>
                 <Typography variant="body2" display="flex" alignItems="center">
-                  <span style={{ color: '#4caf50', marginRight: 8 }}>✓</span>
+                  <span style={{ color: '#30d158', marginRight: 8 }}>✓</span>
                   Motivation et encouragements
                 </Typography>
               </Stack>

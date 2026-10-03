@@ -161,7 +161,7 @@
 }
 
 .youtube-button:hover {
-  background-color: rgba(240, 61, 50, 0.1);
+  background-color: rgba(var(--accent-rgb), 0.1);
 }
 
 .youtube-button img {

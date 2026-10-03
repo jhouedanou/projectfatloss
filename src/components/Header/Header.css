@@ -1,119 +1,77 @@
-.app-header {
-  background-color: var(--background-paper);
-  padding: env(safe-area-inset-top) 1rem 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  border-bottom: 1px solid rgba(240, 61, 50, 0.2);
-}
-
-.logo-container {
-  height: 40px;
-  display: flex;
-  align-items: center;
-}
-
-.app-logo {
-  height: 100%;
-  width: auto;
-  object-fit: contain;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.header-actions .MuiIconButton-root {
-  color: var(--primary-main);
-  transition: all 0.2s ease;
-}
-
-.header-actions .MuiIconButton-root:hover {
-  background-color: rgba(240, 61, 50, 0.1);
-  transform: scale(1.05);
-}
+/* En-tête — barre iOS : fond noir flouté, hairline basse, icônes nues. */
 
 .pfl-header {
   top: 0;
   z-index: 1200;
-  color: #fff;
-  background: rgba(10, 10, 11, 0.86) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--label);
+  background: rgba(0, 0, 0, 0.85) !important;
+  border-bottom: .5px solid var(--sep);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   box-shadow: none !important;
 }
 
 .pfl-header-toolbar {
-  min-height: 76px !important;
-  padding: calc(env(safe-area-inset-top, 0px) + 10px) 18px 10px !important;
+  min-height: 64px !important;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 16px 8px !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
 }
 
 .pfl-header-brand {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .pfl-header-logo,
 .pfl-header-icon {
-  width: 40px !important;
-  height: 40px !important;
-  flex: 0 0 40px;
+  width: 34px !important;
+  height: 34px !important;
+  flex: 0 0 34px;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  border-radius: 12px !important;
-  color: #fff !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  border-radius: 50% !important;
+  color: var(--label-2) !important;
+  background: none !important;
+  border: none !important;
+  transition: color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
 }
 
 .pfl-header-logo img {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
   object-fit: cover;
 }
 
-.pfl-header-icon:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.13) !important;
-  border-color: rgba(255, 255, 255, 0.16) !important;
+.pfl-header-icon:active {
+  transform: scale(.94);
+  color: var(--label) !important;
 }
 
 .pfl-header-icon--auth {
-  background: rgba(16, 185, 129, 0.18) !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
-  color: #10B981 !important;
+  color: var(--ok) !important;
 }
 
 .pfl-header-copy {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .pfl-header-title {
   margin: 0 !important;
-  color: #fff;
-  font-size: 0.98rem !important;
-  font-weight: 800 !important;
+  color: var(--label);
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
   line-height: 1.15 !important;
-  letter-spacing: 0 !important;
+  letter-spacing: -.01em !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -121,12 +79,11 @@
 
 .pfl-header-subtitle {
   margin: 0 !important;
-  color: rgba(255, 255, 255, 0.56);
-  font-size: 0.72rem !important;
-  font-weight: 700 !important;
+  color: var(--label-2);
+  font-size: 0.75rem !important;
+  font-weight: 400 !important;
   line-height: 1.2 !important;
   letter-spacing: 0 !important;
-  text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -135,37 +92,5 @@
 .pfl-header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-body:not(.dark-theme) .pfl-header {
-  color: #161616;
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-bottom-color: rgba(0, 0, 0, 0.08);
-}
-
-body:not(.dark-theme) .pfl-header-title {
-  color: #161616;
-}
-
-body:not(.dark-theme) .pfl-header-subtitle {
-  color: rgba(0, 0, 0, 0.56);
-}
-
-body:not(.dark-theme) .pfl-header-logo,
-body:not(.dark-theme) .pfl-header-icon {
-  color: #161616 !important;
-  background: rgba(0, 0, 0, 0.05) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-@media (max-width: 420px) {
-  .pfl-header-toolbar {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-
-  .pfl-header-subtitle {
-    font-size: 0.68rem !important;
-  }
+  gap: 4px;
 }

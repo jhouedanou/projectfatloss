@@ -1,9 +1,8 @@
 // Correction des bugs liés à pause/isPaused - v1.0.1
 import React, { useState, useEffect, useRef, createContext, useCallback, useMemo } from 'react';
-import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, MonitorPlay, Bell, CalendarPlus, Volume2, VolumeX } from 'lucide-react';
-import { getFirstDoseAt, downloadLipo6Reminder } from '../utils/lipo6Reminder';
+import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, Bell, Volume2, VolumeX, Glasses } from 'lucide-react';
 const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon from '../components/ExoIcon';
@@ -11,16 +10,23 @@ import FloatingButtons from '../components/FloatingButtons/FloatingButtons';
 import ProgressTracker from '../components/ProgressTracker';
 import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
 import DayPills from '../components/DayPills';
-import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
-import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
+import { getActiveWorkoutPlan, isRideStartEnabled } from '../services/WorkoutCustomization';
+import BikeRideSession from '../components/BikeRide/BikeRideSession';
+import { addCardioSession } from '../services/CardioStorage';
+import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceSideChange, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
 import { useTranslation } from 'react-i18next';
-import YouTube from 'react-youtube';
 import { getExerciseIconsPath, getAssetPath } from '../utils/paths';
 import GoogleFitService from '../services/GoogleFitService';
 import PreWorkout from '../components/PreWorkout';
-import { getCaloriesForSet } from '../services/CalorieEstimator';
+import { getCaloriesForSet, getExerciseLoad, setExerciseLoad, parseEquipmentLoad, STANDARD_LOADS_KG } from '../services/CalorieEstimator';
+import WebcamRepCounter from '../components/WebcamRepCounter';
+import { isCameraCountable } from '../services/RepPatternRules';
+import { getCameraAmplitude, setCameraAmplitude, AMPLITUDE_LABELS } from '../services/CameraRepService';
+import { getXrProfile } from '../services/xr/XrRepRules';
+import { startXrWorkoutSession } from '../services/xr/XrWorkoutSession';
+import { resolveXrAction, EMPTY_STATE } from '../services/xr/XrWorkoutModel';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
@@ -39,6 +45,10 @@ const SET_PAUSE_INCREMENT_SECONDS = 5;    // +5s par série déjà réalisée
 const SET_PAUSE_MAX_SECONDS = 40;         // plafond du repos entre séries
 const EXERCISE_PAUSE_SECONDS = 45;        // repos entre exercices (récupération force)
 const PAUSE_DURATION_SECONDS = SET_PAUSE_BASE_SECONDS; // valeur par défaut historique
+
+// Exercices unilatéraux (« /côté », « /jambe ») : délai avant le passage
+// automatique au second côté, le temps de changer de bras ou de jambe.
+const SIDE_SWITCH_DELAY_SECONDS = 3;
 
 // Calcule la durée de pause en fonction du contexte (changement d'exercice ou
 // de série) afin d'avoir plus de force pour l'effort suivant.
@@ -197,7 +207,7 @@ function calculateWeight(equipment) {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode }) {
+function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, total, setNum, totalSets, autoMode, xr }) {
   const defaultTime = getPauseDuration({ isExerciseTransition, setNum });
 
   const [time, setTime] = useState(defaultTime);
@@ -205,6 +215,12 @@ function Pause({ onEnd, onSkip, isExerciseTransition, reducedTime, day, step, to
   const currentExercise = day.exercises[step];
   const nextExercise = step < total - 1 ? day?.exercises?.[step + 1] : null;
   const isLastSet = setNum === totalSets - 1;
+
+  // Casque : afficher le compte à rebours et permettre de passer la pause.
+  useEffect(() => {
+    xr?.publish({ restLeft: time });
+  }, [xr, time]);
+  if (xr) xr.actions.current.skipRest = onSkip;
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -273,17 +289,9 @@ function CalorieDisplay({ calories, visible }) {
 }
 
 
-function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
+function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout }) {
   const [isLoadingFit, setIsLoadingFit] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
-  const [reminderAdded, setReminderAdded] = useState(false);
-  const lipo6FirstDose = getFirstDoseAt();
-
-  const handleAddLipo6Reminder = () => {
-    downloadLipo6Reminder(lipo6FirstDose);
-    setReminderAdded(true);
-  };
-
   function calculateWeight(equipment) {
     const match = equipment && equipment.match(/(\d+)\s*kg/i);
     return match ? parseInt(match[1], 10) : 0;
@@ -308,12 +316,14 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
     setIsLoadingFit(true);
     try {
       await GoogleFitService.signIn();
+      // Durée réelle mesurée (minutes) si disponible, sinon 45 min.
+      const durationMs = (duration > 0 ? duration : 45) * 60 * 1000;
       const sessionActivity = {
-        activityType: 97, // Strength Training in Google Fit
+        activityType: 80, // Strength training → « Musculation » dans Google Fit
         name: `Project Fat Loss - ${day?.title}`,
         description: `Séance de musculation de haute intensité. Poids total soulevé : ${totalWeightLifted} kg.`,
-        startTime: new Date().getTime() - 45 * 60 * 1000,
-        duration: 45 * 60 * 1000,
+        startTime: Date.now() - durationMs,
+        duration: durationMs,
         calories: totalCalories,
       };
       await GoogleFitService.addActivity(sessionActivity);
@@ -339,7 +349,8 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
         sets: parseSets(exercise.sets),
         weightLifted: calculateWeight(exercise.equip)
       })),
-      duration: day.exercises.length * 180 // Estimation de la durée : 3 minutes par exercice
+      // Durée réelle mesurée (minutes) si disponible, sinon estimation (3 min/exercice)
+      duration: duration != null ? duration : day.exercises.length * 3
     };
     
     // Sauvegarder localement
@@ -354,7 +365,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
   return (
     <div className="modal-overlay">
       <div className="modal-content" style={{
-        background: 'linear-gradient(135deg, #141416 0%, #0d0d0e 100%)',
+        background: 'linear-gradient(135deg, #1c1c1e 0%, #000000 100%)',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '24px',
         padding: '36px 24px 28px',
@@ -386,7 +397,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
           fontWeight: 900, 
           marginBottom: '4px', 
           letterSpacing: '-0.5px',
-          background: 'linear-gradient(135deg, #fff 30%, #a1a1aa 100%)',
+          background: 'linear-gradient(135deg, #fff 30%, rgba(235,235,245,0.6) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent'
         }}>
@@ -449,11 +460,11 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
             gap: '6px'
           }}>
             <Flame size={20} color="var(--vermilion)" />
-            <span style={{ color: '#71717a', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <span style={{ color: 'rgba(235,235,245,0.32)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Calories
             </span>
             <span style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 900, fontFamily: "'Outfit', sans-serif" }}>
-              {totalCalories} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#71717a' }}>kcal</span>
+              {totalCalories} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(235,235,245,0.32)' }}>kcal</span>
             </span>
           </div>
 
@@ -467,18 +478,18 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
             alignItems: 'center',
             gap: '6px'
           }}>
-            <Dumbbell size={20} color="#3b82f6" />
-            <span style={{ color: '#71717a', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <Dumbbell size={20} color="#0a84ff" />
+            <span style={{ color: 'rgba(235,235,245,0.32)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Volume
             </span>
             <span style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 900, fontFamily: "'Outfit', sans-serif" }}>
-              {totalWeightLifted} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#71717a' }}>kg</span>
+              {totalWeightLifted} <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(235,235,245,0.32)' }}>kg</span>
             </span>
           </div>
         </div>
 
         <p className="motivation-text" style={{ 
-          color: '#a1a1aa', 
+          color: 'rgba(235,235,245,0.6)', 
           fontSize: '0.82rem', 
           lineHeight: 1.5, 
           margin: '0 0 24px 0',
@@ -500,7 +511,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
               background: isSynced 
                 ? 'rgba(16, 185, 129, 0.08)' 
                 : 'linear-gradient(135deg, #4285F4 0%, #357ae8 100%)',
-              color: isSynced ? '#10b981' : 'white',
+              color: isSynced ? '#30d158' : 'white',
               fontSize: '0.88rem',
               fontWeight: '800',
               fontFamily: "'Outfit', sans-serif",
@@ -534,37 +545,6 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
           </button>
         </div>
 
-        {/* Rappel Lipo 6 — 2e gélule (si 1re prise enregistrée aujourd'hui) */}
-        {lipo6FirstDose && (
-          <div style={{ margin: '0 0 16px 0', width: '100%' }}>
-            <button
-              onClick={handleAddLipo6Reminder}
-              disabled={reminderAdded}
-              style={{
-                width: '100%',
-                minHeight: '48px',
-                padding: '13px 16px',
-                borderRadius: '14px',
-                border: reminderAdded ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(240,61,50,0.4)',
-                background: reminderAdded ? 'rgba(16,185,129,0.08)' : 'rgba(240,61,50,0.1)',
-                color: reminderAdded ? '#10b981' : '#f87171',
-                fontSize: '0.85rem',
-                fontWeight: 800,
-                fontFamily: "'Outfit', sans-serif",
-                letterSpacing: '0.3px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                cursor: reminderAdded ? 'default' : 'pointer',
-              }}
-            >
-              <CalendarPlus size={18} />
-              {reminderAdded ? 'RAPPEL AJOUTÉ À L\'AGENDA' : 'RAPPEL 2e GÉLULE LIPO 6 (+6 H)'}
-            </button>
-          </div>
-        )}
-
         {/* Action Buttons */}
         <div style={{ display: 'flex', gap: '12px' }}>
           <button 
@@ -573,7 +553,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
               padding: '14px',
               borderRadius: '14px',
               border: 'none',
-              background: 'linear-gradient(135deg, var(--vermilion), #c41e0b)',
+              background: 'linear-gradient(135deg, var(--vermilion), #c9271d)',
               color: '#fff',
               fontWeight: 800,
               fontFamily: "'Outfit', sans-serif",
@@ -603,7 +583,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
               borderRadius: '14px',
               border: '1px solid rgba(255, 255, 255, 0.08)',
               background: 'rgba(255, 255, 255, 0.02)',
-              color: '#a1a1aa',
+              color: 'rgba(235,235,245,0.6)',
               fontWeight: 700,
               fontFamily: "'Outfit', sans-serif",
               fontSize: '0.88rem',
@@ -620,7 +600,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
-              e.currentTarget.style.color = '#a1a1aa';
+              e.currentTarget.style.color = 'rgba(235,235,245,0.6)';
               e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
             }}
           >
@@ -632,7 +612,7 @@ function EndOfDayModal({ day, totalCalories, onClose, onSaveWorkout }) {
   );
 }
 
-export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, autoMode: initialAutoMode, onNotificationSettings }) {
+export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onComplete, autoMode: initialAutoMode, onNotificationSettings, immersive = false, xrMode = null }) {
   const [dayIndex, setDayIndex] = useState(initialDayIndex || 0);
   const [step, setStep] = useState(0);
   const [pause, setPause] = useState(false);
@@ -644,6 +624,54 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
   const [autoMode, setAutoMode] = useState(initialAutoMode || false); // Mode automatique pour les pauses
   const [showPreWorkout, setShowPreWorkout] = useState(false);
+  // Sortie vélo d'ouverture : affichée avant le premier exercice quand le
+  // réglage est actif (elle remplace alors le vélo de fin de séance).
+  const [showBikeRide, setShowBikeRide] = useState(() => isRideStartEnabled());
+
+  // Mode immersif (casque VR, WebXR) : la session n'est qu'un afficheur + une
+  // entrée (gâchette / pincement / poignée). React reste la source de vérité :
+  // on lui pousse l'état à afficher, elle renvoie des actions routées vers les
+  // MÊMES handlers que les boutons 2D.
+  const [xrActive, setXrActive] = useState(false);
+  const [xrEntryDismissed, setXrEntryDismissed] = useState(false);
+  const xrSessionRef = useRef(null);            // { update, end } | null
+  const xrStateRef = useRef({ ...EMPTY_STATE }); // dernier état publié
+  const xrActionsRef = useRef({});              // handlers courants, par nom
+  const publishXr = useCallback((partial) => {
+    xrStateRef.current = { ...xrStateRef.current, ...partial };
+    xrSessionRef.current?.update(xrStateRef.current);
+  }, []);
+  const xrBridge = useMemo(
+    () => ({ publish: publishXr, actions: xrActionsRef, active: xrActive }),
+    [publishXr, xrActive]
+  );
+
+  // Démarre la session casque — DOIT rester dans le gestionnaire de clic
+  // (WebXR exige une activation utilisateur).
+  const handleEnterImmersive = () => {
+    if (xrActive || !xrMode) return;
+    setXrActive(true);
+    startXrWorkoutSession({
+      mode: xrMode,
+      getState: () => xrStateRef.current,
+      onAction: ({ type }) => {
+        const name = resolveXrAction(xrStateRef.current, type);
+        if (name) xrActionsRef.current[name]?.();
+      },
+      onEnd: (error) => {
+        xrSessionRef.current = null;
+        setXrActive(false);
+        if (error) console.warn('Mode immersif non démarré:', error?.message);
+      },
+    }).then((session) => {
+      xrSessionRef.current = session;
+      if (!session) setXrActive(false);
+    });
+  };
+  xrActionsRef.current.endSession = () => xrSessionRef.current?.end();
+
+  // Fermer la session casque si la séance est démontée (retour, fin).
+  useEffect(() => () => xrSessionRef.current?.end(), []);
   // Synthèse vocale réactivée pour les exercices
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState({
@@ -658,6 +686,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // Suivi de l'exercice / la série déjà annoncés pour éviter les doublons
   const prevStepRef = useRef(-1);
   const prevSetRef = useRef(-1);
+  // Horodatage de début de séance pour mesurer la durée réelle
+  const workoutStartRef = useRef(Date.now());
+  // Durée en minutes (l'affichage des stats interprète totalDuration en minutes)
+  const getElapsedMinutes = () =>
+    Math.max(0, Math.round((Date.now() - workoutStartRef.current) / 60000));
   let beepTimeouts = [];
   
   // Mémoïser le plan : getWorkoutPlan() lit localStorage et, en cas de plan
@@ -670,6 +703,22 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const day = workoutPlan?.[dayIndex];
   const total = day?.exercises?.length || 0;
   const exo = day?.exercises?.[step];
+
+  // Caméra : décision prise UNE fois au lancement de la séance.
+  // null = pas encore demandé, true/false = choix de l'utilisateur.
+  const [cameraSessionEnabled, setCameraSessionEnabled] = useState(immersive && xrMode ? false : null);
+  // Amplitude du mouvement pour la détection (squats partiels…), choisie au
+  // lancement de la séance et mémorisée entre les séances.
+  const [cameraAmplitude, setCameraAmplitudeState] = useState(getCameraAmplitude());
+  const handleAmplitudeChange = (_e, value) => {
+    if (!value) return; // ToggleButtonGroup renvoie null si on re-clique le bouton actif
+    setCameraAmplitudeState(value);
+    setCameraAmplitude(value);
+  };
+  const dayHasCountable = useMemo(
+    () => !!day?.exercises?.some((e) => isCameraCountable(e)),
+    [day]
+  );
   
   // Utiliser totalSets de l'exercice en priorité, sinon calculer
   const baseTotalSets = exo?.totalSets ?? parseSets(exo?.sets || '1');
@@ -679,6 +728,34 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const totalSets = exo ? baseTotalSets : 1;
 
   const dataReady = !!(workoutPlan && day && exo);
+
+  // Publication de l'état de séance vers le casque (phase, progression, repos).
+  // Pendant une pause de transition, l'avance vers l'exercice suivant n'est
+  // appliquée qu'à la fin du repos (handlePauseEnd) : on annonce donc ici le
+  // « prochain » exercice sans toucher à `step`.
+  useEffect(() => {
+    if (!dataReady) return;
+    const nextExo = pause && pendingTransitionType === 'exercise' ? day.exercises[step + 1] : null;
+    publishXr({
+      dayTitle: day.title,
+      stepIndex: step,
+      total,
+      setNum,
+      totalSets,
+      calories: totalCaloriesBurned,
+      autoMode,
+      exerciseName: exo.name,
+      phase: workoutCompleted ? 'finished' : pause ? 'rest' : 'exercise',
+      isExerciseTransition,
+      restTotal: pause ? getPauseDuration({ isExerciseTransition, setNum }) : null,
+      nextExercise: nextExo ? { name: nextExo.name, sets: nextExo.sets, nbRep: nextExo.nbRep } : null,
+    });
+  }, [dataReady, day, step, total, setNum, totalSets, totalCaloriesBurned, autoMode, exo,
+    workoutCompleted, pause, isExerciseTransition, pendingTransitionType, publishXr]);
+
+  // Phases qui précèdent la musculation : ni annonces vocales, ni notifications
+  // d'exercice, ni dialogue caméra tant que l'une d'elles est à l'écran.
+  const inPrePhase = showBikeRide || showPreWorkout;
 
   // Initialiser la synthèse vocale au démarrage
   useEffect(() => {
@@ -701,7 +778,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   // exercice, puis numéro de série à chaque nouvelle série du même exercice.
   // Silencieux pendant les pauses et l'écran de préparation.
   useEffect(() => {
-    if (!exo || pause || showPreWorkout) return;
+    if (!exo || pause || inPrePhase) return;
 
     const isNewExercise = prevStepRef.current !== step;
     const isNewSet = prevSetRef.current !== setNum;
@@ -714,7 +791,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
     prevStepRef.current = step;
     prevSetRef.current = setNum;
-  }, [exo, step, setNum, totalSets, pause, showPreWorkout]);
+  }, [exo, step, setNum, totalSets, pause, inPrePhase]);
   
   const applyPendingAdvance = useCallback(() => {
     if (pendingTransitionType === 'exercise') {
@@ -887,9 +964,10 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
               sets: parseSets(exercise.sets),
               weightLifted: calculateWeight(exercise.equip)
             })),
-            fatBurnerMode: autoMode
+            fatBurnerMode: autoMode,
+            duration: getElapsedMinutes()
           };
-          
+
           // Sauvegarder d'abord localement
           const savedWorkout = saveWorkout(workoutData);
           
@@ -911,12 +989,56 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
   const handleStartWorkout = () => {
     setShowPreWorkout(false);
+    // Redémarrer le chrono au lancement effectif (si écran pré-séance affiché)
+    workoutStartRef.current = Date.now();
     // L'entraînement se lance automatiquement
+  };
+
+  /**
+   * Fin de la sortie vélo d'ouverture. Le résultat est enregistré comme séance
+   * cardio distincte (jamais ajouté aux calories de la muscu, pour ne pas
+   * compter deux fois le même effort côté Google Fit), et le chrono de la
+   * séance repart à zéro pour que les minutes de vélo ne gonflent pas la durée.
+   * @param {Object|null} ride résultat de la sortie, null si passée/non enregistrée
+   */
+  const handleRideFinished = (ride) => {
+    if (ride) {
+      try {
+        const record = addCardioSession({
+          type: 'bike',
+          duration: ride.durationMin,
+          distance: ride.distanceKm,
+          calories: ride.calories,
+          notes: JSON.stringify({
+            source: ride.source,
+            videoId: ride.videoId,
+            videoTitle: ride.videoTitle,
+            avgWatts: ride.avgWatts,
+            avgBpm: ride.avgBpm,
+            maxSpeedKmh: ride.maxSpeedKmh,
+          }),
+        });
+        // Google Fit : pousser la séance tout de suite si un token valide
+        // existe déjà (pas de popup en plein flux de séance). Sinon elle reste
+        // dans la file « non synchronisé » du calendrier / suivi cardio.
+        import('../services/GoogleFitService')
+          .then(({ default: fit }) =>
+            fit.isSignedIn()
+              ? import('../services/GoogleFitSync').then(({ syncCardioToGoogleFit }) => syncCardioToGoogleFit(record))
+              : null
+          )
+          .catch((error) => console.warn('Sync Google Fit de la sortie vélo reportée:', error?.message));
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement de la sortie vélo:', error);
+      }
+    }
+    setShowBikeRide(false);
+    workoutStartRef.current = Date.now();
   };
 
   // Gestion des notifications d'exercice en cours
   useEffect(() => {
-    if (showPreWorkout) return;
+    if (inPrePhase) return;
     if (exo && !pause && !workoutCompleted) {
       const exerciseData = {
         name: exo.name,
@@ -930,11 +1052,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       notificationService.updateCurrentExercise(exerciseData);
     }
-  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, showPreWorkout]);
+  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, inPrePhase]);
 
   // Gestion des notifications d'exercice en cours avec plus de données
   useEffect(() => {
-    if (showPreWorkout) return;
+    if (inPrePhase) return;
     if (exo && !pause && !workoutCompleted) {
       const exerciseData = {
         name: exo.name,
@@ -955,11 +1077,11 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       notificationService.updateCurrentExercise(exerciseData);
     }
-  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, totalCaloriesBurned, showPreWorkout]);
+  }, [exo, setNum, totalSets, day?.title, step, total, autoMode, pause, workoutCompleted, totalCaloriesBurned, inPrePhase]);
 
   // Gestion des notifications de pause avec timer
   useEffect(() => {
-    if (showPreWorkout) return;
+    if (inPrePhase) return;
     if (pause && !workoutCompleted) {
       const pauseData = {
         remainingTime: getPauseDuration({ isExerciseTransition, setNum }),
@@ -971,7 +1093,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
 
       notificationService.showPauseNotification(pauseData);
     }
-  }, [pause, workoutCompleted, autoMode, step, total, day?.exercises, setNum, totalSets, showPreWorkout, isExerciseTransition]);
+  }, [pause, workoutCompleted, autoMode, step, total, day?.exercises, setNum, totalSets, inPrePhase, isExerciseTransition]);
 
   if (!dataReady) {
     return (
@@ -979,6 +1101,17 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         <h2>Chargement...</h2>
         <p>Veuillez patienter.</p>
       </div>
+    );
+  }
+
+  // La sortie vélo ouvre la séance : elle passe avant tout le reste.
+  if (showBikeRide) {
+    return (
+      <BikeRideSession
+        dayTitle={day?.title}
+        onFinish={handleRideFinished}
+        onSkip={() => handleRideFinished(null)}
+      />
     );
   }
 
@@ -1030,6 +1163,18 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
           >
             {speechEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
+          {xrMode && (
+            <button
+              className={`timer-btn workout-icon-btn ${xrActive ? 'is-active' : ''}`}
+              onClick={handleEnterImmersive}
+              disabled={xrActive}
+              title={xrActive ? 'Session casque en cours' : 'Mode immersif (casque)'}
+              aria-label="Mode immersif"
+              aria-pressed={xrActive}
+            >
+              <Glasses size={18} />
+            </button>
+          )}
           <button
             className={`timer-btn workout-icon-btn ${autoMode ? 'is-active' : ''}`}
             onClick={handleToggleAutoMode}
@@ -1060,6 +1205,29 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       </div>
 
       <h2 className="workout-day-title">{day?.title}</h2>
+
+      {/* Casque VR : carte d'entrée en mode immersif (un tap, exigé par WebXR) */}
+      {xrMode && immersive && !xrActive && !xrEntryDismissed && (
+        <div className="xr-entry-card">
+          <span className="xr-entry-tile"><Glasses size={22} /></span>
+          <div className="xr-entry-copy">
+            <div className="xr-entry-title">Mode immersif</div>
+            <div className="xr-entry-sub">
+              Affichez la séance dans le casque — gâchette ou pincement pour avancer.
+            </div>
+          </div>
+          <div className="xr-entry-actions">
+            <button className="xr-entry-later" onClick={() => setXrEntryDismissed(true)}>Plus tard</button>
+            <button className="xr-entry-enter" onClick={handleEnterImmersive}>Entrer</button>
+          </div>
+        </div>
+      )}
+      {xrActive && (
+        <div className="xr-status-strip" role="status">
+          <Glasses size={16} />
+          <span>Session casque en cours — bouton système du casque pour revenir ici.</span>
+        </div>
+      )}
       
       <>
         <ProgressTracker 
@@ -1083,6 +1251,8 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             isPaused={pause}
             dayIndex={dayIndex}
             autoMode={autoMode}
+            cameraEnabled={cameraSessionEnabled === true}
+            xr={xrBridge}
           />
         ) : (
           <Pause 
@@ -1096,20 +1266,58 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             setNum={setNum}
             totalSets={totalSets}
             autoMode={autoMode}
+            xr={xrBridge}
           />
         )}  
 
       </>
       
       {workoutCompleted && (
-        <EndOfDayModal 
-          day={day} 
-          totalCalories={totalCaloriesBurned} 
+        <EndOfDayModal
+          day={day}
+          totalCalories={totalCaloriesBurned}
+          duration={getElapsedMinutes()}
           onClose={handleCloseEndOfDayModal}
           onSaveWorkout={handleSaveWorkout}
         />
       )}
       
+      {/* Prompt unique au lancement : activer la caméra pour cette séance ? */}
+      <Dialog
+        open={cameraSessionEnabled === null && dayHasCountable && !inPrePhase && !workoutCompleted}
+        onClose={() => setCameraSessionEnabled(false)}
+      >
+        <DialogTitle>Compter les reps avec la caméra ?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Pour cette séance, la caméra peut compter automatiquement vos répétitions
+            sur les exercices compatibles. Placez-vous de profil, corps entier visible.
+          </DialogContentText>
+          <DialogContentText sx={{ mt: 2, mb: 1, fontSize: '0.85rem' }}>
+            Amplitude du mouvement — si vous ne descendez pas complètement
+            (squats partiels…), choisissez Partielle ou Mini :
+          </DialogContentText>
+          <ToggleButtonGroup
+            value={cameraAmplitude}
+            exclusive
+            onChange={handleAmplitudeChange}
+            size="small"
+            fullWidth
+            color="primary"
+          >
+            {Object.entries(AMPLITUDE_LABELS).map(([value, label]) => (
+              <ToggleButton key={value} value={value}>{label}</ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCameraSessionEnabled(false)}>Non merci</Button>
+          <Button onClick={() => setCameraSessionEnabled(true)} variant="contained" color="primary">
+            Activer la caméra
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Boîte de dialogue des paramètres de synthèse vocale */}
       {/* Dialogue de paramètres vocaux supprimé */}
 
@@ -1136,7 +1344,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   );
 }
 
-function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode }) {
+function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCaloriesBurned, onExerciseCompleted, isPaused, dayIndex, autoMode, cameraEnabled = false, xr = null }) {
   const [timer, setTimer] = useState(() => {
     if (exo.timer) {
       return exo.duration || 30;
@@ -1166,7 +1374,33 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   const [currentRep, setCurrentRep] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
   const [countdown, setCountdown] = useState(null); // null = pas de décompte, sinon 3,2,1
+  const [cameraActive, setCameraActive] = useState(false); // comptage reps par webcam
   const timerRef = useRef(null);
+
+  // Charge d'haltères choisie pour cet exercice (mémorisée par nom d'exercice).
+  // Elle module l'estimation de calories de chaque série (CalorieEstimator).
+  const [exerciseLoad, setExerciseLoadUi] = useState(null);
+  const [customLoadOpen, setCustomLoadOpen] = useState(false);
+  const [customLoadValue, setCustomLoadValue] = useState('');
+  useEffect(() => {
+    if (!exo) return;
+    setExerciseLoadUi(getExerciseLoad(exo.name) ?? parseEquipmentLoad(exo));
+    setCustomLoadOpen(false);
+    setCustomLoadValue('');
+  }, [exo]);
+
+  const handlePickLoad = (kg) => {
+    setExerciseLoadUi(kg);
+    setExerciseLoad(exo.name, kg);
+    setCustomLoadOpen(false);
+  };
+
+  const handleCustomLoad = () => {
+    const kg = Number(String(customLoadValue).replace(',', '.'));
+    if (Number.isFinite(kg) && kg > 0 && kg <= 200) {
+      handlePickLoad(kg);
+    }
+  };
 
   // Nouvelle logique pour déterminer quels exercices utilisent le chronomètre
   // Jour 7 (index 6) OU exercices avec nbRep: 0 OU timer: true
@@ -1189,6 +1423,19 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   // Détecter si l'exercice utilise le chronomètre
   const isChrono = isDay7ChronoExercise || hasTimerProperty || hasZeroReps;
 
+  // L'exercice est-il comptable par la caméra (patron de mouvement reconnu) ?
+  const cameraCountable = !isChrono && isCameraCountable(exo);
+
+  // Mode casque (WebXR) : profil de comptage tête/mains de cet exercice, utilisé
+  // par la session immersive quand elle est active (voir StepWorkout).
+  const xrProfile = !isChrono ? getXrProfile(exo) : null;
+
+  // Répétition détectée par le casque : même incrément que la caméra, sans bip
+  // (la session XR émet déjà le sien dans le casque).
+  const handleXrRep = () => {
+    setCurrentRep((prev) => (prev >= exo.nbRep ? prev : prev + 1));
+  };
+
   // Exercices à faire sur chaque membre (nécessitant deux fois le rythme)
   const doubleSidedExercises = [
     'Planche latérale',
@@ -1206,6 +1453,11 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   const [chrono, setChrono] = useState(0);
   const [chronoRunning, setChronoRunning] = useState(false);
   const [side, setSide] = useState(0); // 0: premier côté, 1: deuxième côté
+  // Décompte avant le passage automatique au second côté (null = inactif)
+  const [sideSwitchCountdown, setSideSwitchCountdown] = useState(null);
+  // Le rythme automatique était-il lancé sur le premier côté ? Si oui, on le
+  // relance sur le second pour ne pas laisser l'utilisateur sans cadence.
+  const wasPulsingRef = useRef(false);
   const chronoInterval = useRef(null);
   
   // Timer pour exercices avec duration
@@ -1222,6 +1474,10 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     setCurrentRep(0);
     setShowOverlay(false);
     setCountdown(null);
+    setSideSwitchCountdown(null);
+    wasPulsingRef.current = false;
+    // Activer la caméra si le réglage global est ON et l'exercice comptable
+    setCameraActive(cameraEnabled && cameraCountable);
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -1241,6 +1497,12 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     // ou la série change réellement — y compris pour deux exercices homonymes —
     // sans dépendre d'une référence d'objet qui pourrait changer sans raison.
   }, [dayIndex, step, setNum, totalSets]);
+
+  // Activer/désactiver la caméra quand la décision de séance change (prompt de
+  // lancement résolu après le montage du 1er exercice) ou l'exercice change.
+  useEffect(() => {
+    setCameraActive(cameraEnabled && cameraCountable);
+  }, [cameraEnabled, cameraCountable]);
 
   // Timer dégressif pour exercices avec duration spécifique
   useEffect(() => {
@@ -1270,9 +1532,18 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     };
   }, [timerRunning, exo.duration]);
 
+  // Répétition détectée par la caméra : incrémente le compteur, borne à nbRep
+  const handleCameraRep = () => {
+    setCurrentRep((prev) => {
+      if (prev >= exo.nbRep) return prev;
+      playBeep();
+      return prev + 1;
+    });
+  };
+
   // Lancer le décompte avant le rythme (désactivé pour les exercices chronométrés)
   const handlePulse = () => {
-    if (hasTimer || isChrono) return; // Désactiver le rythme pour les exercices chronométrés
+    if (hasTimer || isChrono || cameraActive) return; // pas de rythme auto si caméra active
     
     if (!isPulsing && countdown === null) {
       setCountdown(3);
@@ -1369,7 +1640,8 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   useEffect(() => {
     setChrono(0);
     setSide(0);
-    
+    setSideSwitchCountdown(null);
+
     // Démarrer automatiquement le timer pour les exercices qui en ont besoin
     if ((hasTimer || isChrono) && !isPaused) {
       // Délai court pour laisser l'interface se charger
@@ -1389,6 +1661,82 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
     }
   }, [side, isDoubleSided, hasTimer, isChrono]);
 
+  // Mémoriser que le rythme automatique tournait sur le côté en cours, pour le
+  // relancer à l'identique après le changement de côté.
+  useEffect(() => {
+    if (isPulsing) wasPulsingRef.current = true;
+  }, [isPulsing]);
+
+  // Passage au second côté d'un exercice unilatéral : remet le compteur, le
+  // timer et la détection caméra à zéro, puis relance la cadence si elle
+  // tournait. Appelé par le décompte automatique comme par le bouton manuel.
+  const switchToSecondSide = useCallback(() => {
+    const resumeRhythm = wasPulsingRef.current && !cameraActive && !hasTimer && !isChrono;
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setSideSwitchCountdown(null);
+    setIsPulsing(false);
+    setCurrentRep(0);
+    setSide(1);
+    wasPulsingRef.current = false;
+
+    // Exercice unilatéral chronométré : le second côté repart sur un timer neuf.
+    if (exo.duration) {
+      setExerciseTimer(exo.duration);
+      setTimerRunning(true);
+    }
+
+    if (resumeRhythm) {
+      setCountdown(3);
+      setShowOverlay(true);
+    } else {
+      setShowOverlay(false);
+    }
+  }, [cameraActive, hasTimer, isChrono, exo.duration]);
+
+  // Détection de la fin du premier côté : reps atteintes (rythme, caméra ou
+  // comptage manuel) ou timer écoulé. On enchaîne automatiquement au lieu
+  // d'attendre un appui sur « Passer au second côté ».
+  useEffect(() => {
+    if (!isDoubleSided || side !== 0 || isPaused) return;
+    if (sideSwitchCountdown !== null) return;
+
+    const repsDone = !isChrono && !hasTimer && exo.nbRep > 0 && currentRep >= exo.nbRep;
+    const timedSideDone = !!exo.duration && !isChrono && exerciseTimer === 0;
+    if (!repsDone && !timedSideDone) return;
+
+    setSideSwitchCountdown(SIDE_SWITCH_DELAY_SECONDS);
+    announceSideChange(1);
+  }, [
+    isDoubleSided,
+    side,
+    isPaused,
+    sideSwitchCountdown,
+    isChrono,
+    hasTimer,
+    currentRep,
+    exo.nbRep,
+    exo.duration,
+    exerciseTimer,
+  ]);
+
+  // Décompte « changez de côté » : un bip par seconde, puis bascule.
+  useEffect(() => {
+    if (sideSwitchCountdown === null || isPaused) return;
+    if (sideSwitchCountdown > 0) {
+      playBeep();
+      const t = setTimeout(
+        () => setSideSwitchCountdown((c) => (c === null ? null : c - 1)),
+        1000
+      );
+      return () => clearTimeout(t);
+    }
+    switchToSecondSide();
+  }, [sideSwitchCountdown, isPaused, switchToSecondSide]);
+
   // Nouveau : bouton "Suivant" sur l'overlay OK
   const handleNext = () => {
     const calories = caloriesPerSet;
@@ -1400,6 +1748,60 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
       onDone();
     }, 2000);
   };
+
+  // ── Casque VR : état publié et gestes routés vers les handlers ci-dessus ──
+  const xrKind = exo.duration && !isChrono ? 'timer' : (isChrono || hasTimer) ? 'chrono' : 'reps';
+  useEffect(() => {
+    xr?.publish({
+      kind: xrKind,
+      exerciseName: exo.name,
+      currentRep,
+      targetReps: exo.nbRep || 0,
+      countdown,
+      isPulsing,
+      side,
+      isDoubleSided: !!isDoubleSided,
+      sideSwitchCountdown,
+      chrono,
+      chronoRunning,
+      exerciseTimer,
+      timerRunning,
+      duration: exo.duration || 0,
+      showCalories,
+      caloriesToShow,
+      // Comptage automatique tête/mains seulement quand le casque est porté
+      xrProfile: xr?.active ? xrProfile : null,
+      stepIndex: step,
+      setNum,
+    });
+  }, [xr, xrKind, exo.name, exo.nbRep, exo.duration, currentRep, countdown, isPulsing, side,
+    isDoubleSided, sideSwitchCountdown, chrono, chronoRunning, exerciseTimer, timerRunning,
+    showCalories, caloriesToShow, xrProfile, step, setNum]);
+
+  // Handlers réenregistrés à chaque rendu (jamais de closure périmée).
+  if (xr) {
+    Object.assign(xr.actions.current, {
+      rep: handleXrRep,
+      addRep: () => setCurrentRep((p) => Math.min(exo.nbRep || 0, p + 1)),
+      next: handleNext,
+      switchSide: xrKind === 'chrono'
+        ? () => {
+          // Même chemin que le bouton « Côté Suivant » du chronomètre.
+          setChronoRunning(false);
+          setSide(1);
+          setChrono(0);
+          setTimeout(() => setChronoRunning(true), 1000);
+        }
+        : switchToSecondSide,
+      finishChrono: () => {
+        setChronoRunning(false);
+        setTimerRunning(false);
+        onDone();
+      },
+      toggleRhythm: handlePulse,
+      togglePause: () => (xrKind === 'timer' ? setTimerRunning((r) => !r) : setChronoRunning((r) => !r)),
+    });
+  }
   
   // Ouvrir YouTube pour l'exercice actuel
   const handleYouTube = () => {
@@ -1432,7 +1834,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
 
   // Mode automatique: démarrer automatiquement le rythme si pas de timer/chrono
   useEffect(() => {
-    if (autoMode && !hasTimer && !isChrono && !isPaused) {
+    if (autoMode && !hasTimer && !isChrono && !isPaused && !cameraActive) {
       // Démarrer automatiquement le rythme après 2 secondes
       const autoStartTimer = setTimeout(() => {
         if (!isPulsing && countdown === null) {
@@ -1443,21 +1845,41 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
       
       return () => clearTimeout(autoStartTimer);
     }
-  }, [autoMode, hasTimer, isChrono, isPaused, isPulsing, countdown]);
+  }, [autoMode, hasTimer, isChrono, isPaused, isPulsing, countdown, cameraActive]);
+
+  // Caméra : à la fin des répétitions détectées, afficher l'écran « OK / Suivant »
+  // pendant 5 secondes puis passer automatiquement à l'exercice suivant.
+  // Sur un exercice unilatéral, seul le second côté termine la série : le
+  // premier déclenche le passage automatique à l'autre côté.
+  useEffect(() => {
+    const lastSideDone = !isDoubleSided || side === 1;
+    if (cameraActive && exo.nbRep > 0 && currentRep >= exo.nbRep && !isChrono && lastSideDone) {
+      setShowOverlay(true);
+      const t = setTimeout(() => {
+        handleNext();
+      }, 5000);
+      return () => clearTimeout(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraActive, currentRep, exo.nbRep, isChrono, isDoubleSided, side]);
 
   // Mode automatique: terminer automatiquement l'exercice après les répétitions
+  // (ignoré si la caméra gère la fin : elle a son propre délai de 5 s ci-dessus)
   useEffect(() => {
-    if (autoMode && currentRep === exo.nbRep && !hasTimer && !isChrono) {
+    // Un exercice unilatéral n'est terminé qu'après le second côté : sinon on
+    // laisse le passage automatique de côté faire son travail.
+    const lastSideDone = !isDoubleSided || side === 1;
+    if (autoMode && !cameraActive && currentRep === exo.nbRep && !hasTimer && !isChrono && lastSideDone) {
       // Attendre 1 seconde puis terminer automatiquement
       const autoFinishTimer = setTimeout(() => {
         const calories = caloriesPerSet;
         onCaloriesBurned(calories);
         onDone();
       }, 1000);
-      
+
       return () => clearTimeout(autoFinishTimer);
     }
-  }, [autoMode, currentRep, exo.nbRep, hasTimer, isChrono, caloriesPerSet, onCaloriesBurned, onDone]);
+  }, [autoMode, cameraActive, currentRep, exo.nbRep, hasTimer, isChrono, isDoubleSided, side, caloriesPerSet, onCaloriesBurned, onDone]);
 
   // Désactivation du mode auto : stopper proprement tout rythme automatique en
   // cours (décompte, pulsation, overlay) au lieu d'en relancer un.
@@ -1562,7 +1984,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               </Typography>
             ) : (
               <>
-                <Typography variant="h4" component="div" sx={{ mb: 2, color: '#4CAF50' }}>
+                <Typography variant="h4" component="div" sx={{ mb: 2, color: '#30d158' }}>
                   OK !
                 </Typography>
                 {isDoubleSided ? (
@@ -1571,19 +1993,21 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
                       Côté {side + 1} sur 2 terminé
                     </Typography>
                     {side === 0 ? (
-                      <Button 
-                        variant="contained" 
-                        color="info"
-                        onClick={() => {
-                          setShowOverlay(false);
-                          setSide(1);
-                          setCurrentRep(0);
-                          setIsPulsing(false);
-                        }}
-                        sx={{ minWidth: 200 }}
-                      >
-                        Passer au second côté
-                      </Button>
+                      <>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: '#0a84ff' }}>
+                          {sideSwitchCountdown > 0
+                            ? `Changez de côté… ${sideSwitchCountdown}`
+                            : 'Changez de côté !'}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          color="info"
+                          onClick={switchToSecondSide}
+                          sx={{ minWidth: 200 }}
+                        >
+                          Passer maintenant
+                        </Button>
+                      </>
                     ) : (
                       <Button 
                         variant="contained" 
@@ -1618,26 +2042,40 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
           className="exercise-illustration"
           sx={{
             width: '100%',
-            // Illustration réduite pour que les instructions ne passent pas sous les contrôles fixes.
-            maxWidth: { xs: 200, md: 260, lg: 300 },
-            aspectRatio: '1/1',
+            // Illustration compacte : la fiche entière (nom, badges, description,
+            // contrôles) doit tenir au-dessus du pli sur un écran de téléphone.
+            // Caméra active : l'aperçu remplace l'illustration, un peu plus large.
+            maxWidth: cameraActive ? 360 : { xs: 132, md: 180, lg: 210 },
+            aspectRatio: cameraActive ? 'auto' : '1/1',
             borderRadius: '16px',
             overflow: 'hidden',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            background: 'var(--illustration-surface, #101013)',
+            border: cameraActive ? 'none' : '1px solid rgba(255, 255, 255, 0.08)',
+            background: cameraActive ? 'transparent' : 'var(--illustration-surface, #101013)',
             mb: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
-            position: 'relative'
+            boxShadow: cameraActive ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.45)',
+            position: 'relative',
+            mx: 'auto'
           }}
         >
-          <img
-            src={getAssetPath(`/illustrations/${getExerciseIllustration(iconType, exo.name)}`)}
-            alt={exo.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          {cameraActive ? (
+            <WebcamRepCounter
+              exo={exo}
+              currentRep={currentRep}
+              targetReps={exo.nbRep}
+              onRep={handleCameraRep}
+              onClose={() => setCameraActive(false)}
+              resetKey={isDoubleSided ? side : null}
+            />
+          ) : (
+            <img
+              src={getAssetPath(`/illustrations/${getExerciseIllustration(iconType, exo.name)}`)}
+              alt={exo.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          )}
         </Box>
         
         <Typography 
@@ -1652,18 +2090,79 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         >
           {exo.name}
         </Typography>
-        {/* Affichage du poids réel soulevé */}
-        {calculateWeight(exo.equipment) > 0 && (
-          <Typography variant="subtitle1" sx={{ color: '#F03D32', fontWeight: 'bold', mb: 2 }}>
-            Poids cible : {calculateWeight(exo.equipment)} kg
-          </Typography>
-        )}
-        
+        {/* Choix de la charge : haltères standard ou charge personnalisée.
+            La sélection est mémorisée par exercice et ajuste les calories. */}
+        <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', mb: 1.5 }}>
+          {STANDARD_LOADS_KG.map((kg) => (
+            <Button
+              key={kg}
+              size="small"
+              variant={exerciseLoad === kg ? 'contained' : 'outlined'}
+              onClick={() => handlePickLoad(kg)}
+              sx={{
+                minWidth: 56,
+                borderRadius: '100px',
+                fontWeight: 700,
+                ...(exerciseLoad === kg
+                  ? { background: '#F03D32', '&:hover': { background: '#c9271d' } }
+                  : { borderColor: 'rgba(255,255,255,0.25)', color: 'rgba(235,235,245,0.6)' }),
+              }}
+            >
+              {kg} kg
+            </Button>
+          ))}
+          {customLoadOpen ? (
+            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+              <input
+                type="number"
+                min="1"
+                max="200"
+                step="0.5"
+                value={customLoadValue}
+                onChange={(e) => setCustomLoadValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleCustomLoad(); }}
+                placeholder="kg"
+                autoFocus
+                style={{
+                  width: 64,
+                  padding: '6px 8px',
+                  borderRadius: 100,
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  background: 'transparent',
+                  color: 'inherit',
+                  textAlign: 'center',
+                }}
+              />
+              <Button size="small" onClick={handleCustomLoad} sx={{ minWidth: 40, fontWeight: 700 }}>OK</Button>
+            </Box>
+          ) : (
+            <Button
+              size="small"
+              variant={exerciseLoad != null && !STANDARD_LOADS_KG.includes(exerciseLoad) ? 'contained' : 'outlined'}
+              onClick={() => { setCustomLoadOpen(true); setCustomLoadValue(exerciseLoad != null ? String(exerciseLoad) : ''); }}
+              sx={{
+                minWidth: 64,
+                borderRadius: '100px',
+                fontWeight: 700,
+                ...(exerciseLoad != null && !STANDARD_LOADS_KG.includes(exerciseLoad)
+                  ? { background: '#F03D32', '&:hover': { background: '#c9271d' } }
+                  : { borderColor: 'rgba(255,255,255,0.25)', color: 'rgba(235,235,245,0.6)' }),
+              }}
+            >
+              {exerciseLoad != null && !STANDARD_LOADS_KG.includes(exerciseLoad) ? `${exerciseLoad} kg` : 'Autre'}
+            </Button>
+          )}
+        </Box>
+        {/* Estimation recalculée avec la charge choisie */}
+        <Typography variant="caption" sx={{ color: 'rgba(235,235,245,0.6)', display: 'block', textAlign: 'center', mb: 1.5 }}>
+          ≈ {caloriesPerSet} kcal / série{exerciseLoad != null ? ` avec ${exerciseLoad} kg` : ''}
+        </Typography>
+
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', mb: 2 }}>
           {exo.equip && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 1.5, py: 0.5, borderRadius: '100px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <Dumbbell size={14} color="#a1a1aa" />
-              <Typography variant="caption" sx={{ color: '#a1a1aa', fontWeight: 600 }}>{exo.equip}</Typography>
+              <Dumbbell size={14} color="rgba(235,235,245,0.6)" />
+              <Typography variant="caption" sx={{ color: 'rgba(235,235,245,0.6)', fontWeight: 600 }}>{exo.equip}</Typography>
             </Box>
           )}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(240, 61, 50, 0.1)', px: 1.5, py: 0.5, borderRadius: '100px', border: '1px solid rgba(240, 61, 50, 0.3)' }}>
@@ -1686,7 +2185,11 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         >
           {exo.desc}
         </Typography>
-        
+
+        {/* Le suivi des reps par caméra se décide UNE fois au lancement de la
+            séance (dialogue d'ouverture) — pas de bouton par exercice. Quand il
+            est actif, l'aperçu remplace l'illustration ci-dessus. */}
+
         {/* Timer spécial pour exercices avec duration fixe */}
         {exo.duration && !isChrono ? (
           <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -1697,12 +2200,12 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               mb: 2, 
               fontFamily: 'monospace', 
               letterSpacing: 2,
-              color: exerciseTimer <= 10 ? '#FF5252' : (timerRunning ? 'success.main' : 'text.primary')
+              color: exerciseTimer <= 10 ? '#ff453a' : (timerRunning ? 'success.main' : 'text.primary')
             }}>
               {Math.floor(exerciseTimer / 60).toString().padStart(2, '0')}:{(exerciseTimer % 60).toString().padStart(2, '0')}
             </Typography>
             {exerciseTimer <= 10 && exerciseTimer > 0 && (
-              <Typography variant="body2" sx={{ mb: 1, color: '#FF5252', fontWeight: 'bold' }}>
+              <Typography variant="body2" sx={{ mb: 1, color: '#ff453a', fontWeight: 'bold' }}>
                 ⚠️ Plus que {exerciseTimer} secondes !
               </Typography>
             )}
@@ -1739,12 +2242,12 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               mb: 2, 
               fontFamily: 'monospace', 
               letterSpacing: 2,
-              color: chrono >= 300 ? '#FF5252' : 'inherit' // Rouge quand durée maximale atteinte
+              color: chrono >= 300 ? '#ff453a' : 'inherit' // Rouge quand durée maximale atteinte
             }}>
               {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
             </Typography>
             {chrono >= 300 && (
-              <Typography variant="body2" sx={{ mb: 1, color: '#FF5252', fontWeight: 'bold' }}>
+              <Typography variant="body2" sx={{ mb: 1, color: '#ff453a', fontWeight: 'bold' }}>
                 ⚠️ Durée maximale atteinte (5 min)
               </Typography>
             )}
@@ -1780,12 +2283,12 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               mb: 2, 
               fontFamily: 'monospace', 
               letterSpacing: 2, 
-              color: chrono >= 300 ? '#FF5252' : (side === 0 ? 'primary.main' : 'success.main')
+              color: chrono >= 300 ? '#ff453a' : (side === 0 ? 'primary.main' : 'success.main')
             }}>
               {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
             </Typography>
             {chrono >= 300 && (
-              <Typography variant="body2" sx={{ mb: 1, color: '#FF5252', fontWeight: 'bold' }}>
+              <Typography variant="body2" sx={{ mb: 1, color: '#ff453a', fontWeight: 'bold' }}>
                 ⚠️ Durée maximale atteinte (5 min)
               </Typography>
             )}
@@ -1809,7 +2312,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               {side === 0 ? (
                 <button 
                   className="btn-timer-primary" 
-                  style={{ background: '#3b82f6', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)' }}
+                  style={{ background: '#0a84ff', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)' }}
                   onClick={() => { 
                     setChronoRunning(false); 
                     setSide(1); 
@@ -1835,13 +2338,21 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         ) : (
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 2, py: 1, borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <RotateCcw size={18} color="#a1a1aa" />
+              <RotateCcw size={18} color="rgba(235,235,245,0.6)" />
               <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>{exo.nbRep} Reps</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(255, 255, 255, 0.05)', px: 2, py: 1, borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <Timer size={18} color="#a1a1aa" />
+              <Timer size={18} color="rgba(235,235,245,0.6)" />
               <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>{exo.sets}</Typography>
             </Box>
+            {/* Exercice unilatéral : le côté en cours change tout seul, il doit
+                rester lisible d'un coup d'œil pendant l'effort. */}
+            {isDoubleSided && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'rgba(59, 130, 246, 0.15)', px: 2, py: 1, borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.4)' }}>
+                <Repeat size={18} color="#0a84ff" />
+                <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600 }}>Côté {side + 1} / 2</Typography>
+              </Box>
+            )}
           </Box>
         )}
         {/* Boutons flottants pour toutes les actions */}

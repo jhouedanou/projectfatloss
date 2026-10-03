@@ -151,14 +151,10 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
           maxHeight: '90vh',
           margin: { xs: '16px', sm: '32px' },
           maxWidth: { xs: 'calc(100vw - 32px)', sm: '600px' },
-          backgroundColor: '#18181b',
-          color: '#fff',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '16px'
         },
       }}
     >
-      <DialogTitle sx={{ pb: 1, borderBottom: '1px solid rgba(255, 255, 255, 0.05)', fontWeight: 'bold' }}>
+      <DialogTitle sx={{ pb: 1, borderBottom: '.5px solid rgba(84, 84, 88, .6)', fontWeight: 600 }}>
         Paramètres & Intégrations
       </DialogTitle>
       <DialogContent sx={{ 
@@ -202,7 +198,7 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
                 size="small" 
                 onClick={handleRequestPermission} 
                 variant="contained"
-                sx={{ mt: 1, background: 'var(--vermilion)', '&:hover': { background: '#c41e0b' } }}
+                sx={{ mt: 1, background: 'var(--vermilion)', '&:hover': { background: '#c9271d' } }}
               >
                 Autoriser les notifications
               </Button>
@@ -305,7 +301,7 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
             size="small"
             sx={{
               background: isFitConnected ? 'rgba(76, 175, 80, 0.2)' : 'linear-gradient(135deg, #4285F4, #34A853)',
-              color: isFitConnected ? '#4CAF50' : 'white',
+              color: isFitConnected ? '#30d158' : 'white',
               fontWeight: '600',
               textTransform: 'none',
               padding: '8px 16px',

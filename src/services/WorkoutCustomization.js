@@ -8,12 +8,30 @@ import { days as defaultWorkoutPlan } from '../data';
 // Clé de stockage dans localStorage
 const CUSTOM_WORKOUT_KEY = 'custom_workout_plan';
 
+// Version du programme par défaut : quand elle change, un éventuel plan
+// personnalisé basé sur l'ancien programme est écarté pour que tout le monde
+// reçoive le nouveau programme (semaine type 4 séances + 3 repos).
+const PLAN_VERSION_KEY = 'plan_version';
+const PLAN_VERSION = '28d-v3';
+
+const migratePlanVersion = () => {
+  try {
+    if (localStorage.getItem(PLAN_VERSION_KEY) !== PLAN_VERSION) {
+      localStorage.removeItem(CUSTOM_WORKOUT_KEY);
+      localStorage.setItem(PLAN_VERSION_KEY, PLAN_VERSION);
+    }
+  } catch (error) {
+    // localStorage indisponible : on servira le plan par défaut de toute façon.
+  }
+};
+
 /**
  * Récupérer le programme d'entraînement (personnalisé ou par défaut)
  * @returns {Array} - Programme d'entraînement
  */
 export const getWorkoutPlan = () => {
   try {
+    migratePlanVersion();
     const storedPlan = localStorage.getItem(CUSTOM_WORKOUT_KEY);
     return storedPlan ? JSON.parse(storedPlan) : defaultWorkoutPlan;
   } catch (error) {
@@ -42,9 +60,13 @@ export const saveWorkoutPlan = (workoutPlan) => {
 
 const VELO_ENABLED_KEY = 'velo_enabled';
 
-/** Détecte une séance de vélo (cardio fin de séance) d'après son nom. */
+/**
+ * Détecte le vélo optionnel de fin de séance d'après son nom exact.
+ * Volontairement strict : l'échauffement vélo des séances de musculation et la
+ * séance vélo dédiée du samedi ne doivent JAMAIS être retirés par ce réglage.
+ */
 const isVeloExercise = (exercise) =>
-  (exercise?.name || '').toLowerCase().includes('vélo');
+  (exercise?.name || '') === 'Vélo (cardio fin de séance)';
 
 /**
  * Indique si le vélo de fin de séance est actif (inclus dans les séances).
@@ -74,6 +96,39 @@ export const setVeloEnabled = (enabled) => {
   }
 };
 
+// --- Ride en début de séance (vélo connecté + vidéo) --------------------------
+// Quand il est actif, la séance démarre par un écran « ride » (vidéo + HUD) et
+// le vélo de fin de séance est retiré du programme (il est remplacé, pas doublé).
+
+const RIDE_START_KEY = 'ride_start_enabled';
+
+/**
+ * Indique si le ride vélo en début de séance est actif.
+ * @returns {boolean} false par défaut si aucun réglage enregistré.
+ */
+export const isRideStartEnabled = () => {
+  try {
+    return localStorage.getItem(RIDE_START_KEY) === 'true';
+  } catch (error) {
+    return false;
+  }
+};
+
+/**
+ * Active ou désactive le ride vélo en début de séance (réglage global mémorisé).
+ * @param {boolean} enabled
+ * @returns {boolean} succès de l'écriture
+ */
+export const setRideStartEnabled = (enabled) => {
+  try {
+    localStorage.setItem(RIDE_START_KEY, String(!!enabled));
+    return true;
+  } catch (error) {
+    console.error('Erreur lors de l\'enregistrement du réglage ride:', error);
+    return false;
+  }
+};
+
 /**
  * Indique si un jour donné contient une séance de vélo (dans le plan brut,
  * indépendamment du réglage activé/désactivé). Sert à savoir s'il faut
@@ -89,13 +144,14 @@ export const dayHasVelo = (dayIndex) => {
 
 /**
  * Programme effectif pour l'affichage et la séance : identique au plan
- * personnalisé/par défaut, mais sans le vélo si celui-ci est désactivé.
+ * personnalisé/par défaut, mais sans le vélo si celui-ci est désactivé ou si
+ * le ride en début de séance le remplace.
  * N'altère jamais le plan enregistré (le WorkoutCustomizer garde le plan complet).
  * @returns {Array}
  */
 export const getActiveWorkoutPlan = () => {
   const plan = getWorkoutPlan();
-  if (isVeloEnabled()) return plan;
+  if (isVeloEnabled() && !isRideStartEnabled()) return plan;
   return plan.map((day) => ({
     ...day,
     exercises: (day.exercises || []).filter((exercise) => !isVeloExercise(exercise)),

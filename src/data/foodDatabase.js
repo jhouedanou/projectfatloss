@@ -1,4 +1,5 @@
 import { glovoFoodDatabase } from './glovoFoodDatabase.js';
+import { getCalorieTarget } from '../services/NutritionGoals.js';
 
 export const foodCategories = [
   { id: 'fruits', name: 'Fruits' },
@@ -668,15 +669,24 @@ foodDatabase.push(...glovoFoodDatabase);
 
 export const getDailyNutritionLog = (dateStr) => {
   const allLogs = JSON.parse(localStorage.getItem('pfl_nutrition_logs') || '{}');
-  return allLogs[dateStr] || {
-    meals: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snacks: []
-    },
-    calorieGoal: 2000
-  };
+  const stored = allLogs[dateStr];
+  if (!stored) {
+    return {
+      meals: {
+        breakfast: [],
+        lunch: [],
+        dinner: [],
+        snacks: []
+      },
+      calorieGoal: getCalorieTarget()
+    };
+  }
+  // L'objectif suit le profil et les pesées, sauf si l'utilisateur l'a fixé
+  // à la main pour ce jour (calorieGoalManual posé par CalorieCounter).
+  if (!stored.calorieGoalManual) {
+    return { ...stored, calorieGoal: getCalorieTarget() };
+  }
+  return stored;
 };
 
 export const saveDailyNutritionLog = (dateStr, data) => {
@@ -829,7 +839,7 @@ export const getNutritionSummary = (dateStr) => {
     protein: 0,
     carbs: 0,
     fat: 0,
-    goal: log.calorieGoal || 2000
+    goal: log.calorieGoal || getCalorieTarget()
   };
   
   if (log.meals) {

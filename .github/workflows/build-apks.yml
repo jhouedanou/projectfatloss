@@ -1,0 +1,78 @@
+name: Build APKs
+
+# Compile les deux APK debug (téléphone Capacitor + montre Wear OS) et les
+# publie en artefacts téléchargeables depuis la page du run.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+    paths:
+      - 'android/**'
+      - 'wear/**'
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'vite.config.js'
+      - 'capacitor.config.json'
+      - '.github/workflows/build-apks.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  phone-apk:
+    name: APK téléphone (Capacitor)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Installer les dépendances web
+        run: yarn install --frozen-lockfile
+
+      - name: Bundle web + assets MediaPipe + sync Capacitor
+        run: yarn cap:sync
+
+      - name: Compiler l'APK
+        working-directory: android
+        run: ./gradlew --no-daemon assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fatloss-telephone-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+  watch-apk:
+    name: APK montre (Wear OS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Compiler l'APK
+        working-directory: wear
+        run: ./gradlew --no-daemon assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fatloss-montre-debug-apk
+          path: wear/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
