@@ -2,19 +2,16 @@
  * Utilitaire pour gérer les chemins en production GitHub Pages
  */
 
-// Détecte automatiquement la base URL
+// Détecte automatiquement la base URL.
+// On s'appuie sur import.meta.env.BASE_URL, injecté par Vite au build à partir
+// de l'option `base` (vite.config.js). En prod GitHub Pages il vaut
+// '/projectfatloss/', en dev '/'. C'est plus fiable qu'un test d'hostname codé
+// en dur : les chemins d'assets restent corrects quel que soit le domaine
+// (domaine personnalisé, prévisualisation, www., etc.).
 export function getBaseUrl() {
-  if (typeof window === 'undefined') return '';
-  
-  // Pour GitHub Pages, vérifier si on est dans le sous-dossier projectfatloss
-  const isGitHubPages = window.location.hostname === 'jhouedanou.github.io';
-  const hasProjectFatlossPath = window.location.pathname.includes('/projectfatloss');
-  
-  if (isGitHubPages && hasProjectFatlossPath) {
-    return '/projectfatloss';
-  }
-  
-  return '';
+  const base = (import.meta.env.BASE_URL || '/');
+  // Retourner sans le slash final : getAssetPath ajoute un chemin commençant par '/'.
+  return base === '/' ? '' : base.replace(/\/$/, '');
 }
 
 // Fonctions utilitaires pour les chemins
