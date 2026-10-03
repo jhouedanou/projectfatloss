@@ -3,10 +3,10 @@
 // L'état "déjà synchronisé" est conservé dans une clé localStorage dédiée afin de
 // NE PAS modifier les enregistrements métier (et donc ne pas déclencher les push
 // Supabase associés). On évite ainsi les doublons côté Google Fit.
-import GoogleFitService, { BIKE_ACTIVITY_TYPES } from './GoogleFitService';
+import GoogleFitService, { BIKE_ACTIVITY_TYPES, VIRTUAL_BIKE_ACTIVITY_TYPES } from './GoogleFitService';
 import { getWorkoutHistory } from './WorkoutStorage';
 import { getWeightHistory } from './WeightStorage';
-import { getCardioSessions, importCardioSessions } from './CardioStorage';
+import { getCardioSessions, importCardioSessions, deleteCardioSession } from './CardioStorage';
 import { getUserWeight } from './CalorieEstimator';
 import { saveDailySteps } from './StepsStorage';
 import { dateKey } from './HabitStorage';
@@ -37,6 +37,11 @@ function readJSON(key, fallback) {
 
 function getSyncedMap() {
   return readJSON(SYNCED_KEY, {});
+}
+
+/** Marque une séance cardio importée comme déjà présente dans Google Fit. */
+export function markCardioSynced(id) {
+  markSynced('cardio', id);
 }
 
 function markSynced(category, id) {
@@ -201,15 +206,47 @@ function getImportedMap() {
   return readJSON(IMPORTED_KEY, {});
 }
 
+// Rameur et rameur d'appartement : Holofit propose aussi le rameur, exclu ici.
+const ROWING_ACTIVITY_TYPES = [102, 103];
+
+/**
+ * Origine d'une séance vélo Google Fit, ou null si ce n'est pas du vélo :
+ *   - 'holofit' : « Holofit » dans le nom ou la description (#Holofit) ;
+ *   - 'strava'  : séance synchronisée depuis Strava et nommée comme une sortie ;
+ *   - 'google_fit' : séance classée vélo par Google Fit (y compris le type
+ *     23 « Cricket », sous lequel arrivent les séances Holofit / Strava).
+ */
+export function bikeSessionOrigin(session) {
+  const type = Number(session?.activityType);
+  if (ROWING_ACTIVITY_TYPES.includes(type)) return null;
+  const text = `${session?.name || ''} ${session?.description || ''}`;
+  if (/holofit/i.test(text)) return 'holofit';
+  const app = `${session?.application?.packageName || ''} ${session?.application?.name || ''}`;
+  const fromStrava = /strava/i.test(app);
+  if (fromStrava && (BIKE_ACTIVITY_TYPES.includes(type) || /ride|v[ée]lo|bike|cycl|spin/i.test(text))) return 'strava';
+  if (BIKE_ACTIVITY_TYPES.includes(type) || VIRTUAL_BIKE_ACTIVITY_TYPES.includes(type)) return 'google_fit';
+  return null;
+}
+
+/** Séance cardio cochée depuis la check-list du jour ? */
+export function isChecklistSession(session) {
+  try {
+    return JSON.parse(session?.notes || '{}').source === 'checklist';
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Récupère les sorties vélo enregistrées dans Google Fit (vélo d'appartement,
- * route, VTT, spinning…) sur les `days` derniers jours et les ajoute aux
- * séances cardio. Sans doublon :
+ * route, VTT, spinning, séances Strava et #Holofit) sur les `days` derniers
+ * jours et les ajoute aux séances cardio. Sans doublon :
  *   - une séance déjà importée est ignorée (id Google Fit mémorisé) ;
  *   - les séances écrites par Project Fat Loss elle-même sont ignorées ;
  *   - une sortie déjà présente localement (fin à ±5 min) est ignorée.
  * Les séances importées sont marquées « synchronisées » pour ne pas être
- * renvoyées vers Google Fit.
+ * renvoyées vers Google Fit. Une séance cochée à la main dans la check-list le
+ * même jour est remplacée par la séance importée (pas de double comptage).
  * @returns {Promise<{found:number, imported:number, skipped:number, minutes:number}>}
  */
 export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
@@ -220,19 +257,21 @@ export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
   const sessions = [];
   for (let from = start; from < end; from += IMPORT_WINDOW_MS) {
     const to = Math.min(end, from + IMPORT_WINDOW_MS);
-    sessions.push(...await GoogleFitService.listSessions(from, to, BIKE_ACTIVITY_TYPES));
+    // Tous types : les séances Holofit/Strava ne sont pas toujours classées vélo.
+    sessions.push(...await GoogleFitService.listSessions(from, to));
   }
 
   const imported = getImportedMap();
   const localBikeEnds = getCardioSessions()
-    .filter((s) => s.type === 'bike')
+    .filter((s) => s.type === 'bike' && !isChecklistSession(s))
     .map((s) => new Date(s.date).getTime());
   const seen = new Set();
   const toImport = [];
 
   for (const session of sessions) {
     const id = session.id;
-    if (!id || seen.has(id) || !BIKE_ACTIVITY_TYPES.includes(Number(session.activityType))) continue;
+    const origin = bikeSessionOrigin(session);
+    if (!id || seen.has(id) || !origin) continue;
     seen.add(id);
     if (imported[id]) continue;
     if (id.startsWith('projectfatloss-') || session.application?.name === 'Project Fat Loss') continue;
@@ -244,7 +283,7 @@ export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
 
     const activeMs = Number(session.activeTimeMillis) || endMs - startMs;
     const minutes = Math.max(1, Math.round(activeMs / 60000));
-    toImport.push({ id, name: session.name, activityType: Number(session.activityType), startMs, endMs, minutes });
+    toImport.push({ id, name: session.name, activityType: Number(session.activityType), origin, startMs, endMs, minutes });
   }
 
   // Calories et distance de chaque sortie. Une donnée manquante n'empêche pas
@@ -274,11 +313,14 @@ export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
       duration: s.minutes,
       distance,
       calories: Math.round(calories),
-      notes: JSON.stringify({ source: 'google_fit', name: s.name || '', activityType: s.activityType }),
+      notes: JSON.stringify({ source: 'google_fit', origin: s.origin, name: s.name || '', activityType: s.activityType }),
     });
   }
 
   const created = importCardioSessions(records);
+
+  replaceChecklistSessions(created);
+
   const storage = getStorage();
   if (storage) {
     created.forEach((record, i) => {
@@ -294,6 +336,17 @@ export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
     skipped: seen.size - created.length,
     minutes: created.reduce((sum, r) => sum + (r.duration || 0), 0),
   };
+}
+
+/**
+ * La vraie séance remplace la case cochée à la main le même jour : supprime
+ * les séances vélo de la check-list des jours où une séance a été importée.
+ */
+export function replaceChecklistSessions(importedRecords) {
+  const importedDays = new Set(importedRecords.map((r) => dateKey(new Date(r.date))));
+  getCardioSessions()
+    .filter((s) => s.type === 'bike' && isChecklistSession(s) && importedDays.has(dateKey(new Date(s.date))))
+    .forEach((s) => deleteCardioSession(s.id));
 }
 
 // ── Import des pas depuis Google Fit ─────────────────────────────────

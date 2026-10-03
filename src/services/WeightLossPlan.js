@@ -14,7 +14,7 @@
  *   - musculation légère à modérée, plusieurs exercices : 3.5
  *
  * Le vélo ne fait pas partie de la séance guidée : ses minutes figurent dans
- * la check-list du jour de l'accueil (2 blocs de 20 min maximum).
+ * la check-list du jour de l'accueil (une seule séance de vélo par jour).
  */
 
 import { getUserWeight, isBikeName } from './CalorieEstimator';
@@ -31,15 +31,10 @@ const GOAL_KEY = 'monthly_loss_goal_kg';
 export const BIKE_MET = 6.8;
 export const STRENGTH_MET = 3.5;
 
-// Vélo par jour de séance : 20 min minimum (accent sur le vélo), 2 blocs de
-// 20 min maximum (jamais plus de 20 min d'affilée sur la selle).
+// Une seule séance de vélo par jour de séance : 20 min minimum (accent sur le
+// vélo), 60 min maximum ; au-delà, le reste passe en vélo libre les jours de repos.
 const MIN_BIKE_PER_SESSION = 20;
-const MAX_BIKE_BLOCK_MIN = 20;
-const MAX_BIKE_PER_SESSION = 2 * MAX_BIKE_BLOCK_MIN;
-
-// Objectif de pas quotidien (check-list). Non compté dans le calcul : la
-// marche du quotidien est déjà dans le TDEE (facteur d'activité 1,4).
-export const DAILY_STEPS_TARGET = 8000;
+const MAX_BIKE_PER_SESSION = 60;
 
 // MET du vélo pour estimer les calories d'un bloc coché (comme CalorieEstimator).
 const BIKE_LOG_MET = 7.0;
@@ -135,13 +130,6 @@ export function estimateSessionMinutes(day) {
 
 // ── Cibles de la semaine ─────────────────────────────────────────────
 
-/** Répartit les minutes de vélo d'un jour en deux blocs (avant / après la muscu). */
-function splitBike(perSession) {
-  const main = Math.min(MAX_BIKE_BLOCK_MIN, ceil5(perSession / 2));
-  const warmup = Math.min(MAX_BIKE_BLOCK_MIN, Math.max(5, perSession - main));
-  return { warmup, main };
-}
-
 /**
  * Cibles d'une semaine du programme (7 jours) pour l'objectif choisi.
  * @param {Array} weekDays jours de la semaine (plan complet, vélo compris)
@@ -162,15 +150,14 @@ export function computeWeekTargets(weekDays, { goalKg = getMonthlyGoalKg(), weig
   );
   const bikeNeeded = Math.max(0, weeklyExerciseKcal - strengthMinutes * strengthRate) / bikeRate;
 
-  // Minutes par jour de séance arrondies à 5 min ; au-delà de 2 × 20 min, le
+  // Minutes de la séance de vélo, arrondies à 5 min ; au-delà de 60 min, le
   // reste se fait en vélo libre les jours de repos.
   const perSessionRaw = sessions ? bikeNeeded / sessions : 0;
   const perSession = sessions
     ? Math.min(MAX_BIKE_PER_SESSION, Math.max(MIN_BIKE_PER_SESSION, ceil5(perSessionRaw)))
     : 0;
   const extraBike = ceil5(Math.max(0, bikeNeeded - perSession * sessions));
-  const { warmup, main } = perSession ? splitBike(perSession) : { warmup: 0, main: 0 };
-  const bikeMinutes = (warmup + main) * sessions + extraBike;
+  const bikeMinutes = perSession * sessions + extraBike;
 
   const weeklyKcal = dietDaily * 7 + bikeMinutes * bikeRate + strengthMinutes * strengthRate;
   const projectedKgPerMonth = (weeklyKcal / 7) * DAYS_PER_MONTH / KCAL_PER_KG;
@@ -184,9 +171,7 @@ export function computeWeekTargets(weekDays, { goalKg = getMonthlyGoalKg(), weig
     bikeMinutes,
     strengthMinutes,
     totalMinutes: bikeMinutes + strengthMinutes,
-    bikePerSession: warmup + main,
-    warmup,
-    main,
+    bikePerSession: perSession,
     extraBike,
     extraPerRestDay: restDays ? ceil5(extraBike / restDays) : extraBike,
     projectedKgPerMonth,
