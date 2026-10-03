@@ -55,10 +55,24 @@ export function isSyncedWithGoogleFit(category, id) {
 
 // ── Synchronisation d'un élément unique ──────────────────────────────
 
+// Durée (minutes) → millisecondes, avec valeur par défaut si absente ou nulle.
+function minutesToMs(minutes, fallbackMs) {
+  const value = Number(minutes);
+  return Number.isFinite(value) && value > 0 ? value * 60 * 1000 : fallbackMs;
+}
+
+// Pas estimés pour une marche : ~1300 pas/km si la distance est connue,
+// sinon ~100 pas/min (seuil de la marche rapide qui rapporte des Points cardio).
+export function estimateWalkSteps(distanceKm, durationMs) {
+  const km = Number(distanceKm);
+  if (Number.isFinite(km) && km > 0) return Math.round(km * 1300);
+  return Math.round((durationMs / 60000) * 100);
+}
+
 export async function syncWorkoutToGoogleFit(workout) {
   const endTime = new Date(workout.date).getTime();
-  // Durée réelle mesurée (minutes), sinon 45 min par défaut.
-  const durationMs = workout.duration > 0 ? workout.duration * 60 * 1000 : DEFAULT_WORKOUT_DURATION_MS;
+  // duration est enregistrée en minutes (chrono réel de la séance).
+  const durationMs = minutesToMs(workout.duration, DEFAULT_WORKOUT_DURATION_MS);
   await GoogleFitService.addActivity({
     activityType: 80, // Strength training → affiché « Musculation » dans Google Fit
     name: `Project Fat Loss - ${workout.title || 'Entraînement'}`,
@@ -78,7 +92,7 @@ export async function syncWeightToGoogleFit(record) {
 export async function syncCardioToGoogleFit(session) {
   const endTime = new Date(session.date).getTime();
   // duration est en minutes ; défaut 30 min si non renseignée.
-  const durationMs = (session.duration ? session.duration : 30) * 60 * 1000;
+  const durationMs = minutesToMs(session.duration, 30 * 60 * 1000);
   const isBike = session.type === 'bike';
   await GoogleFitService.addActivity({
     activityType: isBike ? 1 : 7, // 1 = Vélo, 7 = Marche
@@ -86,7 +100,9 @@ export async function syncCardioToGoogleFit(session) {
     description: `Séance cardio${session.distance ? ` — ${session.distance} km` : ''}.`,
     startTime: endTime - durationMs,
     duration: durationMs,
-    calories: session.calories || 0
+    calories: session.calories || 0,
+    // Marche : les pas permettent à Google Fit de mesurer la cadence (Points cardio).
+    steps: isBike ? 0 : estimateWalkSteps(session.distance, durationMs)
   });
   markSynced('cardio', session.id);
 }

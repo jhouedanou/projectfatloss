@@ -318,11 +318,40 @@ class GoogleFitService {
     });
   }
 
+  // Écrit un point couvrant l'intervalle [startTimeNanos, endTimeNanos].
+  async writeIntervalPoint(dataTypeName, streamName, startTimeNanos, endTimeNanos, value) {
+    const dataSourceId = this.buildDataSourceId(dataTypeName, streamName);
+    await this.apiFetch(`dataSources/${dataSourceId}/datasets/${startTimeNanos}-${endTimeNanos}`, 'PATCH', {
+      dataSourceId,
+      minStartTimeNs: startTimeNanos,
+      maxEndTimeNs: endTimeNanos,
+      point: [{
+        dataTypeName,
+        startTimeNanos,
+        endTimeNanos,
+        value
+      }]
+    });
+  }
+
+  // Ajoute une activité dans Google Fit.
+  //
+  // Les anneaux (Minutes actives / Points cardio) ne sont PAS calculés à partir
+  // des sessions : Google Fit les dérive des segments d'activité
+  // (com.google.activity.segment) et du nombre de pas. On écrit donc, en plus
+  // de la session et des calories :
+  //   - un segment d'activité sur toute la durée (fait bouger les anneaux) ;
+  //   - les pas si `activity.steps` est fourni (marche : cadence → Points cardio).
   async addActivity(activity) {
     if (!this.isInitialized) await this.init();
 
-    const startTimeMillis = new Date(activity.startTime).getTime();
+    let startTimeMillis = new Date(activity.startTime).getTime();
     const durationMillis = activity.duration || 3600000; // Durée par défaut 1h
+    // Google Fit ignore les données dans le futur : on recale la fin sur « maintenant ».
+    const now = Date.now();
+    if (startTimeMillis + durationMillis > now) {
+      startTimeMillis = now - durationMillis;
+    }
     const endTimeMillis = startTimeMillis + durationMillis;
 
     // toNanos valide les horodatages (lève une erreur si startTime est invalide)
@@ -350,7 +379,30 @@ class GoogleFitService {
         }]
       });
 
-      // 3. Créer la séance (session) associée.
+      // 3. Segment d'activité : c'est lui qui alimente Minutes actives et Points cardio.
+      await this.ensureDataSource('com.google.activity.segment', 'ProjectFatLossActivity');
+      await this.writeIntervalPoint(
+        'com.google.activity.segment',
+        'ProjectFatLossActivity',
+        startTimeNanos,
+        endTimeNanos,
+        [{ intVal: activity.activityType }]
+      );
+
+      // 4. Pas (optionnel) : Google Fit utilise la cadence de marche pour les Points cardio.
+      const steps = Math.round(activity.steps || 0);
+      if (steps > 0) {
+        await this.ensureDataSource('com.google.step_count.delta', 'ProjectFatLossSteps');
+        await this.writeIntervalPoint(
+          'com.google.step_count.delta',
+          'ProjectFatLossSteps',
+          startTimeNanos,
+          endTimeNanos,
+          [{ intVal: steps }]
+        );
+      }
+
+      // 5. Créer la séance (session) associée.
       const sessionId = `projectfatloss-${startTimeMillis}`;
       await this.apiFetch(`sessions/${sessionId}`, 'PUT', {
         id: sessionId,
