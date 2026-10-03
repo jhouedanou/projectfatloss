@@ -8,6 +8,8 @@ import { getWorkoutHistory } from './WorkoutStorage';
 import { getWeightHistory } from './WeightStorage';
 import { getCardioSessions, importCardioSessions } from './CardioStorage';
 import { getUserWeight } from './CalorieEstimator';
+import { saveDailySteps } from './StepsStorage';
+import { dateKey } from './HabitStorage';
 import { getNutritionSummary } from '../data/foodDatabase';
 
 const SYNCED_KEY = 'pfl_googlefit_synced';
@@ -278,11 +280,54 @@ export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
   };
 }
 
-/** Une séance cardio vient-elle d'un import Google Fit ? */
-export function isImportedFromGoogleFit(session) {
-  try {
-    return JSON.parse(session?.notes || '{}').source === 'google_fit';
-  } catch {
-    return false;
+// ── Import des pas depuis Google Fit ─────────────────────────────────
+
+// Source « pas estimés » : celle qu'affiche l'application Google Fit.
+const ESTIMATED_STEPS = {
+  dataSourceId: 'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps'
+};
+// Fenêtres de 30 jours (30 compartiments journaliers par requête).
+const STEPS_WINDOW_DAYS = 30;
+
+/**
+ * Récupère le total de pas de chaque jour sur les `days` derniers jours
+ * (aujourd'hui compris) et l'enregistre localement.
+ * @returns {Promise<{ days: number, total: number, today: number|null }>}
+ */
+export async function importStepsFromGoogleFit({ days = 365 } = {}) {
+  await GoogleFitService.signIn();
+
+  const end = Date.now();
+  const firstDay = new Date();
+  firstDay.setHours(0, 0, 0, 0);
+  firstDay.setDate(firstDay.getDate() - (days - 1));
+
+  const byDay = {};
+  for (let from = new Date(firstDay); from.getTime() < end;) {
+    const to = new Date(from);
+    to.setDate(to.getDate() + STEPS_WINDOW_DAYS);
+    const toMs = Math.min(end, to.getTime());
+    let buckets;
+    try {
+      buckets = await GoogleFitService.aggregateDaily(ESTIMATED_STEPS, from.getTime(), toMs);
+    } catch (error) {
+      // Source « estimated_steps » absente : flux de pas fusionné par défaut.
+      if (error.status !== 403 && error.status !== 404 && error.status !== 400) throw error;
+      buckets = await GoogleFitService.aggregateDaily(
+        { dataTypeName: 'com.google.step_count.delta' }, from.getTime(), toMs
+      );
+    }
+    buckets.forEach((b) => {
+      if (b.value > 0) byDay[dateKey(new Date(b.startTimeMillis))] = b.value;
+    });
+    from = to;
   }
+
+  saveDailySteps(byDay);
+  const values = Object.values(byDay);
+  return {
+    days: values.length,
+    total: values.reduce((sum, v) => sum + v, 0),
+    today: byDay[dateKey(new Date())] ?? null,
+  };
 }

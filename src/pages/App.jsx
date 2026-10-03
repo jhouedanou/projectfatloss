@@ -40,7 +40,7 @@ import CardioTracker from '../components/CardioTracker';
 import SettingToggle from '../components/SettingToggle';
 import ImmersiveBanner from '../components/ImmersiveBanner';
 import useImmersiveMode from '../hooks/useImmersiveMode';
-import { estimateSessionMinutes } from '../services/WeightLossPlan';
+import { estimateSessionMinutes, computeWeekTargets } from '../services/WeightLossPlan';
 
 const NOTIFICATION_DURATION = 3000;
 
@@ -337,10 +337,7 @@ export default function App() {
                   {!stepMode ? (
                     !showExercises ? (
                       <>
-                        <HomeDashboard
-                          onStartWorkout={() => setShowExercises(true)}
-                          onGoalChange={reloadActivePlan}
-                        />
+                        <HomeDashboard onStartWorkout={() => setShowExercises(true)} />
 
                         {/* Casque VR détecté : proposer le mode immersif (réglage mémorisé) */}
                         {immersive.xrMode && !immersive.bannerDismissed && (
@@ -394,8 +391,11 @@ export default function App() {
                               {workoutPlan[current].isRestDay
                                 ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
                                 : (() => {
+                                    // Muscu guidée dans l'app ; vélo à cocher sur la check-list de l'accueil.
                                     const minutes = estimateSessionMinutes(workoutPlan[current]);
-                                    return `Jour ${current + 1} · ~${minutes.total} min dont ${minutes.bike} min de vélo`;
+                                    const weekStart = Math.floor(current / 7) * 7;
+                                    const goal = computeWeekTargets(workoutPlan.slice(weekStart, weekStart + 7));
+                                    return `Jour ${current + 1} · ~${minutes.total} min de muscu · vélo ${goal.warmup} + ${goal.main} min (check-list)`;
                                   })()}
                             </p>
                           </div>
@@ -433,7 +433,8 @@ export default function App() {
                           )}
 
                           {/* Sortie vélo d'ouverture : vidéo + vélo connecté.
-                              Proposée uniquement si le jour contient le bloc vélo final. */}
+                              Proposée uniquement si le jour contient du vélo (plan
+                              personnalisé) — le vélo du programme est dans la check-list. */}
                           {currentDayHasVelo && (
                             <SettingToggle
                               icon={<Bike size={20} color={rideStartEnabled ? '#0a84ff' : 'rgba(235,235,245,0.32)'} />}

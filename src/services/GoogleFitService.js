@@ -10,8 +10,8 @@ const CLIENT_ID = '310337608749-e771j9tp94c7i0mts2basfarc53i4ecl.apps.googleuser
 // Numéro de projet Google (préfixe du Client ID), utilisé pour l'ID des sources de données.
 const PROJECT_NUMBER = CLIENT_ID.split('-')[0];
 
-// Lecture : séances (activity.read) et distance des sorties vélo (location.read),
-// pour importer l'historique vélo de Google Fit.
+// Lecture : séances et pas (activity.read), distance des sorties vélo
+// (location.read), pour importer l'historique vélo et les pas de Google Fit.
 const SCOPES = [
   'https://www.googleapis.com/auth/fitness.activity.write',
   'https://www.googleapis.com/auth/fitness.body.write',
@@ -290,6 +290,32 @@ class GoogleFitService {
       }
     }
     return found ? total : null;
+  }
+
+  /**
+   * Totaux par jour (jour calendaire du fuseau local) d'une source ou d'un
+   * type de données, ex. les pas.
+   * @param {Object} aggregateBy - { dataSourceId } ou { dataTypeName }
+   * @returns {Promise<Array<{ startTimeMillis: number, value: number }>>}
+   */
+  async aggregateDaily(aggregateBy, startTimeMillis, endTimeMillis) {
+    const timeZoneId = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    const data = await this.apiFetch('dataset:aggregate', 'POST', {
+      aggregateBy: [aggregateBy],
+      bucketByTime: { period: { type: 'day', value: 1, timeZoneId } },
+      startTimeMillis,
+      endTimeMillis
+    });
+    return (data?.bucket || []).map((bucket) => {
+      let value = 0;
+      for (const dataset of bucket.dataset || []) {
+        for (const point of dataset.point || []) {
+          const v = point.value?.[0];
+          value += v?.intVal ?? v?.fpVal ?? 0;
+        }
+      }
+      return { startTimeMillis: Number(bucket.startTimeMillis), value };
+    });
   }
 
   async addActivity(activity) {

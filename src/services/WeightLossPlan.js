@@ -13,8 +13,8 @@
  *   - vélo d'appartement 90-100 W, effort modéré : 6.8
  *   - musculation légère à modérée, plusieurs exercices : 3.5
  *
- * Les minutes de vélo du programme (blocs « autoDuration ») sont recalculées
- * à partir de ces cibles : elles suivent l'objectif choisi et le poids actuel.
+ * Le vélo ne fait pas partie de la séance guidée : ses minutes figurent dans
+ * la check-list du jour de l'accueil (2 blocs de 20 min maximum).
  */
 
 import { getUserWeight, isBikeName } from './CalorieEstimator';
@@ -31,15 +31,18 @@ const GOAL_KEY = 'monthly_loss_goal_kg';
 export const BIKE_MET = 6.8;
 export const STRENGTH_MET = 3.5;
 
-// Vélo par séance : 20 min minimum (accent sur le vélo), 2 blocs de 20 min
-// maximum (jamais plus de 20 min d'affilée sur la selle).
+// Vélo par jour de séance : 20 min minimum (accent sur le vélo), 2 blocs de
+// 20 min maximum (jamais plus de 20 min d'affilée sur la selle).
 const MIN_BIKE_PER_SESSION = 20;
 const MAX_BIKE_BLOCK_MIN = 20;
 const MAX_BIKE_PER_SESSION = 2 * MAX_BIKE_BLOCK_MIN;
 
-// Noms figés des blocs de vélo générés par scripts/gen-plan.mjs.
-export const BIKE_WARMUP_NAME = 'Vélo — échauffement';
-export const BIKE_MAIN_NAME = 'Vélo (cardio fin de séance)';
+// Objectif de pas quotidien (check-list). Non compté dans le calcul : la
+// marche du quotidien est déjà dans le TDEE (facteur d'activité 1,4).
+export const DAILY_STEPS_TARGET = 8000;
+
+// MET du vélo pour estimer les calories d'un bloc coché (comme CalorieEstimator).
+const BIKE_LOG_MET = 7.0;
 
 // Modèle de repos de StepWorkout.jsx (15 s + 5 s par série faite, plafond
 // 40 s ; 45 s entre deux exercices) — même modèle que scripts/gen-plan.mjs.
@@ -80,6 +83,11 @@ export function setMonthlyGoalKg(kg) {
 /** kcal brûlées par minute en plus du repos. */
 export function netKcalPerMin(met, weightKg = getUserWeight()) {
   return ((met - 1) * 3.5 * weightKg) / 200;
+}
+
+/** Calories estimées d'un bloc de vélo (kcal totales, comme CardioTracker). */
+export function estimateBikeCalories(minutes, weightKg = getUserWeight()) {
+  return Math.round(((BIKE_LOG_MET * 3.5 * weightKg) / 200) * minutes);
 }
 
 /** Déficit quotidien apporté par l'assiette (objectif calorique vs TDEE). */
@@ -127,7 +135,7 @@ export function estimateSessionMinutes(day) {
 
 // ── Cibles de la semaine ─────────────────────────────────────────────
 
-/** Répartit les minutes de vélo d'une séance entre échauffement et bloc final. */
+/** Répartit les minutes de vélo d'un jour en deux blocs (avant / après la muscu). */
 function splitBike(perSession) {
   const main = Math.min(MAX_BIKE_BLOCK_MIN, ceil5(perSession / 2));
   const warmup = Math.min(MAX_BIKE_BLOCK_MIN, Math.max(5, perSession - main));
@@ -141,6 +149,7 @@ function splitBike(perSession) {
 export function computeWeekTargets(weekDays, { goalKg = getMonthlyGoalKg(), weightKg = getUserWeight() } = {}) {
   const sessionDays = (weekDays || []).filter((d) => d && !d.isRestDay);
   const sessions = sessionDays.length;
+  const restDays = (weekDays || []).filter((d) => d && d.isRestDay).length;
 
   const bikeRate = netKcalPerMin(BIKE_MET, weightKg);
   const strengthRate = netKcalPerMin(STRENGTH_MET, weightKg);
@@ -153,8 +162,8 @@ export function computeWeekTargets(weekDays, { goalKg = getMonthlyGoalKg(), weig
   );
   const bikeNeeded = Math.max(0, weeklyExerciseKcal - strengthMinutes * strengthRate) / bikeRate;
 
-  // Minutes par séance arrondies à 5 min ; au-delà de 2 × 20 min, le reste
-  // se fait en sortie libre (onglet Cardio, n'importe quel jour).
+  // Minutes par jour de séance arrondies à 5 min ; au-delà de 2 × 20 min, le
+  // reste se fait en vélo libre les jours de repos.
   const perSessionRaw = sessions ? bikeNeeded / sessions : 0;
   const perSession = sessions
     ? Math.min(MAX_BIKE_PER_SESSION, Math.max(MIN_BIKE_PER_SESSION, ceil5(perSessionRaw)))
@@ -170,6 +179,7 @@ export function computeWeekTargets(weekDays, { goalKg = getMonthlyGoalKg(), weig
     goalKg,
     weightKg,
     sessions,
+    restDays,
     dietDaily: Math.round(dietDaily),
     bikeMinutes,
     strengthMinutes,
@@ -178,42 +188,9 @@ export function computeWeekTargets(weekDays, { goalKg = getMonthlyGoalKg(), weig
     warmup,
     main,
     extraBike,
+    extraPerRestDay: restDays ? ceil5(extraBike / restDays) : extraBike,
     projectedKgPerMonth,
   };
-}
-
-/**
- * Applique les durées de vélo calculées aux blocs « autoDuration » du plan
- * (semaine par semaine : la muscu allégée de S4 demande un peu plus de vélo).
- * Ne modifie pas le plan reçu.
- */
-export function applyDurationTargets(plan, options) {
-  if (!Array.isArray(plan)) return plan;
-  const targetsByWeek = new Map();
-  return plan.map((day, index) => {
-    if (!day || day.isRestDay) return day;
-    const exercises = day.exercises || [];
-    if (!exercises.some((e) => e?.autoDuration && isBikeExercise(e))) return day;
-
-    const week = Math.floor(index / 7);
-    if (!targetsByWeek.has(week)) {
-      targetsByWeek.set(week, computeWeekTargets(plan.slice(week * 7, week * 7 + 7), options));
-    }
-    const { warmup, main } = targetsByWeek.get(week);
-
-    return {
-      ...day,
-      exercises: exercises.map((exercise) => {
-        if (!exercise?.autoDuration || !isBikeExercise(exercise)) return exercise;
-        const minutes = exercise.name === BIKE_WARMUP_NAME ? warmup : main;
-        return {
-          ...exercise,
-          duration: minutes * 60,
-          sets: `${minutes} min (allure modérée)`,
-        };
-      }),
-    };
-  });
 }
 
 // ── Minutes réalisées ────────────────────────────────────────────────
@@ -225,18 +202,9 @@ export function startOfWeek(d = new Date()) {
   return out;
 }
 
-/** Minutes de vélo faites pendant une séance (blocs de vélo du programme). */
-export function bikeMinutesOfWorkout(workout) {
-  const planned = (workout?.exercises || [])
-    .filter((e) => isBikeExercise(e))
-    .reduce((sum, e) => sum + (Number(e.durationMin) || 0), 0);
-  // Jamais plus que la durée réelle de la séance (bloc passé rapidement).
-  return Math.min(planned, Number(workout?.duration) || 0);
-}
-
 /**
- * Minutes réalisées depuis lundi : séances du programme + séances cardio
- * (vélo connecté, saisie manuelle, import Google Fit).
+ * Minutes réalisées depuis lundi : séances de musculation + séances cardio
+ * (check-list du jour, saisie manuelle, import Google Fit).
  */
 export function getWeekProgress(now = new Date()) {
   const weekStart = startOfWeek(now);
@@ -251,9 +219,7 @@ export function getWeekProgress(now = new Date()) {
   let sessions = 0;
 
   getWorkoutHistory().filter((w) => inWeek(w.date)).forEach((w) => {
-    const bike = bikeMinutesOfWorkout(w);
-    bikeMinutes += bike;
-    strengthMinutes += Math.max(0, (Number(w.duration) || 0) - bike);
+    strengthMinutes += Number(w.duration) || 0;
     sessions += 1;
   });
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Scale as ScaleIcon, Clock, Dumbbell, Leaf, Bike, Target } from 'lucide-react';
+import { Scale as ScaleIcon, Clock, Dumbbell, Leaf, Bike, Target, Footprints } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
 import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
@@ -10,10 +10,12 @@ import {
   getMonthlyGoalKg,
   setMonthlyGoalKg,
   computeWeekTargets,
-  estimateSessionMinutes,
   getWeekProgress,
   startOfWeek,
+  DAILY_STEPS_TARGET,
 } from '../services/WeightLossPlan';
+import { getStepsSummary } from '../services/StepsStorage';
+import DailyChecklist from './DailyChecklist';
 import './HomeDashboard.css';
 
 const fmtKg = (kg) => kg.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
@@ -50,16 +52,17 @@ function Ring({ percent, label, sub }) {
   );
 }
 
-export default function HomeDashboard({ onStartWorkout, onGoalChange }) {
+export default function HomeDashboard({ onStartWorkout }) {
   const { t, i18n } = useTranslation();
   const history = useMemo(() => getWorkoutHistory(), []);
   const weights = useMemo(() => getWeightHistory(), []);
   // Objectif mensuel de perte de poids : il fixe les minutes de vélo du plan.
   const [goalKg, setGoalKg] = useState(() => getMonthlyGoalKg());
   // Plan et jour courant ne bougent pas pendant l'affichage du tableau de
-  // bord : lus une fois (et à chaque changement d'objectif), pas à chaque
-  // tick du minuteur.
-  const plan = useMemo(() => getActiveWorkoutPlan(), [goalKg]);
+  // bord : lus une fois, pas à chaque tick du minuteur.
+  const plan = useMemo(() => getActiveWorkoutPlan(), []);
+  // Incrémenté à chaque case de la check-list : relit les minutes de la semaine.
+  const [checklistVersion, setChecklistVersion] = useState(0);
   const currentDayIndex = useMemo(
     () => parseInt(localStorage.getItem('currentWorkoutDay') || '0', 10) || 0,
     []
@@ -86,7 +89,8 @@ export default function HomeDashboard({ onStartWorkout, onGoalChange }) {
 
   // Objectif en minutes (vélo + musculation légère) et minutes faites depuis lundi.
   const goal = useMemo(() => computeWeekTargets(weekPlanDays, { goalKg }), [weekPlanDays, goalKg]);
-  const progress = useMemo(() => getWeekProgress(), []);
+  const progress = useMemo(() => getWeekProgress(), [checklistVersion]);
+  const stepsAverage = useMemo(() => getStepsSummary(7).average, [checklistVersion]);
   const minutesDone = progress.bikeMinutes + progress.strengthMinutes;
   const percent = Math.min(100, (minutesDone / Math.max(1, goal.totalMinutes)) * 100);
 
@@ -94,7 +98,6 @@ export default function HomeDashboard({ onStartWorkout, onGoalChange }) {
     if (kg === goalKg) return;
     setMonthlyGoalKg(kg);
     setGoalKg(kg);
-    onGoalChange && onGoalChange(kg);
   };
 
   // Bande semaine : 7 cellules (lundi → dimanche) avec statut par jour.
@@ -120,7 +123,6 @@ export default function HomeDashboard({ onStartWorkout, onGoalChange }) {
   const todayTitle = todayPlanDay
     ? todayPlanDay.title.replace(/^JOUR \d+:\s*/i, '').split(' — ')[0]
     : '';
-  const todayMinutes = estimateSessionMinutes(todayPlanDay);
 
   const currentWeight = weights.length ? weights[weights.length - 1].weight : null;
   const prevWeight = weights.length > 1 ? weights[weights.length - 2].weight : null;
@@ -183,31 +185,13 @@ export default function HomeDashboard({ onStartWorkout, onGoalChange }) {
         ))}
       </div>
 
-      {/* Carte séance du jour */}
-      {todayPlanDay && (
-        <div className="hd-today card">
-          <span className={`hd-today-tile${todayPlanDay.isRestDay ? ' rest' : ''}`}>
-            {todayPlanDay.isRestDay ? <Leaf size={20} /> : <Dumbbell size={20} />}
-          </span>
-          <span className="hd-today-copy">
-            <span className="hd-today-title">
-              {todayPlanDay.isRestDay ? t('restDay.title', { defaultValue: 'Jour de repos' }) : todayTitle}
-            </span>
-            <span className="hd-today-sub">
-              {todayPlanDay.isRestDay
-                ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
-                : `~${todayMinutes.bike} min de vélo + ~${todayMinutes.strength} min de muscu`}
-            </span>
-          </span>
-          {onStartWorkout && (
-            <button className="btn-soft" onClick={onStartWorkout}>
-              {todayPlanDay.isRestDay
-                ? t('home.view', { defaultValue: 'Voir' })
-                : t('home.start', { defaultValue: 'Démarrer' })}
-            </button>
-          )}
-        </div>
-      )}
+      {/* Check-list du jour : vélo (hors app, à cocher), muscu, pas */}
+      <DailyChecklist
+        planDay={todayPlanDay}
+        goal={goal}
+        onStartWorkout={onStartWorkout}
+        onChange={() => setChecklistVersion((v) => v + 1)}
+      />
 
       <div className="hd-top">
         <Ring
@@ -279,18 +263,25 @@ export default function HomeDashboard({ onStartWorkout, onGoalChange }) {
             <Bike size={16} />
             <span>
               <strong>{goal.bikeMinutes} min de vélo</strong> cette semaine
-              {goal.sessions > 0 && ` · ${goal.warmup} + ${goal.main} min par séance`}
+              {goal.sessions > 0 && ` · ${goal.warmup} + ${goal.main} min les jours de séance`}
             </span>
           </li>
           {goal.extraBike > 0 && (
             <li className="hd-goal-extra">
               <Bike size={16} />
-              <span>dont {goal.extraBike} min en sortie libre (onglet Cardio, le jour de votre choix)</span>
+              <span>dont {goal.extraBike} min de vélo libre les jours de repos</span>
             </li>
           )}
           <li>
             <Dumbbell size={16} />
             <span><strong>{goal.strengthMinutes} min de muscu légère</strong> ({goal.sessions} séances)</span>
+          </li>
+          <li>
+            <Footprints size={16} />
+            <span>
+              <strong>{DAILY_STEPS_TARGET.toLocaleString('fr-FR')} pas par jour</strong>
+              {stepsAverage != null && ` · moyenne 7 jours : ${stepsAverage.toLocaleString('fr-FR')}`}
+            </span>
           </li>
           <li>
             <Leaf size={16} />

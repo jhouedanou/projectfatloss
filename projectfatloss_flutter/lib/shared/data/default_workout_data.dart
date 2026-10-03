@@ -1,6 +1,6 @@
 import '../models/workout_model.dart';
 
-/// Programme perte de poids — 4 semaines de 5 séances vélo + musculation légère
+/// Programme perte de poids — 4 semaines de 5 séances de musculation légère
 /// et 2 jours de repos. Les exercices tournent d'une semaine à l'autre.
 /// Low-impact, 100% debout ou sur banc.
 /// Généré par scripts/gen-plan.mjs — ne pas éditer à la main.
@@ -36,22 +36,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 1: FULL BODY A (Poussée, Pectoraux, Épaules) — Lundi · S1 Adaptation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Développé couché barre",
           sets: "3 × 12 (tempo 3-1-1)",
@@ -136,22 +120,6 @@ class DefaultWorkoutData {
             muscleGroups: ["abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -160,22 +128,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 2: FULL BODY B (Tirage, Dos, Biceps) — Mardi · S1 Adaptation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Rowing haltères deux bras",
           sets: "3 × 12 (tempo 3-1-1)",
@@ -260,22 +212,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -284,22 +220,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 4: FULL BODY C (Jambes, Fessiers) — Jeudi · S1 Adaptation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Squat barre",
           sets: "3 × 12 (tempo 3-1-1)",
@@ -384,22 +304,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -408,22 +312,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 5: FULL BODY D (Haut du corps complet) — Vendredi · S1 Adaptation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Développé incliné haltères",
           sets: "3 × 12 (tempo 3-1-1)",
@@ -508,22 +396,6 @@ class DefaultWorkoutData {
             muscleGroups: ["abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -532,22 +404,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 6: FULL BODY E (Gainage, Fonctionnel) — Samedi · S1 Adaptation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Fentes arrière alternées haltères",
           sets: "3 × 12 (tempo 3-1-1) en alternance",
@@ -620,22 +476,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -644,22 +484,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 8: FULL BODY A (Poussée, Pectoraux, Épaules) — Lundi · S2 Accumulation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Développé couché haltères",
           sets: "3 × 12 (tempo 3-1-1)",
@@ -744,22 +568,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -768,22 +576,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 9: FULL BODY B (Tirage, Dos, Biceps) — Mardi · S2 Accumulation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Rowing barre buste penché",
           sets: "3 × 12 (tempo 3-1-1)",
@@ -868,22 +660,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -892,22 +668,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 11: FULL BODY C (Jambes, Fessiers) — Jeudi · S2 Accumulation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Fentes arrière alternées haltères",
           sets: "3 × 12 (tempo 3-1-1) en alternance",
@@ -992,22 +752,6 @@ class DefaultWorkoutData {
             muscleGroups: ["abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -1016,22 +760,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 12: FULL BODY D (Haut du corps complet) — Vendredi · S2 Accumulation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Développé incliné barre",
           sets: "3 × 12 (tempo 3-1-1)",
@@ -1116,22 +844,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -1140,22 +852,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 13: FULL BODY E (Gainage, Fonctionnel) — Samedi · S2 Accumulation",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Squat sumo haltère",
           sets: "3 × 12 (tempo 3-1-1)",
@@ -1228,22 +924,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -1252,22 +932,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 15: FULL BODY A (Poussée, Pectoraux, Épaules) — Lundi · S3 Intensification",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Développé incliné barre",
           sets: "3 × 10 (tempo lent, plus lourd)",
@@ -1352,22 +1016,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -1376,22 +1024,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 16: FULL BODY B (Tirage, Dos, Biceps) — Mardi · S3 Intensification",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Rowing haltère un bras",
           sets: "3 × 10 (tempo lent, plus lourd) /côté",
@@ -1476,22 +1108,6 @@ class DefaultWorkoutData {
             muscleGroups: ["abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -1500,22 +1116,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 18: FULL BODY C (Jambes, Fessiers) — Jeudi · S3 Intensification",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Squat barre",
           sets: "3 × 10 (tempo lent, plus lourd)",
@@ -1600,22 +1200,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -1624,22 +1208,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 19: FULL BODY D (Haut du corps complet) — Vendredi · S3 Intensification",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Développé couché haltères",
           sets: "3 × 10 (tempo lent, plus lourd)",
@@ -1724,22 +1292,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -1748,22 +1300,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 20: FULL BODY E (Gainage, Fonctionnel) — Samedi · S3 Intensification",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Fentes bulgares haltères",
           sets: "3 × 10 (tempo lent, plus lourd) /côté",
@@ -1836,22 +1372,6 @@ class DefaultWorkoutData {
             muscleGroups: ["abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -1860,22 +1380,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 22: FULL BODY A (Poussée, Pectoraux, Épaules) — Lundi · S4 Allègement",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Développé couché haltères",
           sets: "2 × 12 (allégé)",
@@ -1960,22 +1464,6 @@ class DefaultWorkoutData {
             muscleGroups: ["abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -1984,22 +1472,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 23: FULL BODY B (Tirage, Dos, Biceps) — Mardi · S4 Allègement",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Rowing haltères deux bras",
           sets: "2 × 12 (allégé)",
@@ -2084,22 +1556,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -2108,22 +1564,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 25: FULL BODY C (Jambes, Fessiers) — Jeudi · S4 Allègement",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Squat gobelet haltère",
           sets: "2 × 12 (allégé)",
@@ -2208,22 +1648,6 @@ class DefaultWorkoutData {
             muscleGroups: ["obliques", "abdominals"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -2232,22 +1656,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 26: FULL BODY D (Haut du corps complet) — Vendredi · S4 Allègement",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Écarté haltères sur banc",
           sets: "2 × 12 (allégé)",
@@ -2332,22 +1740,6 @@ class DefaultWorkoutData {
             muscleGroups: ["abdominals", "core"],
           ),
         ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
       ],
     );
   }
@@ -2356,22 +1748,6 @@ class DefaultWorkoutData {
     return WorkoutDay(
       title: "JOUR 27: FULL BODY E (Gainage, Fonctionnel) — Samedi · S4 Allègement",
       exercises: [
-        Exercise(
-          name: "Vélo — échauffement",
-          sets: "10 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Pédalage à allure modérée : résistance légère les 3 premières minutes, puis un cran au-dessus. Vous devez pouvoir parler. Prépare le corps à la musculation.",
-          caloriesPerSet: [100, 130],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 600,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
-          ),
-        ),
         Exercise(
           name: "Squat gobelet haltère",
           sets: "2 × 12 (allégé)",
@@ -2442,22 +1818,6 @@ class DefaultWorkoutData {
             type: "strength_training",
             name: "Dumbbell Woodchopper",
             muscleGroups: ["obliques", "abdominals", "core"],
-          ),
-        ),
-        Exercise(
-          name: "Vélo (cardio fin de séance)",
-          sets: "15 min (allure modérée)",
-          equip: "Vélo Domyos",
-          desc: "Bloc principal de la séance, juste après la musculation : allure modérée et régulière (programme CAL 1 du Domyos EB900 ou résistance moyenne). C'est lui qui brûle le plus de graisse ; sa durée suit votre objectif de perte de poids.",
-          caloriesPerSet: [150, 200],
-          totalSets: 1,
-          nbRep: 0,
-          timer: true,
-          duration: 900,
-          googleFitActivity: GoogleFitActivity(
-            type: "biking",
-            name: "Stationary Cycling",
-            muscleGroups: ["quadriceps", "glutes", "cardio"],
           ),
         ),
       ],
