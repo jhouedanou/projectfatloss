@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Footprints, Bike, Flame, Trash2, Plus, Clock, MapPin, Download } from 'lucide-react';
+import { Footprints, Bike, Flame, Trash2, Plus, Clock, MapPin, Download, HardDrive } from 'lucide-react';
 import { getStepsSummary } from '../services/StepsStorage';
 import {
   getCardioSessions,
@@ -19,6 +19,7 @@ import {
   importBikeSessionsFromGoogleFit,
   importStepsFromGoogleFit
 } from '../services/GoogleFitSync';
+import { importBikeSessionsFromDrive } from '../services/GoogleDriveImport';
 import './CardioTracker.css';
 
 // MET approximatifs : marche d'un bon pas et vélo stationnaire modéré-vigoureux.
@@ -32,7 +33,7 @@ const estimateCalories = (type, durationMin, weightKg) => {
 };
 
 // Origine d'une séance (champ notes en JSON) : badge affiché dans la liste.
-const SOURCE_LABELS = { google_fit: 'Google Fit', checklist: 'Check-list', holofit: 'Holofit', strava: 'Strava' };
+const SOURCE_LABELS = { google_fit: 'Google Fit', checklist: 'Check-list', holofit: 'Holofit', strava: 'Strava', drive: 'Drive' };
 const sourceLabel = (session) => {
   try {
     const notes = JSON.parse(session?.notes || '{}');
@@ -59,6 +60,8 @@ const CardioTracker = () => {
   const [touchedCalories, setTouchedCalories] = useState(false);
   // Import des sorties vélo Google Fit : null | 'loading' | { result } | { error }
   const [importState, setImportState] = useState(null);
+  // Import des séances vélo Health Sync depuis Google Drive : même principe
+  const [driveState, setDriveState] = useState(null);
   // Import des pas Google Fit : même principe
   const [stepsState, setStepsState] = useState(null);
   const [steps, setSteps] = useState(() => getStepsSummary(7));
@@ -90,6 +93,17 @@ const CardioTracker = () => {
     });
     setDuration(''); setDistance(''); setCalories(''); setTouchedCalories(false);
     refresh();
+  };
+
+  const handleImportDrive = async () => {
+    setDriveState('loading');
+    try {
+      const result = await importBikeSessionsFromDrive();
+      setDriveState({ result });
+      refresh();
+    } catch (error) {
+      setDriveState({ error: error.message || 'Import Google Drive impossible' });
+    }
   };
 
   const handleImport = async () => {
@@ -191,6 +205,31 @@ const CardioTracker = () => {
 
       {/* Import de l'historique vélo depuis Google Fit (12 derniers mois) */}
       <div className="cardio-import">
+        {/* Séances vélo exportées par Health Sync dans Google Drive */}
+        <button
+          type="button"
+          className="cardio-import-btn"
+          onClick={handleImportDrive}
+          disabled={driveState === 'loading'}
+        >
+          <HardDrive size={20} />
+          <span>
+            {driveState === 'loading'
+              ? 'Lecture du dossier Health Sync…'
+              : 'Récupérer mes séances vélo depuis Google Drive (Health Sync)'}
+          </span>
+          <Download size={16} />
+        </button>
+        {driveState?.result && (
+          <p className="cardio-import-msg">
+            {driveState.result.imported > 0
+              ? `${driveState.result.imported} séance${driveState.result.imported > 1 ? 's' : ''} vélo importée${driveState.result.imported > 1 ? 's' : ''} · ${fmtMinutes(driveState.result.minutes)} de vélo`
+              : 'Aucune nouvelle séance vélo dans le dossier Health Sync.'}
+            {driveState.result.skipped > 0 && ` (${driveState.result.skipped} déjà présente${driveState.result.skipped > 1 ? 's' : ''})`}
+          </p>
+        )}
+        {driveState?.error && <p className="cardio-import-msg error">{driveState.error}</p>}
+
         <button
           type="button"
           className="cardio-import-btn"

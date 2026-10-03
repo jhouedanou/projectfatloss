@@ -7,6 +7,8 @@
 //   - https://jhouedanou.github.io   (production GitHub Pages)
 //   - http://localhost:5173          (développement local)
 const CLIENT_ID = '310337608749-e771j9tp94c7i0mts2basfarc53i4ecl.apps.googleusercontent.com';
+// Même client OAuth pour l'import Google Drive (GoogleDriveImport.js).
+export const GOOGLE_CLIENT_ID = CLIENT_ID;
 // Numéro de projet Google (préfixe du Client ID), utilisé pour l'ID des sources de données.
 const PROJECT_NUMBER = CLIENT_ID.split('-')[0];
 
@@ -24,6 +26,11 @@ const SCOPES = [
 // 1 vélo, 14 handbike, 15 VTT, 16 vélo de route, 17 spinning,
 // 18 vélo d'appartement, 19 vélo utilitaire.
 export const BIKE_ACTIVITY_TYPES = [1, 14, 15, 16, 17, 18, 19];
+
+// Type 23 (« Cricket ») : les séances de vélo virtuel Holofit / Strava arrivent
+// sous ce type dans Google Fit (mêmes heure, durée, distance et calories que la
+// sortie Strava correspondante dans les exports Health Sync). Compté comme vélo.
+export const VIRTUAL_BIKE_ACTIVITY_TYPES = [23];
 
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
 
