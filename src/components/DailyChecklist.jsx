@@ -6,6 +6,7 @@ import { dateKey } from '../services/HabitStorage';
 import { estimateSessionMinutes } from '../services/WeightLossPlan';
 import { getChecklistDay, isBikeItemDone, toggleBikeItem } from '../services/DailyChecklist';
 import { importBikeSessionsFromDrive, isPublicSyncConfigured } from '../services/GoogleDriveImport';
+import { bikeSessionDayKey } from '../services/GoogleFitSync';
 import './DailyChecklist.css';
 
 /**
@@ -34,7 +35,7 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onChange
   const otherBikeMinutes = useMemo(() => {
     const ownIds = new Set(Object.values(day));
     return getCardioSessions()
-      .filter((s) => s.type === 'bike' && !ownIds.has(s.id) && dateKey(new Date(s.date)) === dateKey(today))
+      .filter((s) => s.type === 'bike' && !ownIds.has(s.id) && bikeSessionDayKey(s) === dateKey(today))
       .reduce((sum, s) => sum + (Number(s.duration) || 0), 0);
   }, [day, today, syncVersion]);
 
