@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Footprints, Bike, Flame, Trash2, Plus, Clock, MapPin, Download } from 'lucide-react';
+import { Footprints, Bike, Flame, Trash2, Plus, Clock, MapPin, Download, RefreshCw } from 'lucide-react';
 import { getStepsSummary } from '../services/StepsStorage';
-import { DAILY_STEPS_TARGET } from '../services/WeightLossPlan';
 import {
   getCardioSessions,
   addCardioSession,
@@ -20,6 +19,12 @@ import {
   importBikeSessionsFromGoogleFit,
   importStepsFromGoogleFit
 } from '../services/GoogleFitSync';
+import {
+  importBikeSessionsFromDrive,
+  getDriveSyncSettings,
+  setDriveSyncSettings,
+  isPublicSyncConfigured
+} from '../services/GoogleDriveImport';
 import './CardioTracker.css';
 
 // MET approximatifs : marche d'un bon pas et vélo stationnaire modéré-vigoureux.
@@ -33,10 +38,11 @@ const estimateCalories = (type, durationMin, weightKg) => {
 };
 
 // Origine d'une séance (champ notes en JSON) : badge affiché dans la liste.
-const SOURCE_LABELS = { google_fit: 'Google Fit', checklist: 'Check-list' };
+const SOURCE_LABELS = { google_fit: 'Google Fit', checklist: 'Check-list', holofit: 'Holofit', strava: 'Strava', drive: 'Drive' };
 const sourceLabel = (session) => {
   try {
-    return SOURCE_LABELS[JSON.parse(session?.notes || '{}').source] || null;
+    const notes = JSON.parse(session?.notes || '{}');
+    return SOURCE_LABELS[notes.origin] || SOURCE_LABELS[notes.source] || null;
   } catch {
     return null;
   }
@@ -59,6 +65,15 @@ const CardioTracker = () => {
   const [touchedCalories, setTouchedCalories] = useState(false);
   // Import des sorties vélo Google Fit : null | 'loading' | { result } | { error }
   const [importState, setImportState] = useState(null);
+  // Import des séances vélo Health Sync depuis Google Drive : même principe
+  const [driveState, setDriveState] = useState(null);
+  // Réglages de la synchro sans connexion : lien du dossier public + clé API
+  const [driveSettings, setDriveSettingsState] = useState(() => getDriveSyncSettings());
+  const [settingsDraft, setSettingsDraft] = useState(() => {
+    const { folderUrl, apiKey } = getDriveSyncSettings();
+    return { folderUrl, apiKey };
+  });
+  const [settingsSaved, setSettingsSaved] = useState(false);
   // Import des pas Google Fit : même principe
   const [stepsState, setStepsState] = useState(null);
   const [steps, setSteps] = useState(() => getStepsSummary(7));
@@ -90,6 +105,27 @@ const CardioTracker = () => {
     });
     setDuration(''); setDistance(''); setCalories(''); setTouchedCalories(false);
     refresh();
+  };
+
+  const handleImportDrive = async () => {
+    setDriveState('loading');
+    try {
+      const result = await importBikeSessionsFromDrive();
+      setDriveState({ result });
+      setDriveSettingsState(getDriveSyncSettings());
+      refresh();
+    } catch (error) {
+      setDriveState({ error: error.message || 'Import Google Drive impossible' });
+    }
+  };
+
+  const handleSaveDriveSettings = (e) => {
+    e.preventDefault();
+    setDriveSettingsState(setDriveSyncSettings({
+      folderUrl: settingsDraft.folderUrl.trim(),
+      apiKey: settingsDraft.apiKey.trim(),
+    }));
+    setSettingsSaved(true);
   };
 
   const handleImport = async () => {
@@ -191,6 +227,68 @@ const CardioTracker = () => {
 
       {/* Import de l'historique vélo depuis Google Fit (12 derniers mois) */}
       <div className="cardio-import">
+        {/* Séances vélo exportées par Health Sync dans Google Drive */}
+        <button
+          type="button"
+          className="cardio-import-btn"
+          onClick={handleImportDrive}
+          disabled={driveState === 'loading'}
+        >
+          <RefreshCw size={20} className={driveState === 'loading' ? 'cardio-spin' : ''} />
+          <span>
+            {driveState === 'loading'
+              ? 'Synchronisation…'
+              : 'Synchroniser avec Google Drive (Health Sync)'}
+          </span>
+        </button>
+        {driveState?.result && (
+          <p className="cardio-import-msg">
+            {driveState.result.imported > 0
+              ? `${driveState.result.imported} séance${driveState.result.imported > 1 ? 's' : ''} vélo importée${driveState.result.imported > 1 ? 's' : ''} · ${fmtMinutes(driveState.result.minutes)} de vélo`
+              : 'Aucune nouvelle séance vélo dans le dossier Health Sync.'}
+            {driveState.result.skipped > 0 && ` (${driveState.result.skipped} déjà présente${driveState.result.skipped > 1 ? 's' : ''})`}
+          </p>
+        )}
+        {driveState?.error && <p className="cardio-import-msg error">{driveState.error}</p>}
+        <p className="cardio-import-msg">
+          {isPublicSyncConfigured() ? 'Dossier public : sans connexion Google' : 'Sans dossier public réglé : connexion Google demandée'}
+          {driveSettings.lastSyncAt && ` · dernière synchro ${new Date(driveSettings.lastSyncAt).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}`}
+        </p>
+
+        {/* Réglages : lien du dossier public et clé API (mémorisés sur l'appareil) */}
+        {/* Ouverts tant que rien n'est réglé, ou après une erreur (lien ou clé à corriger) */}
+        <details className="cardio-sync-settings" open={!isPublicSyncConfigured() || !!driveState?.error}>
+          <summary>Réglages de la synchro (dossier public)</summary>
+          <form onSubmit={handleSaveDriveSettings}>
+            <label>
+              Lien du dossier « Health Sync Activités »
+              <input
+                type="url"
+                value={settingsDraft.folderUrl}
+                onChange={(e) => { setSettingsDraft({ ...settingsDraft, folderUrl: e.target.value }); setSettingsSaved(false); }}
+                placeholder="https://drive.google.com/drive/folders/…"
+              />
+            </label>
+            <label>
+              Clé API Google (API Google Drive)
+              <input
+                type="password"
+                autoComplete="off"
+                value={settingsDraft.apiKey}
+                onChange={(e) => { setSettingsDraft({ ...settingsDraft, apiKey: e.target.value }); setSettingsSaved(false); }}
+                placeholder="AIza…"
+              />
+            </label>
+            <button type="submit" className="cardio-sync-save">
+              {settingsSaved ? 'Enregistré ✓' : 'Enregistrer'}
+            </button>
+            <p className="cardio-sync-hint">
+              Le dossier doit être partagé avec « Tous les utilisateurs disposant du lien ».
+              Plusieurs liens possibles, séparés par un espace.
+            </p>
+          </form>
+        </details>
+
         <button
           type="button"
           className="cardio-import-btn"
@@ -201,7 +299,7 @@ const CardioTracker = () => {
           <span>
             {importState === 'loading'
               ? 'Récupération des sorties vélo…'
-              : 'Récupérer mes sorties vélo depuis Google Fit'}
+              : 'Récupérer mes sorties vélo (Strava, Holofit…) depuis Google Fit'}
           </span>
           <Download size={16} />
         </button>
@@ -249,19 +347,19 @@ const CardioTracker = () => {
           </span>
         </div>
         <div className="cardio-steps-bars" aria-label="Pas des 7 derniers jours">
-          {steps.days.map((d) => (
+          {steps.days.map((d, _i, days) => (
             <div key={d.key} className="cardio-steps-day" title={`${fmtSteps(d.steps)} pas`}>
               <div className="cardio-steps-track">
+                {/* Hauteur relative au meilleur jour de la semaine (pas d'objectif de pas) */}
                 <div
-                  className={`cardio-steps-fill${d.steps >= DAILY_STEPS_TARGET ? ' done' : ''}`}
-                  style={{ height: `${Math.min(100, ((d.steps || 0) / DAILY_STEPS_TARGET) * 100)}%` }}
+                  className="cardio-steps-fill"
+                  style={{ height: `${((d.steps || 0) / Math.max(1, ...days.map((x) => x.steps || 0))) * 100}%` }}
                 />
               </div>
               <span>{d.date.toLocaleDateString('fr-FR', { weekday: 'narrow' })}</span>
             </div>
           ))}
         </div>
-        <p className="cardio-steps-goal">Objectif : {fmtSteps(DAILY_STEPS_TARGET)} pas par jour</p>
       </div>
 
       <GoogleFitSyncButton

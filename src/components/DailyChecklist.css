@@ -90,7 +90,6 @@
 
 .dcl-icon.bike { color: var(--info); }
 .dcl-icon.strength { color: var(--acc); }
-.dcl-icon.steps { color: var(--ok); }
 
 .dcl-copy {
   flex: 1;
@@ -128,6 +127,7 @@
   font-weight: 600;
 }
 
+/* Synchro Health Sync depuis la ligne vélo */
 .dcl-refresh {
   flex-shrink: 0;
   width: 36px;

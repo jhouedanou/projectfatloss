@@ -315,16 +315,74 @@
 
 .cardio-steps-fill {
   width: 100%;
-  background: rgba(48, 209, 88, 0.55);
+  background: #30d158;
   border-radius: 6px 6px 0 0;
 }
 
-.cardio-steps-fill.done {
-  background: #30d158;
+/* Synchro Google Drive : icône qui tourne pendant la synchro */
+.cardio-spin {
+  animation: cardio-spin 0.9s linear infinite;
 }
 
-.cardio-steps-goal {
-  margin: 10px 0 0;
-  font-size: 0.75rem;
+@keyframes cardio-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Réglages de la synchro (dossier public + clé API) */
+.cardio-sync-settings {
+  margin: 10px 0 4px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.cardio-sync-settings summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+}
+
+.cardio-sync-settings form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cardio-sync-settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--text-secondary, rgba(235, 235, 245, 0.6));
+}
+
+.cardio-sync-settings input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-primary, #fff);
+  font-size: 0.85rem;
+}
+
+.cardio-sync-save {
+  align-self: flex-start;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: none;
+  background: var(--acc);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cardio-sync-hint {
+  margin: 0;
+  font-size: 0.72rem;
   color: var(--text-tertiary, #9a9aa2);
 }

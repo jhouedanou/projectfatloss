@@ -1,18 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { Check, Bike, Dumbbell, Footprints, RefreshCw, Leaf } from 'lucide-react';
+import { Check, Bike, Dumbbell, Leaf, RefreshCw } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
-import { getStepsForDate } from '../services/StepsStorage';
+import { getCardioSessions } from '../services/CardioStorage';
 import { dateKey } from '../services/HabitStorage';
-import { estimateSessionMinutes, DAILY_STEPS_TARGET } from '../services/WeightLossPlan';
-import { getChecklistDay, isBikeItemDone, toggleBikeItem, toggleManualItem } from '../services/DailyChecklist';
-import { importStepsFromGoogleFit } from '../services/GoogleFitSync';
+import { estimateSessionMinutes } from '../services/WeightLossPlan';
+import { getChecklistDay, isBikeItemDone, toggleBikeItem } from '../services/DailyChecklist';
+import { importBikeSessionsFromDrive, isPublicSyncConfigured } from '../services/GoogleDriveImport';
 import './DailyChecklist.css';
 
-const fmtSteps = (n) => (n == null ? '—' : n.toLocaleString('fr-FR'));
-
 /**
- * Check-list du jour : blocs de vélo (faits hors de l'app, cochés ici),
- * séance de musculation guidée et objectif de pas.
+ * Check-list du jour : une séance de vélo (faite hors de l'app, cochée ici)
+ * et la séance de musculation guidée.
  * @param {Object} planDay - jour du programme
  * @param {Object} goal - cibles de la semaine (computeWeekTargets)
  * @param {Function} onStartWorkout - ouvre la séance de musculation
@@ -21,14 +19,24 @@ const fmtSteps = (n) => (n == null ? '—' : n.toLocaleString('fr-FR'));
 export default function DailyChecklist({ planDay, goal, onStartWorkout, onChange }) {
   const today = useMemo(() => new Date(), []);
   const [day, setDay] = useState(() => getChecklistDay(today));
-  const [steps, setSteps] = useState(() => getStepsForDate(today));
-  const [stepsLoading, setStepsLoading] = useState(false);
-  const [stepsError, setStepsError] = useState(null);
+  // Synchro Health Sync (dossier Drive public) depuis la ligne vélo
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState(null);
+  const [syncVersion, setSyncVersion] = useState(0);
 
   const workoutDone = useMemo(
     () => getWorkoutHistory().some((w) => dateKey(new Date(w.date)) === dateKey(today)),
     [today]
   );
+
+  // Minutes de vélo du jour venues d'ailleurs (import Google Fit : Strava,
+  // Holofit…, ou saisie manuelle) : elles suffisent à cocher la séance.
+  const otherBikeMinutes = useMemo(() => {
+    const ownIds = new Set(Object.values(day));
+    return getCardioSessions()
+      .filter((s) => s.type === 'bike' && !ownIds.has(s.id) && dateKey(new Date(s.date)) === dateKey(today))
+      .reduce((sum, s) => sum + (Number(s.duration) || 0), 0);
+  }, [day, today, syncVersion]);
 
   if (!planDay) return null;
 
@@ -39,16 +47,14 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onChange
       items.push({ id: 'bikeExtra', kind: 'bike', minutes: goal.extraPerRestDay, label: `Vélo ${goal.extraPerRestDay} min`, hint: 'vélo libre pour tenir l\'objectif' });
     }
   } else {
-    items.push({ id: 'bike1', kind: 'bike', minutes: goal.warmup, label: `Vélo ${goal.warmup} min`, hint: 'avant la muscu' });
+    items.push({ id: 'bike', kind: 'bike', minutes: goal.bikePerSession, label: `Vélo ${goal.bikePerSession} min`, hint: 'une seule séance, au moment qui vous arrange' });
     items.push({ id: 'strength', kind: 'strength', label: 'Muscu légère', hint: `${title} · ~${estimateSessionMinutes(planDay).strength} min` });
-    items.push({ id: 'bike2', kind: 'bike', minutes: goal.main, label: `Vélo ${goal.main} min`, hint: 'après la muscu' });
   }
-  items.push({ id: 'steps', kind: 'steps', label: `${fmtSteps(DAILY_STEPS_TARGET)} pas`, hint: `${fmtSteps(steps)} aujourd'hui` });
 
+  const bikeDoneElsewhere = (item) => otherBikeMinutes >= item.minutes;
   const isDone = (item) => {
-    if (item.kind === 'bike') return isBikeItemDone(day, item.id);
-    if (item.kind === 'strength') return workoutDone;
-    return (steps != null && steps >= DAILY_STEPS_TARGET) || !!day.steps;
+    if (item.kind === 'bike') return isBikeItemDone(day, item.id) || bikeDoneElsewhere(item);
+    return workoutDone;
   };
   const doneCount = items.filter(isDone).length;
 
@@ -57,83 +63,88 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onChange
       if (!workoutDone && onStartWorkout) onStartWorkout();
       return;
     }
-    if (item.kind === 'steps' && steps != null && steps >= DAILY_STEPS_TARGET) return;
-    const next = item.kind === 'bike'
-      ? toggleBikeItem(today, item.id, item.minutes)
-      : toggleManualItem(today, item.id);
-    setDay(next);
+    // Séance déjà enregistrée par ailleurs (import) : rien à cocher.
+    if (bikeDoneElsewhere(item) && !isBikeItemDone(day, item.id)) return;
+    setDay(toggleBikeItem(today, item.id, item.minutes));
     onChange && onChange();
   };
 
-  const refreshSteps = async () => {
-    setStepsLoading(true);
-    setStepsError(null);
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncError(null);
     try {
-      const result = await importStepsFromGoogleFit({ days: 7 });
-      setSteps(result.today ?? getStepsForDate(today));
+      await importBikeSessionsFromDrive();
+      setDay(getChecklistDay(today));
+      setSyncVersion((v) => v + 1);
       onChange && onChange();
     } catch (error) {
-      setStepsError(error.message || 'Google Fit indisponible');
+      setSyncError(error.message || 'Synchronisation impossible');
     } finally {
-      setStepsLoading(false);
+      setSyncing(false);
     }
   };
 
-  const icons = { bike: Bike, strength: Dumbbell, steps: Footprints };
+  const canSync = isPublicSyncConfigured();
+  const icons = { bike: Bike, strength: Dumbbell };
+  const hintOf = (item) => (item.kind === 'bike' && bikeDoneElsewhere(item) && !isBikeItemDone(day, item.id)
+    ? `${otherBikeMinutes} min importées aujourd'hui`
+    : item.hint);
 
   return (
     <div className="dcl card">
       <div className="dcl-head">
         <span className="dcl-title">Check-list du jour</span>
-        <span className="dcl-count">{doneCount}/{items.length}</span>
+        {items.length > 0 && <span className="dcl-count">{doneCount}/{items.length}</span>}
       </div>
       <p className="dcl-sub">
         {planDay.isRestDay ? (
-          <><Leaf size={13} /> Jour de repos</>
+          <><Leaf size={13} /> Jour de repos{items.length === 0 ? ' : rien à faire aujourd\'hui.' : ''}</>
         ) : (
-          'Le vélo se fait hors de l\'app : cochez les blocs faits.'
+          'Le vélo se fait hors de l\'app : cochez la séance une fois faite.'
         )}
       </p>
 
-      <ul className="dcl-list">
-        {items.map((item) => {
-          const done = isDone(item);
-          const Icon = icons[item.kind];
-          return (
-            <li key={item.id} className={`dcl-item${done ? ' done' : ''}`}>
-              <button
-                type="button"
-                className="dcl-check"
-                role="checkbox"
-                aria-checked={done}
-                aria-label={`${item.label} — ${item.hint}`}
-                onClick={() => handleItem(item)}
-              >
-                <span className="dcl-box">{done && <Check size={14} strokeWidth={3} />}</span>
-                <Icon size={18} className={`dcl-icon ${item.kind}`} />
-                <span className="dcl-copy">
-                  <span className="dcl-label">{item.label}</span>
-                  <span className="dcl-hint">{item.hint}</span>
-                </span>
-                {item.kind === 'strength' && !done && <span className="dcl-start">Démarrer</span>}
-              </button>
-              {item.kind === 'steps' && (
+      {items.length > 0 && (
+        <ul className="dcl-list">
+          {items.map((item) => {
+            const done = isDone(item);
+            const Icon = icons[item.kind];
+            return (
+              <li key={item.id} className={`dcl-item${done ? ' done' : ''}`}>
                 <button
                   type="button"
-                  className="dcl-refresh"
-                  onClick={refreshSteps}
-                  disabled={stepsLoading}
-                  aria-label="Actualiser les pas depuis Google Fit"
-                  title="Actualiser les pas depuis Google Fit"
+                  className="dcl-check"
+                  role="checkbox"
+                  aria-checked={done}
+                  aria-label={`${item.label} — ${hintOf(item)}`}
+                  onClick={() => handleItem(item)}
                 >
-                  <RefreshCw size={16} className={stepsLoading ? 'spin' : ''} />
+                  <span className="dcl-box">{done && <Check size={14} strokeWidth={3} />}</span>
+                  <Icon size={18} className={`dcl-icon ${item.kind}`} />
+                  <span className="dcl-copy">
+                    <span className="dcl-label">{item.label}</span>
+                    <span className="dcl-hint">{hintOf(item)}</span>
+                  </span>
+                  {item.kind === 'strength' && !done && <span className="dcl-start">Démarrer</span>}
                 </button>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      {stepsError && <p className="dcl-error">{stepsError}</p>}
+                {item.kind === 'bike' && canSync && (
+                  <button
+                    type="button"
+                    className="dcl-refresh"
+                    onClick={handleSync}
+                    disabled={syncing}
+                    aria-label="Synchroniser les séances vélo depuis Google Drive"
+                    title="Synchroniser les séances vélo depuis Google Drive"
+                  >
+                    <RefreshCw size={16} className={syncing ? 'spin' : ''} />
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {syncError && <p className="dcl-error">{syncError}</p>}
     </div>
   );
 }
