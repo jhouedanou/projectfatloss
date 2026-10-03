@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { getExerciseIconsPath, getAssetPath } from '../utils/paths';
 import GoogleFitService from '../services/GoogleFitService';
 import PreWorkout from '../components/PreWorkout';
-import { getCaloriesForSet, getExerciseLoad, setExerciseLoad, parseEquipmentLoad, STANDARD_LOADS_KG } from '../services/CalorieEstimator';
+import { getCaloriesForSet, getExerciseLoad, setExerciseLoad, parseEquipmentLoad, STANDARD_LOADS_KG, isBikeName } from '../services/CalorieEstimator';
 import WebcamRepCounter from '../components/WebcamRepCounter';
 import { isCameraCountable } from '../services/RepPatternRules';
 import { getCameraAmplitude, setCameraAmplitude, AMPLITUDE_LABELS } from '../services/CameraRepService';
@@ -30,6 +30,23 @@ import { resolveXrAction, EMPTY_STATE } from '../services/xr/XrWorkoutModel';
 
 import '../components/SpeechSettings.css';
 import './StepWorkout.css';
+
+/**
+ * Exercice tel qu'enregistré dans l'historique. Les blocs de vélo gardent leur
+ * durée prévue (minutes) pour séparer, dans les objectifs de la semaine, les
+ * minutes de vélo des minutes de musculation de la séance.
+ */
+function toSavedExercise(exercise) {
+  const saved = {
+    name: exercise.name,
+    sets: parseSets(exercise.sets),
+    weightLifted: calculateWeight(exercise.equip)
+  };
+  if (isBikeName(exercise.name) && exercise.duration) {
+    saved.durationMin = Math.round(exercise.duration / 60);
+  }
+  return saved;
+}
 
 // Fonction utilitaire simple pour formater le temps
 const formatTime = (seconds) => {
@@ -320,8 +337,9 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
         activityType: 97, // Strength Training in Google Fit
         name: `Project Fat Loss - ${day?.title}`,
         description: `Séance de musculation de haute intensité. Poids total soulevé : ${totalWeightLifted} kg.`,
-        startTime: new Date().getTime() - 45 * 60 * 1000,
-        duration: 45 * 60 * 1000,
+        // Durée réelle de la séance (45 min si elle n'a pas pu être mesurée).
+        startTime: new Date().getTime() - (duration || 45) * 60 * 1000,
+        duration: (duration || 45) * 60 * 1000,
         calories: totalCalories,
       };
       await GoogleFitService.addActivity(sessionActivity);
@@ -342,11 +360,7 @@ function EndOfDayModal({ day, totalCalories, duration, onClose, onSaveWorkout })
       calories: totalCalories,
       weightLifted: totalWeightLifted,
       exerciseCount: day.exercises.length,
-      exercises: day.exercises.map(exercise => ({
-        name: exercise.name,
-        sets: parseSets(exercise.sets),
-        weightLifted: calculateWeight(exercise.equip)
-      })),
+      exercises: day.exercises.map(toSavedExercise),
       // Durée réelle mesurée (minutes) si disponible, sinon estimation (3 min/exercice)
       duration: duration != null ? duration : day.exercises.length * 3
     };
@@ -957,11 +971,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
               return total + (weight * sets * reps);
             }, 0),
             exerciseCount: step + 1,
-            exercises: day.exercises.slice(0, step + 1).map(exercise => ({
-              name: exercise.name,
-              sets: parseSets(exercise.sets),
-              weightLifted: calculateWeight(exercise.equip)
-            })),
+            exercises: day.exercises.slice(0, step + 1).map(toSavedExercise),
             fatBurnerMode: autoMode,
             duration: getElapsedMinutes()
           };
@@ -1450,6 +1460,9 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
   
   const [chrono, setChrono] = useState(0);
   const [chronoRunning, setChronoRunning] = useState(false);
+  // Durée cible du chrono : celle de l'exercice (bloc vélo de 15 min, port de
+  // charge de 60 s…), sinon plafond de sécurité de 5 min.
+  const chronoTarget = exo.duration || 300;
   const [side, setSide] = useState(0); // 0: premier côté, 1: deuxième côté
   // Décompte avant le passage automatique au second côté (null = inactif)
   const [sideSwitchCountdown, setSideSwitchCountdown] = useState(null);
@@ -1607,8 +1620,8 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         setChrono(prev => {
           const newTime = prev + 1;
           
-          // Arrêt automatique après 5 minutes (300 secondes) pour la sécurité
-          const maxDuration = 300; // 5 minutes maximum
+          // Arrêt automatique à la durée cible
+          const maxDuration = chronoTarget;
           if (newTime >= maxDuration) {
             setChronoRunning(false);
             // Jouer un son pour indiquer l'arrêt automatique
@@ -1631,7 +1644,7 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         chronoInterval.current = null;
       }
     };
-  }, [chronoRunning, isChrono, isDoubleSided]);
+  }, [chronoRunning, isChrono, isDoubleSided, chronoTarget]);
 
   // Remise à zéro du chrono et du côté à chaque nouvel exercice
   // Démarrage automatique du timer si l'exercice en a besoin
@@ -2234,19 +2247,22 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
         (isChrono || hasTimer) && !isDoubleSided ? (
           <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 1 }}>
-              Chronomètre
+              {exo.duration
+                ? `Chronomètre — objectif ${Math.floor(exo.duration / 60)}:${(exo.duration % 60).toString().padStart(2, '0')}`
+                : 'Chronomètre'}
             </Typography>
             <Typography variant="h3" sx={{ 
               mb: 2, 
               fontFamily: 'monospace', 
               letterSpacing: 2,
-              color: chrono >= 300 ? '#ff453a' : 'inherit' // Rouge quand durée maximale atteinte
+              // Vert quand l'objectif est atteint, rouge quand le plafond de 5 min l'est
+              color: chrono >= chronoTarget ? (exo.duration ? 'success.main' : '#ff453a') : 'inherit'
             }}>
               {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
             </Typography>
-            {chrono >= 300 && (
-              <Typography variant="body2" sx={{ mb: 1, color: '#ff453a', fontWeight: 'bold' }}>
-                ⚠️ Durée maximale atteinte (5 min)
+            {chrono >= chronoTarget && (
+              <Typography variant="body2" sx={{ mb: 1, color: exo.duration ? '#30d158' : '#ff453a', fontWeight: 'bold' }}>
+                {exo.duration ? '✓ Objectif atteint : appuyez sur Terminer' : '⚠️ Durée maximale atteinte (5 min)'}
               </Typography>
             )}
             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -2281,13 +2297,13 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               mb: 2, 
               fontFamily: 'monospace', 
               letterSpacing: 2, 
-              color: chrono >= 300 ? '#ff453a' : (side === 0 ? 'primary.main' : 'success.main')
+              color: chrono >= chronoTarget ? '#ff453a' : (side === 0 ? 'primary.main' : 'success.main')
             }}>
               {Math.floor(chrono / 60).toString().padStart(2, '0')}:{(chrono % 60).toString().padStart(2, '0')}
             </Typography>
-            {chrono >= 300 && (
+            {chrono >= chronoTarget && (
               <Typography variant="body2" sx={{ mb: 1, color: '#ff453a', fontWeight: 'bold' }}>
-                ⚠️ Durée maximale atteinte (5 min)
+                {exo.duration ? '✓ Durée atteinte' : '⚠️ Durée maximale atteinte (5 min)'}
               </Typography>
             )}
             <Typography variant="body1" sx={{ mb: 2, fontWeight: 'bold' }}>

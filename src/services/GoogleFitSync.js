@@ -3,16 +3,18 @@
 // L'état "déjà synchronisé" est conservé dans une clé localStorage dédiée afin de
 // NE PAS modifier les enregistrements métier (et donc ne pas déclencher les push
 // Supabase associés). On évite ainsi les doublons côté Google Fit.
-import GoogleFitService from './GoogleFitService';
+import GoogleFitService, { BIKE_ACTIVITY_TYPES } from './GoogleFitService';
 import { getWorkoutHistory } from './WorkoutStorage';
 import { getWeightHistory } from './WeightStorage';
-import { getCardioSessions } from './CardioStorage';
+import { getCardioSessions, importCardioSessions } from './CardioStorage';
+import { getUserWeight } from './CalorieEstimator';
 import { getNutritionSummary } from '../data/foodDatabase';
 
 const SYNCED_KEY = 'pfl_googlefit_synced';
+const IMPORTED_KEY = 'pfl_googlefit_imported';
 const NUTRITION_LOGS_KEY = 'pfl_nutrition_logs';
 
-// Durée par défaut d'une séance enregistrée depuis l'historique (45 min).
+// Durée par défaut d'une séance dont la durée n'a pas été mesurée (45 min).
 const DEFAULT_WORKOUT_DURATION_MS = 45 * 60 * 1000;
 
 // Accès localStorage protégé pour les contextes non-navigateur (SSR, tests).
@@ -53,12 +55,14 @@ export function isSyncedWithGoogleFit(category, id) {
 
 export async function syncWorkoutToGoogleFit(workout) {
   const endTime = new Date(workout.date).getTime();
+  // Durée réelle mesurée (minutes), sinon 45 min par défaut.
+  const durationMs = workout.duration > 0 ? workout.duration * 60 * 1000 : DEFAULT_WORKOUT_DURATION_MS;
   await GoogleFitService.addActivity({
     activityType: 80, // Strength training → affiché « Musculation » dans Google Fit
     name: `Project Fat Loss - ${workout.title || 'Entraînement'}`,
     description: `Séance de musculation. Poids total soulevé : ${workout.weightLifted || 0} kg.`,
-    startTime: endTime - DEFAULT_WORKOUT_DURATION_MS,
-    duration: DEFAULT_WORKOUT_DURATION_MS,
+    startTime: endTime - durationMs,
+    duration: durationMs,
     calories: workout.calories || 0
   });
   markSynced('workout', workout.id);
@@ -165,4 +169,120 @@ export async function syncAllNutritionDays() {
     syncNutritionDayToGoogleFit,
     d => d
   );
+}
+
+// ── Import des sorties vélo depuis Google Fit ────────────────────────
+
+// MET du vélo (CalorieEstimator / useBikeMetrics) pour estimer les calories
+// quand Google Fit n'en fournit pas.
+const BIKE_MET = 7.0;
+// Fenêtres de lecture de 90 jours : requêtes légères, même sur un an.
+const IMPORT_WINDOW_MS = 90 * 24 * 60 * 60 * 1000;
+
+function getImportedMap() {
+  return readJSON(IMPORTED_KEY, {});
+}
+
+/**
+ * Récupère les sorties vélo enregistrées dans Google Fit (vélo d'appartement,
+ * route, VTT, spinning…) sur les `days` derniers jours et les ajoute aux
+ * séances cardio. Sans doublon :
+ *   - une séance déjà importée est ignorée (id Google Fit mémorisé) ;
+ *   - les séances écrites par Project Fat Loss elle-même sont ignorées ;
+ *   - une sortie déjà présente localement (fin à ±5 min) est ignorée.
+ * Les séances importées sont marquées « synchronisées » pour ne pas être
+ * renvoyées vers Google Fit.
+ * @returns {Promise<{found:number, imported:number, skipped:number, minutes:number}>}
+ */
+export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
+  await GoogleFitService.signIn();
+
+  const end = Date.now();
+  const start = end - days * 24 * 60 * 60 * 1000;
+  const sessions = [];
+  for (let from = start; from < end; from += IMPORT_WINDOW_MS) {
+    const to = Math.min(end, from + IMPORT_WINDOW_MS);
+    sessions.push(...await GoogleFitService.listSessions(from, to, BIKE_ACTIVITY_TYPES));
+  }
+
+  const imported = getImportedMap();
+  const localBikeEnds = getCardioSessions()
+    .filter((s) => s.type === 'bike')
+    .map((s) => new Date(s.date).getTime());
+  const seen = new Set();
+  const toImport = [];
+
+  for (const session of sessions) {
+    const id = session.id;
+    if (!id || seen.has(id) || !BIKE_ACTIVITY_TYPES.includes(Number(session.activityType))) continue;
+    seen.add(id);
+    if (imported[id]) continue;
+    if (id.startsWith('projectfatloss-') || session.application?.name === 'Project Fat Loss') continue;
+
+    const startMs = Number(session.startTimeMillis);
+    const endMs = Number(session.endTimeMillis);
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) continue;
+    if (localBikeEnds.some((t) => Math.abs(t - endMs) <= 5 * 60 * 1000)) continue;
+
+    const activeMs = Number(session.activeTimeMillis) || endMs - startMs;
+    const minutes = Math.max(1, Math.round(activeMs / 60000));
+    toImport.push({ id, name: session.name, activityType: Number(session.activityType), startMs, endMs, minutes });
+  }
+
+  // Calories et distance de chaque sortie. Une donnée manquante n'empêche pas
+  // l'import : calories estimées, distance laissée vide.
+  const records = [];
+  for (const s of toImport) {
+    let calories = null;
+    let distance = null;
+    try {
+      calories = await GoogleFitService.aggregateSum('com.google.calories.expended', s.startMs, s.endMs);
+    } catch (error) {
+      console.warn('Calories Google Fit indisponibles:', error.message);
+    }
+    try {
+      const meters = await GoogleFitService.aggregateSum('com.google.distance.delta', s.startMs, s.endMs);
+      if (meters != null) distance = Math.round(meters / 100) / 10;
+    } catch (error) {
+      console.warn('Distance Google Fit indisponible:', error.message);
+    }
+    if (!calories) {
+      calories = (BIKE_MET * 3.5 * getUserWeight()) / 200 * s.minutes;
+    }
+    records.push({
+      gfitId: s.id,
+      type: 'bike',
+      date: new Date(s.endMs).toISOString(),
+      duration: s.minutes,
+      distance,
+      calories: Math.round(calories),
+      notes: JSON.stringify({ source: 'google_fit', name: s.name || '', activityType: s.activityType }),
+    });
+  }
+
+  const created = importCardioSessions(records);
+  const storage = getStorage();
+  if (storage) {
+    created.forEach((record, i) => {
+      imported[records[i].gfitId] = record.id;
+      markSynced('cardio', record.id);
+    });
+    storage.setItem(IMPORTED_KEY, JSON.stringify(imported));
+  }
+
+  return {
+    found: seen.size,
+    imported: created.length,
+    skipped: seen.size - created.length,
+    minutes: created.reduce((sum, r) => sum + (r.duration || 0), 0),
+  };
+}
+
+/** Une séance cardio vient-elle d'un import Google Fit ? */
+export function isImportedFromGoogleFit(session) {
+  try {
+    return JSON.parse(session?.notes || '{}').source === 'google_fit';
+  } catch {
+    return false;
+  }
 }

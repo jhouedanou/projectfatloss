@@ -185,9 +185,9 @@
   min-width: 0;
 }
 /* La couleur vit sur l'icône, plus sur la carte. */
-.hd-card-cal { color: var(--warn); }
+.hd-card-bike { color: var(--info); }
+.hd-card-strength { color: var(--acc); }
 .hd-card-weight { color: var(--ok); }
-.hd-card-streak { color: var(--yellow); }
 .hd-card svg {
   flex-shrink: 0;
 }
@@ -306,4 +306,102 @@
   .hd-ring-wrap {
     min-height: 188px;
   }
+}
+
+/* Objectif sur la carte : « 45 / 150 min » — le total reste discret. */
+.hd-card-of {
+  font-family: var(--font-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+/* ── Objectif mensuel → durées de la semaine ──────────────────────── */
+.hd-goal {
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.hd-goal-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--acc);
+  margin-bottom: 12px;
+}
+.hd-goal-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--label);
+}
+.hd-goal-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.hd-goal-option {
+  padding: 10px 6px;
+  border-radius: var(--r);
+  border: 1px solid var(--sep-op);
+  background: var(--surface-2);
+  color: var(--label);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--t) var(--ease), border-color var(--t) var(--ease);
+}
+.hd-goal-option span {
+  font-family: var(--font-text);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--label-2);
+  margin-left: 2px;
+}
+.hd-goal-option.active {
+  background: var(--acc-soft);
+  border-color: var(--acc);
+}
+.hd-goal-plan {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hd-goal-plan li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--label-2);
+  line-height: 1.35;
+}
+.hd-goal-plan li svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--label-3);
+}
+.hd-goal-plan strong {
+  color: var(--label);
+  font-weight: 600;
+}
+.hd-goal-extra {
+  padding-left: 26px;
+  font-size: 0.78rem !important;
+}
+.hd-goal-extra svg {
+  display: none;
+}
+.hd-goal-foot {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--sep-op);
+  font-size: 0.8rem;
+  color: var(--label-2);
+}
+.hd-goal-foot strong {
+  color: var(--ok);
+  font-weight: 700;
 }

@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flame, Scale as ScaleIcon, Flag, Clock, Dumbbell, Leaf } from 'lucide-react';
+import { Scale as ScaleIcon, Clock, Dumbbell, Leaf, Bike, Target } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
 import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
 import { recommendNextSession, shortDayTitle } from '../services/RecoveryAdvisor';
+import {
+  GOAL_OPTIONS_KG,
+  getMonthlyGoalKg,
+  setMonthlyGoalKg,
+  computeWeekTargets,
+  estimateSessionMinutes,
+  getWeekProgress,
+  startOfWeek,
+} from '../services/WeightLossPlan';
 import './HomeDashboard.css';
 
-function startOfWeek(d = new Date()) {
-  const day = (d.getDay() + 6) % 7;
-  const out = new Date(d);
-  out.setHours(0, 0, 0, 0);
-  out.setDate(out.getDate() - day);
-  return out;
-}
+const fmtKg = (kg) => kg.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
 
 function Ring({ percent, label, sub }) {
   const size = 156;
@@ -47,13 +50,16 @@ function Ring({ percent, label, sub }) {
   );
 }
 
-export default function HomeDashboard({ onStartWorkout }) {
+export default function HomeDashboard({ onStartWorkout, onGoalChange }) {
   const { t, i18n } = useTranslation();
   const history = useMemo(() => getWorkoutHistory(), []);
   const weights = useMemo(() => getWeightHistory(), []);
+  // Objectif mensuel de perte de poids : il fixe les minutes de vélo du plan.
+  const [goalKg, setGoalKg] = useState(() => getMonthlyGoalKg());
   // Plan et jour courant ne bougent pas pendant l'affichage du tableau de
-  // bord : lus une fois, pas à chaque tick du minuteur.
-  const plan = useMemo(() => getActiveWorkoutPlan(), []);
+  // bord : lus une fois (et à chaque changement d'objectif), pas à chaque
+  // tick du minuteur.
+  const plan = useMemo(() => getActiveWorkoutPlan(), [goalKg]);
   const currentDayIndex = useMemo(
     () => parseInt(localStorage.getItem('currentWorkoutDay') || '0', 10) || 0,
     []
@@ -71,13 +77,25 @@ export default function HomeDashboard({ onStartWorkout }) {
   const weekWorkouts = history.filter(w => new Date(w.date) >= weekStart);
   // Séances prévues cette semaine (jours de repos exclus) : le plan couvre
   // plusieurs semaines, on ne compte donc que la tranche de 7 jours en cours.
-  const target = useMemo(() => {
+  const weekPlanDays = useMemo(() => {
     const weekStartIndex = Math.floor(currentDayIndex / 7) * 7;
-    const weekDays = plan.slice(weekStartIndex, weekStartIndex + 7);
-    return Math.max(1, weekDays.filter((d) => !d.isRestDay).length);
+    return plan.slice(weekStartIndex, weekStartIndex + 7);
   }, [plan, currentDayIndex]);
+  const target = Math.max(1, weekPlanDays.filter((d) => !d.isRestDay).length);
   const done = weekWorkouts.length;
-  const percent = Math.min(100, (done / target) * 100);
+
+  // Objectif en minutes (vélo + musculation légère) et minutes faites depuis lundi.
+  const goal = useMemo(() => computeWeekTargets(weekPlanDays, { goalKg }), [weekPlanDays, goalKg]);
+  const progress = useMemo(() => getWeekProgress(), []);
+  const minutesDone = progress.bikeMinutes + progress.strengthMinutes;
+  const percent = Math.min(100, (minutesDone / Math.max(1, goal.totalMinutes)) * 100);
+
+  const handleGoalChange = (kg) => {
+    if (kg === goalKg) return;
+    setMonthlyGoalKg(kg);
+    setGoalKg(kg);
+    onGoalChange && onGoalChange(kg);
+  };
 
   // Bande semaine : 7 cellules (lundi → dimanche) avec statut par jour.
   const todayIdx = (new Date().getDay() + 6) % 7;
@@ -102,8 +120,7 @@ export default function HomeDashboard({ onStartWorkout }) {
   const todayTitle = todayPlanDay
     ? todayPlanDay.title.replace(/^JOUR \d+:\s*/i, '').split(' — ')[0]
     : '';
-
-  const weekCalories = weekWorkouts.reduce((s, w) => s + (w.calories || 0), 0);
+  const todayMinutes = estimateSessionMinutes(todayPlanDay);
 
   const currentWeight = weights.length ? weights[weights.length - 1].weight : null;
   const prevWeight = weights.length > 1 ? weights[weights.length - 2].weight : null;
@@ -179,7 +196,7 @@ export default function HomeDashboard({ onStartWorkout }) {
             <span className="hd-today-sub">
               {todayPlanDay.isRestDay
                 ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
-                : `${(todayPlanDay.exercises || []).length} exercices · ~1 h`}
+                : `~${todayMinutes.bike} min de vélo + ~${todayMinutes.strength} min de muscu`}
             </span>
           </span>
           {onStartWorkout && (
@@ -195,16 +212,28 @@ export default function HomeDashboard({ onStartWorkout }) {
       <div className="hd-top">
         <Ring
           percent={percent}
-          label={t('home.weekRingLabel', { defaultValue: 'Séances' })}
-          sub={`${done} / ${target}`}
+          label={t('home.minutesRingLabel', { defaultValue: 'Minutes' })}
+          sub={`${minutesDone} / ${goal.totalMinutes} min`}
         />
 
         <div className="hd-stack">
-          <div className="hd-card hd-card-cal">
-            <Flame size={20} />
+          <div className="hd-card hd-card-bike">
+            <Bike size={20} />
             <div className="hd-card-body">
-              <div className="hd-card-label">{t('home.calories', { defaultValue: 'Calories 7j' })}</div>
-              <div className="hd-card-value">{Math.round(weekCalories)}</div>
+              <div className="hd-card-label">Vélo</div>
+              <div className="hd-card-value">
+                {progress.bikeMinutes}<span className="hd-card-of"> / {goal.bikeMinutes} min</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="hd-card hd-card-strength">
+            <Dumbbell size={20} />
+            <div className="hd-card-body">
+              <div className="hd-card-label">Muscu légère</div>
+              <div className="hd-card-value">
+                {progress.strengthMinutes}<span className="hd-card-of"> / {goal.strengthMinutes} min</span>
+              </div>
             </div>
           </div>
 
@@ -222,15 +251,56 @@ export default function HomeDashboard({ onStartWorkout }) {
               </div>
             </div>
           </div>
-
-          <div className="hd-card hd-card-streak">
-            <Flag size={20} />
-            <div className="hd-card-body">
-              <div className="hd-card-label">{t('home.streak', { defaultValue: 'Streak' })}</div>
-              <div className="hd-card-value">{streak} {t('home.days', { defaultValue: 'jours' })}</div>
-            </div>
-          </div>
         </div>
+      </div>
+
+      {/* Objectif mensuel → durées de la semaine */}
+      <div className="hd-goal card">
+        <div className="hd-goal-head">
+          <Target size={20} />
+          <span className="hd-goal-title">Objectif de perte de poids</span>
+        </div>
+        <div className="hd-goal-options" role="radiogroup" aria-label="Kilos à perdre par mois">
+          {GOAL_OPTIONS_KG.map((kg) => (
+            <button
+              key={kg}
+              type="button"
+              role="radio"
+              aria-checked={kg === goalKg}
+              className={`hd-goal-option${kg === goalKg ? ' active' : ''}`}
+              onClick={() => handleGoalChange(kg)}
+            >
+              −{fmtKg(kg)} kg<span>/mois</span>
+            </button>
+          ))}
+        </div>
+        <ul className="hd-goal-plan">
+          <li>
+            <Bike size={16} />
+            <span>
+              <strong>{goal.bikeMinutes} min de vélo</strong> cette semaine
+              {goal.sessions > 0 && ` · ${goal.warmup} + ${goal.main} min par séance`}
+            </span>
+          </li>
+          {goal.extraBike > 0 && (
+            <li className="hd-goal-extra">
+              <Bike size={16} />
+              <span>dont {goal.extraBike} min en sortie libre (onglet Cardio, le jour de votre choix)</span>
+            </li>
+          )}
+          <li>
+            <Dumbbell size={16} />
+            <span><strong>{goal.strengthMinutes} min de muscu légère</strong> ({goal.sessions} séances)</span>
+          </li>
+          <li>
+            <Leaf size={16} />
+            <span>Assiette : <strong>−{goal.dietDaily} kcal/jour</strong> (objectif de l'onglet Nutrition)</span>
+          </li>
+        </ul>
+        <p className="hd-goal-foot">
+          Avec ce plan : environ <strong>−{fmtKg(goal.projectedKgPerMonth)} kg par mois</strong>
+          {' · '}Séances {done}/{target} · Série {streak} jour{streak > 1 ? 's' : ''}
+        </p>
       </div>
 
       {recovery && (

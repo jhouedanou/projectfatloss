@@ -4,20 +4,26 @@
  */
 
 import { days as defaultWorkoutPlan } from '../data';
+import { applyDurationTargets } from './WeightLossPlan';
 
 // Clé de stockage dans localStorage
 const CUSTOM_WORKOUT_KEY = 'custom_workout_plan';
+// Réglage global du vélo de fin de séance (voir plus bas).
+const VELO_ENABLED_KEY = 'velo_enabled';
 
 // Version du programme par défaut : quand elle change, un éventuel plan
 // personnalisé basé sur l'ancien programme est écarté pour que tout le monde
-// reçoive le nouveau programme (semaine type 4 séances + 3 repos).
+// reçoive le nouveau programme (vélo + musculation légère).
 const PLAN_VERSION_KEY = 'plan_version';
-const PLAN_VERSION = '28d-v3';
+const PLAN_VERSION = '28d-v4';
 
 const migratePlanVersion = () => {
   try {
     if (localStorage.getItem(PLAN_VERSION_KEY) !== PLAN_VERSION) {
       localStorage.removeItem(CUSTOM_WORKOUT_KEY);
+      // Le vélo revient au cœur du programme : le vélo de fin de séance,
+      // désactivé à l'époque du programme 100 % muscu, est réactivé.
+      localStorage.removeItem(VELO_ENABLED_KEY);
       localStorage.setItem(PLAN_VERSION_KEY, PLAN_VERSION);
     }
   } catch (error) {
@@ -58,8 +64,6 @@ export const saveWorkoutPlan = (workoutPlan) => {
 // Le vélo peut être inclus ou non dans chaque séance sans modifier le programme
 // (le réglage est global et réversible, mémorisé dans le localStorage).
 
-const VELO_ENABLED_KEY = 'velo_enabled';
-
 /**
  * Détecte le vélo optionnel de fin de séance d'après son nom exact.
  * Volontairement strict : l'échauffement vélo des séances de musculation et la
@@ -74,6 +78,9 @@ const isVeloExercise = (exercise) =>
  */
 export const isVeloEnabled = () => {
   try {
+    // La migration de version peut réinitialiser ce réglage : l'appliquer
+    // avant de le lire (App lit ce réglage avant de charger le plan).
+    migratePlanVersion();
     const stored = localStorage.getItem(VELO_ENABLED_KEY);
     return stored === null ? true : stored === 'true';
   } catch (error) {
@@ -144,13 +151,14 @@ export const dayHasVelo = (dayIndex) => {
 
 /**
  * Programme effectif pour l'affichage et la séance : identique au plan
- * personnalisé/par défaut, mais sans le vélo si celui-ci est désactivé ou si
+ * personnalisé/par défaut, avec les durées de vélo calculées pour l'objectif
+ * de perte de poids, mais sans le vélo de fin si celui-ci est désactivé ou si
  * le ride en début de séance le remplace.
  * N'altère jamais le plan enregistré (le WorkoutCustomizer garde le plan complet).
  * @returns {Array}
  */
 export const getActiveWorkoutPlan = () => {
-  const plan = getWorkoutPlan();
+  const plan = applyDurationTargets(getWorkoutPlan());
   if (isVeloEnabled() && !isRideStartEnabled()) return plan;
   return plan.map((day) => ({
     ...day,

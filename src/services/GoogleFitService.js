@@ -10,11 +10,20 @@ const CLIENT_ID = '310337608749-e771j9tp94c7i0mts2basfarc53i4ecl.apps.googleuser
 // Numéro de projet Google (préfixe du Client ID), utilisé pour l'ID des sources de données.
 const PROJECT_NUMBER = CLIENT_ID.split('-')[0];
 
+// Lecture : séances (activity.read) et distance des sorties vélo (location.read),
+// pour importer l'historique vélo de Google Fit.
 const SCOPES = [
   'https://www.googleapis.com/auth/fitness.activity.write',
   'https://www.googleapis.com/auth/fitness.body.write',
-  'https://www.googleapis.com/auth/fitness.nutrition.write'
+  'https://www.googleapis.com/auth/fitness.nutrition.write',
+  'https://www.googleapis.com/auth/fitness.activity.read',
+  'https://www.googleapis.com/auth/fitness.location.read'
 ].join(' ');
+
+// Types d'activité Google Fit correspondant au vélo :
+// 1 vélo, 14 handbike, 15 VTT, 16 vélo de route, 17 spinning,
+// 18 vélo d'appartement, 19 vélo utilitaire.
+export const BIKE_ACTIVITY_TYPES = [1, 14, 15, 16, 17, 18, 19];
 
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
 
@@ -237,6 +246,50 @@ class GoogleFitService {
     }
 
     return response.status === 204 ? null : response.json();
+  }
+
+  /**
+   * Séances Google Fit d'une période, éventuellement filtrées par type.
+   * Avec startTime/endTime, l'API renvoie toute la période sans pagination.
+   * @returns {Promise<Array>} sessions { id, name, startTimeMillis, endTimeMillis,
+   *   activityType, activeTimeMillis?, application }
+   */
+  async listSessions(startTimeMillis, endTimeMillis, activityTypes = []) {
+    const params = new URLSearchParams({
+      startTime: new Date(startTimeMillis).toISOString(),
+      endTime: new Date(endTimeMillis).toISOString()
+    });
+    activityTypes.forEach((type) => params.append('activityType', String(type)));
+    const data = await this.apiFetch(`sessions?${params.toString()}`, 'GET');
+    return data?.session || [];
+  }
+
+  /**
+   * Somme d'un type de données sur un intervalle (ex. calories ou distance
+   * d'une séance). Renvoie null si la donnée est absente.
+   */
+  async aggregateSum(dataTypeName, startTimeMillis, endTimeMillis) {
+    const data = await this.apiFetch('dataset:aggregate', 'POST', {
+      aggregateBy: [{ dataTypeName }],
+      bucketByTime: { durationMillis: Math.max(1, endTimeMillis - startTimeMillis) },
+      startTimeMillis,
+      endTimeMillis
+    });
+    let total = 0;
+    let found = false;
+    for (const bucket of data?.bucket || []) {
+      for (const dataset of bucket.dataset || []) {
+        for (const point of dataset.point || []) {
+          const value = point.value?.[0];
+          const n = value?.fpVal ?? value?.intVal;
+          if (Number.isFinite(n)) {
+            total += n;
+            found = true;
+          }
+        }
+      }
+    }
+    return found ? total : null;
   }
 
   async addActivity(activity) {

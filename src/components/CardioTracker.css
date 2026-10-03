@@ -201,3 +201,54 @@
   .cardio-inputs { grid-template-columns: 1fr 1fr; }
   .cardio-inputs label:last-child { grid-column: span 2; }
 }
+
+/* Import Google Fit */
+.cardio-import {
+  margin-bottom: 14px;
+}
+
+.cardio-import-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(10, 132, 255, 0.35);
+  background: rgba(10, 132, 255, 0.1);
+  color: var(--text-primary, #fff);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cardio-import-btn span {
+  flex: 1;
+}
+
+.cardio-import-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.cardio-import-msg {
+  margin: 8px 4px 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, rgba(235, 235, 245, 0.6));
+}
+
+.cardio-import-msg.error {
+  color: #ff453a;
+}
+
+.cardio-item-source {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(10, 132, 255, 0.15);
+  color: #0a84ff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  vertical-align: middle;
+}

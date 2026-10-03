@@ -56,6 +56,40 @@ export function addCardioSession({ type, date = null, duration = null, distance 
 }
 
 /**
+ * Ajoute plusieurs séances d'un coup (import Google Fit), chacune avec un id
+ * unique, puis trie la liste du plus récent au plus ancien.
+ * @param {Array} records - [{ type, date, duration, distance, calories, notes }]
+ * @returns {Array} les séances créées
+ */
+export function importCardioSessions(records) {
+  const sessions = getCardioSessions();
+  const usedIds = new Set(sessions.map((s) => s.id));
+  let nextId = Date.now();
+  const created = records.map((r) => {
+    while (usedIds.has(nextId)) nextId += 1;
+    usedIds.add(nextId);
+    return {
+      id: nextId,
+      type: r.type,
+      date: r.date,
+      duration: r.duration != null ? Number(r.duration) : null,
+      distance: r.distance != null ? Number(r.distance) : null,
+      calories: r.calories != null ? Number(r.calories) : null,
+      notes: r.notes || '',
+    };
+  });
+
+  const merged = [...created, ...sessions].sort((a, b) => new Date(b.date) - new Date(a.date));
+  localStorage.setItem(CARDIO_KEY, JSON.stringify(merged));
+
+  import('./SyncService')
+    .then(({ pushCardio }) => Promise.all(created.map((record) => pushCardio(record))))
+    .catch(() => {});
+
+  return created;
+}
+
+/**
  * Supprime une séance cardio.
  * @param {number} id
  * @returns {boolean}

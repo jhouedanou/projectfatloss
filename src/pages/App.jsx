@@ -40,6 +40,7 @@ import CardioTracker from '../components/CardioTracker';
 import SettingToggle from '../components/SettingToggle';
 import ImmersiveBanner from '../components/ImmersiveBanner';
 import useImmersiveMode from '../hooks/useImmersiveMode';
+import { estimateSessionMinutes } from '../services/WeightLossPlan';
 
 const NOTIFICATION_DURATION = 3000;
 
@@ -336,7 +337,10 @@ export default function App() {
                   {!stepMode ? (
                     !showExercises ? (
                       <>
-                        <HomeDashboard onStartWorkout={() => setShowExercises(true)} />
+                        <HomeDashboard
+                          onStartWorkout={() => setShowExercises(true)}
+                          onGoalChange={reloadActivePlan}
+                        />
 
                         {/* Casque VR détecté : proposer le mode immersif (réglage mémorisé) */}
                         {immersive.xrMode && !immersive.bannerDismissed && (
@@ -389,7 +393,10 @@ export default function App() {
                             <p className="hero-subtitle">
                               {workoutPlan[current].isRestDay
                                 ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
-                                : `Jour ${current + 1} · ${workoutPlan[current].exercises.length} exercices · ~1 h`}
+                                : (() => {
+                                    const minutes = estimateSessionMinutes(workoutPlan[current]);
+                                    return `Jour ${current + 1} · ~${minutes.total} min dont ${minutes.bike} min de vélo`;
+                                  })()}
                             </p>
                           </div>
                         </div>
@@ -426,8 +433,7 @@ export default function App() {
                           )}
 
                           {/* Sortie vélo d'ouverture : vidéo + vélo connecté.
-                              Proposée uniquement si le jour contient du vélo (plan
-                              personnalisé) — le programme par défaut est 100 % muscu. */}
+                              Proposée uniquement si le jour contient le bloc vélo final. */}
                           {currentDayHasVelo && (
                             <SettingToggle
                               icon={<Bike size={20} color={rideStartEnabled ? '#0a84ff' : 'rgba(235,235,245,0.32)'} />}
