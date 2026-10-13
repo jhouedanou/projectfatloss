@@ -1,7 +1,10 @@
 /**
- * Bibliothèque de vidéos POV pour le ride vélo en début de séance.
+ * Bibliothèque de vidéos POV pour les sorties vélo.
  * Liste curée depuis les chaînes @WorldViewWorkouts, @IndoorCyclingVideos et
- * @SAFABrian (IDs et durées relevés le 2026-08-03).
+ * @SAFABrian (IDs et durées relevés le 2026-08-03), plus des parcours 360°
+ * trouvés avec le filtre « 360° » de YouTube (Dynamio 360, Indoor Cycling
+ * Videos, FiVR, Bike Ireland…, relevés le 2026-10-13 ; lecture intégrée
+ * vérifiée par oEmbed).
  *
  * `durationSec` est la durée réelle de la vidéo. `refSpeedKmh` est la vitesse
  * de référence : à cette vitesse de pédalage, la lecture est à ×1.
@@ -18,6 +21,159 @@ export const RIDE_VIDEOS = [
     channel: 'Indoor Cycling Videos',
     durationSec: 4200,
     refSpeedKmh: 22,
+    is360: true,
+  },
+  // --- Parcours 360° : glisser ou bouger le téléphone pour regarder autour ---
+  {
+    id: 'QhO9WEX19VA',
+    title: 'Vélo d\'appartement 8 min — 3D 360°',
+    channel: 'FiVR - Fitness in VR',
+    durationSec: 483,
+    refSpeedKmh: 20,
+    is360: true,
+  },
+  {
+    id: 'aYDnqzU_lb8',
+    title: 'Balade vélo virtuelle 360° VR',
+    channel: 'Virtual Running Videos',
+    durationSec: 925,
+    refSpeedKmh: 20,
+    is360: true,
+  },
+  {
+    id: 'zQKgXEKFaIg',
+    title: 'Séance vélo 20 min en VR 360°',
+    channel: 'FiVR - Fitness in VR',
+    durationSec: 1219,
+    refSpeedKmh: 20,
+    is360: true,
+  },
+  {
+    id: 'b4nacLHP2P4',
+    title: 'Las Vegas Strip à vélo — 360° VR',
+    channel: 'Dynamio 360',
+    durationSec: 1452,
+    refSpeedKmh: 16,
+    is360: true,
+  },
+  {
+    id: '_Vdx0V-mo2s',
+    title: 'Parc national de Yosemite — 360° VR',
+    channel: 'Dynamio 360',
+    durationSec: 1760,
+    refSpeedKmh: 16,
+    is360: true,
+  },
+  {
+    id: 'PN2A5-oA8S4',
+    title: 'Sortie stabilisée pour vélo d\'appartement — 360° VR',
+    channel: 'Dynamio 360',
+    durationSec: 1801,
+    refSpeedKmh: 18,
+    is360: true,
+  },
+  {
+    id: 'YX-xUSI53Og',
+    title: 'Espagne, séance brûle-graisses — 360° VR 4K',
+    channel: 'Indoor Cycling Videos',
+    durationSec: 1801,
+    refSpeedKmh: 22,
+    is360: true,
+  },
+  {
+    id: 'o-2mAQSchZQ',
+    title: 'Bord de mer en Espagne — 360° VR 4K',
+    channel: 'Indoor Cycling Videos',
+    durationSec: 1802,
+    refSpeedKmh: 22,
+    is360: true,
+  },
+  {
+    id: 'CiNLLkGfbNg',
+    title: 'Glendora Mountain Road, Californie — 360° VR',
+    channel: 'Dynamio 360',
+    durationSec: 1843,
+    refSpeedKmh: 15,
+    is360: true,
+  },
+  {
+    id: 'Lg6YYMZzxVk',
+    title: 'Chicago à vélo — 360° VR',
+    channel: 'Dynamio 360',
+    durationSec: 2001,
+    refSpeedKmh: 16,
+    is360: true,
+  },
+  {
+    id: 'jl4Mqz-NFYQ',
+    title: 'Seattle, de la gare à la Space Needle — 360° VR',
+    channel: '4K Urban Life',
+    durationSec: 2122,
+    refSpeedKmh: 15,
+    is360: true,
+  },
+  {
+    id: 'pNZa7853QAE',
+    title: 'Hawaï : Waikiki et Honolulu — 360° VR 6K',
+    channel: 'Dynamio 360',
+    durationSec: 2229,
+    refSpeedKmh: 16,
+    is360: true,
+  },
+  {
+    id: 'VV8afxjhmE0',
+    title: 'Alpes, lacs du Tyrol du Sud — 360° VR',
+    channel: 'Indoor Cycling & Treadmill Workouts 4K Videos',
+    durationSec: 2401,
+    refSpeedKmh: 20,
+    is360: true,
+  },
+  {
+    id: '79zw-j3n6gw',
+    title: 'Santa Monica et Venice Beach — 360° VR',
+    channel: 'Dynamio 360',
+    durationSec: 3379,
+    refSpeedKmh: 16,
+    is360: true,
+  },
+  {
+    id: 'UyZWV7_Cj30',
+    title: 'Dolomites, Italie — 360° VR',
+    channel: 'Indoor Cycling Videos',
+    durationSec: 3647,
+    refSpeedKmh: 20,
+    is360: true,
+  },
+  {
+    id: 'CCcYEIs2UjE',
+    title: 'De l\'Autriche à l\'Italie — 360° VR',
+    channel: 'Indoor Cycling Videos',
+    durationSec: 3778,
+    refSpeedKmh: 22,
+    is360: true,
+  },
+  {
+    id: 'Q1sc1eap4fY',
+    title: 'Monts Wicklow, Irlande — 360° VR 8K',
+    channel: 'Bike Ireland',
+    durationSec: 3804,
+    refSpeedKmh: 18,
+    is360: true,
+  },
+  {
+    id: 'ueDjGYGlVvg',
+    title: 'VTT en Espagne — 360° VR',
+    channel: 'Indoor Cycling Videos',
+    durationSec: 4356,
+    refSpeedKmh: 15,
+    is360: true,
+  },
+  {
+    id: '-9-STH3rgww',
+    title: 'Cape Cod Rail Trail — 360°',
+    channel: 'Bryan Boyle',
+    durationSec: 6021,
+    refSpeedKmh: 18,
     is360: true,
   },
   {
