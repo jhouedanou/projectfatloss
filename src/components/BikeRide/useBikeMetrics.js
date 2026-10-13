@@ -9,9 +9,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getUserWeight } from '../../services/CalorieEstimator';
+import { createCalorieState, stepCalories } from '../../services/bike/rideCalories';
 
-/** MET vélo stationnaire vigoureux, utilisé quand la puissance est inconnue. */
-const BIKE_MET = 7.0;
 const TICK_MS = 1000;
 
 /**
@@ -25,6 +24,7 @@ const PLAUSIBLE = {
   watts: [0, 1500],
   bpm: [30, 240],
   kcalTotal: [0, 5000],
+  resistance: [0, 40],
 };
 
 /** Retourne le sample filtré : les champs hors bornes deviennent null. */
@@ -43,8 +43,10 @@ const initialState = {
   cadence: null,
   watts: null,
   bpm: null,
+  resistance: null,
   distanceKm: 0,
   calories: 0,
+  calorieSource: null,
   elapsedSec: 0,
   avgSpeedKmh: 0,
   avgWatts: null,
@@ -56,11 +58,10 @@ const initialState = {
 export default function useBikeMetrics({ adapter, hrAdapter = null, running }) {
   const [metrics, setMetrics] = useState(initialState);
 
-  const liveRef = useRef({ speedKmh: 0, cadence: null, watts: null, bpm: null, kcalTotal: null });
+  const liveRef = useRef({ speedKmh: 0, cadence: null, watts: null, bpm: null, kcalTotal: null, resistance: null });
   const strapBpmRef = useRef(null);
   const accRef = useRef({
     distanceKm: 0,
-    calories: 0,
     elapsedSec: 0,
     speedSum: 0,
     wattsSum: 0,
@@ -69,14 +70,13 @@ export default function useBikeMetrics({ adapter, hrAdapter = null, running }) {
     bpmCount: 0,
     maxSpeedKmh: 0,
     maxWatts: 0,
-    deviceKcalBase: null,
   });
+  const caloriesRef = useRef(createCalorieState());
   const weightRef = useRef(getUserWeight());
 
   const reset = useCallback(() => {
     accRef.current = {
       distanceKm: 0,
-      calories: 0,
       elapsedSec: 0,
       speedSum: 0,
       wattsSum: 0,
@@ -85,9 +85,9 @@ export default function useBikeMetrics({ adapter, hrAdapter = null, running }) {
       bpmCount: 0,
       maxSpeedKmh: 0,
       maxWatts: 0,
-      deviceKcalBase: null,
     };
-    liveRef.current = { speedKmh: 0, cadence: null, watts: null, bpm: null, kcalTotal: null };
+    caloriesRef.current = createCalorieState();
+    liveRef.current = { speedKmh: 0, cadence: null, watts: null, bpm: null, kcalTotal: null, resistance: null };
     setMetrics(initialState);
   }, []);
 
@@ -102,6 +102,9 @@ export default function useBikeMetrics({ adapter, hrAdapter = null, running }) {
       Object.keys(next).forEach((key) => {
         if (clean[key] != null) next[key] = clean[key];
       });
+      // Pouls de poignée : la console envoie null quand on lâche les capteurs,
+      // l'afficher figé sur la dernière valeur serait trompeur.
+      if ('bpm' in sample) next.bpm = clean.bpm;
       liveRef.current = next;
     });
     return unsubscribe;
@@ -141,24 +144,24 @@ export default function useBikeMetrics({ adapter, hrAdapter = null, running }) {
         acc.bpmCount += 1;
       }
 
-      // Calories : compteur de la console si disponible (delta depuis le début),
-      // sinon puissance mesurée, sinon MET × poids tant que ça pédale.
-      if (live.kcalTotal != null) {
-        if (acc.deviceKcalBase == null) acc.deviceKcalBase = live.kcalTotal;
-        acc.calories = Math.max(0, live.kcalTotal - acc.deviceKcalBase);
-      } else if (live.watts != null) {
-        acc.calories += (live.watts * 3.6) / 3600;
-      } else if (speed > 1) {
-        acc.calories += ((BIKE_MET * 3.5 * weightRef.current) / 200) / 60;
-      }
+      // Calories : compteur du vélo (console EB900, FTMS) en priorité, sinon
+      // puissance, sinon MET × poids — voir rideCalories.
+      const { calories, source: calorieSource } = stepCalories(caloriesRef.current, {
+        kcalTotal: live.kcalTotal,
+        watts: live.watts,
+        speedKmh: speed,
+        weightKg: weightRef.current,
+      });
 
       setMetrics({
         speedKmh: speed,
         cadence: live.cadence,
         watts: live.watts,
         bpm,
+        resistance: live.resistance,
         distanceKm: acc.distanceKm,
-        calories: acc.calories,
+        calories,
+        calorieSource,
         elapsedSec: acc.elapsedSec,
         avgSpeedKmh: acc.speedSum / acc.elapsedSec,
         avgWatts: acc.wattsCount ? acc.wattsSum / acc.wattsCount : null,

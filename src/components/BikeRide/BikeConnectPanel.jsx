@@ -13,7 +13,7 @@ const isDomyosDebug = () => {
 
 export const SOURCES = [
   { key: 'ftms', label: 'Vélo FTMS', hint: 'Standard — ou EB900 via pont qdomyos-zwift', ble: true },
-  { key: 'domyos', label: 'Domyos EB900', hint: 'Protocole propriétaire — à calibrer', ble: true },
+  { key: 'domyos', label: 'Domyos EB900', hint: 'Direct, sans appli : vitesse, cadence, calories et pouls de la console', ble: true },
   { key: 'sim', label: 'Mode démo', hint: 'Sans vélo, métriques simulées', ble: false },
 ];
 
@@ -94,7 +94,7 @@ export default function BikeConnectPanel({
           <input type="checkbox" checked={domyosDebug} onChange={(e) => handleDebugToggle(e.target.checked)} />
           <span>
             Mode diagnostic : journalise les trames de la console (console du navigateur et
-            <code> window.__domyosFrames</code>) pour calibrer vitesse/cadence si les valeurs affichées sont fausses
+            <code> window.__domyosFrames</code>) si une valeur affichée ne correspond pas à l'écran du vélo
           </span>
         </label>
       )}

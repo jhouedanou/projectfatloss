@@ -38,7 +38,17 @@ const estimateCalories = (type, durationMin, weightKg) => {
 };
 
 // Origine d'une séance (champ notes en JSON) : badge affiché dans la liste.
-const SOURCE_LABELS = { google_fit: 'Google Fit', checklist: 'Check-list', holofit: 'Holofit', strava: 'Strava', drive: 'Drive' };
+const SOURCE_LABELS = {
+  google_fit: 'Google Fit',
+  checklist: 'Check-list',
+  holofit: 'Holofit',
+  strava: 'Strava',
+  drive: 'Drive',
+  // Séances vélo faites dans l'app, selon la source des données.
+  domyos: 'EB900',
+  ftms: 'Vélo connecté',
+  sim: 'Démo',
+};
 const sourceLabel = (session) => {
   try {
     const notes = JSON.parse(session?.notes || '{}');

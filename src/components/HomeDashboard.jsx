@@ -50,7 +50,7 @@ function Ring({ percent, label, sub }) {
   );
 }
 
-export default function HomeDashboard({ onStartWorkout }) {
+export default function HomeDashboard({ onStartWorkout, onStartRide }) {
   const { t, i18n } = useTranslation();
   const history = useMemo(() => getWorkoutHistory(), []);
   const weights = useMemo(() => getWeightHistory(), []);
@@ -182,11 +182,12 @@ export default function HomeDashboard({ onStartWorkout }) {
         ))}
       </div>
 
-      {/* Check-list du jour : vélo (hors app, à cocher), muscu, pas */}
+      {/* Check-list du jour : vélo (séance immersive ou cochée), muscu */}
       <DailyChecklist
         planDay={todayPlanDay}
         goal={goal}
         onStartWorkout={onStartWorkout}
+        onStartRide={onStartRide}
         onChange={() => setChecklistVersion((v) => v + 1)}
       />
 

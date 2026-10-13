@@ -137,7 +137,7 @@ export const PROTOCOL_INFO = {
   },
   eb900: {
     title: 'Domyos EB900 reconnu',
-    body: 'Console EB900 détectée et connectée. Vitesse, cadence, calories et pouls de la poignée remontent ; la puissance est estimée. Vérifie les valeurs contre l\'écran de la console la première fois.',
+    body: 'Console EB900 détectée et connectée. Vitesse, cadence, résistance, pouls de la poignée et calories comptées par la console remontent ; la puissance est estimée.',
     source: 'domyos',
   },
   domyos: {

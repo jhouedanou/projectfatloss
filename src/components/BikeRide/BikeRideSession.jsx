@@ -9,21 +9,51 @@ import RideSummary from './RideSummary';
 import useBikeMetrics from './useBikeMetrics';
 import usePlaybackRateController from './usePlaybackRateController';
 import useRideScreen from './useRideScreen';
-import { RIDE_VIDEOS, formatVideoDuration } from '../../data/rideVideos';
+import { RIDE_VIDEOS, formatVideoDuration, loadCustomVideos } from '../../data/rideVideos';
 import SimulationAdapter from '../../services/bike/adapters/SimulationAdapter';
 import { detectBike, protocolInfo, releaseDetectedHandle } from '../../services/bike/detectBike';
+import { GHOST_STEP_SEC, ghostGapMeters, ghostPositionAt, pickNextVideo } from '../../services/bike/rideSession';
+import { loadGhost, saveGhosts } from '../../services/bike/RideStorage';
 import './BikeRide.css';
 
+/** Objectifs proposés (minutes) ; null = s'arrêter à la fin du parcours. */
+const GOAL_CHOICES = [null, 10, 20, 30, 45, 60];
+const TOAST_MS = 6000;
+
+/** Libellé de la source des calories, affiché à côté du total. */
+const calorieLabel = (calorieSource, source) => {
+  if (calorieSource === 'device') {
+    if (source === 'domyos') return 'console EB900';
+    if (source === 'ftms') return 'compteur du vélo';
+    return 'démo';
+  }
+  if (calorieSource === 'power') return 'puissance';
+  if (calorieSource === 'estimate') return 'estimation';
+  return '';
+};
+
 /**
- * Écran de sortie vélo qui ouvre la séance : choix du parcours et de la source,
- * puis vidéo plein écran pilotée par le pédalage, puis récapitulatif.
+ * Séance vélo immersive, dans l'esprit de Kinomap et Fit Immersion : choix du
+ * parcours et de la source, objectif de durée, puis vidéo plein écran pilotée
+ * par le pédalage — enchaînement des parcours jusqu'à l'objectif, fantôme du
+ * meilleur passage — puis récapitulatif.
+ *
+ * Deux usages :
+ *  - `mode="session"` : la séance vélo du jour, lancée depuis la check-list
+ *    (objectif = minutes prévues par le plan) ;
+ *  - `mode="warmup"` : sortie en ouverture de la séance de musculation.
  *
  * Ne touche jamais aux calories de la séance de musculation : le résultat est
  * remonté au parent, qui l'enregistre comme séance cardio distincte.
  */
-export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
+export default function BikeRideSession({ dayTitle, onFinish, onSkip, mode = 'warmup', targetMin = null }) {
+  const isSession = mode === 'session';
   const [phase, setPhase] = useState('setup');
   const [video, setVideo] = useState(RIDE_VIDEOS[0]);
+  // Première vidéo de la sortie : seule celle-ci passe au lecteur, les
+  // suivantes sont chargées dans le même lecteur (voir RideVideoPlayer).
+  const [startVideo, setStartVideo] = useState(null);
+  const [goalMin, setGoalMin] = useState(targetMin || null);
   const [unavailableIds, setUnavailableIds] = useState([]);
   const [source, setSource] = useState('sim');
   const [hrEnabled, setHrEnabled] = useState(false);
@@ -42,7 +72,10 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
       return false;
     }
   });
-  const [progress, setProgress] = useState({ current: 0, duration: 0 });
+  const [progress, setProgress] = useState({ current: 0, duration: 0, ghostSec: null, ghostGapM: null });
+  const [toast, setToast] = useState('');
+  const [routes, setRoutes] = useState([]);
+  const [ghost, setGhost] = useState(null);
   // Toujours muet au démarrage : voir RideVideoPlayer.
   const [muted, setMuted] = useState(true);
 
@@ -55,10 +88,33 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
   // connexion à la fois et sort du mode appairage une fois associé — sans ce
   // relais, « Démarrer la sortie » redemande une association impossible.
   const detectedHandleRef = useRef(null);
+  // État lu par les callbacks du lecteur, qui ne doivent pas changer d'identité.
+  const phaseRef = useRef(phase);
+  const videoRef = useRef(video);
+  const metricsRef = useRef(null);
+  const rateRef = useRef(1);
+  const videoPausedRef = useRef(false);
+  const gyroRef = useRef(gyro);
+  const goalRef = useRef(goalMin);
+  const unavailableRef = useRef(unavailableIds);
+  // Parcours en cours (positions relevées pour le fantôme) et parcours finis.
+  const segmentRef = useRef(null);
+  const segmentsRef = useRef([]);
+  const justChainedRef = useRef(false);
+  const goalAnnouncedRef = useRef(false);
+  const toastTimerRef = useRef(null);
+  const finishRideRef = useRef(null);
+
+  phaseRef.current = phase;
+  videoRef.current = video;
+  gyroRef.current = gyro;
+  goalRef.current = goalMin;
+  unavailableRef.current = unavailableIds;
 
   const { fullscreen, enter: enterFullscreen, leave: leaveFullscreen, toggle: toggleFullscreen } = useRideScreen();
 
-  const { metrics } = useBikeMetrics({ adapter, hrAdapter, running: phase === 'riding' });
+  const { metrics, reset: resetMetrics } = useBikeMetrics({ adapter, hrAdapter, running: phase === 'riding' });
+  metricsRef.current = metrics;
   const { rate, videoPaused } = usePlaybackRateController({
     playerRef,
     speedKmh: metrics.speedKmh,
@@ -67,19 +123,120 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     enabled: adaptRate,
     active: phase === 'riding',
   });
+  rateRef.current = rate;
+  videoPausedRef.current = videoPaused;
 
-  // Position dans la vidéo, relevée à chaque tick de métriques (1 s) pour la
-  // barre de progression du HUD.
+  const showToast = useCallback((text) => {
+    setToast(text);
+    clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(''), TOAST_MS);
+  }, []);
+
+  useEffect(() => () => clearTimeout(toastTimerRef.current), []);
+
+  /** Ouvre un parcours : relevés du fantôme à zéro, meilleur passage chargé. */
+  const openSegment = useCallback((nextVideo, startElapsed) => {
+    segmentRef.current = { videoId: nextVideo.id, startElapsed, positions: [] };
+    setGhost(loadGhost(nextVideo.id));
+    setRoutes((prev) => [...prev, nextVideo.title]);
+  }, []);
+
+  const closeSegment = useCallback(() => {
+    if (segmentRef.current) segmentsRef.current.push(segmentRef.current);
+    segmentRef.current = null;
+  }, []);
+
+  // Chaque tick de métriques (1 s) : position dans la vidéo pour la barre de
+  // progression, relevé du fantôme, écart avec le meilleur passage, objectif.
   useEffect(() => {
     if (phase !== 'riding') return;
     const player = playerRef.current;
     if (!player?.getCurrentTime) return;
+    // Parcours enchaîné pas encore lancé : le lecteur donne encore la position
+    // et la durée de la vidéo précédente, qui fausseraient le fantôme.
+    if (justChainedRef.current) return;
+    let current = 0;
+    let duration = 0;
     try {
-      setProgress({ current: player.getCurrentTime() || 0, duration: player.getDuration() || video?.durationSec || 0 });
-    } catch (error) {
+      current = player.getCurrentTime() || 0;
+      duration = player.getDuration() || video?.durationSec || 0;
+    } catch (playerError) {
+      return; // player pas prêt
+    }
+
+    const segment = segmentRef.current;
+    let ghostSec = null;
+    let ghostGapM = null;
+    if (segment) {
+      const onRoute = Math.max(0, metrics.elapsedSec - segment.startElapsed);
+      if (Math.floor(onRoute / GHOST_STEP_SEC) >= segment.positions.length) segment.positions.push(current);
+      if (ghost) {
+        ghostSec = ghostPositionAt(ghost, onRoute);
+        ghostGapM = ghostGapMeters(current, ghostSec, video?.refSpeedKmh);
+      }
+    }
+    setProgress({ current, duration, ghostSec, ghostGapM });
+
+    if (goalMin && !goalAnnouncedRef.current && metrics.elapsedSec >= goalMin * 60) {
+      goalAnnouncedRef.current = true;
+      showToast('Objectif atteint ! Termine ce parcours ou appuie sur « Terminer ».');
+    }
+  }, [metrics.elapsedSec, phase, video, ghost, goalMin, showToast]);
+
+  /**
+   * Fin d'un parcours : sans objectif, ou objectif atteint, la sortie se
+   * termine ; sinon le parcours suivant est chargé dans le même lecteur.
+   */
+  const chainToNext = useCallback(() => {
+    const current = videoRef.current;
+    const elapsed = metricsRef.current?.elapsedSec || 0;
+    const goalSec = goalRef.current ? goalRef.current * 60 : null;
+    closeSegment();
+    if (!goalSec || elapsed >= goalSec) {
+      finishRideRef.current?.();
+      return;
+    }
+    const allVideos = [...loadCustomVideos(), ...RIDE_VIDEOS];
+    const next = pickNextVideo(allVideos, {
+      currentId: current?.id,
+      playedIds: segmentsRef.current.map((segment) => segment.videoId),
+      unavailableIds: unavailableRef.current,
+      remainingSec: goalSec - elapsed,
+    });
+    if (!next) {
+      finishRideRef.current?.();
+      return;
+    }
+    videoRef.current = next;
+    setVideo(next);
+    openSegment(next, elapsed);
+    justChainedRef.current = true;
+    try {
+      playerRef.current?.loadVideoById(next.id);
+    } catch (playerError) {
       /* player pas prêt */
     }
-  }, [metrics.elapsedSec, phase, video]);
+    showToast(`Parcours suivant : ${next.title}`);
+  }, [closeSegment, openSegment, showToast]);
+
+  const handleVideoEnded = useCallback(() => {
+    if (phaseRef.current === 'riding') chainToNext();
+  }, [chainToNext]);
+
+  // Parcours enchaîné : il démarre à ×1, sans gyroscope, et joue même si le
+  // cycliste est à l'arrêt — on lui rend l'état de la sortie.
+  const handlePlaying = useCallback(() => {
+    if (!justChainedRef.current) return;
+    justChainedRef.current = false;
+    const player = playerRef.current;
+    try {
+      if (rateRef.current !== 1) player?.setPlaybackRate(rateRef.current);
+      if (videoRef.current?.is360) setView(player, { enableOrientationSensor: gyroRef.current });
+      if (videoPausedRef.current) player?.pauseVideo();
+    } catch (playerError) {
+      /* player pas prêt */
+    }
+  }, []);
 
   const handleToggleGyro = useCallback(() => {
     const next = !gyro;
@@ -106,11 +263,29 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
 
   useEffect(() => stopAdapters, [stopAdapters]);
 
-  const handleUnavailable = useCallback((id) => {
+  /**
+   * Vidéo illisible dans l'app. Au tout début, retour au choix du parcours ;
+   * en cours de séance, on passe au parcours suivant.
+   */
+  const handleUnavailable = useCallback(() => {
+    const id = videoRef.current?.id;
+    if (!id) return;
+    unavailableRef.current = [...unavailableRef.current, id];
     setUnavailableIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    const ridden = (metricsRef.current?.elapsedSec || 0) > 10 || segmentsRef.current.length > 0;
+    if (phaseRef.current === 'riding' && ridden) {
+      chainToNext();
+      return;
+    }
+    // Retour au choix : le vélo est libéré, « Démarrer » le reconnectera.
+    stopAdapters();
+    setAdapter(null);
+    setHrAdapter(null);
+    setConnected(false);
+    leaveFullscreen();
     setError('Cette vidéo n\'est pas lisible dans l\'application. Choisis un autre parcours.');
     setPhase('setup');
-  }, []);
+  }, [chainToNext, stopAdapters, leaveFullscreen]);
 
   /**
    * Détection en un appui : sélecteur Bluetooth filtré sur « Domyos », puis
@@ -203,13 +378,19 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
         }
       }
 
+      resetMetrics();
+      segmentsRef.current = [];
+      goalAnnouncedRef.current = false;
+      setRoutes([]);
+      setStartVideo(video);
+      openSegment(video, 0);
       setPhase('riding');
     } catch (startError) {
       setConnected(false);
       setError(startError?.message || 'Connexion impossible.');
       leaveFullscreen();
     }
-  }, [source, hrEnabled, enterFullscreen, leaveFullscreen]);
+  }, [source, hrEnabled, video, openSegment, resetMetrics, enterFullscreen, leaveFullscreen]);
 
   const handleToggleMute = useCallback(() => {
     const next = !muted;
@@ -228,24 +409,32 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     } catch (playerError) {
       /* player pas prêt */
     }
+    closeSegment();
     stopAdapters();
     leaveFullscreen();
+    setToast('');
     setPhase('summary');
-  }, [stopAdapters, leaveFullscreen]);
+  }, [closeSegment, stopAdapters, leaveFullscreen]);
+  finishRideRef.current = handleFinishRide;
 
   const handleSave = useCallback(() => {
+    saveGhosts(segmentsRef.current);
     onFinish({
+      mode,
       durationMin: Math.max(1, Math.round(metrics.elapsedSec / 60)),
       distanceKm: Math.round(metrics.distanceKm * 100) / 100,
       calories: Math.round(metrics.calories),
+      calorieSource: metrics.calorieSource,
       avgWatts: metrics.avgWatts == null ? null : Math.round(metrics.avgWatts),
       avgBpm: metrics.avgBpm == null ? null : Math.round(metrics.avgBpm),
       maxSpeedKmh: Math.round(metrics.maxSpeedKmh * 10) / 10,
-      videoId: video?.id || null,
-      videoTitle: video?.title || null,
+      targetMin: goalMin,
+      videoId: startVideo?.id || video?.id || null,
+      videoTitle: routes[0] || video?.title || null,
+      routes,
       source,
     });
-  }, [metrics, video, source, onFinish]);
+  }, [metrics, video, startVideo, routes, goalMin, source, mode, onFinish]);
 
   // Racine UNIQUE et toujours montée, quelle que soit la phase — c'est
   // l'élément qui passe en plein écran. Si chaque phase rendait son propre
@@ -259,10 +448,12 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     content = (
       <>
         <RideVideoPlayer
-          videoId={video.id}
+          videoId={startVideo.id}
           playerRef={playerRef}
           onUnavailable={handleUnavailable}
-          is360={!!video.is360}
+          onEnded={handleVideoEnded}
+          onPlaying={handlePlaying}
+          is360={!!startVideo.is360}
           gyro={gyro}
         />
         {video.is360 && <Ride360Layer playerRef={playerRef} />}
@@ -283,6 +474,10 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
           onToggleGyro={handleToggleGyro}
           onRecenter={handleRecenter}
           progress={progress}
+          goalSec={goalMin ? goalMin * 60 : null}
+          routeIndex={routes.length}
+          calorieLabel={calorieLabel(metrics.calorieSource, source)}
+          toast={toast}
         />
       </>
     );
@@ -305,18 +500,47 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
     content = (
       <RideSummary
         metrics={metrics}
-        videoTitle={video.title}
+        routes={routes}
+        goalSec={goalMin ? goalMin * 60 : null}
+        calorieLabel={calorieLabel(metrics.calorieSource, source)}
         onSave={handleSave}
         onDiscard={() => onFinish(null)}
+        saveLabel={isSession ? 'Enregistrer la séance' : 'Enregistrer et continuer'}
       />
     );
   } else {
     content = (
       <div className="ride-setup">
         <header className="ride-setup-head">
-          <p className="ride-eyebrow">Échauffement · {dayTitle || 'Séance'}</p>
-          <h2 className="ride-setup-title">Sortie vélo</h2>
+          <p className="ride-eyebrow">
+            {isSession ? 'Séance vélo du jour' : `Échauffement · ${dayTitle || 'Séance'}`}
+          </p>
+          <h2 className="ride-setup-title">{isSession ? 'Séance vélo immersive' : 'Sortie vélo'}</h2>
         </header>
+
+        <h3 className="ride-section-title">Objectif</h3>
+        <div className="ride-goal-choices" role="radiogroup" aria-label="Objectif de durée">
+          {Array.from(new Set([...GOAL_CHOICES, targetMin || null]))
+            .sort((a, b) => (a ?? -1) - (b ?? -1))
+            .map((minutes) => (
+              <button
+                key={minutes ?? 'route'}
+                type="button"
+                role="radio"
+                aria-checked={goalMin === minutes}
+                className={`ride-filter ${goalMin === minutes ? 'is-active' : ''}`}
+                onClick={() => setGoalMin(minutes)}
+              >
+                {minutes ? `${minutes} min` : 'Fin du parcours'}
+                {minutes && minutes === targetMin ? ' · plan' : ''}
+              </button>
+            ))}
+        </div>
+        <p className="ride-status">
+          {goalMin
+            ? `Les parcours s'enchaînent jusqu'à ${goalMin} min ; une fois l'objectif atteint, la sortie s'arrête à la fin du parcours en cours.`
+            : 'La sortie s\'arrête à la fin de la vidéo choisie.'}
+        </p>
 
         <h3 className="ride-section-title">Parcours</h3>
         <RideVideoPicker
@@ -352,6 +576,7 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
             Sélection : {video.title}
             {video.durationSec > 0 && ` · ${formatVideoDuration(video.durationSec)}`}
             {video.is360 && ' · 360° (glisse ou bouge le téléphone pour regarder autour)'}
+            {loadGhost(video.id) && ' · ton meilleur passage roule avec toi (fantôme)'}
           </p>
         )}
 
@@ -360,7 +585,7 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip }) {
             Démarrer la sortie
           </button>
           <button type="button" className="ride-btn ride-btn-ghost" onClick={onSkip}>
-            Passer et commencer la muscu
+            {isSession ? 'Retour' : 'Passer et commencer la muscu'}
           </button>
         </div>
       </div>

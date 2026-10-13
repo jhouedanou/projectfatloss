@@ -12,7 +12,7 @@ import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
 import DayPills from '../components/DayPills';
 import { getActiveWorkoutPlan, isRideStartEnabled } from '../services/WorkoutCustomization';
 import BikeRideSession from '../components/BikeRide/BikeRideSession';
-import { addCardioSession } from '../services/CardioStorage';
+import { saveRideSession } from '../services/bike/RideStorage';
 import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceSideChange, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
@@ -1004,30 +1004,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const handleRideFinished = (ride) => {
     if (ride) {
       try {
-        const record = addCardioSession({
-          type: 'bike',
-          duration: ride.durationMin,
-          distance: ride.distanceKm,
-          calories: ride.calories,
-          notes: JSON.stringify({
-            source: ride.source,
-            videoId: ride.videoId,
-            videoTitle: ride.videoTitle,
-            avgWatts: ride.avgWatts,
-            avgBpm: ride.avgBpm,
-            maxSpeedKmh: ride.maxSpeedKmh,
-          }),
-        });
-        // Google Fit : pousser la séance tout de suite si un token valide
-        // existe déjà (pas de popup en plein flux de séance). Sinon elle reste
-        // dans la file « non synchronisé » du calendrier / suivi cardio.
-        import('../services/GoogleFitService')
-          .then(({ default: fit }) =>
-            fit.isSignedIn()
-              ? import('../services/GoogleFitSync').then(({ syncCardioToGoogleFit }) => syncCardioToGoogleFit(record))
-              : null
-          )
-          .catch((error) => console.warn('Sync Google Fit de la sortie vélo reportée:', error?.message));
+        saveRideSession(ride);
       } catch (error) {
         console.error('Erreur lors de l\'enregistrement de la sortie vélo:', error);
       }

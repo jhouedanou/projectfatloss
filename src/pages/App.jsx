@@ -11,6 +11,8 @@ import {
   setRideStartEnabled,
 } from '../services/WorkoutCustomization';
 import StepWorkout from './StepWorkout';
+import BikeRideSession from '../components/BikeRide/BikeRideSession';
+import { saveRideSession } from '../services/bike/RideStorage';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import WorkoutStats from '../components/WorkoutStats';
 import WeightTracker from '../components/WeightTracker';
@@ -81,6 +83,23 @@ export default function App() {
   const currentDayHasVelo = useMemo(() => dayHasVelo(current), [current, showCustomizer]);
   // Mode immersif (casque VR / WebXR) : détection une fois, réglage mémorisé.
   const immersive = useImmersiveMode();
+  // Séance vélo immersive (vidéo + vélo connecté), ouverte depuis l'accueil :
+  // null = fermée, sinon { targetMin } (minutes prévues par le plan, ou null).
+  const [rideSession, setRideSession] = useState(null);
+  // Incrémenté après une séance vélo : l'accueil relit check-list et minutes.
+  const [homeVersion, setHomeVersion] = useState(0);
+
+  const handleRideSessionFinish = (ride) => {
+    if (ride) {
+      try {
+        saveRideSession(ride);
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement de la séance vélo:', error);
+      }
+    }
+    setRideSession(null);
+    setHomeVersion((v) => v + 1);
+  };
 
   // Auth Supabase : suit l'état de connexion et synchronise à la connexion
   useEffect(() => {
@@ -328,6 +347,15 @@ export default function App() {
           {showLanguageSelector && <LanguageSelector />}
           
           {showCustomizer && <WorkoutCustomizer onClose={handleCloseCustomizer} />}
+
+          {rideSession && (
+            <BikeRideSession
+              mode="session"
+              targetMin={rideSession.targetMin}
+              onFinish={handleRideSessionFinish}
+              onSkip={() => setRideSession(null)}
+            />
+          )}
           
           {/* Contenu principal avec transitions */}
           <Fade in={viewMode === 'workout'} timeout={300} unmountOnExit mountOnEnter>
@@ -337,7 +365,11 @@ export default function App() {
                   {!stepMode ? (
                     !showExercises ? (
                       <>
-                        <HomeDashboard onStartWorkout={() => setShowExercises(true)} />
+                        <HomeDashboard
+                          key={homeVersion}
+                          onStartWorkout={() => setShowExercises(true)}
+                          onStartRide={(targetMin) => setRideSession({ targetMin })}
+                        />
 
                         {/* Casque VR détecté : proposer le mode immersif (réglage mémorisé) */}
                         {immersive.xrMode && !immersive.bannerDismissed && (
@@ -350,8 +382,16 @@ export default function App() {
                         )}
                         <HomeTrackers />
 
-                        {/* Lien rapide Cardio (sorti de la barre d'onglets) */}
+                        {/* Liens rapides : séance vélo immersive, Cardio (sorti de la barre d'onglets) */}
                         <div className="home-quicklinks">
+                          <button className="card press home-quicklink" onClick={() => setRideSession({ targetMin: null })}>
+                            <span className="home-quicklink-tile"><Play size={20} /></span>
+                            <span className="home-quicklink-copy">
+                              <span className="home-quicklink-title">Séance vélo immersive</span>
+                              <span className="home-quicklink-sub">Parcours vidéo pilotés par votre Domyos EB900</span>
+                            </span>
+                            <ChevronRight size={18} className="home-quicklink-chevron" />
+                          </button>
                           <button className="card press home-quicklink" onClick={() => setViewMode('cardio')}>
                             <span className="home-quicklink-tile"><Bike size={20} /></span>
                             <span className="home-quicklink-copy">
@@ -391,7 +431,7 @@ export default function App() {
                               {workoutPlan[current].isRestDay
                                 ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
                                 : (() => {
-                                    // Muscu guidée dans l'app ; vélo à cocher sur la check-list de l'accueil.
+                                    // Muscu guidée dans l'app ; vélo lancé ou coché depuis la check-list de l'accueil.
                                     const minutes = estimateSessionMinutes(workoutPlan[current]);
                                     const weekStart = Math.floor(current / 7) * 7;
                                     const goal = computeWeekTargets(workoutPlan.slice(weekStart, weekStart + 7));

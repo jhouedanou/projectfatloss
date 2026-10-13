@@ -25,6 +25,7 @@
     "cap:sync": "npm run build:cap && cap sync android",
     "fetch-mediapipe": "node scripts/fetch-mediapipe-assets.mjs",
     "generate-icons": "node scripts/generate-icons.js",
+    "test:bike": "node scripts/test-bike.mjs",
     "seed-exercises": "node scripts/seed-exercises.mjs",
     "mobile": "vite --host 0.0.0.0 --port 3000",
     "mobile-sync": "browser-sync start --proxy 'localhost:3000' --files 'src/**/*' --port 3001 --ui-port 3002",
