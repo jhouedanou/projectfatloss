@@ -1,13 +1,21 @@
 import React, { memo, useCallback } from 'react';
 import YouTube from 'react-youtube';
 
+/** État « lecture en cours » de l'API YouTube IFrame. */
+const PLAYING = 1;
+
 /**
  * Lecteur YouTube plein écran pour le ride.
  *
  * Mémoïsé : les métriques changent chaque seconde et ne doivent jamais
  * provoquer un remontage de l'iframe (qui relancerait la vidéo). L'instance du
  * player est remontée au parent via `playerRef` pour piloter `setPlaybackRate`,
- * `pauseVideo`, `playVideo` et le son sans re-render.
+ * `pauseVideo`, `playVideo`, le son et l'enchaînement des parcours
+ * (`loadVideoById`) sans re-render.
+ *
+ * `videoId` est la PREMIÈRE vidéo de la sortie : les parcours suivants sont
+ * chargés par le parent dans le même lecteur. Changer `videoId` recréerait
+ * l'iframe, et le son coupé à la création.
  *
  * La vidéo démarre TOUJOURS muette : les navigateurs n'autorisent le démarrage
  * automatique qu'à cette condition, et il n'y a aucun bouton de lecture natif
@@ -18,7 +26,7 @@ import YouTube from 'react-youtube';
  * démarrage si demandé (`gyro`), l'orientation est ensuite pilotée par
  * Ride360Layer et les boutons du HUD.
  */
-function RideVideoPlayer({ videoId, playerRef, onUnavailable, is360 = false, gyro = false }) {
+function RideVideoPlayer({ videoId, playerRef, onUnavailable, onEnded, onPlaying, is360 = false, gyro = false }) {
   const handleReady = useCallback(
     (event) => {
       playerRef.current = event.target;
@@ -37,13 +45,21 @@ function RideVideoPlayer({ videoId, playerRef, onUnavailable, is360 = false, gyr
   );
 
   // 100 / 101 / 150 : vidéo absente ou lecture interdite hors du site d'origine.
+  // Le parent sait quelle vidéo joue (elle a pu changer depuis `videoId`).
   const handleError = useCallback(
     (event) => {
       if (event?.data === 101 || event?.data === 150 || event?.data === 100) {
-        onUnavailable?.(videoId);
+        onUnavailable?.();
       }
     },
-    [onUnavailable, videoId]
+    [onUnavailable]
+  );
+
+  const handleStateChange = useCallback(
+    (event) => {
+      if (event?.data === PLAYING) onPlaying?.();
+    },
+    [onPlaying]
   );
 
   return (
@@ -66,6 +82,8 @@ function RideVideoPlayer({ videoId, playerRef, onUnavailable, is360 = false, gyr
         }}
         onReady={handleReady}
         onError={handleError}
+        onEnd={onEnded}
+        onStateChange={handleStateChange}
       />
     </div>
   );

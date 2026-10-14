@@ -90,6 +90,13 @@
   color: #fff;
 }
 
+/* Objectif de la séance : les choix passent à la ligne plutôt que défiler. */
+.ride-goal-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .ride-picker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -803,6 +810,39 @@
   transition: left 1s linear;
 }
 
+/* Fantôme : ton meilleur passage, un point translucide sur la route. */
+.ride-progress-ghost {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(186, 230, 253, 0.55);
+  border: 2px solid rgba(186, 230, 253, 0.9);
+  transform: translate(-50%, -50%);
+  transition: left 1s linear;
+}
+
+/* Objectif de la séance : barre fine sous la route, verte une fois atteint. */
+.ride-goal {
+  position: relative;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.ride-goal-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #ffd166;
+  transition: width 1s linear;
+}
+
+.ride-goal.is-done .ride-goal-fill {
+  background: #22C55E;
+}
+
 .ride-dash-stats {
   display: flex;
   flex-wrap: wrap;
@@ -833,6 +873,20 @@
 
 .ride-dash-remaining {
   margin-left: auto;
+}
+
+.ride-dash-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ride-dash-ghost.is-ahead strong {
+  color: #86efac;
+}
+
+.ride-dash-ghost.is-behind strong {
+  color: #fca5a5;
 }
 
 @media (max-width: 640px) {
@@ -918,6 +972,17 @@
   font-weight: 800;
 }
 
+.ride-hud-route {
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .ride-hud-icon.is-on {
   background: #FF6B35;
   border-color: #FF6B35;
@@ -934,6 +999,26 @@
   background: rgba(10, 12, 18, 0.8);
   font-size: 0.95rem;
   font-weight: 650;
+}
+
+/* Annonce brève : parcours suivant, objectif atteint. */
+.ride-toast {
+  position: absolute;
+  left: 50%;
+  top: calc(64px + env(safe-area-inset-top));
+  transform: translateX(-50%);
+  max-width: min(560px, calc(100% - 32px));
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: rgba(10, 12, 18, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-size: 0.9rem;
+  font-weight: 650;
+  text-align: center;
+  text-wrap: balance;
+  pointer-events: none;
 }
 
 /* --- Récapitulatif -------------------------------------------------------- */
@@ -1006,7 +1091,9 @@
 
   .ride-360-hint,
   .ride-progress-fill,
-  .ride-progress-rider {
+  .ride-progress-rider,
+  .ride-progress-ghost,
+  .ride-goal-fill {
     animation: none;
     transition: none;
   }

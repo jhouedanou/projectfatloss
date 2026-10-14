@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Maximize, Minimize, Smartphone, LocateFixed } from 'lucide-react';
+import { Volume2, VolumeX, Maximize, Minimize, Smartphone, LocateFixed, Ghost } from 'lucide-react';
 import { getUserWeight } from '../../services/CalorieEstimator';
 
 /** mm:ss ou h:mm:ss selon la durée. */
@@ -77,12 +77,20 @@ function ZoneBar({ zone }) {
   );
 }
 
+/** « 85 m devant » / « 1,2 km derrière ». */
+const formatGap = (meters) => {
+  const abs = Math.abs(meters);
+  const text = abs >= 1000 ? `${(abs / 1000).toFixed(1).replace('.', ',')} km` : `${abs} m`;
+  return `${text} ${meters >= 0 ? 'devant' : 'derrière'}`;
+};
+
 /**
  * Overlay de télémétrie posé sur la vidéo, dans l'esprit de Kinomap VR : la
  * route reste dégagée au centre, les commandes en haut, un tableau de bord en
  * verre dépoli en bas — puissance colorée par zone, vitesse en héros, cadence,
- * cardio — et une barre de progression du parcours (position dans la vidéo,
- * temps restant à la vitesse de lecture courante).
+ * cardio — une barre de progression du parcours (position dans la vidéo, temps
+ * restant à la vitesse de lecture courante, fantôme du meilleur passage) et,
+ * si un objectif est fixé, la barre de l'objectif de la séance.
  */
 export default function BikeHud({
   metrics,
@@ -101,6 +109,10 @@ export default function BikeHud({
   onToggleGyro,
   onRecenter,
   progress,
+  goalSec = null,
+  routeIndex = 1,
+  calorieLabel = '',
+  toast = '',
 }) {
   const ftp = getFtp();
   const zone = powerZone(metrics.watts, ftp);
@@ -112,6 +124,10 @@ export default function BikeHud({
   const ratio = duration ? current / duration : 0;
   // Temps réel restant : la vidéo défile à `rate`, pas à ×1.
   const remainingSec = duration && rate > 0 ? (duration - current) / rate : null;
+  const ghostRatio = duration && progress?.ghostSec != null ? Math.min(1, progress.ghostSec / duration) : null;
+  const ghostGap = progress?.ghostGapM;
+  const goalRatio = goalSec ? Math.min(1, metrics.elapsedSec / goalSec) : 0;
+  const goalReached = goalSec != null && metrics.elapsedSec >= goalSec;
 
   return (
     <div className="ride-hud">
@@ -122,6 +138,7 @@ export default function BikeHud({
         </div>
         <div className="ride-hud-title">
           {is360 && <span className="ride-hud-360">360°</span>}
+          {routeIndex > 1 && <span className="ride-hud-route">Parcours {routeIndex}</span>}
           {videoTitle}
         </div>
         {is360 && (
@@ -203,7 +220,12 @@ export default function BikeHud({
             </span>
           </div>
 
-          <Tile label="Cadence" value={metrics.cadence} unit="rpm" />
+          <Tile
+            label="Cadence"
+            value={metrics.cadence}
+            unit="rpm"
+            sub={metrics.resistance != null ? `niveau ${fmt(metrics.resistance)}` : null}
+          />
           <Tile
             label="Cardio"
             value={metrics.bpm}
@@ -216,18 +238,40 @@ export default function BikeHud({
         <div className="ride-dash-route">
           <div className="ride-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(ratio * 100)} aria-label="Progression du parcours">
             <span className="ride-progress-fill" style={{ width: `${ratio * 100}%` }} />
+            {ghostRatio != null && (
+              <span className="ride-progress-ghost" style={{ left: `${ghostRatio * 100}%` }} title="Ton meilleur passage" />
+            )}
             <span className="ride-progress-rider" style={{ left: `${ratio * 100}%` }} />
           </div>
+          {goalSec != null && (
+            <div
+              className={`ride-goal ${goalReached ? 'is-done' : ''}`}
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(goalRatio * 100)}
+              aria-label="Objectif de la séance"
+            >
+              <span className="ride-goal-fill" style={{ width: `${goalRatio * 100}%` }} />
+            </div>
+          )}
           <div className="ride-dash-stats">
             <span className="ride-dash-stat">
-              <strong>{formatDuration(metrics.elapsedSec)}</strong> durée
+              <strong>{formatDuration(metrics.elapsedSec)}</strong>
+              {goalSec != null ? ` / ${formatDuration(goalSec)} objectif` : ' durée'}
             </span>
             <span className="ride-dash-stat">
               <strong>{fmt(metrics.distanceKm, 2)}</strong> km
             </span>
             <span className="ride-dash-stat">
-              <strong>{fmt(metrics.calories)}</strong> kcal
+              <strong>{fmt(metrics.calories)}</strong> kcal{calorieLabel ? ` · ${calorieLabel}` : ''}
             </span>
+            {ghostGap != null && (
+              <span className={`ride-dash-stat ride-dash-ghost ${ghostGap >= 0 ? 'is-ahead' : 'is-behind'}`}>
+                <Ghost size={14} aria-hidden="true" />
+                <strong>{formatGap(ghostGap)}</strong>
+              </span>
+            )}
             <span className={`ride-dash-stat ride-dash-rate ${videoPaused ? 'is-paused' : ''}`}>
               <strong>{videoPaused ? 'pause' : `×${rate}`}</strong> lecture
             </span>
@@ -242,6 +286,11 @@ export default function BikeHud({
 
       {videoPaused && (
         <div className="ride-paused-banner">Vidéo en pause — reprends le pédalage</div>
+      )}
+      {toast && !videoPaused && (
+        <div className="ride-toast" role="status">
+          {toast}
+        </div>
       )}
     </div>
   );

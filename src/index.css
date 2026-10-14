@@ -401,6 +401,9 @@ h6 { font-size: .875rem; }
 
 /* ── Lien rapide accueil (Cardio) ─────────────────────────────────── */
 .home-quicklinks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   padding: 0 16px;
   max-width: 760px;
   margin: 0 auto 4px;
