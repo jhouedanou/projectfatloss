@@ -15,6 +15,7 @@ import {
 } from '../src/services/bike/eb900Protocol.js';
 import { DEVICE_GRACE_SEC, createCalorieState, stepCalories } from '../src/services/bike/rideCalories.js';
 import { ghostGapMeters, ghostPositionAt, isBetterGhost, pickNextVideo } from '../src/services/bike/rideSession.js';
+import { explainBleError, isQuestBrowser } from '../src/services/bike/BleBridge.js';
 
 let failures = 0;
 const check = (label, actual, expected) => {
@@ -196,6 +197,22 @@ check('plus dur = plus de watts', estimateDomyosWatts(80, 12) > estimateDomyosWa
     isBetterGhost({ positions: [0, 10, 20, 20] }, { positions: [0, 5, 10, 15, 20] }),
     true
   );
+}
+
+// --- Navigateur du Quest (Bluetooth web bloqué) ---------------------------------
+{
+  const quest3 =
+    'Mozilla/5.0 (X11; Linux x86_64; Quest 3) AppleWebKit/537.36 (KHTML, like Gecko) OculusBrowser/35.2.0 SamsungBrowser/4.0 Chrome/128.0.6613.137 VR Safari/537.36';
+  const pixel =
+    'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36';
+  check('navigateur du Quest 3/3S reconnu', isQuestBrowser(quest3), true);
+  check('Chrome Android non concerné', isQuestBrowser(pixel), false);
+  check(
+    'erreur anglaise traduite',
+    explainBleError(new Error('Bluetooth Low Energy not available.')),
+    'Bluetooth indisponible : active le Bluetooth de l\'appareil, puis réessaie.'
+  );
+  check('autre erreur gardée telle quelle', explainBleError(new Error('GATT Server is disconnected.')), 'GATT Server is disconnected.');
 }
 
 console.log(failures ? `\n${failures} échec(s)` : '\nTous les tests passent');

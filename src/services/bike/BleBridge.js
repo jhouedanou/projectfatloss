@@ -7,7 +7,7 @@
  *    le build web ne le réclame pas.
  *
  * API commune (toutes les méthodes en Promise) :
- *   isSupported() -> boolean
+ *   isSupported() -> boolean   (false dans le navigateur du Quest, qui bloque le Bluetooth)
  *   requestDevice({ services, namePrefix, optionalServices }) -> handle opaque
  *     (namePrefix : chaîne ou tableau de préfixes)
  *   connect(handle)
@@ -41,12 +41,20 @@ const isNative = () => {
   }
 };
 
+/**
+ * Navigateur du casque Meta Quest. Il expose `navigator.bluetooth`, mais toute
+ * demande échoue (« Bluetooth Low Energy not available ») : Meta bloque le
+ * Bluetooth web. L'application Android installée sur le Quest, elle, y a accès.
+ */
+export const isQuestBrowser = (ua = typeof navigator !== 'undefined' ? navigator.userAgent : '') =>
+  /OculusBrowser|Quest/i.test(ua || '');
+
 // --- Transport Web Bluetooth --------------------------------------------------
 
 const webTransport = {
   name: 'web',
 
-  isSupported: () => typeof navigator !== 'undefined' && !!navigator.bluetooth,
+  isSupported: () => typeof navigator !== 'undefined' && !!navigator.bluetooth && !isQuestBrowser(),
 
   // Web Bluetooth n'autorise pas le scan libre : seul le sélecteur du
   // navigateur voit les appareils alentour. Le filtrage (namePrefix) est le
@@ -215,6 +223,29 @@ const capacitorTransport = {
 // --- Façade -------------------------------------------------------------------
 
 const transport = () => (isNative() ? capacitorTransport : webTransport);
+
+/** Pourquoi le Bluetooth manque ici, en une phrase (null s'il est disponible). */
+export function unavailableReason() {
+  if (transport().isSupported()) return null;
+  if (isQuestBrowser()) {
+    return 'Le navigateur du Quest bloque le Bluetooth. Installe l\'application Android Project Fat Loss sur le Quest : elle se connecte directement à l\'EB900.';
+  }
+  return 'Bluetooth non disponible dans ce navigateur. Sur Android, utilise Chrome ou l\'application ; sur iPhone, aucun navigateur n\'expose le Bluetooth : utilise le mode démo.';
+}
+
+/**
+ * Message en français pour une erreur Bluetooth. Les erreurs du navigateur
+ * arrivent en anglais (« Bluetooth Low Energy not available », « Bluetooth
+ * adapter not available »).
+ */
+export function explainBleError(error) {
+  const message = error?.message || String(error || '');
+  if (/low energy not available|adapter not available|bluetooth.*(off|disabled|unavailable)/i.test(message)) {
+    if (isQuestBrowser()) return unavailableReason() || message;
+    return 'Bluetooth indisponible : active le Bluetooth de l\'appareil, puis réessaie.';
+  }
+  return message || 'Connexion Bluetooth impossible.';
+}
 
 const BleBridge = {
   /** Le BLE est-il utilisable sur cette plateforme ? (iOS Safari / Firefox : non) */

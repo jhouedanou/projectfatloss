@@ -12,6 +12,7 @@ import useRideScreen from './useRideScreen';
 import { RIDE_VIDEOS, formatVideoDuration, loadCustomVideos } from '../../data/rideVideos';
 import SimulationAdapter from '../../services/bike/adapters/SimulationAdapter';
 import { detectBike, protocolInfo, releaseDetectedHandle } from '../../services/bike/detectBike';
+import { explainBleError } from '../../services/bike/BleBridge';
 import { GHOST_STEP_SEC, ghostGapMeters, ghostPositionAt, pickNextVideo } from '../../services/bike/rideSession';
 import { loadGhost, saveGhosts } from '../../services/bike/RideStorage';
 import './BikeRide.css';
@@ -315,7 +316,7 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip, mode = 'wa
       const message = detectError?.message || 'Détection impossible.';
       setStatus('');
       // Sélecteur fermé sans choix : pas une erreur.
-      if (!/cancel|annul/i.test(message)) setError(message);
+      if (!/cancel|annul/i.test(message)) setError(explainBleError(detectError));
     } finally {
       setDetectingEb900(false);
     }
@@ -387,7 +388,7 @@ export default function BikeRideSession({ dayTitle, onFinish, onSkip, mode = 'wa
       setPhase('riding');
     } catch (startError) {
       setConnected(false);
-      setError(startError?.message || 'Connexion impossible.');
+      setError(explainBleError(startError));
       leaveFullscreen();
     }
   }, [source, hrEnabled, video, openSegment, resetMetrics, enterFullscreen, leaveFullscreen]);

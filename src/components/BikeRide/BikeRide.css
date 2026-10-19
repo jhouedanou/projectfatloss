@@ -491,6 +491,28 @@
   word-break: break-all;
 }
 
+/* Navigateur du Quest : étapes pour installer l'application Android. */
+.ride-quest-help {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #262c37;
+  background: #10141c;
+}
+
+.ride-quest-help summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #f5f7fa;
+}
+
+.ride-quest-help .ride-steps {
+  margin-top: 10px;
+}
+
+.ride-quest-help a {
+  color: #FF6B35;
+}
+
 /* --- Boutons -------------------------------------------------------------- */
 
 .ride-actions {
