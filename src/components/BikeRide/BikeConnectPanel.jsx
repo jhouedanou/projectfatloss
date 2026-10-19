@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import BleBridge from '../../services/bike/BleBridge';
+import BleBridge, { isQuestBrowser, unavailableReason } from '../../services/bike/BleBridge';
+import QuestApkHelp from './QuestApkHelp';
 
 const DOMYOS_DEBUG_KEY = 'domyos_debug';
 
@@ -62,12 +63,15 @@ export default function BikeConnectPanel({
             >
               <span className="ride-source-label">{item.label}</span>
               <span className="ride-source-hint">
-                {disabled ? 'Bluetooth indisponible sur cette plateforme' : item.hint}
+                {disabled ? (isQuestBrowser() ? 'Bloqué par le navigateur du Quest' : 'Bluetooth indisponible sur cette plateforme') : item.hint}
               </span>
             </button>
           );
         })}
       </div>
+
+      {!bleOk && <p className="ride-status">{unavailableReason()}</p>}
+      {!bleOk && isQuestBrowser() && <QuestApkHelp />}
 
       {bleOk && onDetectEb900 && (
         <button

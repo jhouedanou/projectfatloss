@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import BleBridge from '../../services/bike/BleBridge';
+import BleBridge, { explainBleError, isQuestBrowser, unavailableReason } from '../../services/bike/BleBridge';
+import QuestApkHelp from './QuestApkHelp';
 import {
   detectBike,
   identifyScannedDevice,
@@ -101,7 +102,7 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
       setState('idle');
       return;
     }
-    setError(message);
+    setError(explainBleError(detectError));
     setState('error');
   }, []);
 
@@ -203,12 +204,8 @@ export default function BikeDetectScreen({ onUseSource, onBack }) {
         ))}
       </ol>
 
-      {!bleOk && (
-        <p className="ride-error">
-          Bluetooth indisponible sur cette plateforme. Dans Chrome sur Android — y compris
-          l'application installée — la détection fonctionne ; sur iPhone, non.
-        </p>
-      )}
+      {!bleOk && <p className="ride-error">{unavailableReason()}</p>}
+      {!bleOk && isQuestBrowser() && <QuestApkHelp />}
 
       {state === 'scanning' && (
         <p className="ride-status">Scan en cours ({devices.length} appareil{devices.length > 1 ? 's' : ''} trouvé{devices.length > 1 ? 's' : ''})…</p>

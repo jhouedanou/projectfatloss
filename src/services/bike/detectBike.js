@@ -6,7 +6,7 @@
  * choisi et connecté, ses services GATT disent exactement à quoi on a affaire.
  */
 
-import BleBridge, { fullUuid } from './BleBridge';
+import BleBridge, { fullUuid, unavailableReason } from './BleBridge';
 import { DOMYOS_SERVICE } from './adapters/DomyosAdapter';
 import { FTMS_SERVICE } from './adapters/FtmsAdapter';
 import { HR_SERVICE } from './adapters/HeartRateAdapter';
@@ -100,9 +100,7 @@ export function releaseDetectedHandle(report) {
  */
 export async function detectBike({ domyosOnly = false } = {}) {
   if (!BleBridge.isSupported()) {
-    throw new Error(
-      'Bluetooth non disponible ici. Sur iPhone, aucun navigateur n\'expose le Bluetooth : utilise le mode démo.'
-    );
+    throw new Error(unavailableReason());
   }
 
   const handle = await BleBridge.requestDevice({
