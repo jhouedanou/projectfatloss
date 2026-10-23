@@ -1,6 +1,6 @@
 import React from 'react';
 
-/** Ligne de réglage on/off (options vélo de la page séance, mode immersif…). */
+/** Ligne de réglage on/off (options vélo de la page séance…). */
 export default function SettingToggle({ icon, title, subtitle, checked, onToggle, ariaLabel }) {
   return (
     <div style={{

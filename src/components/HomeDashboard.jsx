@@ -85,7 +85,7 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
   const target = Math.max(1, weekPlanDays.filter((d) => !d.isRestDay).length);
   const done = weekWorkouts.length;
 
-  // Objectif en minutes (vélo + musculation légère) et minutes faites depuis lundi.
+  // Objectif en minutes (vélo + musculation) et minutes faites depuis lundi.
   const goal = useMemo(() => computeWeekTargets(weekPlanDays, { goalKg }), [weekPlanDays, goalKg]);
   const progress = useMemo(() => getWeekProgress(), [checklistVersion]);
   const minutesDone = progress.bikeMinutes + progress.strengthMinutes;
@@ -212,7 +212,7 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
           <div className="hd-card hd-card-strength">
             <Dumbbell size={20} />
             <div className="hd-card-body">
-              <div className="hd-card-label">Muscu légère</div>
+              <div className="hd-card-label">Musculation</div>
               <div className="hd-card-value">
                 {progress.strengthMinutes}<span className="hd-card-of"> / {goal.strengthMinutes} min</span>
               </div>
@@ -260,25 +260,23 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
           <li>
             <Bike size={16} />
             <span>
-              <strong>{goal.bikeMinutes} min de vélo</strong> cette semaine
-              {goal.sessions > 0 && ` · une séance de ${goal.bikePerSession} min les jours de muscu`}
+              <strong>{goal.bikeMinutes} min de vélo</strong> cette semaine · {goal.bikePerSession} min chaque jour
             </span>
           </li>
-          {goal.extraBike > 0 && (
-            <li className="hd-goal-extra">
-              <Bike size={16} />
-              <span>dont {goal.extraBike} min de vélo libre les jours de repos</span>
-            </li>
-          )}
           <li>
             <Dumbbell size={16} />
-            <span><strong>{goal.strengthMinutes} min de muscu légère</strong> ({goal.sessions} séances)</span>
+            <span><strong>{goal.strengthMinutes} min de musculation</strong> ({goal.sessions} séances)</span>
           </li>
           <li>
             <Leaf size={16} />
             <span>Assiette : <strong>−{goal.dietDaily} kcal/jour</strong> (objectif de l'onglet Nutrition)</span>
           </li>
         </ul>
+        {goal.missingKcalPerDay > 0 && (
+          <p className="hd-goal-gap">
+            Pour viser −{fmtKg(goalKg)} kg : encore <strong>−{goal.missingKcalPerDay} kcal/jour</strong> dans l'assiette.
+          </p>
+        )}
         <p className="hd-goal-foot">
           Avec ce plan : environ <strong>−{fmtKg(goal.projectedKgPerMonth)} kg par mois</strong>
           {' · '}Séances {done}/{target} · Série {streak} jour{streak > 1 ? 's' : ''}

@@ -43,14 +43,12 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartR
   if (!planDay) return null;
 
   const title = planDay.title.replace(/^JOUR \d+:\s*/i, '').split(' — ')[0];
-  const items = [];
-  if (planDay.isRestDay) {
-    if (goal.extraPerRestDay > 0) {
-      items.push({ id: 'bikeExtra', kind: 'bike', minutes: goal.extraPerRestDay, label: `Vélo ${goal.extraPerRestDay} min`, hint: 'vélo libre pour tenir l\'objectif' });
-    }
-  } else {
-    items.push({ id: 'bike', kind: 'bike', minutes: goal.bikePerSession, label: `Vélo ${goal.bikePerSession} min`, hint: 'une seule séance, au moment qui vous arrange' });
-    items.push({ id: 'strength', kind: 'strength', label: 'Muscu légère', hint: `${title} · ~${estimateSessionMinutes(planDay).strength} min` });
+  // Vélo chaque jour (même un jour sans musculation), puis la séance du jour.
+  const items = [
+    { id: 'bike', kind: 'bike', minutes: goal.bikePerSession, label: `Vélo ${goal.bikePerSession} min`, hint: 'chaque jour, au moment qui vous arrange' },
+  ];
+  if (!planDay.isRestDay) {
+    items.push({ id: 'strength', kind: 'strength', label: 'Musculation', hint: `${title} · ~${estimateSessionMinutes(planDay).strength} min` });
   }
 
   const bikeDoneElsewhere = (item) => otherBikeMinutes >= item.minutes;
@@ -100,7 +98,7 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartR
       </div>
       <p className="dcl-sub">
         {planDay.isRestDay ? (
-          <><Leaf size={13} /> Jour de repos{items.length === 0 ? ' : rien à faire aujourd\'hui.' : ''}</>
+          <><Leaf size={13} /> Pas de musculation aujourd'hui : seulement le vélo.</>
         ) : (
           onStartRide
             ? '« Rouler » lance la séance vélo en vidéo, pilotée par votre EB900. Faite ailleurs ? Cochez-la.'

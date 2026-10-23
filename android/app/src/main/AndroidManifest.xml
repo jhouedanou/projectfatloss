@@ -38,9 +38,6 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Comptage de répétitions par vision (getUserMedia dans le WebView) -->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 
     <!-- Vélo connecté (BLE) : la WebView n'expose pas Web Bluetooth, le scan et
          la connexion passent par le plugin natif. Android 12+ utilise les

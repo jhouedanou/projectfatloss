@@ -345,12 +345,15 @@
   color: var(--label);
   font-weight: 600;
 }
-.hd-goal-extra {
-  padding-left: 26px;
-  font-size: 0.78rem !important;
+/* Objectif plus ambitieux que le plan : ce qu'il reste à prendre dans l'assiette. */
+.hd-goal-gap {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--label-2);
 }
-.hd-goal-extra svg {
-  display: none;
+.hd-goal-gap strong {
+  color: var(--acc);
+  font-weight: 700;
 }
 .hd-goal-foot {
   margin: 12px 0 0;
