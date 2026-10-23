@@ -10,9 +10,10 @@ const CUSTOM_WORKOUT_KEY = 'custom_workout_plan';
 
 // Version du programme par défaut : quand elle change, un éventuel plan
 // personnalisé basé sur l'ancien programme est écarté pour que tout le monde
-// reçoive le nouveau programme (musculation légère, vélo en check-list).
+// reçoive le nouveau programme (une séance chaque jour, vélo 20 min en
+// check-list).
 const PLAN_VERSION_KEY = 'plan_version';
-const PLAN_VERSION = '28d-v4';
+const PLAN_VERSION = '28d-v5';
 
 const migratePlanVersion = () => {
   try {
