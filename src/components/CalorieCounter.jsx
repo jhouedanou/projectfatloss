@@ -153,19 +153,6 @@ const CalorieCounter = () => {
     setLog(updatedLog);
     setSummary(getNutritionSummary(selectedDate));
 
-    const mealItems = updatedLog?.meals?.[activeMealType] || [];
-    const lastLoggedItem = mealItems[mealItems.length - 1];
-    if (lastLoggedItem) {
-      import('../services/SyncService')
-        .then(({ pushAddedFoodEntry }) => pushAddedFoodEntry({
-          day: selectedDate,
-          mealType: activeMealType,
-          item: lastLoggedItem,
-          sourceCustomId: foodItem?.remoteId || null,
-        }))
-        .catch(() => {});
-    }
-    
     // Reset states and close modal
     setSelectedFood(null);
     setQuantity(100);

@@ -53,7 +53,7 @@ export function saveUserExercise(exercise) {
   exercises.push(customExercise);
   localStorage.setItem(USER_EXERCISES_KEY, JSON.stringify(exercises));
 
-  // Pousser vers Supabase (offline-first, non bloquant)
+  // Pousser vers Firebase (offline-first, non bloquant)
   import('./SyncService')
     .then(({ pushUserExercise }) => pushUserExercise(customExercise))
     .catch(() => {});
@@ -101,7 +101,7 @@ export function deleteUserExercise(exerciseId) {
 
   localStorage.setItem(USER_EXERCISES_KEY, JSON.stringify(filteredExercises));
 
-  // Répercuter la suppression sur Supabase (match par nom)
+  // Répercuter la suppression sur Firebase (match par nom)
   if (target?.name) {
     import('./SyncService')
       .then(({ deleteRemoteUserExercise }) => deleteRemoteUserExercise(target.name))

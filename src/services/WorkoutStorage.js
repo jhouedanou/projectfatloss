@@ -43,7 +43,7 @@ export function saveWorkout(workout) {
   // Mettre à jour les statistiques globales
   updateWorkoutStats(workoutWithId);
 
-  // Pousser vers Supabase (offline-first : ne bloque pas, échoue silencieusement)
+  // Pousser vers Firebase (offline-first : ne bloque pas, échoue silencieusement)
   import('./SyncService')
     .then(({ pushWorkout }) => pushWorkout(workoutWithId))
     .catch(() => {});
@@ -93,7 +93,7 @@ export function deleteWorkout(workoutId) {
   // Recalculer les statistiques
   recalculateAllStats();
 
-  // Répercuter la suppression sur Supabase
+  // Répercuter la suppression sur Firebase
   import('./SyncService')
     .then(({ deleteRemoteWorkout }) => deleteRemoteWorkout(workoutId))
     .catch(() => {});

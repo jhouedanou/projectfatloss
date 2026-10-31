@@ -148,5 +148,17 @@ export default defineConfig(({ command, mode }) => {
   
   // Configurer la gestion du cache
   cacheDir: '.vite_cache', // Dossier de cache personnalisé
+
+  // Firebase dans son propre fichier : le bundle principal reste sous la
+  // limite de 2 Mo du cache hors-ligne (service worker).
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+        },
+      },
+    },
+  },
   };
 });

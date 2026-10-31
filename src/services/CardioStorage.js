@@ -1,6 +1,6 @@
 /**
  * Stockage local des séances cardio (marche / vélo) — offline-first.
- * Chaque séance pousse vers Supabase (table cardio_sessions) quand connecté.
+ * Chaque séance pousse vers Firebase (collection cardio) quand connecté.
  */
 
 const CARDIO_KEY = 'cardio_sessions_data';

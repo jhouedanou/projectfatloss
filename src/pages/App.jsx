@@ -97,7 +97,7 @@ export default function App() {
     setHomeVersion((v) => v + 1);
   };
 
-  // Auth Supabase : suit l'état de connexion et synchronise à la connexion
+  // Auth Firebase : suit l'état de connexion et synchronise à la connexion
   useEffect(() => {
     const unsubscribe = onAuthChange((u) => {
       setUser(u);
@@ -105,7 +105,7 @@ export default function App() {
         setShowLogin(false);
         // Pull + merge + push à la connexion (offline-first)
         fullSync()
-          .then(() => console.log('Synchronisation Supabase terminée'))
+          .then(() => console.log('Synchronisation Firebase terminée'))
           .catch((e) => console.warn('Sync échouée:', e?.message));
       }
     });

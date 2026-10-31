@@ -1,12 +1,27 @@
 /**
- * Service de synchronisation offline-first avec Supabase.
+ * Service de synchronisation offline-first avec Firebase (Firestore).
  * - localStorage reste la source de lecture instantanée (l'app marche hors-ligne).
- * - syncData()        : pousse les données locales vers Supabase (upsert idempotent).
+ * - syncData()        : pousse les données locales vers Firestore (écriture idempotente).
  * - fetchSyncedData() : récupère les données distantes de l'utilisateur.
  * - applySyncedData() : fusionne les données distantes dans le localStorage.
  * - fullSync()        : pull + merge + push (à appeler à la connexion).
+ *
+ * Données de l'utilisateur sous users/{uid}/ : workouts, weighIns, cardio,
+ * nutrition (un document par jour), foods (aliments personnalisés) et
+ * exercises (exercices personnels). Chaque document garde l'enregistrement
+ * local entier en texte JSON (champ `json`) : Firestore refuse les tableaux
+ * imbriqués et les valeurs undefined. Quelques champs lisibles (date, titre…)
+ * l'accompagnent pour la console Firebase.
  */
-import { supabase, isSupabaseConfigured } from './supabase';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  setDoc,
+  writeBatch,
+} from 'firebase/firestore';
+import { db, isFirebaseConfigured } from './firebase';
 import { getCurrentUser } from './AuthService';
 import { getWorkoutHistory } from './WorkoutStorage';
 import { getWeightEntries } from './WeightStorage';
@@ -19,6 +34,9 @@ const USER_EXERCISES_KEY = 'user_custom_exercises';
 const CARDIO_KEY = 'cardio_sessions_data';
 const NUTRITION_KEY = 'pfl_nutrition_logs';
 const CUSTOM_FOODS_KEY = 'pfl_custom_foods';
+
+// Une écriture groupée Firestore accepte 500 opérations au plus.
+const BATCH_SIZE = 400;
 
 const getNutritionLogs = () => {
   try {
@@ -36,113 +54,88 @@ const getCustomFoods = () => {
   }
 };
 
-const notReady = () => ({ success: false, error: 'Synchronisation indisponible (non connecté ou Supabase non configuré)' });
+const notReady = () => ({ success: false, error: 'Synchronisation indisponible (non connecté ou Firebase non configuré)' });
 
 const requireUser = async () => {
-  if (!isSupabaseConfigured) return null;
+  if (!isFirebaseConfigured) return null;
   return getCurrentUser();
 };
 
-// --- Mapping local <-> remote -------------------------------------------------
+// --- Documents Firestore ------------------------------------------------------
 
-const workoutToRow = (w, userId) => ({
-  user_id: userId,
-  client_id: typeof w.id === 'number' ? w.id : Number(w.id) || null,
-  title: w.title || null,
-  date: w.date || new Date().toISOString(),
-  display_date: w.displayDate || null,
-  duration: w.duration ?? null,
-  calories: w.calories ?? null,
-  weight_lifted: w.weightLifted ?? null,
-  exercises: w.exercises ?? null,
+/** Identifiant de document sûr (ni « / », ni « . » seul). */
+const docId = (value) => encodeURIComponent(String(value)).replace(/\./g, '%2E');
+
+const userDoc = (uid, name, id) => doc(db, 'users', uid, name, docId(id));
+const userCollection = (uid, name) => collection(db, 'users', uid, name);
+
+/** Retire les undefined (refusés par Firestore). */
+const clean = (value) => JSON.parse(JSON.stringify(value ?? null));
+
+/** Document : l'enregistrement entier en JSON + quelques champs lisibles. */
+const toDoc = (record, summary = {}) => clean({
+  ...summary,
+  json: JSON.stringify(record ?? null),
+  updatedAt: new Date().toISOString(),
 });
 
-const rowToWorkout = (r) => ({
-  id: r.client_id ?? r.id,
-  title: r.title,
-  date: r.date,
-  displayDate: r.display_date,
-  duration: r.duration,
-  calories: r.calories,
-  weightLifted: r.weight_lifted,
-  exercises: r.exercises,
-});
+const fromDoc = (snapshot) => {
+  try {
+    return JSON.parse(snapshot.data().json);
+  } catch {
+    return null;
+  }
+};
 
-const weighToRow = (e, userId) => ({
-  user_id: userId,
-  client_id: typeof e.id === 'number' ? e.id : Number(e.id) || null,
-  weight: e.weight,
-  date: e.date || new Date().toISOString(),
-  notes: e.notes || null,
-});
+const readCollection = async (uid, name) => {
+  const snapshot = await getDocs(userCollection(uid, name));
+  return snapshot.docs.map((d) => ({ id: d.id, record: fromDoc(d), data: d.data() }));
+};
 
-const rowToWeigh = (r) => ({
-  id: r.client_id ?? r.id,
-  weight: Number(r.weight),
-  date: r.date,
-  notes: r.notes || '',
-});
+/** Écrit des paires [référence, données] par paquets. */
+const commitInChunks = async (writes) => {
+  for (let i = 0; i < writes.length; i += BATCH_SIZE) {
+    const batch = writeBatch(db);
+    writes.slice(i, i + BATCH_SIZE).forEach(([ref, data]) => batch.set(ref, data));
+    await batch.commit();
+  }
+};
 
-const cardioToRow = (s, userId) => ({
-  user_id: userId,
-  client_id: typeof s.id === 'number' ? s.id : Number(s.id) || null,
-  type: s.type,
-  date: s.date || new Date().toISOString(),
-  duration: s.duration ?? null,
-  distance: s.distance ?? null,
-  calories: s.calories ?? null,
-  notes: s.notes || null,
-});
+// --- Mapping local <-> distant -----------------------------------------------
 
-const rowToCardio = (r) => ({
-  id: r.client_id ?? r.id,
-  type: r.type,
-  date: r.date,
-  duration: r.duration,
-  distance: r.distance != null ? Number(r.distance) : null,
-  calories: r.calories != null ? Number(r.calories) : null,
-  notes: r.notes || '',
-});
+const hasId = (item) => item && item.id !== undefined && item.id !== null && item.id !== '';
 
-const nutritionToRow = (day, data, userId) => ({
-  user_id: userId,
-  day,
-  meals: data?.meals ?? null,
-  calorie_goal: data?.calorieGoal ?? 2000,
-  updated_at: new Date().toISOString(),
-});
-
-const customFoodToRow = (food, userId) => ({
-  user_id: userId,
-  entry_type: 'custom',
-  name: food?.name || 'Aliment personnalisé',
-  brand: food?.brand || null,
-  quantity: null,
-  unit: food?.unit || '100g',
-  calories: food?.calories ?? 0,
-  protein: food?.protein ?? 0,
-  carbs: food?.carbs ?? 0,
-  fat: food?.fat ?? 0,
-  fiber: food?.fiber ?? null,
-  sugar: food?.sugar ?? null,
-  sodium: food?.sodium ?? null,
-  meal_type: null,
-  log_day: null,
-  source_custom_id: null,
-});
-
-const rowToCustomFood = (r) => ({
-  remoteId: r.id,
-  name: r.name,
-  calories: Number(r.calories ?? 0),
-  protein: Number(r.protein ?? 0),
-  carbs: Number(r.carbs ?? 0),
-  fat: Number(r.fat ?? 0),
-  category: 'custom',
-  unit: r.unit || '100g',
-});
+const workoutDoc = (w) => toDoc(w, { date: w.date || null, title: w.title || null, calories: w.calories ?? null });
+const weighDoc = (e) => toDoc(e, { date: e.date || null, weight: e.weight ?? null });
+const cardioDoc = (s) => toDoc(s, { date: s.date || null, type: s.type || null, duration: s.duration ?? null });
+const nutritionDoc = (day, data) => toDoc(
+  { ...data, meals: data?.meals ?? null, calorieGoal: data?.calorieGoal ?? 2000 },
+  { day, calorieGoal: data?.calorieGoal ?? 2000 }
+);
 
 const normalizeFoodName = (value) => String(value || '').trim().toLowerCase();
+const foodKey = (food) => normalizeFoodName(food?.name || 'Aliment personnalisé');
+
+const foodDoc = (food) => {
+  const { remoteId, ...rest } = food || {};
+  return toDoc(
+    { ...rest, name: food?.name || 'Aliment personnalisé' },
+    { name: food?.name || 'Aliment personnalisé', createdAt: food?.createdAt || new Date().toISOString() }
+  );
+};
+
+const docToCustomFood = ({ id, record, data }) => ({
+  remoteId: id,
+  name: record?.name ?? data?.name,
+  calories: Number(record?.calories ?? 0),
+  protein: Number(record?.protein ?? 0),
+  carbs: Number(record?.carbs ?? 0),
+  fat: Number(record?.fat ?? 0),
+  category: 'custom',
+  unit: record?.unit || '100g',
+});
+
+const exerciseDoc = (ex) => toDoc(ex, { name: ex.name });
 
 // Fusion par id (les entrées locales priment en cas de conflit d'id identique)
 const mergeById = (local, remote) => {
@@ -155,102 +148,27 @@ const mergeById = (local, remote) => {
 // --- Push --------------------------------------------------------------------
 
 /**
- * Pousse toutes les données locales vers Supabase.
+ * Pousse toutes les données locales vers Firestore.
  */
 export const syncData = async () => {
   try {
     const user = await requireUser();
     if (!user) return notReady();
+    const { uid } = user;
 
-    const workouts = getWorkoutHistory();
-    const weighIns = getWeightEntries();
-    const customExercises = getUserExercises();
-    const cardioSessions = getCardioSessions();
-    const customFoods = getCustomFoods();
+    const writes = [
+      ...getWorkoutHistory().filter(hasId).map((w) => [userDoc(uid, 'workouts', w.id), workoutDoc(w)]),
+      ...getWeightEntries().filter(hasId).map((e) => [userDoc(uid, 'weighIns', e.id), weighDoc(e)]),
+      ...getCardioSessions().filter(hasId).map((s) => [userDoc(uid, 'cardio', s.id), cardioDoc(s)]),
+      // Journal alimentaire (un document par jour)
+      ...Object.entries(getNutritionLogs()).map(([day, data]) => [userDoc(uid, 'nutrition', day), nutritionDoc(day, data)]),
+      // Aliments personnalisés : un document par nom
+      ...getCustomFoods().map((food) => [userDoc(uid, 'foods', foodKey(food)), foodDoc(food)]),
+      // Exercices personnels : un document par nom
+      ...getUserExercises().filter((ex) => ex?.name).map((ex) => [userDoc(uid, 'exercises', ex.name), exerciseDoc(ex)]),
+    ];
 
-    // Séances
-    if (workouts.length) {
-      const { error } = await supabase
-        .from('workouts')
-        .upsert(workouts.map((w) => workoutToRow(w, user.id)), { onConflict: 'user_id,client_id' });
-      if (error) throw error;
-    }
-
-    // Pesées
-    if (weighIns.length) {
-      const { error } = await supabase
-        .from('weigh_ins')
-        .upsert(weighIns.map((e) => weighToRow(e, user.id)), { onConflict: 'user_id,client_id' });
-      if (error) throw error;
-    }
-
-    // Séances cardio
-    if (cardioSessions.length) {
-      const { error } = await supabase
-        .from('cardio_sessions')
-        .upsert(cardioSessions.map((s) => cardioToRow(s, user.id)), { onConflict: 'user_id,client_id' });
-      if (error) throw error;
-    }
-
-    // Journal alimentaire (1 ligne par jour)
-    const nutritionLogs = getNutritionLogs();
-    const nutritionRows = Object.entries(nutritionLogs).map(([day, data]) => nutritionToRow(day, data, user.id));
-    if (nutritionRows.length) {
-      const { error } = await supabase
-        .from('nutrition_logs')
-        .upsert(nutritionRows, { onConflict: 'user_id,day' });
-      if (error) throw error;
-    }
-
-    // Aliments personnalisés : synchronisation par nom (insère ceux absents côté distant)
-    if (customFoods.length) {
-      const { data: existingCustoms, error: customSelErr } = await supabase
-        .from('user_food_entries')
-        .select('id,name')
-        .eq('user_id', user.id)
-        .eq('entry_type', 'custom');
-      if (customSelErr) throw customSelErr;
-
-      const knownNames = new Set((existingCustoms || []).map((r) => normalizeFoodName(r.name)));
-      const toInsertCustoms = customFoods
-        .filter((food) => !knownNames.has(normalizeFoodName(food.name)))
-        .map((food) => customFoodToRow(food, user.id));
-
-      if (toInsertCustoms.length) {
-        const { error } = await supabase.from('user_food_entries').insert(toInsertCustoms);
-        if (error) throw error;
-      }
-    }
-
-    // Exercices personnels : insère ceux qui n'existent pas encore (match par nom)
-    if (customExercises.length) {
-      const { data: existing, error: selErr } = await supabase
-        .from('exercises')
-        .select('name')
-        .eq('owner_id', user.id);
-      if (selErr) throw selErr;
-
-      const known = new Set((existing || []).map((r) => r.name));
-      const toInsert = customExercises
-        .filter((ex) => !known.has(ex.name))
-        .map((ex) => ({
-          owner_id: user.id,
-          name: ex.name,
-          description: ex.description || null,
-          equip: ex.equipment || null,
-          category: ex.category || null,
-          muscle_group: ex.muscleGroup || null,
-          is_timer: !!ex.isTimer,
-          default_duration: ex.defaultDuration ?? null,
-          total_sets: ex.defaultSets ?? null,
-          nb_rep: ex.defaultReps ?? null,
-        }));
-
-      if (toInsert.length) {
-        const { error } = await supabase.from('exercises').insert(toInsert);
-        if (error) throw error;
-      }
-    }
+    await commitInChunks(writes);
 
     return {
       success: true,
@@ -265,249 +183,115 @@ export const syncData = async () => {
 
 // --- Push d'un seul enregistrement (offline-first, fire-and-forget) ----------
 
-/**
- * Pousse une seule séance vers Supabase. Silencieux si non connecté/hors-ligne.
- */
-export const pushWorkout = async (workout) => {
+/** Écrit un document de l'utilisateur. Silencieux si non connecté/hors-ligne. */
+const pushOne = async (label, name, id, data) => {
   try {
     const user = await requireUser();
-    if (!user) return;
-    await supabase
-      .from('workouts')
-      .upsert(workoutToRow(workout, user.id), { onConflict: 'user_id,client_id' });
-  } catch (error) {
-    console.warn('[sync] pushWorkout différé:', error?.message);
-  }
-};
-
-/**
- * Pousse une seule pesée vers Supabase.
- */
-export const pushWeighIn = async (entry) => {
-  try {
-    const user = await requireUser();
-    if (!user) return;
-    await supabase
-      .from('weigh_ins')
-      .upsert(weighToRow(entry, user.id), { onConflict: 'user_id,client_id' });
-  } catch (error) {
-    console.warn('[sync] pushWeighIn différé:', error?.message);
-  }
-};
-
-export const deleteRemoteWorkout = async (clientId) => {
-  try {
-    const user = await requireUser();
-    if (!user) return;
-    await supabase.from('workouts').delete().eq('user_id', user.id).eq('client_id', clientId);
-  } catch (error) {
-    console.warn('[sync] deleteRemoteWorkout différé:', error?.message);
-  }
-};
-
-export const deleteRemoteWeighIn = async (clientId) => {
-  try {
-    const user = await requireUser();
-    if (!user) return;
-    await supabase.from('weigh_ins').delete().eq('user_id', user.id).eq('client_id', clientId);
-  } catch (error) {
-    console.warn('[sync] deleteRemoteWeighIn différé:', error?.message);
-  }
-};
-
-export const pushCardio = async (session) => {
-  try {
-    const user = await requireUser();
-    if (!user) return;
-    await supabase
-      .from('cardio_sessions')
-      .upsert(cardioToRow(session, user.id), { onConflict: 'user_id,client_id' });
-  } catch (error) {
-    console.warn('[sync] pushCardio différé:', error?.message);
-  }
-};
-
-export const deleteRemoteCardio = async (clientId) => {
-  try {
-    const user = await requireUser();
-    if (!user) return;
-    await supabase.from('cardio_sessions').delete().eq('user_id', user.id).eq('client_id', clientId);
-  } catch (error) {
-    console.warn('[sync] deleteRemoteCardio différé:', error?.message);
-  }
-};
-
-/**
- * Pousse le journal alimentaire d'un jour (dateStr YYYY-MM-DD) vers Supabase.
- */
-export const pushNutritionDay = async (day, data) => {
-  try {
-    const user = await requireUser();
-    if (!user) return;
-    await supabase
-      .from('nutrition_logs')
-      .upsert(nutritionToRow(day, data, user.id), { onConflict: 'user_id,day' });
-  } catch (error) {
-    console.warn('[sync] pushNutritionDay différé:', error?.message);
-  }
-};
-
-/**
- * Pousse un aliment personnalisé dans user_food_entries.
- * Retourne la ligne créée (incluant son id distant) si disponible.
- */
-export const pushCustomFoodEntry = async (food) => {
-  try {
-    const user = await requireUser();
-    if (!user) return null;
-
-    const payload = customFoodToRow(food, user.id);
-    const { data, error } = await supabase
-      .from('user_food_entries')
-      .insert(payload)
-      .select('*')
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.warn('[sync] pushCustomFoodEntry différé:', error?.message);
-    return null;
-  }
-};
-
-/**
- * Enregistre un aliment ajouté à un repas.
- */
-export const pushAddedFoodEntry = async ({ day, mealType, item, sourceCustomId = null }) => {
-  try {
-    const user = await requireUser();
-    if (!user) return null;
-
-    const payload = {
-      user_id: user.id,
-      entry_type: 'added',
-      name: item?.name || 'Aliment',
-      quantity: item?.quantity ?? null,
-      unit: item?.unit || item?.unitLabel || 'g',
-      calories: item?.calories ?? 0,
-      protein: item?.protein ?? 0,
-      carbs: item?.carbs ?? 0,
-      fat: item?.fat ?? 0,
-      meal_type: mealType,
-      log_day: day,
-      source_custom_id: sourceCustomId,
-    };
-
-    const { error } = await supabase.from('user_food_entries').insert(payload);
-    if (error) throw error;
+    if (!user) return false;
+    await setDoc(userDoc(user.uid, name, id), data);
     return true;
   } catch (error) {
-    console.warn('[sync] pushAddedFoodEntry différé:', error?.message);
+    console.warn(`[sync] ${label} différé:`, error?.message);
     return false;
   }
 };
 
-/**
- * Supprime un aliment personnalisé distant.
- */
-export const deleteRemoteCustomFoodEntry = async ({ remoteId, name }) => {
+/** Supprime un document de l'utilisateur. Silencieux si non connecté/hors-ligne. */
+const deleteOne = async (label, name, id) => {
   try {
     const user = await requireUser();
     if (!user) return;
-
-    if (remoteId) {
-      await supabase
-        .from('user_food_entries')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('entry_type', 'custom')
-        .eq('id', remoteId);
-      return;
-    }
-
-    await supabase
-      .from('user_food_entries')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('entry_type', 'custom')
-      .eq('name', name);
+    await deleteDoc(userDoc(user.uid, name, id));
   } catch (error) {
-    console.warn('[sync] deleteRemoteCustomFoodEntry différé:', error?.message);
+    console.warn(`[sync] ${label} différé:`, error?.message);
   }
 };
 
 /**
- * Récupère les aliments personnalisés de l'utilisateur.
+ * Pousse une seule séance vers Firestore. Silencieux si non connecté/hors-ligne.
+ */
+export const pushWorkout = async (workout) => {
+  if (!hasId(workout)) return;
+  await pushOne('pushWorkout', 'workouts', workout.id, workoutDoc(workout));
+};
+
+/**
+ * Pousse une seule pesée vers Firestore.
+ */
+export const pushWeighIn = async (entry) => {
+  if (!hasId(entry)) return;
+  await pushOne('pushWeighIn', 'weighIns', entry.id, weighDoc(entry));
+};
+
+export const deleteRemoteWorkout = (clientId) => deleteOne('deleteRemoteWorkout', 'workouts', clientId);
+
+export const deleteRemoteWeighIn = (clientId) => deleteOne('deleteRemoteWeighIn', 'weighIns', clientId);
+
+export const pushCardio = async (session) => {
+  if (!hasId(session)) return;
+  await pushOne('pushCardio', 'cardio', session.id, cardioDoc(session));
+};
+
+export const deleteRemoteCardio = (clientId) => deleteOne('deleteRemoteCardio', 'cardio', clientId);
+
+/**
+ * Pousse le journal alimentaire d'un jour (dateStr YYYY-MM-DD) vers Firestore.
+ */
+export const pushNutritionDay = async (day, data) => {
+  await pushOne('pushNutritionDay', 'nutrition', day, nutritionDoc(day, data));
+};
+
+/**
+ * Pousse un aliment personnalisé.
+ * Retourne { id } (identifiant distant) si l'écriture a réussi.
+ */
+export const pushCustomFoodEntry = async (food) => {
+  const key = foodKey(food);
+  const ok = await pushOne('pushCustomFoodEntry', 'foods', key, foodDoc(food));
+  return ok ? { id: docId(key) } : null;
+};
+
+/**
+ * Supprime un aliment personnalisé distant (retrouvé par son nom).
+ */
+export const deleteRemoteCustomFoodEntry = async ({ remoteId, name }) => {
+  if (name) {
+    await deleteOne('deleteRemoteCustomFoodEntry', 'foods', normalizeFoodName(name));
+  } else if (remoteId) {
+    await deleteOne('deleteRemoteCustomFoodEntry', 'foods', decodeURIComponent(remoteId));
+  }
+};
+
+/**
+ * Récupère les aliments personnalisés de l'utilisateur (plus récents d'abord).
  */
 export const fetchCustomFoodEntries = async () => {
   try {
     const user = await requireUser();
     if (!user) return [];
-
-    const { data, error } = await supabase
-      .from('user_food_entries')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('entry_type', 'custom')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return (data || []).map(rowToCustomFood);
+    const docs = await readCollection(user.uid, 'foods');
+    return docs
+      .sort((a, b) => String(b.data?.createdAt || '').localeCompare(String(a.data?.createdAt || '')))
+      .map(docToCustomFood);
   } catch (error) {
     console.warn('[sync] fetchCustomFoodEntries différé:', error?.message);
     return [];
   }
 };
 
-const customExerciseToRow = (ex, userId) => ({
-  owner_id: userId,
-  name: ex.name,
-  description: ex.description || null,
-  equip: ex.equipment || null,
-  category: ex.category || null,
-  muscle_group: ex.muscleGroup || null,
-  is_timer: !!ex.isTimer,
-  default_duration: ex.defaultDuration ?? null,
-  total_sets: ex.defaultSets ?? null,
-  nb_rep: ex.defaultReps ?? null,
-});
-
 /**
- * Pousse un exercice personnel vers Supabase (insère s'il n'existe pas, sinon met à jour par nom).
+ * Pousse un exercice personnel vers Firestore (un document par nom).
  */
 export const pushUserExercise = async (exercise) => {
-  try {
-    const user = await requireUser();
-    if (!user) return;
-    const { data: existing } = await supabase
-      .from('exercises')
-      .select('id')
-      .eq('owner_id', user.id)
-      .eq('name', exercise.name)
-      .maybeSingle();
-
-    if (existing) {
-      await supabase.from('exercises').update(customExerciseToRow(exercise, user.id)).eq('id', existing.id);
-    } else {
-      await supabase.from('exercises').insert(customExerciseToRow(exercise, user.id));
-    }
-  } catch (error) {
-    console.warn('[sync] pushUserExercise différé:', error?.message);
-  }
+  if (!exercise?.name) return;
+  await pushOne('pushUserExercise', 'exercises', exercise.name, exerciseDoc(exercise));
 };
 
-export const deleteRemoteUserExercise = async (name) => {
-  try {
-    const user = await requireUser();
-    if (!user) return;
-    await supabase.from('exercises').delete().eq('owner_id', user.id).eq('name', name);
-  } catch (error) {
-    console.warn('[sync] deleteRemoteUserExercise différé:', error?.message);
-  }
-};
+export const deleteRemoteUserExercise = (name) => deleteOne('deleteRemoteUserExercise', 'exercises', name);
 
 // --- Pull --------------------------------------------------------------------
+
+const records = (docs) => docs.map((d) => d.record).filter(hasId);
 
 /**
  * Récupère les données distantes de l'utilisateur connecté.
@@ -517,34 +301,31 @@ export const fetchSyncedData = async () => {
     const user = await requireUser();
     if (!user) return notReady();
 
-    const [workoutsRes, weighRes, cardioRes, nutritionRes, customFoodsRes] = await Promise.all([
-      supabase.from('workouts').select('*').eq('user_id', user.id).order('date', { ascending: false }),
-      supabase.from('weigh_ins').select('*').eq('user_id', user.id).order('date', { ascending: true }),
-      supabase.from('cardio_sessions').select('*').eq('user_id', user.id).order('date', { ascending: false }),
-      supabase.from('nutrition_logs').select('*').eq('user_id', user.id),
-      supabase.from('user_food_entries').select('*').eq('user_id', user.id).eq('entry_type', 'custom').order('created_at', { ascending: false }),
+    const [workouts, weighIns, cardio, nutrition, foods] = await Promise.all([
+      readCollection(user.uid, 'workouts'),
+      readCollection(user.uid, 'weighIns'),
+      readCollection(user.uid, 'cardio'),
+      readCollection(user.uid, 'nutrition'),
+      readCollection(user.uid, 'foods'),
     ]);
-
-    if (workoutsRes.error) throw workoutsRes.error;
-    if (weighRes.error) throw weighRes.error;
-    if (cardioRes.error) throw cardioRes.error;
-    if (nutritionRes.error) throw nutritionRes.error;
-    if (customFoodsRes.error) throw customFoodsRes.error;
 
     // nutrition : reconstruit l'objet { [day]: { meals, calorieGoal } }
     const nutritionLogs = {};
-    (nutritionRes.data || []).forEach((r) => {
-      nutritionLogs[r.day] = { meals: r.meals, calorieGoal: r.calorie_goal ?? 2000 };
+    nutrition.forEach(({ record, data }) => {
+      if (!data?.day || !record) return;
+      nutritionLogs[data.day] = { ...record, calorieGoal: record.calorieGoal ?? 2000 };
     });
 
     return {
       success: true,
       data: {
-        workoutHistory: (workoutsRes.data || []).map(rowToWorkout),
-        weightEntries: (weighRes.data || []).map(rowToWeigh),
-        cardioSessions: (cardioRes.data || []).map(rowToCardio),
+        workoutHistory: records(workouts).sort((a, b) => new Date(b.date) - new Date(a.date)),
+        weightEntries: records(weighIns).sort((a, b) => new Date(a.date) - new Date(b.date)),
+        cardioSessions: records(cardio).sort((a, b) => new Date(b.date) - new Date(a.date)),
         nutritionLogs,
-        customFoods: (customFoodsRes.data || []).map(rowToCustomFood),
+        customFoods: foods
+          .sort((a, b) => String(b.data?.createdAt || '').localeCompare(String(a.data?.createdAt || '')))
+          .map(docToCustomFood),
       },
       syncedAt: new Date().toISOString(),
     };
