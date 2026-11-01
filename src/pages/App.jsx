@@ -367,7 +367,6 @@ export default function App() {
                           onStartWorkout={() => setShowExercises(true)}
                           onStartRide={(targetMin) => setRideSession({ targetMin })}
                         />
-                        <HomeTrackers />
 
                         {/* Liens rapides : séance vélo immersive, Cardio (sorti de la barre d'onglets) */}
                         <div className="home-quicklinks">
@@ -538,6 +537,8 @@ export default function App() {
           <Fade in={viewMode === 'history'} timeout={300} unmountOnExit mountOnEnter>
             <div className="history-content">
               <WorkoutStats />
+              {/* Progrès, muscles travaillés, habitudes : déplacés de l'accueil */}
+              <HomeTrackers />
               <WorkoutCalendar />
             </div>
           </Fade>
