@@ -36,6 +36,7 @@ import {
   isSyncedWithGoogleFit
 } from '../services/GoogleFitSync';
 import './CalorieCounter.css';
+import { healthServiceName } from '../services/HealthConnect';
 
 const normalizeFoodSearchText = (value) =>
   String(value || '')
@@ -343,7 +344,7 @@ const CalorieCounter = () => {
             synced={isSyncedWithGoogleFit('nutrition', selectedDate)}
             onSync={() => syncNutritionDayToGoogleFit(selectedDate)}
             allowResync
-            title="Synchroniser cette journée avec Google Fit"
+            title={`Synchroniser cette journée avec ${healthServiceName()}`}
           />
           <span style={{ fontSize: '0.8rem', color: 'rgba(235,235,245,0.6)' }}>Synchroniser ce jour</span>
         </div>

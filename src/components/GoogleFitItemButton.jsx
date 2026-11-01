@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import GoogleFitIcon from './GoogleFitIcon';
+import { healthServiceName } from '../services/HealthConnect';
 import './GoogleFitSync.css';
 
 /**
@@ -12,7 +13,7 @@ import './GoogleFitSync.css';
  * @param {boolean} allowResync - si true, le bouton reste cliquable après succès
  *   (utile pour la nutrition d'une journée encore modifiable).
  */
-const GoogleFitItemButton = ({ synced = false, onSync, onError, allowResync = false, title = 'Synchroniser avec Google Fit' }) => {
+const GoogleFitItemButton = ({ synced = false, onSync, onError, allowResync = false, title = `Synchroniser avec ${healthServiceName()}` }) => {
   const [state, setState] = useState(synced ? 'done' : 'idle'); // idle | loading | done | error
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -36,7 +37,7 @@ const GoogleFitItemButton = ({ synced = false, onSync, onError, allowResync = fa
   };
 
   const tooltip = state === 'done'
-    ? 'Synchronisé avec Google Fit'
+    ? `Synchronisé avec ${healthServiceName()}`
     : state === 'error'
       ? `Échec : ${errorMsg}`
       : title;

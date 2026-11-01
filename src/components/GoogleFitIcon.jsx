@@ -1,4 +1,6 @@
 import React from 'react';
+import { HeartPulse } from 'lucide-react';
+import { isHealthConnectApp } from '../services/HealthConnect';
 
 /**
  * Logo Google Fit en SVG inline (4 couleurs).
@@ -6,7 +8,10 @@ import React from 'react';
  * d'un asset susceptible d'être mis en cache de façon obsolète par le service
  * worker de la PWA — l'icône fait partie du bundle JS.
  */
-const GoogleFitIcon = ({ size = 20, className, title = 'Google Fit' }) => (
+const GoogleFitIcon = ({ size = 20, className, title = 'Google Fit' }) => (isHealthConnectApp() ? (
+  // APK : la synchro passe par Health Connect (icône cœur, couleurs Health Connect)
+  <HeartPulse size={size} className={className} color="#4285F4" role="img" aria-label="Health Connect" />
+) : (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -21,6 +26,6 @@ const GoogleFitIcon = ({ size = 20, className, title = 'Google Fit' }) => (
     <path fill="#34A853" d="M12 12 22 12 18 18z" />
     <path fill="#FBBC04" d="M12 12 12 22 6 18z" />
   </svg>
-);
+));
 
 export default GoogleFitIcon;

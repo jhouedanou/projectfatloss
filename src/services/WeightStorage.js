@@ -44,11 +44,43 @@ export const addWeightRecord = (weight, date = null, notes = '') => {
       .then(({ pushWeighIn }) => pushWeighIn(newRecord))
       .catch(() => {});
 
+    // APK : envoi vers Health Connect si l'accès est déjà accordé
+    import('./GoogleFitSync')
+      .then(({ autoSyncToHealth }) => autoSyncToHealth('weight', newRecord))
+      .catch(() => {});
+
     return newRecord;
   } catch (error) {
     console.error('Erreur lors de l\'ajout d\'un enregistrement de poids:', error);
     throw error;
   }
+};
+
+/**
+ * Ajoute plusieurs pesées d'un coup (import Health Connect), chacune avec un
+ * id unique, puis trie l'historique du plus ancien au plus récent.
+ * @param {Array<{weight:number, date:string, notes?:string}>} records
+ * @returns {Array} les pesées créées
+ */
+export const importWeightRecords = (records) => {
+  const history = getWeightHistory();
+  const usedIds = new Set(history.map((r) => r.id));
+  let nextId = Date.now();
+  const created = records.map((r) => {
+    while (usedIds.has(nextId)) nextId += 1;
+    usedIds.add(nextId);
+    return { id: nextId, weight: Number(r.weight), date: r.date, notes: r.notes || '' };
+  });
+
+  const merged = [...history, ...created].sort((a, b) => new Date(a.date) - new Date(b.date));
+  localStorage.setItem(WEIGHT_HISTORY_KEY, JSON.stringify(merged));
+
+  // Pousser vers Firebase (offline-first, non bloquant)
+  import('./SyncService')
+    .then(({ pushWeighIn }) => Promise.all(created.map((record) => pushWeighIn(record))))
+    .catch(() => {});
+
+  return created;
 };
 
 /**

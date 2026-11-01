@@ -48,6 +48,11 @@ export function saveWorkout(workout) {
     .then(({ pushWorkout }) => pushWorkout(workoutWithId))
     .catch(() => {});
 
+  // APK : envoi vers Health Connect si l'accès est déjà accordé
+  import('./GoogleFitSync')
+    .then(({ autoSyncToHealth }) => autoSyncToHealth('workout', workoutWithId))
+    .catch(() => {});
+
   return workoutWithId;
 }
 

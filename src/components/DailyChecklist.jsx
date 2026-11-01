@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Check, Bike, Dumbbell, Leaf, RefreshCw, Play } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getCardioSessions } from '../services/CardioStorage';
@@ -6,7 +6,12 @@ import { dateKey } from '../services/HabitStorage';
 import { estimateSessionMinutes } from '../services/WeightLossPlan';
 import { getChecklistDay, isBikeItemDone, toggleBikeItem } from '../services/DailyChecklist';
 import { importBikeSessionsFromDrive, isPublicSyncConfigured } from '../services/GoogleDriveImport';
-import { bikeSessionDayKey } from '../services/GoogleFitSync';
+import { bikeSessionDayKey, importBikeSessionsFromGoogleFit, importStepsFromGoogleFit } from '../services/GoogleFitSync';
+import { isHealthConnectApp } from '../services/HealthConnect';
+
+// APK : import automatique Health Connect au plus toutes les 15 minutes.
+const HEALTH_AUTOSYNC_KEY = 'pfl_hc_autosync_at';
+const HEALTH_AUTOSYNC_MS = 15 * 60 * 1000;
 import './DailyChecklist.css';
 
 /**
@@ -21,7 +26,7 @@ import './DailyChecklist.css';
 export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartRide, onChange }) {
   const today = useMemo(() => new Date(), []);
   const [day, setDay] = useState(() => getChecklistDay(today));
-  // Synchro Health Sync (dossier Drive public) depuis la ligne vélo
+  // Synchro depuis la ligne vélo : Health Connect (APK) ou Health Sync (dossier Drive public)
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState(null);
   const [syncVersion, setSyncVersion] = useState(0);
@@ -39,6 +44,30 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartR
       .filter((s) => s.type === 'bike' && !ownIds.has(s.id) && bikeSessionDayKey(s) === dateKey(today))
       .reduce((sum, s) => sum + (Number(s.duration) || 0), 0);
   }, [day, today, syncVersion]);
+
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  // APK : sorties vélo et pas de Health Connect importés à l'ouverture, sans
+  // demande d'autorisation (l'accès s'accorde depuis Cardio ou les réglages).
+  useEffect(() => {
+    if (!isHealthConnectApp()) return;
+    let last = 0;
+    try { last = Number(sessionStorage.getItem(HEALTH_AUTOSYNC_KEY)) || 0; } catch { /* stockage indisponible */ }
+    if (Date.now() - last < HEALTH_AUTOSYNC_MS) return;
+    try { sessionStorage.setItem(HEALTH_AUTOSYNC_KEY, String(Date.now())); } catch { /* idem */ }
+    Promise.all([
+      importBikeSessionsFromGoogleFit({ days: 7, prompt: false }),
+      importStepsFromGoogleFit({ days: 7, prompt: false }),
+    ])
+      .then(([bike]) => {
+        if (!bike.imported) return;
+        setDay(getChecklistDay(today));
+        setSyncVersion((v) => v + 1);
+        onChangeRef.current?.();
+      })
+      .catch((error) => console.warn('[health] import automatique différé:', error?.message));
+  }, [today]);
 
   if (!planDay) return null;
 
@@ -73,7 +102,8 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartR
     setSyncing(true);
     setSyncError(null);
     try {
-      await importBikeSessionsFromDrive();
+      if (isHealthConnectApp()) await importBikeSessionsFromGoogleFit({ days: 30 });
+      else await importBikeSessionsFromDrive();
       setDay(getChecklistDay(today));
       setSyncVersion((v) => v + 1);
       onChange && onChange();
@@ -84,7 +114,7 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartR
     }
   };
 
-  const canSync = isPublicSyncConfigured();
+  const canSync = isHealthConnectApp() || isPublicSyncConfigured();
   const icons = { bike: Bike, strength: Dumbbell };
   const hintOf = (item) => (item.kind === 'bike' && bikeDoneElsewhere(item) && !isBikeItemDone(day, item.id)
     ? `${otherBikeMinutes} min importées aujourd'hui`

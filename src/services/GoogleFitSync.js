@@ -1,11 +1,14 @@
-// Couche de synchronisation Google Fit pour l'historique (séances, poids, nutrition).
+// Couche de synchronisation santé pour l'historique (séances, poids, nutrition) :
+// Google Fit sur le site, Health Connect dans l'APK Android (même interface,
+// mêmes fonctions ; voir HealthConnect.js).
 //
 // L'état "déjà synchronisé" est conservé dans une clé localStorage dédiée afin de
 // NE PAS modifier les enregistrements métier (et donc ne pas déclencher les push
-// Firebase associés). On évite ainsi les doublons côté Google Fit.
+// Firebase associés). On évite ainsi les doublons côté Google Fit / Health Connect.
 import GoogleFitService, { BIKE_ACTIVITY_TYPES, VIRTUAL_BIKE_ACTIVITY_TYPES } from './GoogleFitService';
+import HealthConnect, { ensureHealthAccess, isHealthConnectApp } from './HealthConnect';
 import { getWorkoutHistory } from './WorkoutStorage';
-import { getWeightHistory } from './WeightStorage';
+import { getWeightHistory, importWeightRecords } from './WeightStorage';
 import { getCardioSessions, importCardioSessions, deleteCardioSession } from './CardioStorage';
 import { getUserWeight } from './CalorieEstimator';
 import { saveDailySteps } from './StepsStorage';
@@ -74,23 +77,55 @@ export function estimateWalkSteps(distanceKm, durationMs) {
   return Math.round((durationMs / 60000) * 100);
 }
 
+// Écriture Health Connect : séance avec ses calories actives et sa distance.
+const HC_WRITE_EXERCISE = ['WRITE_EXERCISE', 'WRITE_ACTIVE_CALORIES_BURNED', 'WRITE_DISTANCE'];
+
+async function writeHealthExercise({ clientId, type, title, notes, endTime, durationMs, calories, distanceKm }) {
+  await ensureHealthAccess(HC_WRITE_EXERCISE);
+  await HealthConnect.writeExercise({
+    clientId,
+    type,
+    title,
+    notes,
+    startMs: endTime - durationMs,
+    endMs: endTime,
+    calories: Number(calories) || 0,
+    distanceMeters: Number(distanceKm) > 0 ? Number(distanceKm) * 1000 : 0,
+  });
+}
+
 export async function syncWorkoutToGoogleFit(workout) {
   const endTime = new Date(workout.date).getTime();
   // duration est enregistrée en minutes (chrono réel de la séance).
   const durationMs = minutesToMs(workout.duration, DEFAULT_WORKOUT_DURATION_MS);
-  await GoogleFitService.addActivity({
-    activityType: 80, // Strength training → affiché « Musculation » dans Google Fit
-    name: `Project Fat Loss - ${workout.title || 'Entraînement'}`,
-    description: `Séance de musculation. Poids total soulevé : ${workout.weightLifted || 0} kg.`,
-    startTime: endTime - durationMs,
-    duration: durationMs,
-    calories: workout.calories || 0
-  });
+  const title = `Project Fat Loss - ${workout.title || 'Entraînement'}`;
+  const description = `Séance de musculation. Poids total soulevé : ${workout.weightLifted || 0} kg.`;
+  if (isHealthConnectApp()) {
+    await writeHealthExercise({
+      clientId: `workout-${workout.id}`, type: 'strength', title, notes: description,
+      endTime, durationMs, calories: workout.calories,
+    });
+  } else {
+    await GoogleFitService.addActivity({
+      activityType: 80, // Strength training → affiché « Musculation » dans Google Fit
+      name: title,
+      description,
+      startTime: endTime - durationMs,
+      duration: durationMs,
+      calories: workout.calories || 0
+    });
+  }
   markSynced('workout', workout.id);
 }
 
 export async function syncWeightToGoogleFit(record) {
-  await GoogleFitService.addWeight(record.weight, new Date(record.date).getTime());
+  const time = new Date(record.date).getTime();
+  if (isHealthConnectApp()) {
+    await ensureHealthAccess(['WRITE_WEIGHT']);
+    await HealthConnect.writeWeight({ clientId: String(record.id), timeMs: time, kg: Number(record.weight) });
+  } else {
+    await GoogleFitService.addWeight(record.weight, time);
+  }
   markSynced('weight', record.id);
 }
 
@@ -99,25 +134,62 @@ export async function syncCardioToGoogleFit(session) {
   // duration est en minutes ; défaut 30 min si non renseignée.
   const durationMs = minutesToMs(session.duration, 30 * 60 * 1000);
   const isBike = session.type === 'bike';
-  await GoogleFitService.addActivity({
-    activityType: isBike ? 1 : 7, // 1 = Vélo, 7 = Marche
-    name: `Project Fat Loss - ${isBike ? 'Vélo' : 'Marche'}`,
-    description: `Séance cardio${session.distance ? ` — ${session.distance} km` : ''}.`,
-    startTime: endTime - durationMs,
-    duration: durationMs,
-    calories: session.calories || 0,
-    // Marche : les pas permettent à Google Fit de mesurer la cadence (Points cardio).
-    steps: isBike ? 0 : estimateWalkSteps(session.distance, durationMs)
-  });
+  const title = `Project Fat Loss - ${isBike ? 'Vélo' : 'Marche'}`;
+  const description = `Séance cardio${session.distance ? ` — ${session.distance} km` : ''}.`;
+  if (isHealthConnectApp()) {
+    await writeHealthExercise({
+      clientId: `cardio-${session.id}`, type: isBike ? 'bike' : 'walk', title, notes: description,
+      endTime, durationMs, calories: session.calories, distanceKm: session.distance,
+    });
+  } else {
+    await GoogleFitService.addActivity({
+      activityType: isBike ? 1 : 7, // 1 = Vélo, 7 = Marche
+      name: title,
+      description,
+      startTime: endTime - durationMs,
+      duration: durationMs,
+      calories: session.calories || 0,
+      // Marche : les pas permettent à Google Fit de mesurer la cadence (Points cardio).
+      steps: isBike ? 0 : estimateWalkSteps(session.distance, durationMs)
+    });
+  }
   markSynced('cardio', session.id);
 }
 
 export async function syncNutritionDayToGoogleFit(dateStr) {
   const summary = getNutritionSummary(dateStr);
-  // Horodatage à midi pour rattacher le résumé à la bonne journée.
-  const timestamp = new Date(`${dateStr}T12:00:00`).getTime();
-  await GoogleFitService.addNutrition(summary, timestamp);
+  if (isHealthConnectApp()) {
+    await ensureHealthAccess(['WRITE_NUTRITION']);
+    await HealthConnect.writeNutritionDay({
+      day: dateStr, calories: summary.calories, protein: summary.protein, carbs: summary.carbs, fat: summary.fat,
+    });
+  } else {
+    // Horodatage à midi pour rattacher le résumé à la bonne journée.
+    const timestamp = new Date(`${dateStr}T12:00:00`).getTime();
+    await GoogleFitService.addNutrition(summary, timestamp);
+  }
   markSynced('nutrition', dateStr);
+}
+
+/**
+ * Envoi automatique dans l'APK : une séance, une pesée ou une sortie vélo
+ * enregistrée part vers Health Connect si l'accès est déjà accordé (aucune
+ * demande d'autorisation ici). Les cases cochées à la main dans la
+ * check-list ne partent pas : la vraie séance, importée ensuite, les remplace.
+ * @param {'workout'|'weight'|'cardio'} category
+ */
+export async function autoSyncToHealth(category, item) {
+  if (!isHealthConnectApp() || !item || isSyncedWithGoogleFit(category, item.id)) return;
+  if (category === 'cardio' && isChecklistSession(item)) return;
+  try {
+    const needed = category === 'weight' ? ['WRITE_WEIGHT'] : HC_WRITE_EXERCISE;
+    if (!await ensureHealthAccess(needed, { prompt: false })) return;
+    if (category === 'workout') await syncWorkoutToGoogleFit(item);
+    else if (category === 'weight') await syncWeightToGoogleFit(item);
+    else if (category === 'cardio') await syncCardioToGoogleFit(item);
+  } catch (error) {
+    console.warn('[health] envoi automatique différé:', error?.message);
+  }
 }
 
 // ── Synchronisation en masse ─────────────────────────────────────────
@@ -238,29 +310,120 @@ export function isChecklistSession(session) {
   }
 }
 
-/**
- * Récupère les sorties vélo enregistrées dans Google Fit (vélo d'appartement,
- * route, VTT, spinning, séances Strava et #Holofit) sur les `days` derniers
- * jours et les ajoute aux séances cardio. Sans doublon :
- *   - une séance déjà importée est ignorée (id Google Fit mémorisé) ;
- *   - les séances écrites par Project Fat Loss elle-même sont ignorées ;
- *   - une sortie déjà présente localement (fin à ±5 min) est ignorée.
- * Les séances importées sont marquées « synchronisées » pour ne pas être
- * renvoyées vers Google Fit. Une séance cochée à la main dans la check-list le
- * même jour est remplacée par la séance importée (pas de double comptage).
- * @returns {Promise<{found:number, imported:number, skipped:number, minutes:number}>}
- */
-export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
-  await GoogleFitService.signIn();
+// Health Connect : vélo (8) et vélo d'appartement (9) ; rameur (53, 54) exclu.
+const HC_BIKE_TYPES = [8, 9];
+const HC_ROWING_TYPES = [53, 54];
+const OWN_PACKAGE = 'com.houedanou.fatloss';
 
-  const end = Date.now();
-  const start = end - days * 24 * 60 * 60 * 1000;
+/**
+ * Origine d'une séance Health Connect, ou null si ce n'est pas du vélo :
+ * 'holofit' (nom ou app), 'strava' (app Strava), 'health_connect' (autre app).
+ */
+export function healthBikeSessionOrigin(session) {
+  const type = Number(session?.exerciseType);
+  if (HC_ROWING_TYPES.includes(type)) return null;
+  const title = session?.title || '';
+  const app = session?.packageName || '';
+  if (/holofit/i.test(`${title} ${app}`)) return 'holofit';
+  if (!HC_BIKE_TYPES.includes(type) && !/ride|v[ée]lo|bike|cycl|spin/i.test(title)) return null;
+  return /strava/i.test(app) ? 'strava' : 'health_connect';
+}
+
+/**
+ * Séances vélo Google Fit candidates : [{ id, name, activityType, origin,
+ * startMs, endMs, minutes }] (calories et distance lues plus tard, seulement
+ * pour les séances vraiment nouvelles).
+ */
+async function listGoogleFitBikeSessions(start, end) {
+  await GoogleFitService.signIn();
   const sessions = [];
   for (let from = start; from < end; from += IMPORT_WINDOW_MS) {
     const to = Math.min(end, from + IMPORT_WINDOW_MS);
     // Tous types : les séances Holofit/Strava ne sont pas toujours classées vélo.
     sessions.push(...await GoogleFitService.listSessions(from, to));
   }
+  return sessions
+    .filter((session) => !session.id?.startsWith('projectfatloss-') && session.application?.name !== 'Project Fat Loss')
+    .map((session) => {
+      const startMs = Number(session.startTimeMillis);
+      const endMs = Number(session.endTimeMillis);
+      const activeMs = Number(session.activeTimeMillis) || endMs - startMs;
+      return {
+        id: session.id,
+        name: session.name,
+        activityType: Number(session.activityType),
+        origin: bikeSessionOrigin(session),
+        startMs,
+        endMs,
+        minutes: Math.max(1, Math.round(activeMs / 60000)),
+      };
+    });
+}
+
+/** Calories et distance d'une sortie Google Fit (une donnée manquante reste null). */
+async function readGoogleFitTotals(s) {
+  let calories = null;
+  let distance = null;
+  try {
+    calories = await GoogleFitService.aggregateSum('com.google.calories.expended', s.startMs, s.endMs);
+  } catch (error) {
+    console.warn('Calories Google Fit indisponibles:', error.message);
+  }
+  try {
+    const meters = await GoogleFitService.aggregateSum('com.google.distance.delta', s.startMs, s.endMs);
+    if (meters != null) distance = Math.round(meters / 100) / 10;
+  } catch (error) {
+    console.warn('Distance Google Fit indisponible:', error.message);
+  }
+  return { calories, distance };
+}
+
+const HC_READ_SESSIONS = ['READ_EXERCISE', 'READ_ACTIVE_CALORIES_BURNED', 'READ_TOTAL_CALORIES_BURNED', 'READ_DISTANCE'];
+
+/** Séances vélo Health Connect candidates, calories et distance comprises. */
+async function listHealthBikeSessions(start, end, { prompt = true } = {}) {
+  if (!await ensureHealthAccess(HC_READ_SESSIONS, { prompt })) return [];
+  const { sessions = [] } = await HealthConnect.readExerciseSessions({ startMs: start, endMs: end });
+  return sessions
+    .filter((session) => session.packageName !== OWN_PACKAGE && !String(session.clientRecordId || '').startsWith('pfl-'))
+    .map((session) => ({
+      id: `hc-${session.id}`,
+      name: session.title,
+      activityType: Number(session.exerciseType),
+      origin: healthBikeSessionOrigin(session),
+      startMs: Number(session.startMs),
+      endMs: Number(session.endMs),
+      minutes: Math.max(1, Math.round((Number(session.endMs) - Number(session.startMs)) / 60000)),
+      totals: {
+        calories: session.calories ?? null,
+        distance: session.distanceMeters != null ? Math.round(session.distanceMeters / 100) / 10 : null,
+      },
+    }));
+}
+
+/**
+ * Récupère les sorties vélo enregistrées dans Google Fit (site) ou Health
+ * Connect (APK) — vélo d'appartement, route, VTT, spinning, séances Strava et
+ * #Holofit — sur les `days` derniers jours et les ajoute aux séances cardio.
+ * Sans doublon :
+ *   - une séance déjà importée est ignorée (id mémorisé) ;
+ *   - les séances écrites par Project Fat Loss elle-même sont ignorées ;
+ *   - une sortie déjà présente localement (fin à ±5 min) est ignorée.
+ * Les séances importées sont marquées « synchronisées » pour ne pas être
+ * renvoyées. Une séance cochée à la main dans la check-list le même jour est
+ * remplacée par la séance importée (pas de double comptage).
+ * Health Connect ne donne que 30 jours d'historique avant la première autorisation.
+ * @param {{ days?: number, prompt?: boolean }} options - prompt : false pour
+ *   l'import automatique (aucune demande d'autorisation dans l'APK)
+ * @returns {Promise<{found:number, imported:number, skipped:number, minutes:number}>}
+ */
+export async function importBikeSessionsFromGoogleFit({ days = 365, prompt = true } = {}) {
+  const end = Date.now();
+  const start = end - days * 24 * 60 * 60 * 1000;
+  const healthConnect = isHealthConnectApp();
+  const candidates = healthConnect
+    ? await listHealthBikeSessions(start, end, { prompt })
+    : await listGoogleFitBikeSessions(start, end);
 
   const imported = getImportedMap();
   const localBikeEnds = getCardioSessions()
@@ -269,41 +432,19 @@ export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
   const seen = new Set();
   const toImport = [];
 
-  for (const session of sessions) {
-    const id = session.id;
-    const origin = bikeSessionOrigin(session);
-    if (!id || seen.has(id) || !origin) continue;
-    seen.add(id);
-    if (imported[id]) continue;
-    if (id.startsWith('projectfatloss-') || session.application?.name === 'Project Fat Loss') continue;
-
-    const startMs = Number(session.startTimeMillis);
-    const endMs = Number(session.endTimeMillis);
-    if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) continue;
-    if (localBikeEnds.some((t) => Math.abs(t - endMs) <= 5 * 60 * 1000)) continue;
-
-    const activeMs = Number(session.activeTimeMillis) || endMs - startMs;
-    const minutes = Math.max(1, Math.round(activeMs / 60000));
-    toImport.push({ id, name: session.name, activityType: Number(session.activityType), origin, startMs, endMs, minutes });
+  for (const s of candidates) {
+    if (!s.id || seen.has(s.id) || !s.origin) continue;
+    seen.add(s.id);
+    if (imported[s.id]) continue;
+    if (!Number.isFinite(s.startMs) || !Number.isFinite(s.endMs) || s.endMs <= s.startMs) continue;
+    if (localBikeEnds.some((t) => Math.abs(t - s.endMs) <= 5 * 60 * 1000)) continue;
+    toImport.push(s);
   }
 
-  // Calories et distance de chaque sortie. Une donnée manquante n'empêche pas
-  // l'import : calories estimées, distance laissée vide.
+  // Calories manquantes : estimées ; distance manquante : laissée vide.
   const records = [];
   for (const s of toImport) {
-    let calories = null;
-    let distance = null;
-    try {
-      calories = await GoogleFitService.aggregateSum('com.google.calories.expended', s.startMs, s.endMs);
-    } catch (error) {
-      console.warn('Calories Google Fit indisponibles:', error.message);
-    }
-    try {
-      const meters = await GoogleFitService.aggregateSum('com.google.distance.delta', s.startMs, s.endMs);
-      if (meters != null) distance = Math.round(meters / 100) / 10;
-    } catch (error) {
-      console.warn('Distance Google Fit indisponible:', error.message);
-    }
+    let { calories, distance } = s.totals || await readGoogleFitTotals(s);
     if (!calories) {
       calories = (BIKE_MET * 3.5 * getUserWeight()) / 200 * s.minutes;
     }
@@ -314,7 +455,12 @@ export async function importBikeSessionsFromGoogleFit({ days = 365 } = {}) {
       duration: s.minutes,
       distance,
       calories: Math.round(calories),
-      notes: JSON.stringify({ source: 'google_fit', origin: s.origin, name: s.name || '', activityType: s.activityType }),
+      notes: JSON.stringify({
+        source: healthConnect ? 'health_connect' : 'google_fit',
+        origin: s.origin,
+        name: s.name || '',
+        activityType: s.activityType,
+      }),
     });
   }
 
@@ -376,7 +522,8 @@ const STEPS_WINDOW_DAYS = 30;
  * (aujourd'hui compris) et l'enregistre localement.
  * @returns {Promise<{ days: number, total: number, today: number|null }>}
  */
-export async function importStepsFromGoogleFit({ days = 365 } = {}) {
+export async function importStepsFromGoogleFit({ days = 365, prompt = true } = {}) {
+  if (isHealthConnectApp()) return importStepsFromHealthConnect({ days, prompt });
   await GoogleFitService.signIn();
 
   const end = Date.now();
@@ -412,4 +559,51 @@ export async function importStepsFromGoogleFit({ days = 365 } = {}) {
     total: values.reduce((sum, v) => sum + v, 0),
     today: byDay[dateKey(new Date())] ?? null,
   };
+}
+
+/** Pas de chaque jour lus dans Health Connect (APK), comme importStepsFromGoogleFit. */
+async function importStepsFromHealthConnect({ days, prompt }) {
+  if (!await ensureHealthAccess(['READ_STEPS'], { prompt })) return { days: 0, total: 0, today: null };
+  const { days: rows = [] } = await HealthConnect.readDailySteps({ days: Math.min(days, 400) });
+  const byDay = {};
+  rows.forEach((row) => {
+    if (row.steps > 0) byDay[row.date] = Number(row.steps);
+  });
+  saveDailySteps(byDay);
+  const values = Object.values(byDay);
+  return {
+    days: values.length,
+    total: values.reduce((sum, v) => sum + v, 0),
+    today: byDay[dateKey(new Date())] ?? null,
+  };
+}
+
+// ── Import des pesées depuis Health Connect (APK) ────────────────────
+
+/**
+ * Ajoute les pesées de Health Connect (balance connectée, Samsung Health,
+ * Fitbit…) absentes de l'historique : une pesée du même jour à 0,1 kg près
+ * est déjà là. Les pesées écrites par Project Fat Loss sont ignorées.
+ * @returns {Promise<{found:number, imported:number}>}
+ */
+export async function importWeightsFromHealthConnect({ days = 365, prompt = true } = {}) {
+  if (!isHealthConnectApp()) return { found: 0, imported: 0 };
+  if (!await ensureHealthAccess(['READ_WEIGHT'], { prompt })) return { found: 0, imported: 0 };
+  const end = Date.now();
+  const { weights = [] } = await HealthConnect.readWeights({ startMs: end - days * 24 * 60 * 60 * 1000, endMs: end });
+  const outside = weights.filter((w) => w.packageName !== OWN_PACKAGE && !String(w.clientRecordId || '').startsWith('pfl-'));
+
+  const known = getWeightHistory().map((r) => ({ day: dateKey(new Date(r.date)), kg: Number(r.weight) }));
+  const toAdd = [];
+  outside.forEach((w) => {
+    const day = dateKey(new Date(w.timeMs));
+    const kg = Math.round(Number(w.kg) * 10) / 10;
+    if (!(kg > 0) || known.some((k) => k.day === day && Math.abs(k.kg - kg) < 0.1)) return;
+    known.push({ day, kg });
+    toAdd.push({ kg, date: new Date(w.timeMs).toISOString() });
+  });
+
+  importWeightRecords(toAdd.map(({ kg, date }) => ({ weight: kg, date, notes: 'Health Connect' })))
+    .forEach((record) => markSynced('weight', record.id));
+  return { found: outside.length, imported: toAdd.length };
 }

@@ -25,7 +25,9 @@ import {
   getNotificationPermissionStatus
 } from '../services/NotificationService';
 import NotificationTestDialog from './NotificationTestDialog';
+import GoogleFitIcon from './GoogleFitIcon';
 import GoogleFitService from '../services/GoogleFitService';
+import { connectHealthConnect, healthServiceName, isHealthConnectApp } from '../services/HealthConnect';
 
 const NotificationSettingsDialog = ({ open, onClose }) => {
   const [settings, setSettings] = useState({
@@ -52,7 +54,11 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
         setPermissionStatus(status);
       });
 
-      // Vérifier si Google Fit est déjà connecté
+      // Vérifier si Google Fit (site) ou Health Connect (APK) est déjà connecté
+      if (isHealthConnectApp()) {
+        connectHealthConnect({ prompt: false }).then(setIsFitConnected).catch(() => setIsFitConnected(false));
+        return;
+      }
       try {
         setIsFitConnected(GoogleFitService.isSignedIn());
       } catch (e) {
@@ -127,12 +133,13 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
   const handleConnectGoogleFit = async () => {
     setIsLoadingFit(true);
     try {
-      await GoogleFitService.signIn();
+      if (isHealthConnectApp()) await connectHealthConnect();
+      else await GoogleFitService.signIn();
       setIsFitConnected(true);
-      alert('Connexion Google Fit réussie ! Vos futures séances pourront être synchronisées.');
+      alert(`Connexion ${healthServiceName()} réussie ! Vos futures séances pourront être synchronisées.`);
     } catch (error) {
       console.error(error);
-      alert(`Erreur de connexion à Google Fit : ${error.message || error}`);
+      alert(`Erreur de connexion à ${healthServiceName()} : ${error.message || error}`);
     } finally {
       setIsLoadingFit(false);
     }
@@ -283,15 +290,13 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
         
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: '600', mb: 1, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img 
-              src="https://www.gstatic.com/images/branding/product/1x/gfit_512dp.png" 
-              alt="Google Fit" 
-              style={{ width: '20px', height: '20px', objectFit: 'contain' }}
-            />
-            Intégration Google Fit
+            <GoogleFitIcon size={20} />
+            Intégration {healthServiceName()}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Synchronisez vos séances d'entraînement et vos calories brûlées directement avec votre compte Google Fit.
+            {isHealthConnectApp()
+              ? 'Vos séances, pesées et repas partent vers Health Connect, et vos pas, sorties vélo et pesées en reviennent. Pas de connexion Google : Android demande seulement l\'autorisation.'
+              : 'Synchronisez vos séances d\'entraînement et vos calories brûlées directement avec votre compte Google Fit.'}
           </Typography>
           
           <Button 
@@ -312,7 +317,7 @@ const NotificationSettingsDialog = ({ open, onClose }) => {
               }
             }}
           >
-            {isLoadingFit ? 'Connexion...' : isFitConnected ? '✓ Connecté à Google Fit' : 'Connecter Google Fit'}
+            {isLoadingFit ? 'Connexion...' : isFitConnected ? `✓ Connecté à ${healthServiceName()}` : `Connecter ${healthServiceName()}`}
           </Button>
         </Box>
 
