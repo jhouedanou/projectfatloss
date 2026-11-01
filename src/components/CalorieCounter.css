@@ -913,6 +913,12 @@
   font-weight: 700;
 }
 
+.deficit-row-empty {
+  color: var(--label-2);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .deficit-row-total {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 10px;

@@ -39,6 +39,7 @@ import { onAuthChange, signOut } from '../services/AuthService';
 import { fullSync } from '../services/SyncService';
 import LoginForm from '../components/LoginForm';
 import CardioTracker from '../components/CardioTracker';
+import { parseDayTitle } from '../utils/dayTitle';
 import SettingToggle from '../components/SettingToggle';
 import { estimateSessionMinutes, computeWeekTargets } from '../services/WeightLossPlan';
 
@@ -412,7 +413,7 @@ export default function App() {
                               <ArrowLeft size={14} strokeWidth={2.5} />
                               <span>Programme</span>
                             </button>
-                            <h2 className="hero-title">{workoutPlan[current].title.replace(/^JOUR \d+:\s*/i, '').split(' — ')[0]}</h2>
+                            <h2 className="hero-title">{parseDayTitle(workoutPlan[current].title).name}</h2>
                             <p className="hero-subtitle">
                               {workoutPlan[current].isRestDay
                                 ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })

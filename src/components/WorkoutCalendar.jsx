@@ -18,6 +18,7 @@ import {
 // Importez le CSS par défaut de react-calendar
 import 'react-calendar/dist/Calendar.css';
 import './WorkoutCalendar.css'; // Importer les styles personnalisés
+import { healthServiceName } from '../services/HealthConnect';
 
 function WorkoutCalendar() {
   // La date du jour est sélectionnée à l'ouverture : les séances du jour
@@ -107,7 +108,7 @@ function WorkoutCalendar() {
                 <GoogleFitItemButton
                   synced={isSyncedWithGoogleFit('cardio', session.id)}
                   onSync={() => syncCardioToGoogleFit(session)}
-                  title="Synchroniser cette séance cardio avec Google Fit"
+                  title={`Synchroniser cette séance cardio avec ${healthServiceName()}`}
                 />
               </div>
 
@@ -142,7 +143,7 @@ function WorkoutCalendar() {
                 <GoogleFitItemButton
                   synced={isSyncedWithGoogleFit('workout', workout.id)}
                   onSync={() => syncWorkoutToGoogleFit(workout)}
-                  title="Synchroniser cette séance avec Google Fit"
+                  title={`Synchroniser cette séance avec ${healthServiceName()}`}
                 />
               </div>
               

@@ -48,6 +48,11 @@ export function saveWorkout(workout) {
     .then(({ pushWorkout }) => pushWorkout(workoutWithId))
     .catch(() => {});
 
+  // APK : envoi vers Health Connect si l'accès est déjà accordé
+  import('./GoogleFitSync')
+    .then(({ autoSyncToHealth }) => autoSyncToHealth('workout', workoutWithId))
+    .catch(() => {});
+
   return workoutWithId;
 }
 
@@ -163,7 +168,7 @@ export function getWeightLiftedByExercise() {
  * Recalcule toutes les statistiques à partir de l'historique complet
  * Utile après des suppressions ou modifications importantes
  */
-function recalculateAllStats() {
+export function recalculateAllStats() {
   // Réinitialiser les statistiques
   const emptyStats = {
     totalWorkouts: 0,

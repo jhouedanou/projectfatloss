@@ -52,6 +52,11 @@ export function addCardioSession({ type, date = null, duration = null, distance 
     .then(({ pushCardio }) => pushCardio(record))
     .catch(() => {});
 
+  // APK : envoi vers Health Connect si l'accès est déjà accordé
+  import('./GoogleFitSync')
+    .then(({ autoSyncToHealth }) => autoSyncToHealth('cardio', record))
+    .catch(() => {});
+
   return record;
 }
 

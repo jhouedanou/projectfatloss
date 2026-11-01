@@ -21,9 +21,12 @@ import {
   getUnsyncedWeights,
   syncAllWeights,
   syncWeightToGoogleFit,
-  isSyncedWithGoogleFit
+  isSyncedWithGoogleFit,
+  importWeightsFromHealthConnect
 } from '../services/GoogleFitSync';
+import GoogleFitIcon from './GoogleFitIcon';
 import './WeightTracker.css';
+import { healthServiceName, isHealthConnectApp } from '../services/HealthConnect';
 
 // Composant Popup d'encouragement
 function EncouragementModal({ isOpen, onClose, weightIncrease }) {
@@ -107,6 +110,20 @@ function WeightTracker() {
     loadWeightData();
   }, []);
   
+  // APK : import des pesées Health Connect (null | 'loading' | { result } | { error })
+  const [healthImport, setHealthImport] = useState(null);
+
+  const handleImportHealthWeights = async () => {
+    setHealthImport('loading');
+    try {
+      const result = await importWeightsFromHealthConnect({ days: 365 });
+      setHealthImport({ result });
+      loadWeightData();
+    } catch (err) {
+      setHealthImport({ error: err.message || 'Import Health Connect impossible' });
+    }
+  };
+
   const loadWeightData = () => {
     const history = getWeightHistory();
     setWeightRecords(history);
@@ -302,6 +319,29 @@ function WeightTracker() {
         </div>
       )}
       
+      {/* APK : pesées de la balance connectée, Samsung Health, Fitbit… via Health Connect */}
+      {isHealthConnectApp() && (
+        <div className="gfit-sync">
+          <button
+            type="button"
+            className="gfit-sync-btn"
+            onClick={handleImportHealthWeights}
+            disabled={healthImport === 'loading'}
+          >
+            <GoogleFitIcon size={20} />
+            <span>{healthImport === 'loading' ? 'Récupération des pesées…' : 'Récupérer mes pesées depuis Health Connect'}</span>
+          </button>
+          {healthImport?.result && (
+            <p className="gfit-sync-result">
+              {healthImport.result.imported > 0
+                ? `${healthImport.result.imported} pesée${healthImport.result.imported > 1 ? 's' : ''} ajoutée${healthImport.result.imported > 1 ? 's' : ''}`
+                : 'Aucune nouvelle pesée dans Health Connect.'}
+            </p>
+          )}
+          {healthImport?.error && <p className="gfit-sync-error">{healthImport.error}</p>}
+        </div>
+      )}
+
       {/* Historique des enregistrements */}
       {weightRecords.length > 0 && (
         <div className="weight-history">
@@ -324,7 +364,7 @@ function WeightTracker() {
                   <GoogleFitItemButton
                     synced={isSyncedWithGoogleFit('weight', record.id)}
                     onSync={() => syncWeightToGoogleFit(record)}
-                    title="Synchroniser cette pesée avec Google Fit"
+                    title={`Synchroniser cette pesée avec ${healthServiceName()}`}
                   />
                   <button
                     className="delete-record"

@@ -15,7 +15,9 @@ const resources = {
 };
 
 i18n
-  // Détection automatique de la langue du navigateur
+  // Français par défaut : tout le contenu (programme, conseils) est en français.
+  // Seul un choix fait dans le sélecteur de langue (clé pfl_lang) change la
+  // langue ; la langue du navigateur (anglaise sur le Quest) est ignorée.
   .use(LanguageDetector)
   // Intégration avec React
   .use(initReactI18next)
@@ -28,8 +30,9 @@ i18n
       escapeValue: false // React s'occupe de l'échappement
     },
     detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage']
+      order: ['localStorage'],
+      lookupLocalStorage: 'pfl_lang',
+      caches: []
     }
   });
 

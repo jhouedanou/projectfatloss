@@ -15,6 +15,7 @@ import {
 } from '../services/WeightLossPlan';
 import DailyChecklist from './DailyChecklist';
 import './HomeDashboard.css';
+import { parseDayTitle } from '../utils/dayTitle';
 
 const fmtKg = (kg) => kg.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
 
@@ -118,7 +119,7 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
   // Séance du jour, pour la carte « Aujourd'hui ».
   const todayPlanDay = plan[currentDayIndex] || null;
   const todayTitle = todayPlanDay
-    ? todayPlanDay.title.replace(/^JOUR \d+:\s*/i, '').split(' — ')[0]
+    ? parseDayTitle(todayPlanDay.title).name
     : '';
 
   const currentWeight = weights.length ? weights[weights.length - 1].weight : null;

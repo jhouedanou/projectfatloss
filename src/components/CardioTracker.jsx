@@ -26,6 +26,10 @@ import {
   isPublicSyncConfigured
 } from '../services/GoogleDriveImport';
 import './CardioTracker.css';
+import { healthServiceName, isHealthConnectApp } from '../services/HealthConnect';
+
+// Health Connect ne donne que 30 jours d'historique avant la première autorisation.
+const importPeriod = isHealthConnectApp() ? '30 derniers jours' : '12 derniers mois';
 
 // MET approximatifs : marche d'un bon pas et vélo stationnaire modéré-vigoureux.
 // La marche est suivie comme un exercice à part entière, distinct du vélo.
@@ -40,6 +44,7 @@ const estimateCalories = (type, durationMin, weightKg) => {
 // Origine d'une séance (champ notes en JSON) : badge affiché dans la liste.
 const SOURCE_LABELS = {
   google_fit: 'Google Fit',
+  health_connect: 'Health Connect',
   checklist: 'Check-list',
   holofit: 'Holofit',
   strava: 'Strava',
@@ -145,7 +150,7 @@ const CardioTracker = () => {
       setImportState({ result });
       refresh();
     } catch (error) {
-      setImportState({ error: error.message || 'Import Google Fit impossible' });
+      setImportState({ error: error.message || `Import ${healthServiceName()} impossible` });
     }
   };
 
@@ -156,7 +161,7 @@ const CardioTracker = () => {
       setStepsState({ result });
       setSteps(getStepsSummary(7));
     } catch (error) {
-      setStepsState({ error: error.message || 'Import Google Fit impossible' });
+      setStepsState({ error: error.message || `Import ${healthServiceName()} impossible` });
     }
   };
 
@@ -179,11 +184,11 @@ const CardioTracker = () => {
           </div>
           <div className="cardio-stat">
             <Bike size={18} color="#0a84ff" />
-            <div><strong>{stats.byType.bike.count}</strong><span>séances vélo</span></div>
+            <div><strong>{stats.byType.bike.count}</strong><span>{stats.byType.bike.count > 1 ? 'séances vélo' : 'séance vélo'}</span></div>
           </div>
           <div className="cardio-stat">
             <Footprints size={18} color="#30d158" />
-            <div><strong>{stats.byType.walk.count}</strong><span>marches</span></div>
+            <div><strong>{stats.byType.walk.count}</strong><span>{stats.byType.walk.count > 1 ? 'marches' : 'marche'}</span></div>
           </div>
         </div>
       )}
@@ -235,7 +240,7 @@ const CardioTracker = () => {
         </button>
       </form>
 
-      {/* Import de l'historique vélo depuis Google Fit (12 derniers mois) */}
+      {/* Import de l'historique vélo depuis Google Fit ou Health Connect (APK) */}
       <div className="cardio-import">
         {/* Séances vélo exportées par Health Sync dans Google Drive */}
         <button
@@ -266,8 +271,8 @@ const CardioTracker = () => {
         </p>
 
         {/* Réglages : lien du dossier public et clé API (mémorisés sur l'appareil) */}
-        {/* Ouverts tant que rien n'est réglé, ou après une erreur (lien ou clé à corriger) */}
-        <details className="cardio-sync-settings" open={!isPublicSyncConfigured() || !!driveState?.error}>
+        {/* Fermés par défaut (réglage technique) ; ouverts après une erreur (lien ou clé à corriger) */}
+        <details className="cardio-sync-settings" open={!!driveState?.error}>
           <summary>Réglages de la synchro (dossier public)</summary>
           <form onSubmit={handleSaveDriveSettings}>
             <label>
@@ -309,7 +314,7 @@ const CardioTracker = () => {
           <span>
             {importState === 'loading'
               ? 'Récupération des sorties vélo…'
-              : 'Récupérer mes sorties vélo (Strava, Holofit…) depuis Google Fit'}
+              : `Récupérer mes sorties vélo (Strava, Holofit…) depuis ${healthServiceName()}`}
           </span>
           <Download size={16} />
         </button>
@@ -317,7 +322,7 @@ const CardioTracker = () => {
           <p className="cardio-import-msg">
             {importState.result.imported > 0
               ? `${importState.result.imported} sortie${importState.result.imported > 1 ? 's' : ''} vélo importée${importState.result.imported > 1 ? 's' : ''} · ${fmtMinutes(importState.result.minutes)} de vélo`
-              : 'Aucune nouvelle sortie vélo trouvée sur les 12 derniers mois.'}
+              : `Aucune nouvelle sortie vélo trouvée sur les ${importPeriod}.`}
             {importState.result.skipped > 0 && ` (${importState.result.skipped} déjà présente${importState.result.skipped > 1 ? 's' : ''})`}
           </p>
         )}
@@ -333,15 +338,15 @@ const CardioTracker = () => {
           <span>
             {stepsState === 'loading'
               ? 'Récupération des pas…'
-              : 'Récupérer mes pas depuis Google Fit'}
+              : `Récupérer mes pas depuis ${healthServiceName()}`}
           </span>
           <Download size={16} />
         </button>
         {stepsState?.result && (
           <p className="cardio-import-msg">
             {stepsState.result.days > 0
-              ? `${stepsState.result.days} jour${stepsState.result.days > 1 ? 's' : ''} de pas récupéré${stepsState.result.days > 1 ? 's' : ''} sur 12 mois`
-              : 'Aucun pas trouvé sur les 12 derniers mois.'}
+              ? `${stepsState.result.days} jour${stepsState.result.days > 1 ? 's' : ''} de pas récupéré${stepsState.result.days > 1 ? 's' : ''} sur les ${importPeriod}`
+              : `Aucun pas trouvé sur les ${importPeriod}.`}
           </p>
         )}
         {stepsState?.error && <p className="cardio-import-msg error">{stepsState.error}</p>}
@@ -403,7 +408,7 @@ const CardioTracker = () => {
             <GoogleFitItemButton
               synced={isSyncedWithGoogleFit('cardio', s.id)}
               onSync={() => syncCardioToGoogleFit(s)}
-              title="Synchroniser cette séance cardio avec Google Fit"
+              title={`Synchroniser cette séance cardio avec ${healthServiceName()}`}
             />
             <button className="cardio-del" onClick={() => handleDelete(s.id)} aria-label="Supprimer">
               <Trash2 size={16} />

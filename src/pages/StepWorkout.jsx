@@ -1,8 +1,9 @@
 // Correction des bugs liés à pause/isPaused - v1.0.1
 import React, { useState, useEffect, useRef, createContext, useCallback, useMemo } from 'react';
+import { parseDayTitle } from '../utils/dayTitle';
 import { Box, Typography, Paper, Button, FormControlLabel, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { ArrowLeft, Rocket, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, Bell, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Save, Flame, Dumbbell, Repeat, Timer, Play, Pause as PauseIconLucide, RotateCcw, Check, Bell, Volume2, VolumeX } from 'lucide-react';
 const beepSound = '/beep.mp3';
 import YouTubeButton from '../components/YouTubeButton';
 import ExoIcon from '../components/ExoIcon';
@@ -1048,20 +1049,22 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
             {speechEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
           <button
-            className={`timer-btn workout-icon-btn ${autoMode ? 'is-active' : ''}`}
+            className={`timer-btn workout-icon-btn workout-text-btn ${autoMode ? 'is-active' : ''}`}
             onClick={handleToggleAutoMode}
-            title={autoMode ? "Désactiver le mode automatique" : "Activer le mode automatique"}
-            aria-label={autoMode ? "Desactiver le mode automatique" : "Activer le mode automatique"}
+            title={autoMode ? "Désactiver le mode automatique" : "Activer le mode automatique : l'app compte les répétitions et enchaîne"}
+            aria-label={autoMode ? "Désactiver le mode automatique" : "Activer le mode automatique"}
+            aria-pressed={autoMode}
           >
-            <Rocket size={18} />
+            Auto
           </button>
-          <button 
-            className="timer-btn workout-icon-btn save-btn" 
+          <button
+            className="timer-btn workout-icon-btn workout-text-btn save-btn"
             onClick={handleSaveAndExit}
-            title="Sauvegarder et quitter"
-            aria-label="Sauvegarder et quitter"
+            title="Terminer la séance et l'enregistrer"
+            aria-label="Terminer la séance"
           >
-            <Save size={18} />
+            <Save size={16} />
+            <span>Terminer</span>
           </button>
           {onNotificationSettings && (
             <button 
@@ -1076,7 +1079,17 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         </div>
       </div>
 
-      <h2 className="workout-day-title">{day?.title}</h2>
+      {(() => {
+        // Titre court (« Récupération active ») et repères en sous-titre.
+        const { name, weekday, week } = parseDayTitle(day?.title);
+        const sub = [weekday, week].filter(Boolean).join(' · ');
+        return (
+          <div className="workout-day-head">
+            <h2 className="workout-day-title">{name}</h2>
+            {sub && <p className="workout-day-sub">{sub}</p>}
+          </div>
+        );
+      })()}
 
       
       <>
@@ -1659,42 +1672,23 @@ function StepSet({ exo, exercises = [], step, setNum, totalSets, onDone, onCalor
               zIndex: 1
             }}
           >
+            {/* Compteur lisible à 2 m : le téléphone est posé au sol ou sur le banc.
+                En mode auto, pastille en haut de la carte pour laisser voir la consigne. */}
             {countdown !== null ? (
-              <Typography
-                variant="h3"
-                component="div"
-                sx={{
-                  mb: 2,
-                  ...(autoMode && {
-                    px: 3,
-                    py: 1,
-                    borderRadius: '100px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.72)',
-                    backdropFilter: 'blur(8px)',
-                    fontSize: '2rem'
-                  })
-                }}
-              >
-                {countdown > 0 ? countdown : "Go!"}
-              </Typography>
+              <div className={`rep-counter${autoMode ? ' rep-counter--pill' : ''}`} aria-live="polite">
+                <span className="rep-counter-value">{countdown > 0 ? countdown : 'Go !'}</span>
+              </div>
             ) : currentRep < exo.nbRep ? (
-              <Typography
-                variant="h4"
-                component="div"
-                sx={{
-                  mb: 2,
-                  ...(autoMode && {
-                    px: 3,
-                    py: 1,
-                    borderRadius: '100px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.72)',
-                    backdropFilter: 'blur(8px)',
-                    fontSize: '1.5rem'
-                  })
-                }}
+              <div
+                className={`rep-counter${autoMode ? ' rep-counter--pill' : ''}`}
+                aria-live="polite"
+                aria-label={`Répétition ${currentRep + 1} sur ${exo.nbRep}`}
               >
-                Répétition {currentRep + 1} / {exo.nbRep}
-              </Typography>
+                <span className="rep-counter-value">{currentRep + 1}</span>
+                <span className="rep-counter-total">
+                  sur {exo.nbRep}{isDoubleSided ? ` · côté ${side + 1}/2` : ''}
+                </span>
+              </div>
             ) : (
               <>
                 <Typography variant="h4" component="div" sx={{ mb: 2, color: '#30d158' }}>

@@ -34,6 +34,8 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // Plugin de l'application (pas un paquet npm) : à enregistrer avant super.onCreate.
+        registerPlugin(HealthConnectPlugin.class);
         super.onCreate(savedInstanceState);
 
         // Le WebChromeClient de Capacitor referme aussitôt tout plein écran

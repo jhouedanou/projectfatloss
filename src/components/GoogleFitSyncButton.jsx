@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import GoogleFitIcon from './GoogleFitIcon';
+import { healthServiceName } from '../services/HealthConnect';
 import './GoogleFitSync.css';
 
 /**
@@ -37,8 +38,9 @@ const GoogleFitSyncButton = ({ getUnsyncedCount, onSync, noun = 'élément', nou
   const label = syncing
     ? 'Synchronisation…'
     : count === 0
-      ? 'Tout est synchronisé avec Google Fit'
-      : `Synchroniser ${count} ${count > 1 ? nounPlural : noun} avec Google Fit`;
+      // Vrai même sans connexion : il n'y a simplement rien à envoyer.
+      ? `Rien de nouveau à envoyer à ${healthServiceName()}`
+      : `Synchroniser ${count} ${count > 1 ? nounPlural : noun} avec ${healthServiceName()}`;
 
   return (
     <div className="gfit-sync">

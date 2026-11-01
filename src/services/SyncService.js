@@ -23,7 +23,7 @@ import {
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
 import { getCurrentUser } from './AuthService';
-import { getWorkoutHistory } from './WorkoutStorage';
+import { getWorkoutHistory, recalculateAllStats } from './WorkoutStorage';
 import { getWeightEntries } from './WeightStorage';
 import { getUserExercises } from './UserExerciseStorage';
 import { getCardioSessions } from './CardioStorage';
@@ -348,6 +348,8 @@ export const applySyncedData = (syncedData) => {
       const merged = mergeById(getWorkoutHistory(), syncedData.workoutHistory)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
       localStorage.setItem(WORKOUT_HISTORY_KEY, JSON.stringify(merged));
+      // Les totaux d'Historique (séances, calories, durée) suivent la fusion.
+      recalculateAllStats();
     }
 
     if (Array.isArray(syncedData.weightEntries)) {
