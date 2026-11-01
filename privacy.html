@@ -125,9 +125,9 @@
   <h2>3. Compte et synchronisation (optionnel)</h2>
   <p>
     Vous pouvez créer un compte pour retrouver vos données sur plusieurs appareils.
-    L'inscription se fait uniquement par <strong>adresse e-mail et mot de passe</strong> ;
-    aucune connexion via un réseau social n'est proposée. L'hébergement est assuré
-    par <strong>Supabase</strong>.
+    L'inscription se fait par <strong>adresse e-mail et mot de passe</strong> ou avec
+    votre <strong>compte Google</strong> (sur le site uniquement). L'hébergement est assuré
+    par <strong>Firebase</strong> (Google).
   </p>
   <p>Si et seulement si vous créez un compte, les données suivantes sont synchronisées :</p>
   <ul>
@@ -138,9 +138,9 @@
     <li>vos journaux alimentaires et vos aliments personnalisés.</li>
   </ul>
   <p>
-    Chaque table est protégée par une règle de sécurité au niveau des lignes
-    (<em>Row Level Security</em>) liée à votre identifiant de compte : techniquement,
-    aucun autre utilisateur ne peut lire vos enregistrements.
+    Vos données sont rangées sous votre identifiant de compte et protégées par des
+    règles de sécurité Firestore : techniquement, aucun autre utilisateur ne peut lire
+    vos enregistrements.
     <strong>Sans compte, aucune de ces données ne quitte votre appareil.</strong>
   </p>
 
@@ -181,7 +181,7 @@
   <h2>6. Services tiers</h2>
   <p>Selon les fonctions que vous activez, les services suivants peuvent intervenir :</p>
   <ul>
-    <li><strong>Supabase</strong> — hébergement du compte et des données synchronisées ;</li>
+    <li><strong>Firebase</strong> (Google) — hébergement du compte et des données synchronisées ;</li>
     <li><strong>Google Fit</strong> — export de vos séances, pesées et apports alimentaires ;</li>
     <li><strong>OneSignal</strong> — envoi des notifications de rappel d'entraînement ;</li>
     <li><strong>Strava</strong> — import de vos activités, si vous connectez ce service ;</li>
@@ -311,11 +311,11 @@
   <h2>3. Account and sync (optional)</h2>
   <p>
     You may create an account to access your data across devices. Sign-up uses
-    <strong>e-mail and password only</strong> — no social login. Hosting is provided by
-    <strong>Supabase</strong>. If, and only if, you create an account, the following is
-    synced: your profile, workouts and custom exercises, weigh-ins, cardio sessions,
-    nutrition logs and custom foods. Every table is protected by Row Level Security
-    tied to your account ID, so no other user can read your records.
+    <strong>e-mail and password</strong> or your <strong>Google account</strong> (website only).
+    Hosting is provided by <strong>Firebase</strong> (Google). If, and only if, you create an
+    account, the following is synced: your profile, workouts and custom exercises, weigh-ins,
+    cardio sessions, nutrition logs and custom foods. Your records are stored under your
+    account ID and protected by Firestore security rules, so no other user can read them.
     <strong>Without an account, none of this data leaves your device.</strong>
   </p>
 
@@ -351,7 +351,7 @@
 
   <h2>6. Third-party services</h2>
   <p>
-    Depending on the features you enable: <strong>Supabase</strong> (account and synced data
+    Depending on the features you enable: <strong>Firebase</strong> (Google; account and synced data
     hosting), <strong>Google Fit</strong> (exporting your workouts, weigh-ins and nutrition),
     <strong>OneSignal</strong> (workout reminder notifications), <strong>Strava</strong> (importing your
     activities), <strong>Google Fonts</strong> (display fonts) and <strong>YouTube</strong> (exercise
