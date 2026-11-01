@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Scale as ScaleIcon, Clock, Dumbbell, Leaf, Bike, Target } from 'lucide-react';
+import { Scale as ScaleIcon, Clock, Dumbbell, Bike, Target } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
 import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
-import { recommendNextSession, shortDayTitle } from '../services/RecoveryAdvisor';
+import { recommendNextSession } from '../services/RecoveryAdvisor';
 import {
   GOAL_OPTIONS_KG,
   getMonthlyGoalKg,
@@ -15,38 +15,22 @@ import {
 } from '../services/WeightLossPlan';
 import DailyChecklist from './DailyChecklist';
 import './HomeDashboard.css';
-import { parseDayTitle } from '../utils/dayTitle';
 
 const fmtKg = (kg) => kg.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
 
-function Ring({ percent, label, sub }) {
-  const size = 156;
-  const stroke = 12;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const offset = c * (1 - Math.min(1, Math.max(0, percent / 100)));
+/** Ligne « Vélo 40 / 140 min » avec sa barre de progression. */
+function WeekRow({ icon, tone, label, value, total }) {
+  const pct = Math.min(100, (value / Math.max(1, total)) * 100);
   return (
-    <div className="hd-ring-wrap">
-      <svg width={size} height={size} className="hd-ring">
-        <circle cx={size / 2} cy={size / 2} r={r} className="hd-ring-bg" strokeWidth={stroke} fill="none" />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          className="hd-ring-fg"
-          strokeWidth={stroke}
-          fill="none"
-          strokeDasharray={c}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        />
-      </svg>
-      <div className="hd-ring-center">
-        <div className="hd-ring-label">{label}</div>
-        <div className="hd-ring-pct">{Math.round(percent)}%</div>
-        <div className="hd-ring-sub">{sub}</div>
-      </div>
+    <div className="hd-week-row">
+      <span className={`hd-week-row-icon ${tone}`}>{icon}</span>
+      <span className="hd-week-row-label">{label}</span>
+      <span className="hd-week-row-value">
+        {value}<span className="hd-card-of"> / {total} min</span>
+      </span>
+      <span className="hd-week-row-bar" aria-hidden="true">
+        <span className={`hd-week-row-fill ${tone}`} style={{ width: `${pct}%` }} />
+      </span>
     </div>
   );
 }
@@ -89,8 +73,6 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
   // Objectif en minutes (vélo + musculation) et minutes faites depuis lundi.
   const goal = useMemo(() => computeWeekTargets(weekPlanDays, { goalKg }), [weekPlanDays, goalKg]);
   const progress = useMemo(() => getWeekProgress(), [checklistVersion]);
-  const minutesDone = progress.bikeMinutes + progress.strengthMinutes;
-  const percent = Math.min(100, (minutesDone / Math.max(1, goal.totalMinutes)) * 100);
 
   const handleGoalChange = (kg) => {
     if (kg === goalKg) return;
@@ -116,11 +98,8 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
     });
   }, [plan, currentDayIndex, weekWorkouts, todayIdx]);
 
-  // Séance du jour, pour la carte « Aujourd'hui ».
+  // Séance du jour, pour la check-list.
   const todayPlanDay = plan[currentDayIndex] || null;
-  const todayTitle = todayPlanDay
-    ? parseDayTitle(todayPlanDay.title).name
-    : '';
 
   const currentWeight = weights.length ? weights[weights.length - 1].weight : null;
   const prevWeight = weights.length > 1 ? weights[weights.length - 2].weight : null;
@@ -170,7 +149,7 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
     <div className="hd-root">
       <div className="hd-header">
         <h1 className="hd-title page-title">{t('home.title', { defaultValue: 'Aujourd\'hui' })}</h1>
-        <p className="hd-subtitle page-subtitle">{t('home.subtitle', { defaultValue: 'Vue d\'ensemble de la semaine' })}</p>
+        <p className="hd-subtitle page-subtitle">{t('home.subtitle', { defaultValue: 'Votre journée, puis votre semaine' })}</p>
       </div>
 
       {/* Bande semaine : lundi → dimanche */}
@@ -192,56 +171,56 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
         onChange={() => setChecklistVersion((v) => v + 1)}
       />
 
-      <div className="hd-top">
-        <Ring
-          percent={percent}
-          label={t('home.minutesRingLabel', { defaultValue: 'Minutes' })}
-          sub={`${minutesDone} / ${goal.totalMinutes} min`}
-        />
+      {/* Récupération : une seule ligne, seulement quand il faut attendre. */}
+      {recovery && !recovery.firstSession && !(recovery.ready && new Date(nowMinute * 60000) >= recovery.recommended) && (
+        <p className="hd-recovery-line">
+          <Clock size={15} />
+          <span>
+            {t('home.recovery.nextLabel', { defaultValue: 'Prochaine séance conseillée' })} :{' '}
+            <strong>{recoveryDayLabel(recovery.recommended)} · {recoveryTimeLabel(recovery.recommended)}</strong>
+          </span>
+        </p>
+      )}
 
-        <div className="hd-stack">
-          <div className="hd-card hd-card-bike">
-            <Bike size={20} />
-            <div className="hd-card-body">
-              <div className="hd-card-label">Vélo</div>
-              <div className="hd-card-value">
-                {progress.bikeMinutes}<span className="hd-card-of"> / {goal.bikeMinutes} min</span>
-              </div>
-            </div>
-          </div>
+      {/* Cette semaine : vélo, musculation, poids, puis l'objectif du mois */}
+      <div className="hd-week-card card">
+        <div className="hd-week-card-head">
+          <span className="hd-week-card-title">Cette semaine</span>
+          <span className="hd-week-card-count">{done}/{target} séances</span>
+        </div>
 
-          <div className="hd-card hd-card-strength">
-            <Dumbbell size={20} />
-            <div className="hd-card-body">
-              <div className="hd-card-label">Musculation</div>
-              <div className="hd-card-value">
-                {progress.strengthMinutes}<span className="hd-card-of"> / {goal.strengthMinutes} min</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="hd-card hd-card-weight">
-            <ScaleIcon size={20} />
-            <div className="hd-card-body">
-              <div className="hd-card-label">{t('home.weight', { defaultValue: 'Poids' })}</div>
-              <div className="hd-card-value">
-                {currentWeight != null ? `${currentWeight} kg` : '—'}
-                {weightDelta != null && (
-                  <span className={`hd-delta ${weightDelta < 0 ? 'down' : weightDelta > 0 ? 'up' : ''}`}>
-                    {weightDelta > 0 ? '+' : ''}{weightDelta.toFixed(1)}
-                  </span>
-                )}
-              </div>
-            </div>
+        <div className="hd-week-rows">
+          <WeekRow
+            icon={<Bike size={18} />}
+            tone="bike"
+            label="Vélo"
+            value={progress.bikeMinutes}
+            total={goal.bikeMinutes}
+          />
+          <WeekRow
+            icon={<Dumbbell size={18} />}
+            tone="strength"
+            label="Musculation"
+            value={progress.strengthMinutes}
+            total={goal.strengthMinutes}
+          />
+          <div className="hd-week-row">
+            <span className="hd-week-row-icon weight"><ScaleIcon size={18} /></span>
+            <span className="hd-week-row-label">{t('home.weight', { defaultValue: 'Poids' })}</span>
+            <span className="hd-week-row-value">
+              {currentWeight != null ? `${currentWeight} kg` : 'Pas encore de pesée'}
+              {weightDelta != null && (
+                <span className={`hd-delta ${weightDelta < 0 ? 'down' : weightDelta > 0 ? 'up' : ''}`}>
+                  {weightDelta > 0 ? '+' : ''}{weightDelta.toFixed(1)}
+                </span>
+              )}
+            </span>
           </div>
         </div>
-      </div>
 
-      {/* Objectif mensuel → durées de la semaine */}
-      <div className="hd-goal card">
         <div className="hd-goal-head">
-          <Target size={20} />
-          <span className="hd-goal-title">Objectif de perte de poids</span>
+          <Target size={18} />
+          <span className="hd-goal-title">Objectif par mois</span>
         </div>
         <div className="hd-goal-options" role="radiogroup" aria-label="Kilos à perdre par mois">
           {GOAL_OPTIONS_KG.map((kg) => (
@@ -257,83 +236,17 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
             </button>
           ))}
         </div>
-        <ul className="hd-goal-plan">
-          <li>
-            <Bike size={16} />
-            <span>
-              <strong>{goal.bikeMinutes} min de vélo</strong> cette semaine · {goal.bikePerSession} min chaque jour
-            </span>
-          </li>
-          <li>
-            <Dumbbell size={16} />
-            <span><strong>{goal.strengthMinutes} min de musculation</strong> ({goal.sessions} séances)</span>
-          </li>
-          <li>
-            <Leaf size={16} />
-            <span>Assiette : <strong>−{goal.dietDaily} kcal/jour</strong> (objectif de l'onglet Nutrition)</span>
-          </li>
-        </ul>
         {goal.missingKcalPerDay > 0 && (
           <p className="hd-goal-gap">
             Pour viser −{fmtKg(goalKg)} kg : encore <strong>−{goal.missingKcalPerDay} kcal/jour</strong> dans l'assiette.
           </p>
         )}
         <p className="hd-goal-foot">
-          Avec ce plan : environ <strong>−{fmtKg(goal.projectedKgPerMonth)} kg par mois</strong>
-          {' · '}Séances {done}/{target} · Série {streak} jour{streak > 1 ? 's' : ''}
+          Avec ce plan ({goal.bikePerSession} min de vélo par jour, assiette −{goal.dietDaily} kcal/jour) :
+          environ <strong>−{fmtKg(goal.projectedKgPerMonth)} kg par mois</strong>
+          {streak > 1 ? ` · série de ${streak} jours` : ''}
         </p>
       </div>
-
-      {recovery && (
-        <div className={`hd-recovery ${recovery.ready ? 'ready' : 'waiting'}`}>
-          <div className="hd-recovery-head">
-            <Clock size={22} />
-            <div className="hd-recovery-title">
-              {t('home.recovery.heading', { defaultValue: 'Récupération' })}
-            </div>
-          </div>
-
-          {recovery.firstSession ? (
-            <p className="hd-recovery-desc">
-              {t('home.recovery.first', { defaultValue: 'Aucune séance enregistrée — le meilleur créneau, c\'est maintenant.' })}
-            </p>
-          ) : (
-            <>
-              <div className="hd-recovery-label">
-                {t('home.recovery.nextLabel', { defaultValue: 'Prochaine séance conseillée' })}
-              </div>
-              <div className="hd-recovery-datetime">
-                {recovery.ready && new Date(nowMinute * 60000) >= recovery.recommended
-                  ? t('home.recovery.now', { defaultValue: 'Dès maintenant' })
-                  : `${recoveryDayLabel(recovery.recommended)} · ${recoveryTimeLabel(recovery.recommended)}`}
-              </div>
-              <p className="hd-recovery-hint">
-                {t('home.recovery.detail', {
-                  defaultValue: '~{{hours}} h de récupération après {{last}} · à suivre : {{next}}',
-                  hours: recovery.recoveryHours,
-                  last: shortDayTitle(recovery.lastTitle),
-                  next: shortDayTitle(recovery.nextDay.title),
-                })}
-              </p>
-              <div className="hd-recovery-bar">
-                <div
-                  className="hd-recovery-bar-fill"
-                  style={{ width: `${Math.round(recovery.progress * 100)}%` }}
-                />
-              </div>
-              <div className="hd-recovery-status">
-                {recovery.ready
-                  ? t('home.recovery.ready', { defaultValue: 'Récupéré ✓' })
-                  : t('home.recovery.progress', {
-                      defaultValue: 'Récupération : {{pct}} %',
-                      pct: Math.round(recovery.progress * 100),
-                    })}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
     </div>
   );
 }

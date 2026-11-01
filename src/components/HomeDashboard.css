@@ -58,118 +58,86 @@
 .hd-week-dot.rest { background: var(--label-4); }
 .hd-week-dot.up { background: var(--label-3); }
 
-/* ── Anneau + cartes stats ────────────────────────────────────────── */
-.hd-top {
-  display: grid;
-  grid-template-columns: minmax(156px, 0.9fr) minmax(0, 1fr);
-  gap: 12px;
-  align-items: stretch;
+/* ── Récupération : une ligne sous la check-list ──────────────────── */
+.hd-recovery-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 2px 14px;
+  font-size: 0.85rem;
+  color: var(--label-2);
+}
+.hd-recovery-line svg { flex-shrink: 0; color: var(--warn); }
+.hd-recovery-line strong { color: var(--label); font-weight: 600; }
+
+/* ── Cette semaine : vélo, musculation, poids + objectif du mois ──── */
+.hd-week-card {
+  padding: 14px;
   margin-bottom: 12px;
 }
-
-.hd-ring-wrap {
-  position: relative;
+.hd-week-card-head {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface);
-  border: none;
-  border-radius: var(--r-lg);
-  padding: 12px;
-  min-height: 182px;
-}
-
-.hd-ring {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-.hd-ring-bg {
-  stroke: var(--surface-2);
-}
-.hd-ring-fg {
-  stroke: var(--acc);
-  transition: stroke-dashoffset 0.6s var(--ease);
-}
-
-.hd-ring-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-.hd-ring-label {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--label-2);
-}
-.hd-ring-pct {
-  font-family: var(--font-display);
-  font-size: 1.9rem;
-  font-weight: 800;
-  color: var(--label);
-  letter-spacing: -0.03em;
-  line-height: 1;
-  margin: 4px 0;
-}
-.hd-ring-sub {
-  font-size: 0.78rem;
-  color: var(--label-2);
-  font-weight: 600;
-}
-
-.hd-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.hd-card {
-  display: flex;
-  align-items: center;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 12px;
-  padding: 12px 14px;
-  border-radius: var(--r-card);
-  border: none;
-  background: var(--surface);
+  margin-bottom: 10px;
+}
+.hd-week-card-title {
+  font-weight: 600;
+  font-size: 1rem;
   color: var(--label);
-  flex: 1;
-  min-height: 56px;
-  min-width: 0;
 }
-/* La couleur vit sur l'icône, plus sur la carte. */
-.hd-card-bike { color: var(--info); }
-.hd-card-strength { color: var(--acc); }
-.hd-card-weight { color: var(--ok); }
-.hd-card svg {
-  flex-shrink: 0;
-}
-.hd-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.hd-card-label {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.hd-week-card-count {
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--label-2);
 }
-.hd-card-value {
+.hd-week-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--sep-op);
+}
+.hd-week-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 6px;
+}
+.hd-week-row-icon { display: flex; }
+.hd-week-row-icon.bike { color: var(--info); }
+.hd-week-row-icon.strength { color: var(--acc); }
+.hd-week-row-icon.weight { color: var(--ok); }
+.hd-week-row-label {
+  font-size: 0.95rem;
+  color: var(--label);
+}
+.hd-week-row-value {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--label);
-  letter-spacing: -0.01em;
-  overflow-wrap: anywhere;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
+.hd-week-row-bar {
+  grid-column: 2 / 4;
+  height: 6px;
+  border-radius: 100px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.hd-week-row-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width var(--t) var(--ease);
+}
+.hd-week-row-fill.bike { background: var(--info); }
+.hd-week-row-fill.strength { background: var(--acc); }
 .hd-delta {
   font-size: 0.75rem;
   font-weight: 600;
@@ -184,88 +152,6 @@
 .hd-delta.down { color: var(--ok); background: var(--ok-soft); }
 .hd-delta.up { color: var(--err); background: var(--err-soft); }
 
-/* ── Carte récupération ───────────────────────────────────────────── */
-.hd-recovery {
-  border-radius: var(--r-lg);
-  padding: 16px;
-  border: none;
-  background: var(--surface);
-  color: var(--label);
-}
-.hd-recovery-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 6px;
-  color: var(--info);
-}
-.hd-recovery.ready .hd-recovery-head { color: var(--ok); }
-.hd-recovery-title {
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--label);
-}
-.hd-recovery-label {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--label-2);
-}
-.hd-recovery-datetime {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin: 2px 0 6px;
-}
-.hd-recovery-desc {
-  font-size: 0.85rem;
-  color: var(--label-2);
-  margin: 4px 0 2px;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
-}
-.hd-recovery-hint {
-  font-size: 0.78rem;
-  color: var(--label-2);
-  margin: 0 0 12px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}
-.hd-recovery-bar {
-  position: relative;
-  width: 100%;
-  height: 8px;
-  border-radius: 100px;
-  background: var(--surface-2);
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-.hd-recovery-bar-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--info);
-  border-radius: 100px;
-  transition: width 0.6s var(--ease);
-}
-.hd-recovery.ready .hd-recovery-bar-fill { background: var(--ok); }
-.hd-recovery-status {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--label-2);
-}
-
-@media (max-width: 360px) {
-  .hd-top {
-    grid-template-columns: 1fr;
-  }
-  .hd-ring-wrap {
-    min-height: 188px;
-  }
-}
-
 /* Objectif sur la carte : « 45 / 150 min » — le total reste discret. */
 .hd-card-of {
   font-family: var(--font-text);
@@ -274,11 +160,7 @@
   color: var(--label-2);
 }
 
-/* ── Objectif mensuel → durées de la semaine ──────────────────────── */
-.hd-goal {
-  padding: 14px;
-  margin-bottom: 12px;
-}
+/* ── Objectif du mois (bas de la carte « Cette semaine ») ─────────── */
 .hd-goal-head {
   display: flex;
   align-items: center;
@@ -298,6 +180,7 @@
   margin-bottom: 12px;
 }
 .hd-goal-option {
+  min-height: 44px;
   padding: 10px 6px;
   border-radius: var(--r);
   border: 1px solid var(--sep-op);
@@ -319,31 +202,6 @@
 .hd-goal-option.active {
   background: var(--acc-soft);
   border-color: var(--acc);
-}
-.hd-goal-plan {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.hd-goal-plan li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 0.85rem;
-  color: var(--label-2);
-  line-height: 1.35;
-}
-.hd-goal-plan li svg {
-  flex-shrink: 0;
-  margin-top: 1px;
-  color: var(--label-3);
-}
-.hd-goal-plan strong {
-  color: var(--label);
-  font-weight: 600;
 }
 /* Objectif plus ambitieux que le plan : ce qu'il reste à prendre dans l'assiette. */
 .hd-goal-gap {

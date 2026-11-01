@@ -19,6 +19,7 @@ import {
 import 'react-calendar/dist/Calendar.css';
 import './WorkoutCalendar.css'; // Importer les styles personnalisés
 import { healthServiceName } from '../services/HealthConnect';
+import { parseDayTitle } from '../utils/dayTitle';
 
 function WorkoutCalendar() {
   // La date du jour est sélectionnée à l'ouverture : les séances du jour
@@ -138,7 +139,7 @@ function WorkoutCalendar() {
           {selectedDayWorkouts.map(workout => (
             <div key={workout.id} className="day-workout-card">
               <div className="workout-header">
-                <span className="workout-title">{workout.title}</span>
+                <span className="workout-title">{parseDayTitle(workout.title).name || workout.title}</span>
                 <span className="workout-time">{format(new Date(workout.date), 'HH:mm', { locale: fr })}</span>
                 <GoogleFitItemButton
                   synced={isSyncedWithGoogleFit('workout', workout.id)}
