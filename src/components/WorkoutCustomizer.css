@@ -337,21 +337,21 @@
   color: #fff;
 }
 
-.form-group {
+.exercise-form .form-group {
   margin-bottom: 16px;
 }
 
-.form-row {
+.exercise-form .form-row {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
 }
 
-.form-group.half {
+.exercise-form .form-group.half {
   flex: 1;
 }
 
-.form-group label {
+.exercise-form .form-group label {
   display: block;
   margin-bottom: 6px;
   font-family: 'Outfit', sans-serif;
@@ -362,11 +362,11 @@
   color: var(--label-2);
 }
 
-.dark-theme .form-group label {
+.dark-theme .exercise-form .form-group label {
   color: var(--label-2);
 }
 
-.form-group input, .form-group textarea, .form-group select {
+.exercise-form .form-group input, .exercise-form .form-group textarea, .exercise-form .form-group select {
   width: 100%;
   padding: 10px 14px;
   border-radius: 10px;
@@ -379,21 +379,21 @@
   transition: all 0.25s ease;
 }
 
-.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+.exercise-form .form-group input:focus, .exercise-form .form-group textarea:focus, .exercise-form .form-group select:focus {
   border-color: var(--acc);
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.25);
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-.dark-theme .form-group input, 
-.dark-theme .form-group textarea, 
-.dark-theme .form-group select {
+.dark-theme .exercise-form .form-group input, 
+.dark-theme .exercise-form .form-group textarea, 
+.dark-theme .exercise-form .form-group select {
   background-color: rgba(255, 255, 255, 0.04);
   color: #fff;
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-.form-actions {
+.exercise-form .form-actions {
   display: flex;
   gap: 12px;
   margin-top: 24px;

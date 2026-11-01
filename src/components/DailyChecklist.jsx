@@ -8,6 +8,7 @@ import { getChecklistDay, isBikeItemDone, toggleBikeItem } from '../services/Dai
 import { importBikeSessionsFromDrive, isPublicSyncConfigured } from '../services/GoogleDriveImport';
 import { bikeSessionDayKey, importBikeSessionsFromGoogleFit, importStepsFromGoogleFit } from '../services/GoogleFitSync';
 import { isHealthConnectApp } from '../services/HealthConnect';
+import { parseDayTitle } from '../utils/dayTitle';
 
 // APK : import automatique Health Connect au plus toutes les 15 minutes.
 const HEALTH_AUTOSYNC_KEY = 'pfl_hc_autosync_at';
@@ -71,7 +72,7 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartR
 
   if (!planDay) return null;
 
-  const title = planDay.title.replace(/^JOUR \d+:\s*/i, '').split(' — ')[0];
+  const title = parseDayTitle(planDay.title).name;
   // Vélo chaque jour (même un jour sans musculation), puis la séance du jour.
   const items = [
     { id: 'bike', kind: 'bike', minutes: goal.bikePerSession, label: `Vélo ${goal.bikePerSession} min`, hint: 'chaque jour, au moment qui vous arrange' },

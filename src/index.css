@@ -137,6 +137,7 @@
   color: var(--acc);
   border: none;
   border-radius: 100px;
+  min-height: 44px;
   padding: 8px 14px;
   font-family: var(--font-text);
   font-weight: 600;
@@ -351,8 +352,8 @@ h6 { font-size: .875rem; }
   gap: 3px;
   background: none;
   border: none;
-  color: var(--label-3);
-  font-size: 11px;
+  color: var(--label-2);
+  font-size: 12px;
   font-weight: 500;
   font-family: var(--font-text);
   cursor: pointer;

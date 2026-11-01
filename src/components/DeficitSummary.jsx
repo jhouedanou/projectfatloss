@@ -66,12 +66,19 @@ export default function DeficitSummary({ selectedDate, summary }) {
             )}
             {t('nutrition.deficit.deficit', { defaultValue: 'Déficit estimé' })}
           </span>
-          <span
-            className="deficit-row-value"
-            style={{ color: inDeficit ? '#30d158' : '#ff453a', fontWeight: 800 }}
-          >
-            {inDeficit ? '−' : '+'}{Math.abs(deficit)} kcal
-          </span>
+          {/* Sans repas noté, le « déficit » ne serait que la dépense du jour : trompeur. */}
+          {summary.calories > 0 ? (
+            <span
+              className="deficit-row-value"
+              style={{ color: inDeficit ? '#30d158' : '#ff453a', fontWeight: 800 }}
+            >
+              {inDeficit ? '−' : '+'}{Math.abs(deficit)} kcal
+            </span>
+          ) : (
+            <span className="deficit-row-value deficit-row-empty">
+              {t('nutrition.deficit.empty', { defaultValue: 'Notez un repas pour le voir' })}
+            </span>
+          )}
         </div>
       </div>
 

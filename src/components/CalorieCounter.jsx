@@ -36,6 +36,7 @@ import {
   isSyncedWithGoogleFit
 } from '../services/GoogleFitSync';
 import './CalorieCounter.css';
+import { getProteinTargetGrams } from '../services/NutritionGoals';
 import { healthServiceName } from '../services/HealthConnect';
 
 const normalizeFoodSearchText = (value) =>
@@ -275,10 +276,12 @@ const CalorieCounter = () => {
   const isGoalExceeded = summary.calories > summary.goal;
   const progressPercent = Math.min(100, (summary.calories / summary.goal) * 100);
 
-  // Macro Target percentages (Standard guidelines: 30% Protein, 45% Carbs, 25% Fat)
-  const proteinGoal = Math.round((summary.goal * 0.30) / 4);
-  const carbsGoal = Math.round((summary.goal * 0.45) / 4);
-  const fatGoal = Math.round((summary.goal * 0.25) / 9);
+  // Objectifs de macros : protéines selon le poids (même chiffre que le bilan
+  // énergétique), le reste des calories réparti en glucides (64 %) et lipides (36 %).
+  const proteinGoal = getProteinTargetGrams();
+  const restKcal = Math.max(0, summary.goal - proteinGoal * 4);
+  const carbsGoal = Math.round((restKcal * 0.64) / 4);
+  const fatGoal = Math.round((restKcal * 0.36) / 9);
 
   return (
     <div className="calorie-tracker-container">

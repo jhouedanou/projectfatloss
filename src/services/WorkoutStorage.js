@@ -168,7 +168,7 @@ export function getWeightLiftedByExercise() {
  * Recalcule toutes les statistiques à partir de l'historique complet
  * Utile après des suppressions ou modifications importantes
  */
-function recalculateAllStats() {
+export function recalculateAllStats() {
   // Réinitialiser les statistiques
   const emptyStats = {
     totalWorkouts: 0,

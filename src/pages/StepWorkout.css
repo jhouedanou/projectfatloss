@@ -126,18 +126,94 @@
   visibility: visible !important;
 }
 
-.workout-day-title {
+/* Titre de séance : nom court, repères (jour, semaine) en sous-titre */
+.workout-day-head {
   width: 100%;
   max-width: 760px;
   margin: 0 auto 10px;
   padding: 0 18px;
   box-sizing: border-box;
-  color: #fff;
-  font-size: 1.08rem;
-  line-height: 1.25;
-  font-weight: 900;
-  letter-spacing: 0;
   text-align: left;
+}
+
+.workout-day-title {
+  margin: 0;
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.workout-day-sub {
+  margin: 4px 0 0;
+  color: var(--label-2);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Petits écrans : la cloche (réglages de notification) laisse la place à
+   « Auto » et « Terminer » ; elle reste dans l'en-tête de l'accueil. */
+@media (max-width: 400px) {
+  .workout-icon-btn.notification-btn { display: none; }
+}
+
+/* Boutons texte de la barre de séance (« Auto », « Terminer ») */
+.workout-icon-btn.workout-text-btn {
+  width: auto;
+  flex: 0 0 auto;
+  min-width: 44px;
+  padding: 0 10px;
+  gap: 5px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.workout-icon-btn.workout-text-btn.save-btn {
+  color: var(--acc) !important;
+  border-color: rgba(var(--accent-rgb), 0.38) !important;
+}
+
+/* Compteur de répétitions : lisible à 2 m, chiffres de même largeur */
+.rep-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.rep-counter-value {
+  font-family: 'Barlow Condensed', 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 5rem;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.rep-counter-total {
+  margin-top: 6px;
+  color: var(--label-2);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.rep-counter--pill {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 22px;
+  border-radius: 100px;
+  background-color: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.rep-counter--pill .rep-counter-value {
+  font-size: 3rem;
+}
+
+.rep-counter--pill .rep-counter-total {
+  margin-top: 0;
 }
 
 .save-btn {
@@ -201,14 +277,6 @@
   margin: 20px 0;
   font-family: 'Inter', sans-serif;
   letter-spacing: -1px;
-}
-
-.rep-counter {
-  color: var(--acc);
-  font-size: 2.5rem;
-  text-align: center;
-  margin: 16px 0;
-  font-weight: 800;
 }
 
 .exercise-overlay {

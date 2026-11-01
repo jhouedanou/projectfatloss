@@ -87,7 +87,7 @@ const LoginForm = ({ onClose }) => {
       </div>
 
       {!isFirebaseConfigured && (
-        <div className="login-error-message">Firebase non configuré (variables VITE_FIREBASE_ manquantes).</div>
+        <div className="login-error-message">Connexion indisponible pour le moment. L'app fonctionne quand même : vos données restent sur cet appareil.</div>
       )}
       {error && <div className="login-error-message">{error}</div>}
       {info && <div className="login-info-message">{info}</div>}

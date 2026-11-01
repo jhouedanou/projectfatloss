@@ -184,11 +184,11 @@ const CardioTracker = () => {
           </div>
           <div className="cardio-stat">
             <Bike size={18} color="#0a84ff" />
-            <div><strong>{stats.byType.bike.count}</strong><span>séances vélo</span></div>
+            <div><strong>{stats.byType.bike.count}</strong><span>{stats.byType.bike.count > 1 ? 'séances vélo' : 'séance vélo'}</span></div>
           </div>
           <div className="cardio-stat">
             <Footprints size={18} color="#30d158" />
-            <div><strong>{stats.byType.walk.count}</strong><span>marches</span></div>
+            <div><strong>{stats.byType.walk.count}</strong><span>{stats.byType.walk.count > 1 ? 'marches' : 'marche'}</span></div>
           </div>
         </div>
       )}
@@ -271,8 +271,8 @@ const CardioTracker = () => {
         </p>
 
         {/* Réglages : lien du dossier public et clé API (mémorisés sur l'appareil) */}
-        {/* Ouverts tant que rien n'est réglé, ou après une erreur (lien ou clé à corriger) */}
-        <details className="cardio-sync-settings" open={!isPublicSyncConfigured() || !!driveState?.error}>
+        {/* Fermés par défaut (réglage technique) ; ouverts après une erreur (lien ou clé à corriger) */}
+        <details className="cardio-sync-settings" open={!!driveState?.error}>
           <summary>Réglages de la synchro (dossier public)</summary>
           <form onSubmit={handleSaveDriveSettings}>
             <label>

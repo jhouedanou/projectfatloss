@@ -38,7 +38,8 @@ const GoogleFitSyncButton = ({ getUnsyncedCount, onSync, noun = 'élément', nou
   const label = syncing
     ? 'Synchronisation…'
     : count === 0
-      ? `Tout est synchronisé avec ${healthServiceName()}`
+      // Vrai même sans connexion : il n'y a simplement rien à envoyer.
+      ? `Rien de nouveau à envoyer à ${healthServiceName()}`
       : `Synchroniser ${count} ${count > 1 ? nounPlural : noun} avec ${healthServiceName()}`;
 
   return (
