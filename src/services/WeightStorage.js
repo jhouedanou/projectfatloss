@@ -39,7 +39,7 @@ export const addWeightRecord = (weight, date = null, notes = '') => {
     // Sauvegarder l'historique mis à jour
     localStorage.setItem(WEIGHT_HISTORY_KEY, JSON.stringify(history));
 
-    // Pousser vers Supabase (offline-first, non bloquant)
+    // Pousser vers Firebase (offline-first, non bloquant)
     import('./SyncService')
       .then(({ pushWeighIn }) => pushWeighIn(newRecord))
       .catch(() => {});
@@ -77,7 +77,7 @@ export const deleteWeightRecord = (id) => {
     
     localStorage.setItem(WEIGHT_HISTORY_KEY, JSON.stringify(updatedHistory));
 
-    // Répercuter la suppression sur Supabase
+    // Répercuter la suppression sur Firebase
     import('./SyncService')
       .then(({ deleteRemoteWeighIn }) => deleteRemoteWeighIn(id))
       .catch(() => {});

@@ -2,7 +2,7 @@
 //
 // L'état "déjà synchronisé" est conservé dans une clé localStorage dédiée afin de
 // NE PAS modifier les enregistrements métier (et donc ne pas déclencher les push
-// Supabase associés). On évite ainsi les doublons côté Google Fit.
+// Firebase associés). On évite ainsi les doublons côté Google Fit.
 import GoogleFitService, { BIKE_ACTIVITY_TYPES, VIRTUAL_BIKE_ACTIVITY_TYPES } from './GoogleFitService';
 import { getWorkoutHistory } from './WorkoutStorage';
 import { getWeightHistory } from './WeightStorage';

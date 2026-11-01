@@ -143,6 +143,41 @@
 .login-button:hover:not(:disabled) { transform: translateY(-2px); }
 .login-button:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
 
+.login-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px;
+  background: #fff;
+  color: #1f1f1f;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+.login-google:hover:not(:disabled) { transform: translateY(-2px); }
+.login-google:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--text-tertiary, #8a8a92);
+  font-size: 0.8rem;
+}
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .login-switch {
   display: block;
   width: 100%;

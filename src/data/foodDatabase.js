@@ -694,7 +694,7 @@ export const saveDailyNutritionLog = (dateStr, data) => {
   allLogs[dateStr] = data;
   localStorage.setItem('pfl_nutrition_logs', JSON.stringify(allLogs));
 
-  // Pousse le jour vers Supabase (offline-first, non bloquant)
+  // Pousse le jour vers Firebase (offline-first, non bloquant)
   import('../services/SyncService')
     .then(({ pushNutritionDay }) => pushNutritionDay(dateStr, data))
     .catch(() => {});
