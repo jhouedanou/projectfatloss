@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Check, Bike, Dumbbell, Leaf, RefreshCw, Play } from 'lucide-react';
+import { Check, Bike, Dumbbell, Leaf, RefreshCw } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getCardioSessions } from '../services/CardioStorage';
 import { dateKey } from '../services/HabitStorage';
@@ -16,15 +16,14 @@ const HEALTH_AUTOSYNC_MS = 15 * 60 * 1000;
 import './DailyChecklist.css';
 
 /**
- * Check-list du jour : une séance de vélo (immersive dans l'app, ou faite
- * ailleurs et cochée ici) et la séance de musculation guidée.
+ * Check-list du jour : une séance de vélo (faite hors de l'app, cochée ici ou
+ * importée) et la séance de musculation guidée.
  * @param {Object} planDay - jour du programme
  * @param {Object} goal - cibles de la semaine (computeWeekTargets)
  * @param {Function} onStartWorkout - ouvre la séance de musculation
- * @param {Function} [onStartRide] - ouvre la séance vélo immersive (minutes prévues)
  * @param {Function} onChange - appelé après chaque case cochée/décochée
  */
-export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartRide, onChange }) {
+export default function DailyChecklist({ planDay, goal, onStartWorkout, onChange }) {
   const today = useMemo(() => new Date(), []);
   const [day, setDay] = useState(() => getChecklistDay(today));
   // Synchro depuis la ligne vélo : Health Connect (APK) ou Health Sync (dossier Drive public)
@@ -131,9 +130,7 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartR
         {planDay.isRestDay ? (
           <><Leaf size={13} /> Pas de musculation aujourd'hui : seulement le vélo.</>
         ) : (
-          onStartRide
-            ? '« Rouler » lance la séance vélo en vidéo, pilotée par votre EB900. Faite ailleurs ? Cochez-la.'
-            : 'Le vélo se fait hors de l\'app : cochez la séance une fois faite.'
+          'Le vélo se fait hors de l\'app : cochez la séance une fois faite.'
         )}
       </p>
 
@@ -160,16 +157,6 @@ export default function DailyChecklist({ planDay, goal, onStartWorkout, onStartR
                   </span>
                   {item.kind === 'strength' && !done && <span className="dcl-start">Démarrer</span>}
                 </button>
-                {item.kind === 'bike' && !done && onStartRide && (
-                  <button
-                    type="button"
-                    className="dcl-ride"
-                    onClick={() => onStartRide(item.minutes)}
-                    aria-label={`Lancer la séance vélo immersive de ${item.minutes} min`}
-                  >
-                    <Play size={13} fill="currentColor" /> Rouler
-                  </button>
-                )}
                 {item.kind === 'bike' && canSync && (
                   <button
                     type="button"

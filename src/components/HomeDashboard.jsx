@@ -35,7 +35,7 @@ function WeekRow({ icon, tone, label, value, total }) {
   );
 }
 
-export default function HomeDashboard({ onStartWorkout, onStartRide }) {
+export default function HomeDashboard({ onStartWorkout }) {
   const { t, i18n } = useTranslation();
   const history = useMemo(() => getWorkoutHistory(), []);
   const weights = useMemo(() => getWeightHistory(), []);
@@ -162,12 +162,11 @@ export default function HomeDashboard({ onStartWorkout, onStartRide }) {
         ))}
       </div>
 
-      {/* Check-list du jour : vélo (séance immersive ou cochée), muscu */}
+      {/* Check-list du jour : vélo (coché ou importé), muscu */}
       <DailyChecklist
         planDay={todayPlanDay}
         goal={goal}
         onStartWorkout={onStartWorkout}
-        onStartRide={onStartRide}
         onChange={() => setChecklistVersion((v) => v + 1)}
       />
 

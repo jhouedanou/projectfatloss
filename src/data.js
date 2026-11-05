@@ -1,14 +1,14 @@
 /**
- * PROGRAMME PERTE DE POIDS — 28 jours = 4 semaines, entraînement TOUS LES JOURS.
+ * PROGRAMME PERTE DE POIDS — 28 jours = 4 semaines, 6 séances par semaine (≥ 400 kcal), dimanche repos.
  * Lundi BAS DU CORPS A / Mardi HAUT DU CORPS A (poussée) / Mercredi CIRCUIT CORPS ENTIER /
  * Jeudi BAS DU CORPS B / Vendredi HAUT DU CORPS B (tirage) / Samedi FULL BODY FONCTIONNEL /
- * Dimanche RÉCUPÉRATION ACTIVE (séance courte et légère).
+ * Dimanche REPOS. Chaque séance finit par un finisher (thrusters ou complexe aux haltères).
  * Vélo : 20 min chaque jour, dans la check-list du jour de l'accueil.
  * Les exercices tournent sur les 4 semaines (une variante par semaine et par schéma de
- * mouvement) ; la charge monte S1 → S3 puis S4 allège.
+ * mouvement) ; la charge monte S1 → S3 puis S4 allège les charges.
  * Adapté : profil 147 kg pour 1,78 m, debout/banc (au sol : seulement des crunchs), ZÉRO saut (low-impact).
  * Matériel : haltères 2×15 et 2×10 kg, barre 30 kg, veste lestée 10 kg, poids chevilles
- * 2×4 + 2×2 kg, tapis de sol, vélo Domyos EB900.
+ * 2×4 + 2×2 kg, tapis de sol, vélo d'appartement.
  * Généré par scripts/gen-plan.mjs — ne pas éditer à la main.
  */
 const fullPlan = [
@@ -18,11 +18,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat gobelet haltère',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Haltère 15 kg',
         desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -32,11 +32,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre roumain (départ debout)',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Barre 30 kg',
         desc: 'Départ debout barre en mains, poussez les hanches en arrière et descendez la barre le long des cuisses, dos droit, sans poser au sol. Ischios + fessiers + lombaires.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -100,6 +100,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -108,11 +122,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Développé couché haltères',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Haltères 15 kg',
         desc: 'Sur banc plat, poussez les haltères vers le haut en contrôlant la descente, amplitude complète. Pectoraux, triceps.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -122,11 +136,11 @@ const fullPlan = [
       },
       {
         name: 'Développé militaire barre',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Barre 30 kg',
         desc: 'Debout, gainé, poussez la barre au-dessus de la tête sans cambrer. Épaules complètes. 100% debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -190,6 +204,20 @@ const fullPlan = [
           muscleGroups: ['obliques', 'abdominals']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -198,11 +226,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat gobelet haltère',
-        sets: '3 × 12 (léger, enchaîné)',
+        sets: '4 × 12 (léger, enchaîné)',
         equip: 'Haltère 15 kg',
         desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -212,11 +240,11 @@ const fullPlan = [
       },
       {
         name: 'Rowing haltères deux bras',
-        sets: '3 × 12 (léger, enchaîné)',
+        sets: '4 × 12 (léger, enchaîné)',
         equip: 'Haltères 15 kg',
         desc: 'Buste penché, tirez les deux haltères vers les hanches en serrant les omoplates. Dos complet. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -226,11 +254,11 @@ const fullPlan = [
       },
       {
         name: 'Pullover haltère sur banc',
-        sets: '3 × 12 (léger, enchaîné)',
+        sets: '4 × 12 (léger, enchaîné)',
         equip: 'Haltère 15 kg',
         desc: 'Allongé en travers du banc, descendez l\'haltère derrière la tête bras tendus puis remontez. Grand dorsal. Sur banc.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -240,11 +268,11 @@ const fullPlan = [
       },
       {
         name: 'Curl marteau haltères',
-        sets: '3 × 12 (léger, enchaîné)',
+        sets: '4 × 12 (léger, enchaîné)',
         equip: 'Haltères 15 kg',
         desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -254,11 +282,11 @@ const fullPlan = [
       },
       {
         name: 'Woodchopper haltère',
-        sets: '3 × 12 (léger, enchaîné) /côté',
+        sets: '4 × 12 (léger, enchaîné) /côté',
         equip: 'Haltère 10 kg',
         desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -268,11 +296,11 @@ const fullPlan = [
       },
       {
         name: 'Marche du fermier (farmer carry)',
-        sets: '2 × 45 s',
+        sets: '3 × 45 s',
         equip: 'Haltères 15 kg',
         desc: 'Un haltère lourd dans chaque main, marchez tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
         caloriesPerSet: [11, 12],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 0,
         timer: true,
         duration: 60,
@@ -280,6 +308,20 @@ const fullPlan = [
           type: 'strength_training',
           name: 'Farmer Carry',
           muscleGroups: ['core', 'forearms', 'trapezius']
+        }
+      },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
         }
       },
     ],
@@ -290,11 +332,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Fentes arrière alternées haltères',
-        sets: '3 × 12 (tempo 3-1-1) en alternance',
+        sets: '4 × 12 (tempo 3-1-1) en alternance',
         equip: 'Haltères 10 kg',
         desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -304,11 +346,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre surélevé (rack pull)',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Barre 30 kg',
         desc: 'Barre posée à hauteur des genoux (cales/support), dos droit, tirez en poussant les hanches. JAMAIS depuis le sol : préserve le dos.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -372,6 +414,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -380,11 +436,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Rowing barre buste penché',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Barre 30 kg',
         desc: 'Buste penché 45°, dos droit, tirez la barre vers le bas du ventre. Épaisseur du dos. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -394,11 +450,11 @@ const fullPlan = [
       },
       {
         name: 'Rowing haltère un bras',
-        sets: '3 × 12 (tempo 3-1-1) /côté',
+        sets: '4 × 12 (tempo 3-1-1) /côté',
         equip: 'Haltère 15 kg',
         desc: 'Un genou et une main sur le banc, tirez l\'haltère vers la hanche, coude près du corps. Appui sur banc, pas au sol.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -462,6 +518,20 @@ const fullPlan = [
           muscleGroups: ['abdominals', 'core']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -470,11 +540,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat sumo haltère',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Haltère 15 kg',
         desc: 'Pieds très écartés, pointes vers l\'extérieur, haltère tenu entre les jambes. Adducteurs + fessiers. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -484,11 +554,11 @@ const fullPlan = [
       },
       {
         name: 'Développé incliné haltères',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Haltères 15 kg',
         desc: 'Banc incliné, poussez les haltères vers le haut en contrôlant la descente. Haut des pectoraux.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -526,11 +596,11 @@ const fullPlan = [
       },
       {
         name: 'Marche du fermier (farmer carry)',
-        sets: '2 × 45 s',
+        sets: '3 × 45 s',
         equip: 'Haltères 15 kg',
         desc: 'Un haltère lourd dans chaque main, marchez tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
         caloriesPerSet: [11, 12],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 0,
         timer: true,
         duration: 60,
@@ -554,84 +624,26 @@ const fullPlan = [
           muscleGroups: ['obliques', 'abdominals', 'core']
         }
       },
+      {
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
+        }
+      },
     ],
   },
   {
-    title: 'JOUR 7: RÉCUPÉRATION ACTIVE (Séance légère, Gainage) — Dimanche · S1 Adaptation',
-    isRestDay: false,
+    title: 'JOUR 7: REPOS (Récupération) — Dimanche',
+    isRestDay: true,
     exercises: [
-      {
-        name: 'Extension de hanche debout',
-        sets: '2 × 12 (léger) /côté',
-        equip: 'Poids chevilles 4 kg',
-        desc: 'Debout en appui léger, tendez la jambe vers l\'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Standing Hip Extension',
-          muscleGroups: ['glutes', 'hamstrings']
-        }
-      },
-      {
-        name: 'Oiseau haltères (arrière épaule)',
-        sets: '2 × 12 (léger)',
-        equip: 'Haltères 10 kg',
-        desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Rear Delt Raise',
-          muscleGroups: ['shoulders', 'back']
-        }
-      },
-      {
-        name: 'Crunchs',
-        sets: '2 × 12 (léger)',
-        equip: 'Tapis de sol',
-        desc: 'Allongé sur le dos, genoux fléchis, pieds au sol : enroulez le haut du dos vers les genoux sans tirer sur la nuque, puis redescendez lentement. Pour vous allonger et vous relever, passez par le côté, sans à-coup.',
-        caloriesPerSet: [10, 12],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Crunch',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Relevés de genoux debout',
-        sets: '2 × 12 (léger) /côté',
-        equip: 'Poids chevilles 4 kg',
-        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
-        caloriesPerSet: [16, 18],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Standing Knee Raises',
-          muscleGroups: ['abdominals', 'core']
-        }
-      },
-      {
-        name: 'Marche du fermier (farmer carry)',
-        sets: '2 × 45 s',
-        equip: 'Haltères 15 kg',
-        desc: 'Un haltère lourd dans chaque main, marchez tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
-        caloriesPerSet: [11, 12],
-        totalSets: 2,
-        nbRep: 0,
-        timer: true,
-        duration: 60,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Farmer Carry',
-          muscleGroups: ['core', 'forearms', 'trapezius']
-        }
-      },
     ],
   },
   {
@@ -640,11 +652,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat barre',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Barre 30 kg',
         desc: 'Barre sur les trapèzes, descendez hanches sous parallèle si mobilité OK, puis remontez. Quadriceps, fessiers. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -654,11 +666,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre surélevé (rack pull)',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Barre 30 kg',
         desc: 'Barre posée à hauteur des genoux (cales/support), dos droit, tirez en poussant les hanches. JAMAIS depuis le sol : préserve le dos.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -722,6 +734,20 @@ const fullPlan = [
           muscleGroups: ['obliques', 'abdominals', 'core']
         }
       },
+      {
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '3 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -730,11 +756,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Développé couché barre',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Barre 30 kg',
         desc: 'Sur banc, descendez la barre vers la poitrine puis poussez, tempo contrôlé. Pectoraux. (Le banc est surélevé : pas d\'appui au sol.)',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -744,11 +770,11 @@ const fullPlan = [
       },
       {
         name: 'Développé Arnold haltères',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Haltères 15 kg',
         desc: 'Assis sur banc, paumes vers vous, tournez les poignets en poussant vers le haut. Tous les faisceaux de l\'épaule.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -812,6 +838,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -820,11 +860,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat sumo haltère',
-        sets: '3 × 15 (léger, enchaîné)',
+        sets: '4 × 15 (léger, enchaîné)',
         equip: 'Haltère 15 kg',
         desc: 'Pieds très écartés, pointes vers l\'extérieur, haltère tenu entre les jambes. Adducteurs + fessiers. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -834,11 +874,11 @@ const fullPlan = [
       },
       {
         name: 'Rowing haltère un bras',
-        sets: '3 × 15 (léger, enchaîné) /côté',
+        sets: '4 × 15 (léger, enchaîné) /côté',
         equip: 'Haltère 15 kg',
         desc: 'Un genou et une main sur le banc, tirez l\'haltère vers la hanche, coude près du corps. Appui sur banc, pas au sol.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -848,11 +888,11 @@ const fullPlan = [
       },
       {
         name: 'Oiseau haltères (arrière épaule)',
-        sets: '3 × 15 (léger, enchaîné)',
+        sets: '4 × 15 (léger, enchaîné)',
         equip: 'Haltères 10 kg',
         desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -862,11 +902,11 @@ const fullPlan = [
       },
       {
         name: 'Curl biceps haltères',
-        sets: '3 × 15 (léger, enchaîné)',
+        sets: '4 × 15 (léger, enchaîné)',
         equip: 'Haltères 10 kg',
         desc: 'Debout, fléchissez les coudes pour monter les haltères vers les épaules sans balancer. Biceps.',
         caloriesPerSet: [12, 14],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -876,11 +916,11 @@ const fullPlan = [
       },
       {
         name: 'Relevés de genoux debout',
-        sets: '3 × 15 (léger, enchaîné) /côté',
+        sets: '4 × 15 (léger, enchaîné) /côté',
         equip: 'Poids chevilles 4 kg',
         desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -904,6 +944,20 @@ const fullPlan = [
           muscleGroups: ['core', 'forearms', 'trapezius']
         }
       },
+      {
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '3 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -912,11 +966,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Fentes bulgares haltères',
-        sets: '3 × 12 (tempo 3-1-1) /côté',
+        sets: '4 × 12 (tempo 3-1-1) /côté',
         equip: 'Haltères 10 kg',
         desc: 'Pied arrière surélevé sur le banc, descendez sur la jambe avant. Très efficace quadriceps et fessiers. Debout, zéro impact.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -926,11 +980,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre roumain (départ debout)',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Barre 30 kg',
         desc: 'Départ debout barre en mains, poussez les hanches en arrière et descendez la barre le long des cuisses, dos droit, sans poser au sol. Ischios + fessiers + lombaires.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -994,6 +1048,20 @@ const fullPlan = [
           muscleGroups: ['obliques', 'abdominals']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -1002,11 +1070,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Rowing haltères deux bras',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Haltères 15 kg',
         desc: 'Buste penché, tirez les deux haltères vers les hanches en serrant les omoplates. Dos complet. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1016,11 +1084,11 @@ const fullPlan = [
       },
       {
         name: 'Pullover haltère sur banc',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Haltère 15 kg',
         desc: 'Allongé en travers du banc, descendez l\'haltère derrière la tête bras tendus puis remontez. Grand dorsal. Sur banc.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1084,6 +1152,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -1092,11 +1174,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Fentes avant alternées haltères',
-        sets: '3 × 12 (tempo 3-1-1) en alternance',
+        sets: '4 × 12 (tempo 3-1-1) en alternance',
         equip: 'Haltères 10 kg',
         desc: 'Un pas en avant, descendez le genou arrière vers le sol sans le poser, puis remontez. Alternez. Quadriceps, fessiers, équilibre.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1106,11 +1188,11 @@ const fullPlan = [
       },
       {
         name: 'Développé couché haltères',
-        sets: '3 × 12 (tempo 3-1-1)',
+        sets: '4 × 12 (tempo 3-1-1)',
         equip: 'Haltères 15 kg',
         desc: 'Sur banc plat, poussez les haltères vers le haut en contrôlant la descente, amplitude complète. Pectoraux, triceps.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -1176,84 +1258,26 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '3 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
+        }
+      },
     ],
   },
   {
-    title: 'JOUR 14: RÉCUPÉRATION ACTIVE (Séance légère, Gainage) — Dimanche · S2 Accumulation',
-    isRestDay: false,
+    title: 'JOUR 14: REPOS (Récupération) — Dimanche',
+    isRestDay: true,
     exercises: [
-      {
-        name: 'Mollets debout lestés',
-        sets: '2 × 12 (léger)',
-        equip: 'Veste lestée 10 kg',
-        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Standing Calf Raise',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Élévations latérales haltères',
-        sets: '2 × 12 (léger)',
-        equip: 'Haltères 10 kg',
-        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Lateral Raises',
-          muscleGroups: ['shoulders']
-        }
-      },
-      {
-        name: 'Crunchs',
-        sets: '2 × 12 (léger)',
-        equip: 'Tapis de sol',
-        desc: 'Allongé sur le dos, genoux fléchis, pieds au sol : enroulez le haut du dos vers les genoux sans tirer sur la nuque, puis redescendez lentement. Pour vous allonger et vous relever, passez par le côté, sans à-coup.',
-        caloriesPerSet: [10, 12],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Crunch',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Crunch latéral debout (side bend)',
-        sets: '2 × 12 (léger) /côté',
-        equip: 'Haltère 15 kg',
-        desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
-        caloriesPerSet: [13, 15],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Standing Side Bend',
-          muscleGroups: ['obliques', 'abdominals']
-        }
-      },
-      {
-        name: 'Marche du fermier (farmer carry)',
-        sets: '3 × 45 s',
-        equip: 'Haltères 15 kg',
-        desc: 'Un haltère lourd dans chaque main, marchez tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
-        caloriesPerSet: [11, 12],
-        totalSets: 3,
-        nbRep: 0,
-        timer: true,
-        duration: 60,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Farmer Carry',
-          muscleGroups: ['core', 'forearms', 'trapezius']
-        }
-      },
     ],
   },
   {
@@ -1262,11 +1286,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat gobelet haltère',
-        sets: '3 × 10 (tempo lent, plus lourd)',
+        sets: '4 × 10 (tempo lent, plus lourd)',
         equip: 'Haltère 15 kg',
         desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1276,11 +1300,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre roumain (départ debout)',
-        sets: '3 × 10 (tempo lent, plus lourd)',
+        sets: '4 × 10 (tempo lent, plus lourd)',
         equip: 'Barre 30 kg',
         desc: 'Départ debout barre en mains, poussez les hanches en arrière et descendez la barre le long des cuisses, dos droit, sans poser au sol. Ischios + fessiers + lombaires.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1344,6 +1368,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '4 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -1352,11 +1390,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Développé incliné haltères',
-        sets: '3 × 10 (tempo lent, plus lourd)',
+        sets: '4 × 10 (tempo lent, plus lourd)',
         equip: 'Haltères 15 kg',
         desc: 'Banc incliné, poussez les haltères vers le haut en contrôlant la descente. Haut des pectoraux.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1366,11 +1404,11 @@ const fullPlan = [
       },
       {
         name: 'Push press barre',
-        sets: '3 × 10 (tempo lent, plus lourd)',
+        sets: '4 × 10 (tempo lent, plus lourd)',
         equip: 'Barre 30 kg',
         desc: 'Debout, légère impulsion des jambes puis poussez la barre au-dessus de la tête. Épaules + puissance, zéro impact.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1434,6 +1472,20 @@ const fullPlan = [
           muscleGroups: ['obliques', 'abdominals', 'core']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '4 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -1442,11 +1494,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat gobelet haltère',
-        sets: '3 × 15 (léger, enchaîné)',
+        sets: '4 × 15 (léger, enchaîné)',
         equip: 'Haltère 15 kg',
         desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -1456,11 +1508,11 @@ const fullPlan = [
       },
       {
         name: 'Rowing haltères deux bras',
-        sets: '3 × 15 (léger, enchaîné)',
+        sets: '4 × 15 (léger, enchaîné)',
         equip: 'Haltères 15 kg',
         desc: 'Buste penché, tirez les deux haltères vers les hanches en serrant les omoplates. Dos complet. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -1470,11 +1522,11 @@ const fullPlan = [
       },
       {
         name: 'Pullover haltère sur banc',
-        sets: '3 × 15 (léger, enchaîné)',
+        sets: '4 × 15 (léger, enchaîné)',
         equip: 'Haltère 15 kg',
         desc: 'Allongé en travers du banc, descendez l\'haltère derrière la tête bras tendus puis remontez. Grand dorsal. Sur banc.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -1484,11 +1536,11 @@ const fullPlan = [
       },
       {
         name: 'Curl marteau haltères',
-        sets: '3 × 15 (léger, enchaîné)',
+        sets: '4 × 15 (léger, enchaîné)',
         equip: 'Haltères 15 kg',
         desc: 'Debout, paumes face à face, fléchissez les coudes sans balancer le buste. Biceps et brachial (épaisseur du bras).',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -1498,11 +1550,11 @@ const fullPlan = [
       },
       {
         name: 'Woodchopper haltère',
-        sets: '3 × 15 (léger, enchaîné) /côté',
+        sets: '4 × 15 (léger, enchaîné) /côté',
         equip: 'Haltère 10 kg',
         desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
         caloriesPerSet: [16, 18],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
@@ -1526,6 +1578,20 @@ const fullPlan = [
           muscleGroups: ['core', 'forearms', 'trapezius']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '4 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -1534,11 +1600,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Fentes arrière alternées haltères',
-        sets: '3 × 10 (tempo lent, plus lourd) en alternance',
+        sets: '4 × 10 (tempo lent, plus lourd) en alternance',
         equip: 'Haltères 10 kg',
         desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1548,11 +1614,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre surélevé (rack pull)',
-        sets: '3 × 10 (tempo lent, plus lourd)',
+        sets: '4 × 10 (tempo lent, plus lourd)',
         equip: 'Barre 30 kg',
         desc: 'Barre posée à hauteur des genoux (cales/support), dos droit, tirez en poussant les hanches. JAMAIS depuis le sol : préserve le dos.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1616,6 +1682,20 @@ const fullPlan = [
           muscleGroups: ['abdominals']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '4 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -1624,11 +1704,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Rowing haltère un bras',
-        sets: '3 × 10 (tempo lent, plus lourd) /côté',
+        sets: '4 × 10 (tempo lent, plus lourd) /côté',
         equip: 'Haltère 15 kg',
         desc: 'Un genou et une main sur le banc, tirez l\'haltère vers la hanche, coude près du corps. Appui sur banc, pas au sol.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1638,11 +1718,11 @@ const fullPlan = [
       },
       {
         name: 'Rowing haltères deux bras',
-        sets: '3 × 10 (tempo lent, plus lourd)',
+        sets: '4 × 10 (tempo lent, plus lourd)',
         equip: 'Haltères 15 kg',
         desc: 'Buste penché, tirez les deux haltères vers les hanches en serrant les omoplates. Dos complet. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1706,6 +1786,20 @@ const fullPlan = [
           muscleGroups: ['obliques', 'abdominals', 'core']
         }
       },
+      {
+        name: 'Thruster haltères',
+        sets: '4 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
     ],
   },
   {
@@ -1714,11 +1808,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Squat gobelet haltère',
-        sets: '3 × 10 (tempo lent, plus lourd)',
+        sets: '4 × 10 (tempo lent, plus lourd)',
         equip: 'Haltère 15 kg',
         desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1728,11 +1822,11 @@ const fullPlan = [
       },
       {
         name: 'Développé incliné barre',
-        sets: '3 × 10 (tempo lent, plus lourd)',
+        sets: '4 × 10 (tempo lent, plus lourd)',
         equip: 'Barre 30 kg',
         desc: 'Banc incliné 30-45°, poussez la barre vers le haut. Haut des pectoraux et épaules.',
         caloriesPerSet: [21, 24],
-        totalSets: 3,
+        totalSets: 4,
         nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
@@ -1798,57 +1892,105 @@ const fullPlan = [
           muscleGroups: ['abdominals', 'core']
         }
       },
+      {
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '4 × 12 (enchaîné)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
+        }
+      },
     ],
   },
   {
-    title: 'JOUR 21: RÉCUPÉRATION ACTIVE (Séance légère, Gainage) — Dimanche · S3 Intensification',
+    title: 'JOUR 21: REPOS (Récupération) — Dimanche',
+    isRestDay: true,
+    exercises: [
+    ],
+  },
+  {
+    title: 'JOUR 22: BAS DU CORPS A (Squat, Fessiers, Mollets) — Lundi · S4 Allègement',
     isRestDay: false,
     exercises: [
       {
-        name: 'Extension de hanche debout',
-        sets: '2 × 15 (léger) /côté',
-        equip: 'Poids chevilles 4 kg',
-        desc: 'Debout en appui léger, tendez la jambe vers l\'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 15,
+        name: 'Squat sumo haltère',
+        sets: '4 × 12 (charges allégées)',
+        equip: 'Haltère 15 kg',
+        desc: 'Pieds très écartés, pointes vers l\'extérieur, haltère tenu entre les jambes. Adducteurs + fessiers. Debout.',
+        caloriesPerSet: [21, 24],
+        totalSets: 4,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Standing Hip Extension',
-          muscleGroups: ['glutes', 'hamstrings']
+          name: 'Sumo Squat',
+          muscleGroups: ['glutes', 'adductors', 'quadriceps']
         }
       },
       {
-        name: 'Oiseau haltères (arrière épaule)',
-        sets: '2 × 15 (léger)',
+        name: 'Soulevé de terre surélevé (rack pull)',
+        sets: '4 × 12 (charges allégées)',
+        equip: 'Barre 30 kg',
+        desc: 'Barre posée à hauteur des genoux (cales/support), dos droit, tirez en poussant les hanches. JAMAIS depuis le sol : préserve le dos.',
+        caloriesPerSet: [21, 24],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Rack Pull',
+          muscleGroups: ['back', 'glutes', 'hamstrings']
+        }
+      },
+      {
+        name: 'Fentes avant alternées haltères',
+        sets: '3 × 12 (charges allégées) en alternance',
         equip: 'Haltères 10 kg',
-        desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 15,
+        desc: 'Un pas en avant, descendez le genou arrière vers le sol sans le poser, puis remontez. Alternez. Quadriceps, fessiers, équilibre.',
+        caloriesPerSet: [21, 24],
+        totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Rear Delt Raise',
-          muscleGroups: ['shoulders', 'back']
+          name: 'Walking Lunges',
+          muscleGroups: ['quadriceps', 'glutes']
         }
       },
       {
-        name: 'Crunchs',
-        sets: '2 × 15 (léger)',
-        equip: 'Tapis de sol',
-        desc: 'Allongé sur le dos, genoux fléchis, pieds au sol : enroulez le haut du dos vers les genoux sans tirer sur la nuque, puis redescendez lentement. Pour vous allonger et vous relever, passez par le côté, sans à-coup.',
-        caloriesPerSet: [10, 12],
-        totalSets: 2,
-        nbRep: 15,
+        name: 'Squat gobelet haltère',
+        sets: '3 × 12 (charges allégées)',
+        equip: 'Haltère 15 kg',
+        desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
+        caloriesPerSet: [21, 24],
+        totalSets: 3,
+        nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Crunch',
-          muscleGroups: ['abdominals']
+          name: 'Goblet Squat',
+          muscleGroups: ['quadriceps', 'glutes', 'core']
+        }
+      },
+      {
+        name: 'Mollets debout lestés',
+        sets: '3 × 12 (charges allégées)',
+        equip: 'Veste lestée 10 kg',
+        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
+        caloriesPerSet: [12, 14],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Calf Raise',
+          muscleGroups: ['calves']
         }
       },
       {
         name: 'Relevés de genoux debout',
-        sets: '2 × 15 (léger) /côté',
+        sets: '2 × 15 /côté',
         equip: 'Poids chevilles 4 kg',
         desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
         caloriesPerSet: [16, 18],
@@ -1861,8 +2003,202 @@ const fullPlan = [
         }
       },
       {
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
+        }
+      },
+    ],
+  },
+  {
+    title: 'JOUR 23: HAUT DU CORPS A (Poussée, Pectoraux, Épaules, Triceps) — Mardi · S4 Allègement',
+    isRestDay: false,
+    exercises: [
+      {
+        name: 'Développé couché haltères',
+        sets: '4 × 12 (charges allégées)',
+        equip: 'Haltères 15 kg',
+        desc: 'Sur banc plat, poussez les haltères vers le haut en contrôlant la descente, amplitude complète. Pectoraux, triceps.',
+        caloriesPerSet: [21, 24],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Bench Press',
+          muscleGroups: ['chest', 'triceps', 'shoulders']
+        }
+      },
+      {
+        name: 'Développé Arnold haltères',
+        sets: '4 × 12 (charges allégées)',
+        equip: 'Haltères 15 kg',
+        desc: 'Assis sur banc, paumes vers vous, tournez les poignets en poussant vers le haut. Tous les faisceaux de l\'épaule.',
+        caloriesPerSet: [21, 24],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Arnold Press',
+          muscleGroups: ['shoulders', 'triceps']
+        }
+      },
+      {
+        name: 'Développé incliné barre',
+        sets: '3 × 12 (charges allégées)',
+        equip: 'Barre 30 kg',
+        desc: 'Banc incliné 30-45°, poussez la barre vers le haut. Haut des pectoraux et épaules.',
+        caloriesPerSet: [21, 24],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Incline Barbell Press',
+          muscleGroups: ['chest', 'shoulders', 'triceps']
+        }
+      },
+      {
+        name: 'Élévations frontales haltères',
+        sets: '3 × 12 (charges allégées)',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, montez les haltères devant vous jusqu\'aux épaules. Deltoïde antérieur.',
+        caloriesPerSet: [12, 14],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Front Raises',
+          muscleGroups: ['shoulders']
+        }
+      },
+      {
+        name: 'Kickback triceps haltère',
+        sets: '3 × 12 (charges allégées) /côté',
+        equip: 'Haltère 10 kg',
+        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 3,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Triceps Kickback',
+          muscleGroups: ['triceps']
+        }
+      },
+      {
+        name: 'Crunchs',
+        sets: '2 × 15',
+        equip: 'Tapis de sol',
+        desc: 'Allongé sur le dos, genoux fléchis, pieds au sol : enroulez le haut du dos vers les genoux sans tirer sur la nuque, puis redescendez lentement. Pour vous allonger et vous relever, passez par le côté, sans à-coup.',
+        caloriesPerSet: [10, 12],
+        totalSets: 2,
+        nbRep: 15,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Crunch',
+          muscleGroups: ['abdominals']
+        }
+      },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
+        }
+      },
+    ],
+  },
+  {
+    title: 'JOUR 24: CIRCUIT CORPS ENTIER (Charges légères, enchaîné) — Mercredi · S4 Allègement',
+    isRestDay: false,
+    exercises: [
+      {
+        name: 'Squat sumo haltère',
+        sets: '4 × 12 (léger, enchaîné)',
+        equip: 'Haltère 15 kg',
+        desc: 'Pieds très écartés, pointes vers l\'extérieur, haltère tenu entre les jambes. Adducteurs + fessiers. Debout.',
+        caloriesPerSet: [21, 24],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Sumo Squat',
+          muscleGroups: ['glutes', 'adductors', 'quadriceps']
+        }
+      },
+      {
+        name: 'Rowing barre buste penché',
+        sets: '4 × 12 (léger, enchaîné)',
+        equip: 'Barre 30 kg',
+        desc: 'Buste penché 45°, dos droit, tirez la barre vers le bas du ventre. Épaisseur du dos. Debout.',
+        caloriesPerSet: [21, 24],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Bent Over Barbell Row',
+          muscleGroups: ['back', 'biceps']
+        }
+      },
+      {
+        name: 'Oiseau haltères (arrière épaule)',
+        sets: '4 × 12 (léger, enchaîné)',
+        equip: 'Haltères 10 kg',
+        desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Rear Delt Raise',
+          muscleGroups: ['shoulders', 'back']
+        }
+      },
+      {
+        name: 'Curl biceps haltères',
+        sets: '4 × 12 (léger, enchaîné)',
+        equip: 'Haltères 10 kg',
+        desc: 'Debout, fléchissez les coudes pour monter les haltères vers les épaules sans balancer. Biceps.',
+        caloriesPerSet: [12, 14],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Curl',
+          muscleGroups: ['biceps']
+        }
+      },
+      {
+        name: 'Relevés de genoux debout',
+        sets: '4 × 12 (léger, enchaîné) /côté',
+        equip: 'Poids chevilles 4 kg',
+        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
+        caloriesPerSet: [16, 18],
+        totalSets: 4,
+        nbRep: 12,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Standing Knee Raises',
+          muscleGroups: ['abdominals', 'core']
+        }
+      },
+      {
         name: 'Marche du fermier (farmer carry)',
-        sets: '3 × 60 s',
+        sets: '3 × 45 s',
         equip: 'Haltères 15 kg',
         desc: 'Un haltère lourd dans chaque main, marchez tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
         caloriesPerSet: [11, 12],
@@ -1876,276 +2212,18 @@ const fullPlan = [
           muscleGroups: ['core', 'forearms', 'trapezius']
         }
       },
-    ],
-  },
-  {
-    title: 'JOUR 22: BAS DU CORPS A (Squat, Fessiers, Mollets) — Lundi · S4 Allègement',
-    isRestDay: false,
-    exercises: [
       {
-        name: 'Squat sumo haltère',
-        sets: '2 × 12 (allégé)',
-        equip: 'Haltère 15 kg',
-        desc: 'Pieds très écartés, pointes vers l\'extérieur, haltère tenu entre les jambes. Adducteurs + fessiers. Debout.',
-        caloriesPerSet: [21, 24],
-        totalSets: 2,
-        nbRep: 12,
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
         googleFitActivity: {
           type: 'strength_training',
-          name: 'Sumo Squat',
-          muscleGroups: ['glutes', 'adductors', 'quadriceps']
-        }
-      },
-      {
-        name: 'Soulevé de terre surélevé (rack pull)',
-        sets: '2 × 12 (allégé)',
-        equip: 'Barre 30 kg',
-        desc: 'Barre posée à hauteur des genoux (cales/support), dos droit, tirez en poussant les hanches. JAMAIS depuis le sol : préserve le dos.',
-        caloriesPerSet: [21, 24],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Rack Pull',
-          muscleGroups: ['back', 'glutes', 'hamstrings']
-        }
-      },
-      {
-        name: 'Fentes avant alternées haltères',
-        sets: '2 × 12 (allégé) en alternance',
-        equip: 'Haltères 10 kg',
-        desc: 'Un pas en avant, descendez le genou arrière vers le sol sans le poser, puis remontez. Alternez. Quadriceps, fessiers, équilibre.',
-        caloriesPerSet: [21, 24],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Walking Lunges',
-          muscleGroups: ['quadriceps', 'glutes']
-        }
-      },
-      {
-        name: 'Squat gobelet haltère',
-        sets: '2 × 12 (allégé)',
-        equip: 'Haltère 15 kg',
-        desc: 'Debout, haltère tenu verticalement contre la poitrine, descendez en squat buste droit puis remontez. Quadriceps, fessiers, gainage. Debout.',
-        caloriesPerSet: [21, 24],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Goblet Squat',
-          muscleGroups: ['quadriceps', 'glutes', 'core']
-        }
-      },
-      {
-        name: 'Mollets debout lestés',
-        sets: '2 × 12 (allégé)',
-        equip: 'Veste lestée 10 kg',
-        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Standing Calf Raise',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Relevés de genoux debout',
-        sets: '2 × 12 /côté',
-        equip: 'Poids chevilles 4 kg',
-        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
-        caloriesPerSet: [16, 18],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Standing Knee Raises',
-          muscleGroups: ['abdominals', 'core']
-        }
-      },
-    ],
-  },
-  {
-    title: 'JOUR 23: HAUT DU CORPS A (Poussée, Pectoraux, Épaules, Triceps) — Mardi · S4 Allègement',
-    isRestDay: false,
-    exercises: [
-      {
-        name: 'Développé couché haltères',
-        sets: '2 × 12 (allégé)',
-        equip: 'Haltères 15 kg',
-        desc: 'Sur banc plat, poussez les haltères vers le haut en contrôlant la descente, amplitude complète. Pectoraux, triceps.',
-        caloriesPerSet: [21, 24],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Dumbbell Bench Press',
-          muscleGroups: ['chest', 'triceps', 'shoulders']
-        }
-      },
-      {
-        name: 'Développé Arnold haltères',
-        sets: '2 × 12 (allégé)',
-        equip: 'Haltères 15 kg',
-        desc: 'Assis sur banc, paumes vers vous, tournez les poignets en poussant vers le haut. Tous les faisceaux de l\'épaule.',
-        caloriesPerSet: [21, 24],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Arnold Press',
-          muscleGroups: ['shoulders', 'triceps']
-        }
-      },
-      {
-        name: 'Développé incliné barre',
-        sets: '2 × 12 (allégé)',
-        equip: 'Barre 30 kg',
-        desc: 'Banc incliné 30-45°, poussez la barre vers le haut. Haut des pectoraux et épaules.',
-        caloriesPerSet: [21, 24],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Incline Barbell Press',
-          muscleGroups: ['chest', 'shoulders', 'triceps']
-        }
-      },
-      {
-        name: 'Élévations frontales haltères',
-        sets: '2 × 12 (allégé)',
-        equip: 'Haltères 10 kg',
-        desc: 'Debout, montez les haltères devant vous jusqu\'aux épaules. Deltoïde antérieur.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Front Raises',
-          muscleGroups: ['shoulders']
-        }
-      },
-      {
-        name: 'Kickback triceps haltère',
-        sets: '2 × 12 (allégé) /côté',
-        equip: 'Haltère 10 kg',
-        desc: 'Buste penché, coude collé au corps et fixe, tendez l\'avant-bras vers l\'arrière puis revenez. Isolation triceps.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Triceps Kickback',
-          muscleGroups: ['triceps']
-        }
-      },
-      {
-        name: 'Crunchs',
-        sets: '2 × 12',
-        equip: 'Tapis de sol',
-        desc: 'Allongé sur le dos, genoux fléchis, pieds au sol : enroulez le haut du dos vers les genoux sans tirer sur la nuque, puis redescendez lentement. Pour vous allonger et vous relever, passez par le côté, sans à-coup.',
-        caloriesPerSet: [10, 12],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Crunch',
-          muscleGroups: ['abdominals']
-        }
-      },
-    ],
-  },
-  {
-    title: 'JOUR 24: CIRCUIT CORPS ENTIER (Charges légères, enchaîné) — Mercredi · S4 Allègement',
-    isRestDay: false,
-    exercises: [
-      {
-        name: 'Squat sumo haltère',
-        sets: '2 × 15 (léger, enchaîné)',
-        equip: 'Haltère 15 kg',
-        desc: 'Pieds très écartés, pointes vers l\'extérieur, haltère tenu entre les jambes. Adducteurs + fessiers. Debout.',
-        caloriesPerSet: [21, 24],
-        totalSets: 2,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Sumo Squat',
-          muscleGroups: ['glutes', 'adductors', 'quadriceps']
-        }
-      },
-      {
-        name: 'Rowing barre buste penché',
-        sets: '2 × 15 (léger, enchaîné)',
-        equip: 'Barre 30 kg',
-        desc: 'Buste penché 45°, dos droit, tirez la barre vers le bas du ventre. Épaisseur du dos. Debout.',
-        caloriesPerSet: [21, 24],
-        totalSets: 2,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Bent Over Barbell Row',
-          muscleGroups: ['back', 'biceps']
-        }
-      },
-      {
-        name: 'Oiseau haltères (arrière épaule)',
-        sets: '2 × 15 (léger, enchaîné)',
-        equip: 'Haltères 10 kg',
-        desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Rear Delt Raise',
-          muscleGroups: ['shoulders', 'back']
-        }
-      },
-      {
-        name: 'Curl biceps haltères',
-        sets: '2 × 15 (léger, enchaîné)',
-        equip: 'Haltères 10 kg',
-        desc: 'Debout, fléchissez les coudes pour monter les haltères vers les épaules sans balancer. Biceps.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Dumbbell Curl',
-          muscleGroups: ['biceps']
-        }
-      },
-      {
-        name: 'Relevés de genoux debout',
-        sets: '2 × 15 (léger, enchaîné) /côté',
-        equip: 'Poids chevilles 4 kg',
-        desc: 'Debout en appui léger, montez le genou vers la poitrine en contractant les abdos, alternez. Abdos bas, 100% debout.',
-        caloriesPerSet: [16, 18],
-        totalSets: 2,
-        nbRep: 15,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Standing Knee Raises',
-          muscleGroups: ['abdominals', 'core']
-        }
-      },
-      {
-        name: 'Marche du fermier (farmer carry)',
-        sets: '2 × 45 s',
-        equip: 'Haltères 15 kg',
-        desc: 'Un haltère lourd dans chaque main, marchez tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
-        caloriesPerSet: [11, 12],
-        totalSets: 2,
-        nbRep: 0,
-        timer: true,
-        duration: 60,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Farmer Carry',
-          muscleGroups: ['core', 'forearms', 'trapezius']
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
         }
       },
     ],
@@ -2156,11 +2234,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Fentes bulgares haltères',
-        sets: '2 × 12 (allégé) /côté',
+        sets: '4 × 12 (charges allégées) /côté',
         equip: 'Haltères 10 kg',
         desc: 'Pied arrière surélevé sur le banc, descendez sur la jambe avant. Très efficace quadriceps et fessiers. Debout, zéro impact.',
         caloriesPerSet: [21, 24],
-        totalSets: 2,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2170,11 +2248,11 @@ const fullPlan = [
       },
       {
         name: 'Soulevé de terre roumain (départ debout)',
-        sets: '2 × 12 (allégé)',
+        sets: '4 × 12 (charges allégées)',
         equip: 'Barre 30 kg',
         desc: 'Départ debout barre en mains, poussez les hanches en arrière et descendez la barre le long des cuisses, dos droit, sans poser au sol. Ischios + fessiers + lombaires.',
         caloriesPerSet: [21, 24],
-        totalSets: 2,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2184,11 +2262,11 @@ const fullPlan = [
       },
       {
         name: 'Extension de hanche debout',
-        sets: '2 × 12 (allégé) /côté',
+        sets: '3 × 12 (charges allégées) /côté',
         equip: 'Poids chevilles 4 kg',
         desc: 'Debout en appui léger, tendez la jambe vers l\'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.',
         caloriesPerSet: [12, 14],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2198,11 +2276,11 @@ const fullPlan = [
       },
       {
         name: 'Montées sur banc lestées',
-        sets: '2 × 12 (allégé) /côté',
+        sets: '3 × 12 (charges allégées) /côté',
         equip: 'Haltères 10 kg',
         desc: 'Montez complètement sur un banc/marche stable, jambe motrice, contrôlez la descente. Alternez. Bas du corps fonctionnel, zéro impact.',
         caloriesPerSet: [16, 18],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2212,11 +2290,11 @@ const fullPlan = [
       },
       {
         name: 'Mollets debout lestés',
-        sets: '2 × 12 (allégé)',
+        sets: '3 × 12 (charges allégées)',
         equip: 'Veste lestée 10 kg',
         desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
         caloriesPerSet: [12, 14],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2226,16 +2304,30 @@ const fullPlan = [
       },
       {
         name: 'Woodchopper haltère',
-        sets: '2 × 12 /côté',
+        sets: '2 × 15 /côté',
         equip: 'Haltère 10 kg',
         desc: 'Debout, amenez l\'haltère en diagonale de la hanche basse vers l\'épaule opposée puis inversez. Rotation du tronc, debout.',
         caloriesPerSet: [16, 18],
         totalSets: 2,
-        nbRep: 12,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Dumbbell Woodchopper',
           muscleGroups: ['obliques', 'abdominals', 'core']
+        }
+      },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
         }
       },
     ],
@@ -2246,11 +2338,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Rowing barre buste penché',
-        sets: '2 × 12 (allégé)',
+        sets: '4 × 12 (charges allégées)',
         equip: 'Barre 30 kg',
         desc: 'Buste penché 45°, dos droit, tirez la barre vers le bas du ventre. Épaisseur du dos. Debout.',
         caloriesPerSet: [21, 24],
-        totalSets: 2,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2260,11 +2352,11 @@ const fullPlan = [
       },
       {
         name: 'Pullover haltère sur banc',
-        sets: '2 × 12 (allégé)',
+        sets: '4 × 12 (charges allégées)',
         equip: 'Haltère 15 kg',
         desc: 'Allongé en travers du banc, descendez l\'haltère derrière la tête bras tendus puis remontez. Grand dorsal. Sur banc.',
         caloriesPerSet: [16, 18],
-        totalSets: 2,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2274,11 +2366,11 @@ const fullPlan = [
       },
       {
         name: 'Shrugs barre (haussements)',
-        sets: '2 × 12 (allégé)',
+        sets: '3 × 12 (charges allégées)',
         equip: 'Barre 30 kg',
         desc: 'Debout, barre devant, haussez les épaules vers les oreilles sans plier les bras. Trapèzes.',
         caloriesPerSet: [16, 18],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2288,11 +2380,11 @@ const fullPlan = [
       },
       {
         name: 'Curl biceps haltères',
-        sets: '2 × 12 (allégé)',
+        sets: '3 × 12 (charges allégées)',
         equip: 'Haltères 10 kg',
         desc: 'Debout, fléchissez les coudes pour monter les haltères vers les épaules sans balancer. Biceps.',
         caloriesPerSet: [12, 14],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2302,11 +2394,11 @@ const fullPlan = [
       },
       {
         name: 'Oiseau haltères (arrière épaule)',
-        sets: '2 × 12 (allégé)',
+        sets: '3 × 12 (charges allégées)',
         equip: 'Haltères 10 kg',
         desc: 'Buste penché ou assis penché, montez les haltères sur les côtés en serrant les omoplates. Arrière de l\'épaule — corrige la posture.',
         caloriesPerSet: [12, 14],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2316,16 +2408,30 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '2 × 12',
+        sets: '2 × 15',
         equip: 'Tapis de sol',
         desc: 'Allongé sur le dos, genoux fléchis, pieds au sol : enroulez le haut du dos vers les genoux sans tirer sur la nuque, puis redescendez lentement. Pour vous allonger et vous relever, passez par le côté, sans à-coup.',
         caloriesPerSet: [10, 12],
         totalSets: 2,
-        nbRep: 12,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunch',
           muscleGroups: ['abdominals']
+        }
+      },
+      {
+        name: 'Thruster haltères',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Thruster',
+          muscleGroups: ['quadriceps', 'glutes', 'shoulders']
         }
       },
     ],
@@ -2336,11 +2442,11 @@ const fullPlan = [
     exercises: [
       {
         name: 'Fentes arrière alternées haltères',
-        sets: '2 × 12 (allégé) en alternance',
+        sets: '4 × 12 (charges allégées) en alternance',
         equip: 'Haltères 10 kg',
         desc: 'Un pas en arrière, descendez le genou arrière sans le poser, puis revenez debout. Alternez. Fessiers et ischios, plus doux pour les genoux que la fente avant.',
         caloriesPerSet: [21, 24],
-        totalSets: 2,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2350,11 +2456,11 @@ const fullPlan = [
       },
       {
         name: 'Développé couché haltères',
-        sets: '2 × 12 (allégé)',
+        sets: '4 × 12 (charges allégées)',
         equip: 'Haltères 15 kg',
         desc: 'Sur banc plat, poussez les haltères vers le haut en contrôlant la descente, amplitude complète. Pectoraux, triceps.',
         caloriesPerSet: [21, 24],
-        totalSets: 2,
+        totalSets: 4,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2364,11 +2470,11 @@ const fullPlan = [
       },
       {
         name: 'Élévations latérales haltères',
-        sets: '2 × 12 (allégé)',
+        sets: '3 × 12 (charges allégées)',
         equip: 'Haltères 10 kg',
         desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
         caloriesPerSet: [12, 14],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2378,11 +2484,11 @@ const fullPlan = [
       },
       {
         name: 'Extension de hanche debout',
-        sets: '2 × 12 (allégé) /côté',
+        sets: '3 × 12 (charges allégées) /côté',
         equip: 'Poids chevilles 4 kg',
         desc: 'Debout en appui léger, tendez la jambe vers l\'arrière en serrant le fessier, sans cambrer le bas du dos. Fessiers, 100% debout.',
         caloriesPerSet: [12, 14],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 12,
         googleFitActivity: {
           type: 'strength_training',
@@ -2392,11 +2498,11 @@ const fullPlan = [
       },
       {
         name: 'Marche du fermier (farmer carry)',
-        sets: '2 × 45 s',
+        sets: '3 × 45 s',
         equip: 'Haltères 15 kg',
         desc: 'Un haltère lourd dans chaque main, marchez tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
         caloriesPerSet: [11, 12],
-        totalSets: 2,
+        totalSets: 3,
         nbRep: 0,
         timer: true,
         duration: 60,
@@ -2408,96 +2514,38 @@ const fullPlan = [
       },
       {
         name: 'Crunchs',
-        sets: '2 × 12',
+        sets: '2 × 15',
         equip: 'Tapis de sol',
         desc: 'Allongé sur le dos, genoux fléchis, pieds au sol : enroulez le haut du dos vers les genoux sans tirer sur la nuque, puis redescendez lentement. Pour vous allonger et vous relever, passez par le côté, sans à-coup.',
         caloriesPerSet: [10, 12],
         totalSets: 2,
-        nbRep: 12,
+        nbRep: 15,
         googleFitActivity: {
           type: 'strength_training',
           name: 'Crunch',
           muscleGroups: ['abdominals']
+        }
+      },
+      {
+        name: 'Complexe haltères (soulevé, rowing, développé)',
+        sets: '3 × 10 (enchaîné, léger)',
+        equip: 'Haltères 2×10 kg',
+        desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+        caloriesPerSet: [29, 33],
+        totalSets: 3,
+        nbRep: 10,
+        googleFitActivity: {
+          type: 'strength_training',
+          name: 'Dumbbell Complex',
+          muscleGroups: ['hamstrings', 'back', 'shoulders']
         }
       },
     ],
   },
   {
-    title: 'JOUR 28: RÉCUPÉRATION ACTIVE (Séance légère, Gainage) — Dimanche · S4 Allègement',
-    isRestDay: false,
+    title: 'JOUR 28: REPOS (Récupération) — Dimanche',
+    isRestDay: true,
     exercises: [
-      {
-        name: 'Mollets debout lestés',
-        sets: '2 × 12 (léger)',
-        equip: 'Veste lestée 10 kg',
-        desc: 'Debout, avant-pieds sur une cale ou le bord du banc, montez sur la pointe des pieds puis descendez lentement le talon. Mollets, zéro impact.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Standing Calf Raise',
-          muscleGroups: ['calves']
-        }
-      },
-      {
-        name: 'Élévations latérales haltères',
-        sets: '2 × 12 (léger)',
-        equip: 'Haltères 10 kg',
-        desc: 'Debout, montez les haltères latéralement jusqu\'aux épaules. Deltoïde moyen.',
-        caloriesPerSet: [12, 14],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Lateral Raises',
-          muscleGroups: ['shoulders']
-        }
-      },
-      {
-        name: 'Crunchs',
-        sets: '2 × 12 (léger)',
-        equip: 'Tapis de sol',
-        desc: 'Allongé sur le dos, genoux fléchis, pieds au sol : enroulez le haut du dos vers les genoux sans tirer sur la nuque, puis redescendez lentement. Pour vous allonger et vous relever, passez par le côté, sans à-coup.',
-        caloriesPerSet: [10, 12],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Crunch',
-          muscleGroups: ['abdominals']
-        }
-      },
-      {
-        name: 'Crunch latéral debout (side bend)',
-        sets: '2 × 12 (léger) /côté',
-        equip: 'Haltère 15 kg',
-        desc: 'Debout, un haltère d\'un côté, inclinez le buste latéralement puis redressez en contractant l\'oblique. Debout, aucun appui au sol.',
-        caloriesPerSet: [13, 15],
-        totalSets: 2,
-        nbRep: 12,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Standing Side Bend',
-          muscleGroups: ['obliques', 'abdominals']
-        }
-      },
-      {
-        name: 'Marche du fermier (farmer carry)',
-        sets: '2 × 45 s',
-        equip: 'Haltères 15 kg',
-        desc: 'Un haltère lourd dans chaque main, marchez tronc gainé et droit, épaules basses. Anti-flexion, core et grip, debout.',
-        caloriesPerSet: [11, 12],
-        totalSets: 2,
-        nbRep: 0,
-        timer: true,
-        duration: 60,
-        googleFitActivity: {
-          type: 'strength_training',
-          name: 'Farmer Carry',
-          muscleGroups: ['core', 'forearms', 'trapezius']
-        }
-      },
     ],
   },
 ];

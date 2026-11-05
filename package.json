@@ -24,7 +24,6 @@
     "build:cap": "node scripts/generate-icons.js && vite build --mode capacitor",
     "cap:sync": "npm run build:cap && cap sync android",
     "generate-icons": "node scripts/generate-icons.js",
-    "test:bike": "node scripts/test-bike.mjs",
     "mobile": "vite --host 0.0.0.0 --port 3000",
     "mobile-sync": "browser-sync start --proxy 'localhost:3000' --files 'src/**/*' --port 3001 --ui-port 3002",
     "bs": "browser-sync start --proxy 'localhost:5173' --files 'src/**/*,public/**/*,index.html' --port 3000 --ui-port 3001 --no-open",
@@ -32,7 +31,6 @@
     "dev:full": "concurrently \"npm run dev\" \"npm run bs\" --names \"VITE,BROWSERSYNC\" --prefix-colors \"blue,green\" --kill-others-on-fail"
   },
   "dependencies": {
-    "@capacitor-community/bluetooth-le": "^6.0.0",
     "@capacitor/android": "^6.0.0",
     "@capacitor/core": "^6.0.0",
     "@emotion/react": "^11.14.0",

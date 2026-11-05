@@ -130,23 +130,6 @@
   font-weight: 600;
 }
 
-/* Séance vélo immersive lancée depuis la ligne vélo */
-.dcl-ride {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 44px;
-  padding: 7px 14px;
-  border: none;
-  border-radius: 999px;
-  background: var(--acc-soft);
-  color: var(--acc);
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-}
 
 /* Synchro Health Sync depuis la ligne vélo */
 .dcl-refresh {
