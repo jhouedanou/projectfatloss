@@ -4,7 +4,7 @@
  * Principe : 1 kg de graisse ≈ 7 700 kcal. Perdre 3 à 4 kg par mois demande
  * donc un déficit de ~760 à ~1 010 kcal par jour. Une partie vient de
  * l'assiette (objectif calorique de NutritionGoals), le reste vient du sport :
- * 20 min de vélo chaque jour et une séance de musculation chaque jour.
+ * 20 min de vélo chaque jour et six séances de musculation par semaine.
  * Le vélo est fixe : l'objectif choisi (3 à 4 kg) dit seulement ce qu'il faut
  * encore retirer de l'assiette si le plan n'y suffit pas.
  *

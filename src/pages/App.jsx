@@ -7,12 +7,8 @@ import {
   isVeloEnabled,
   setVeloEnabled,
   dayHasVelo,
-  isRideStartEnabled,
-  setRideStartEnabled,
 } from '../services/WorkoutCustomization';
 import StepWorkout from './StepWorkout';
-import BikeRideSession from '../components/BikeRide/BikeRideSession';
-import { saveRideSession } from '../services/bike/RideStorage';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import WorkoutStats from '../components/WorkoutStats';
 import WeightTracker from '../components/WeightTracker';
@@ -76,27 +72,8 @@ export default function App() {
   const [showLogin, setShowLogin] = useState(false);
   // Vélo de fin de séance optionnel (réglage global mémorisé)
   const [veloEnabled, setVeloEnabledState] = useState(() => isVeloEnabled());
-  // Sortie vélo en ouverture de séance (vidéo + vélo connecté)
-  const [rideStartEnabled, setRideStartEnabledState] = useState(() => isRideStartEnabled());
   // Le jour courant propose-t-il un vélo (dans le plan brut) ? Sinon pas d'interrupteur.
   const currentDayHasVelo = useMemo(() => dayHasVelo(current), [current, showCustomizer]);
-  // Séance vélo immersive (vidéo + vélo connecté), ouverte depuis l'accueil :
-  // null = fermée, sinon { targetMin } (minutes prévues par le plan, ou null).
-  const [rideSession, setRideSession] = useState(null);
-  // Incrémenté après une séance vélo : l'accueil relit check-list et minutes.
-  const [homeVersion, setHomeVersion] = useState(0);
-
-  const handleRideSessionFinish = (ride) => {
-    if (ride) {
-      try {
-        saveRideSession(ride);
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement de la séance vélo:', error);
-      }
-    }
-    setRideSession(null);
-    setHomeVersion((v) => v + 1);
-  };
 
   // Auth Firebase : suit l'état de connexion et synchronise à la connexion
   useEffect(() => {
@@ -193,15 +170,6 @@ export default function App() {
     const next = !veloEnabled;
     setVeloEnabledState(next);
     setVeloEnabled(next);
-    reloadActivePlan();
-  };
-
-  // Active/désactive la sortie vélo d'ouverture. Quand elle est active, le vélo
-  // de fin de séance sort du programme : c'est le même effort, déplacé.
-  const handleToggleRideStart = () => {
-    const next = !rideStartEnabled;
-    setRideStartEnabledState(next);
-    setRideStartEnabled(next);
     reloadActivePlan();
   };
 
@@ -344,15 +312,6 @@ export default function App() {
           {showLanguageSelector && <LanguageSelector />}
           
           {showCustomizer && <WorkoutCustomizer onClose={handleCloseCustomizer} />}
-
-          {rideSession && (
-            <BikeRideSession
-              mode="session"
-              targetMin={rideSession.targetMin}
-              onFinish={handleRideSessionFinish}
-              onSkip={() => setRideSession(null)}
-            />
-          )}
           
           {/* Contenu principal avec transitions */}
           <Fade in={viewMode === 'workout'} timeout={300} unmountOnExit mountOnEnter>
@@ -363,21 +322,11 @@ export default function App() {
                     !showExercises ? (
                       <>
                         <HomeDashboard
-                          key={homeVersion}
                           onStartWorkout={() => setShowExercises(true)}
-                          onStartRide={(targetMin) => setRideSession({ targetMin })}
                         />
 
-                        {/* Liens rapides : séance vélo immersive, Cardio (sorti de la barre d'onglets) */}
+                        {/* Lien rapide : Cardio (sorti de la barre d'onglets) */}
                         <div className="home-quicklinks">
-                          <button className="card press home-quicklink" onClick={() => setRideSession({ targetMin: null })}>
-                            <span className="home-quicklink-tile"><Play size={20} /></span>
-                            <span className="home-quicklink-copy">
-                              <span className="home-quicklink-title">Séance vélo immersive</span>
-                              <span className="home-quicklink-sub">Parcours vidéo pilotés par votre Domyos EB900</span>
-                            </span>
-                            <ChevronRight size={18} className="home-quicklink-chevron" />
-                          </button>
                           <button className="card press home-quicklink" onClick={() => setViewMode('cardio')}>
                             <span className="home-quicklink-tile"><Bike size={20} /></span>
                             <span className="home-quicklink-copy">
@@ -444,24 +393,8 @@ export default function App() {
                         </div>
                       ) : (
                         <div className="exercises-container">
-                          {/* Sortie vélo d'ouverture : vidéo + vélo connecté.
-                              Proposée uniquement si le jour contient du vélo (plan
-                              personnalisé) — le vélo du programme est dans la check-list. */}
-                          {currentDayHasVelo && (
-                            <SettingToggle
-                              icon={<Bike size={20} color={rideStartEnabled ? '#0a84ff' : 'rgba(235,235,245,0.32)'} />}
-                              title="Sortie vélo en début de séance"
-                              subtitle={rideStartEnabled
-                                ? 'Vidéo + vélo connecté avant la muscu (remplace le vélo de fin)'
-                                : 'La séance commence directement par la muscu'}
-                              checked={rideStartEnabled}
-                              onToggle={handleToggleRideStart}
-                              ariaLabel="Activer ou désactiver la sortie vélo en début de séance"
-                            />
-                          )}
-
                           {/* Interrupteur : vélo de fin de séance optionnel */}
-                          {currentDayHasVelo && !rideStartEnabled && (
+                          {currentDayHasVelo && (
                             <SettingToggle
                               icon={<Bike size={20} color={veloEnabled ? '#0a84ff' : 'rgba(235,235,245,0.32)'} />}
                               title="Vélo en fin de séance"

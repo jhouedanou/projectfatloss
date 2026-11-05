@@ -19,7 +19,7 @@ public class MainActivity extends BridgeActivity {
 
     /**
      * Vue fournie par la WebView quand une page passe un élément en plein
-     * écran (requestFullscreen) : la sortie vélo et ses vidéos 360°.
+     * écran (requestFullscreen), par exemple une vidéo YouTube d'exercice.
      */
     private View fullscreenView;
     private WebChromeClient.CustomViewCallback fullscreenCallback;

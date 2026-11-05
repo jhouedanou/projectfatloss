@@ -11,9 +11,7 @@ import FloatingButtons from '../components/FloatingButtons/FloatingButtons';
 import ProgressTracker from '../components/ProgressTracker';
 import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
 import DayPills from '../components/DayPills';
-import { getActiveWorkoutPlan, isRideStartEnabled } from '../services/WorkoutCustomization';
-import BikeRideSession from '../components/BikeRide/BikeRideSession';
-import { saveRideSession } from '../services/bike/RideStorage';
+import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
 import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceSideChange, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
@@ -614,9 +612,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
   const [autoMode, setAutoMode] = useState(initialAutoMode || false); // Mode automatique pour les pauses
   const [showPreWorkout, setShowPreWorkout] = useState(false);
-  // Sortie vélo d'ouverture : affichée avant le premier exercice quand le
-  // réglage est actif (elle remplace alors le vélo de fin de séance).
-  const [showBikeRide, setShowBikeRide] = useState(() => isRideStartEnabled());
 
   // Synthèse vocale réactivée pour les exercices
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -661,9 +656,9 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
   const dataReady = !!(workoutPlan && day && exo);
 
 
-  // Phases qui précèdent la musculation : ni annonces vocales, ni notifications
-  // d'exercice tant que l'une d'elles est à l'écran.
-  const inPrePhase = showBikeRide || showPreWorkout;
+  // Écran qui précède la musculation : ni annonces vocales, ni notifications
+  // d'exercice tant qu'il est affiché.
+  const inPrePhase = showPreWorkout;
 
   // Initialiser la synthèse vocale au démarrage
   useEffect(() => {
@@ -902,25 +897,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
     // L'entraînement se lance automatiquement
   };
 
-  /**
-   * Fin de la sortie vélo d'ouverture. Le résultat est enregistré comme séance
-   * cardio distincte (jamais ajouté aux calories de la muscu, pour ne pas
-   * compter deux fois le même effort côté Google Fit), et le chrono de la
-   * séance repart à zéro pour que les minutes de vélo ne gonflent pas la durée.
-   * @param {Object|null} ride résultat de la sortie, null si passée/non enregistrée
-   */
-  const handleRideFinished = (ride) => {
-    if (ride) {
-      try {
-        saveRideSession(ride);
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement de la sortie vélo:', error);
-      }
-    }
-    setShowBikeRide(false);
-    workoutStartRef.current = Date.now();
-  };
-
   // Gestion des notifications d'exercice en cours
   useEffect(() => {
     if (inPrePhase) return;
@@ -986,17 +962,6 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
         <h2>Chargement...</h2>
         <p>Veuillez patienter.</p>
       </div>
-    );
-  }
-
-  // La sortie vélo ouvre la séance : elle passe avant tout le reste.
-  if (showBikeRide) {
-    return (
-      <BikeRideSession
-        dayTitle={day?.title}
-        onFinish={handleRideFinished}
-        onSkip={() => handleRideFinished(null)}
-      />
     );
   }
 
@@ -1080,7 +1045,7 @@ export default function StepWorkout({ dayIndex: initialDayIndex, onBack, onCompl
       </div>
 
       {(() => {
-        // Titre court (« Récupération active ») et repères en sous-titre.
+        // Titre court (« Bas du corps A ») et repères en sous-titre.
         const { name, weekday, week } = parseDayTitle(day?.title);
         const sub = [weekday, week].filter(Boolean).join(' · ');
         return (

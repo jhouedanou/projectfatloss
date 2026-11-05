@@ -5,20 +5,24 @@
  *   - src/data.js                                          (application web)
  *   - projectfatloss_flutter/lib/shared/data/default_workout_data.dart (application Flutter)
  *
- * Programme : 28 jours = 4 semaines d'entraînement TOUS LES JOURS, en alternant
- * les groupes musculaires pour ne jamais retravailler les mêmes muscles deux
- * jours de suite :
+ * Programme : 28 jours = 4 semaines, 6 séances intenses par semaine et le
+ * dimanche en repos, en alternant les groupes musculaires pour ne pas
+ * retravailler les mêmes muscles deux jours de suite :
  *   Lundi    : BAS DU CORPS A (squat, fessiers, mollets)
  *   Mardi    : HAUT DU CORPS A (poussée : pectoraux, épaules, triceps)
  *   Mercredi : CIRCUIT CORPS ENTIER (charges légères, enchaîné)
  *   Jeudi    : BAS DU CORPS B (fentes, ischios, fessiers)
  *   Vendredi : HAUT DU CORPS B (tirage : dos, biceps)
  *   Samedi   : FULL BODY FONCTIONNEL (jambes + poussée + port de charge)
- *   Dimanche : RÉCUPÉRATION ACTIVE (séance courte et légère, gainage)
+ *   Dimanche : REPOS
+ *
+ * Intensité : chaque séance dépasse 400 kcal (estimation de l'app,
+ * CalorieEstimator, à 147 kg) : 4 séries sur les mouvements principaux et un
+ * « finisher » en fin de séance (thrusters ou complexe aux haltères, sans
+ * saut). La semaine 4 allège les charges, pas le volume.
  *
  * Vélo : 20 min chaque jour, dans la check-list de l'accueil (hors séance
- * guidée). Le vélo étant plus court, la musculation porte une plus grande part
- * de la dépense : ~25-30 min, 3 séries, repos courts.
+ * guidée).
  *
  * Les exercices tournent sur les 4 semaines : chaque schéma de mouvement
  * (poussée horizontale, tirage, hinge, fentes…) a une variante différente par
@@ -27,7 +31,7 @@
  * Objectif : perte de poids durable (profil 147 kg pour 1,78 m, IMC ~46) —
  * low-impact, zéro saut, debout ou sur banc ; au sol, seulement des crunchs.
  * Matériel : haltères 2×15 et 2×10 kg, barre 30 kg, veste lestée 10 kg, poids
- * chevilles 2×4 + 2×2 kg, tapis de sol, vélo Domyos EB900.
+ * chevilles 2×4 + 2×2 kg, tapis de sol, vélo d'appartement.
  *
  * Usage : node scripts/gen-plan.mjs
  */
@@ -288,6 +292,20 @@ const CATALOG = {
     duration: 60,
   },
 
+  // --- Finishers : intensité sans saut (MET 8, CalorieEstimator) ---
+  'Thruster haltères': {
+    equip: 'Haltères 2×10 kg',
+    desc: 'Haltères à hauteur d\'épaules, descendez en squat jusqu\'à frôler le banc derrière vous, puis remontez en poussant les haltères au-dessus de la tête d\'un seul élan. Pieds au sol, sans saut ; soufflez en poussant.',
+    caloriesPerSet: [29, 33],
+    gf: ['Dumbbell Thruster', ['quadriceps', 'glutes', 'shoulders']],
+  },
+  'Complexe haltères (soulevé, rowing, développé)': {
+    equip: 'Haltères 2×10 kg',
+    desc: 'Sans poser les haltères : 1 soulevé de terre roumain, 1 rowing buste penché, 1 développé au-dessus de la tête = 1 répétition. Dos droit, rythme régulier, sans saut.',
+    caloriesPerSet: [29, 33],
+    gf: ['Dumbbell Complex', ['hamstrings', 'back', 'shoulders']],
+  },
+
   // --- Au sol (le seul) ---
   Crunchs: {
     equip: 'Tapis de sol',
@@ -315,57 +333,57 @@ const UNILATERAL = new Set([
 ]);
 
 // ---------------------------------------------------------------------------
-// Progression sur 4 semaines : la charge monte S1 → S3, S4 allège pour
-// récupérer avant de reprendre le cycle. Entraînement quotidien : 3 séries sur
-// les mouvements principaux, charges modérées et repos courts. `circuit` sert
-// au circuit du mercredi (charges légères, enchaîné), `light` à la
-// récupération active du dimanche.
+// Progression sur 4 semaines : la charge monte S1 → S3, S4 allège les charges
+// (pas le volume) pour récupérer avant de reprendre le cycle. 4 séries sur les
+// mouvements principaux, 3 sur les accessoires, repos courts. `circuit` sert
+// au circuit du mercredi (charges légères, enchaîné), `finisher` au bloc
+// intense de fin de séance.
 // ---------------------------------------------------------------------------
 
 const WEEKS = [
   {
     label: 'S1 Adaptation',
-    main: { sets: '3 × 12 (tempo 3-1-1)', n: 3, rep: 12 },
+    main: { sets: '4 × 12 (tempo 3-1-1)', n: 4, rep: 12 },
     access: { sets: '3 × 12', n: 3, rep: 12 },
     core: { sets: '2 × 15', n: 2, rep: 15 },
-    carry: { sets: '2 × 45 s', n: 2, rep: 0 },
-    circuit: { sets: '3 × 12 (léger, enchaîné)', n: 3, rep: 12 },
-    light: { sets: '2 × 12 (léger)', n: 2, rep: 12 },
+    carry: { sets: '3 × 45 s', n: 3, rep: 0 },
+    circuit: { sets: '4 × 12 (léger, enchaîné)', n: 4, rep: 12 },
+    finisher: { sets: '3 × 10 (enchaîné, léger)', n: 3, rep: 10 },
   },
   {
     label: 'S2 Accumulation',
-    main: { sets: '3 × 12 (tempo 3-1-1)', n: 3, rep: 12 },
+    main: { sets: '4 × 12 (tempo 3-1-1)', n: 4, rep: 12 },
     access: { sets: '3 × 15', n: 3, rep: 15 },
     core: { sets: '3 × 15', n: 3, rep: 15 },
     carry: { sets: '3 × 45 s', n: 3, rep: 0 },
-    circuit: { sets: '3 × 15 (léger, enchaîné)', n: 3, rep: 15 },
-    light: { sets: '2 × 12 (léger)', n: 2, rep: 12 },
+    circuit: { sets: '4 × 15 (léger, enchaîné)', n: 4, rep: 15 },
+    finisher: { sets: '3 × 12 (enchaîné)', n: 3, rep: 12 },
   },
   {
     label: 'S3 Intensification',
-    main: { sets: '3 × 10 (tempo lent, plus lourd)', n: 3, rep: 10 },
+    main: { sets: '4 × 10 (tempo lent, plus lourd)', n: 4, rep: 10 },
     access: { sets: '3 × 12', n: 3, rep: 12 },
     core: { sets: '3 × 15', n: 3, rep: 15 },
     carry: { sets: '3 × 60 s', n: 3, rep: 0 },
-    circuit: { sets: '3 × 15 (léger, enchaîné)', n: 3, rep: 15 },
-    light: { sets: '2 × 15 (léger)', n: 2, rep: 15 },
+    circuit: { sets: '4 × 15 (léger, enchaîné)', n: 4, rep: 15 },
+    finisher: { sets: '4 × 12 (enchaîné)', n: 4, rep: 12 },
   },
   {
     label: 'S4 Allègement',
-    main: { sets: '2 × 12 (allégé)', n: 2, rep: 12 },
-    access: { sets: '2 × 12 (allégé)', n: 2, rep: 12 },
-    core: { sets: '2 × 12', n: 2, rep: 12 },
-    carry: { sets: '2 × 45 s', n: 2, rep: 0 },
-    circuit: { sets: '2 × 15 (léger, enchaîné)', n: 2, rep: 15 },
-    light: { sets: '2 × 12 (léger)', n: 2, rep: 12 },
+    main: { sets: '4 × 12 (charges allégées)', n: 4, rep: 12 },
+    access: { sets: '3 × 12 (charges allégées)', n: 3, rep: 12 },
+    core: { sets: '2 × 15', n: 2, rep: 15 },
+    carry: { sets: '3 × 45 s', n: 3, rep: 0 },
+    circuit: { sets: '4 × 12 (léger, enchaîné)', n: 4, rep: 12 },
+    finisher: { sets: '3 × 10 (enchaîné, léger)', n: 3, rep: 10 },
   },
 ];
 
 // ---------------------------------------------------------------------------
-// La semaine : une séance chaque jour (le vélo de 20 min est dans la
+// La semaine : six séances, dimanche en repos (le vélo de 20 min est dans la
 // check-list du jour, hors séance guidée). Bas et haut du corps alternent ; le
 // circuit du mercredi et le full body du samedi restent légers sur les muscles
-// travaillés la veille ou le lendemain.
+// travaillés la veille ou le lendemain. Chaque séance finit par un finisher.
 // Chaque « slot » liste 4 variantes — une par semaine — pour le même schéma
 // de mouvement : les exercices changent tout au long du mois.
 // ---------------------------------------------------------------------------
@@ -383,6 +401,7 @@ const SESSIONS = [
       slot('access', ['Extension de hanche debout', 'Squat sumo haltère', 'Extension de hanche debout', 'Squat gobelet haltère']),
       slot('access', ['Mollets debout lestés', 'Mollets debout lestés', 'Mollets debout lestés', 'Mollets debout lestés']),
       slot('core', ['Crunchs', 'Woodchopper haltère', 'Crunchs', 'Relevés de genoux debout']),
+      slot('finisher', ['Complexe haltères (soulevé, rowing, développé)', 'Complexe haltères (soulevé, rowing, développé)', 'Complexe haltères (soulevé, rowing, développé)', 'Complexe haltères (soulevé, rowing, développé)']),
     ],
   },
   {
@@ -395,6 +414,7 @@ const SESSIONS = [
       slot('access', ['Élévations latérales haltères', 'Élévations frontales haltères', 'Élévations latérales haltères', 'Élévations frontales haltères']),
       slot('access', ['Extension triceps nuque haltère', 'Kickback triceps haltère', 'Extension triceps nuque haltère', 'Kickback triceps haltère']),
       slot('core', ['Crunch latéral debout (side bend)', 'Crunchs', 'Woodchopper haltère', 'Crunchs']),
+      slot('finisher', ['Thruster haltères', 'Thruster haltères', 'Thruster haltères', 'Thruster haltères']),
     ],
   },
   {
@@ -407,6 +427,7 @@ const SESSIONS = [
       slot('circuit', ['Curl marteau haltères', 'Curl biceps haltères', 'Curl marteau haltères', 'Curl biceps haltères']),
       slot('circuit', ['Woodchopper haltère', 'Relevés de genoux debout', 'Woodchopper haltère', 'Relevés de genoux debout']),
       slot('carry', ['Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)']),
+      slot('finisher', ['Thruster haltères', 'Complexe haltères (soulevé, rowing, développé)', 'Thruster haltères', 'Complexe haltères (soulevé, rowing, développé)']),
     ],
   },
   {
@@ -419,6 +440,7 @@ const SESSIONS = [
       slot('access', ['Squat sumo haltère', 'Montées sur banc lestées', 'Squat sumo haltère', 'Montées sur banc lestées']),
       slot('access', ['Mollets debout lestés', 'Mollets debout lestés', 'Mollets debout lestés', 'Mollets debout lestés']),
       slot('core', ['Crunchs', 'Crunch latéral debout (side bend)', 'Crunchs', 'Woodchopper haltère']),
+      slot('finisher', ['Thruster haltères', 'Thruster haltères', 'Thruster haltères', 'Thruster haltères']),
     ],
   },
   {
@@ -431,6 +453,7 @@ const SESSIONS = [
       slot('access', ['Curl biceps haltères', 'Curl marteau haltères', 'Curl concentré haltère', 'Curl biceps haltères']),
       slot('access', ['Shrugs barre (haussements)', 'Oiseau haltères (arrière épaule)', 'Shrugs barre (haussements)', 'Oiseau haltères (arrière épaule)']),
       slot('core', ['Relevés de genoux debout', 'Crunchs', 'Woodchopper haltère', 'Crunchs']),
+      slot('finisher', ['Thruster haltères', 'Thruster haltères', 'Thruster haltères', 'Thruster haltères']),
     ],
   },
   {
@@ -443,19 +466,10 @@ const SESSIONS = [
       slot('access', ['Montées sur banc lestées', 'Extension de hanche debout', 'Montées sur banc lestées', 'Extension de hanche debout']),
       slot('carry', ['Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)']),
       slot('core', ['Woodchopper haltère', 'Crunchs', 'Relevés de genoux debout', 'Crunchs']),
+      slot('finisher', ['Complexe haltères (soulevé, rowing, développé)', 'Complexe haltères (soulevé, rowing, développé)', 'Complexe haltères (soulevé, rowing, développé)', 'Complexe haltères (soulevé, rowing, développé)']),
     ],
   },
-  {
-    day: 'Dimanche',
-    title: 'RÉCUPÉRATION ACTIVE (Séance légère, Gainage)',
-    slots: [
-      slot('light', ['Extension de hanche debout', 'Mollets debout lestés', 'Extension de hanche debout', 'Mollets debout lestés']),
-      slot('light', ['Oiseau haltères (arrière épaule)', 'Élévations latérales haltères', 'Oiseau haltères (arrière épaule)', 'Élévations latérales haltères']),
-      slot('light', ['Crunchs', 'Crunchs', 'Crunchs', 'Crunchs']),
-      slot('light', ['Relevés de genoux debout', 'Crunch latéral debout (side bend)', 'Relevés de genoux debout', 'Crunch latéral debout (side bend)']),
-      slot('carry', ['Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)', 'Marche du fermier (farmer carry)']),
-    ],
-  },
+  { day: 'Dimanche', rest: true },
 ];
 
 // ---------------------------------------------------------------------------
@@ -593,16 +607,16 @@ function jsExercise(exercise) {
 function renderDataJs() {
   const out = [
     '/**',
-    ' * PROGRAMME PERTE DE POIDS — 28 jours = 4 semaines, entraînement TOUS LES JOURS.',
+    ' * PROGRAMME PERTE DE POIDS — 28 jours = 4 semaines, 6 séances par semaine (≥ 400 kcal), dimanche repos.',
     ' * Lundi BAS DU CORPS A / Mardi HAUT DU CORPS A (poussée) / Mercredi CIRCUIT CORPS ENTIER /',
     ' * Jeudi BAS DU CORPS B / Vendredi HAUT DU CORPS B (tirage) / Samedi FULL BODY FONCTIONNEL /',
-    ' * Dimanche RÉCUPÉRATION ACTIVE (séance courte et légère).',
+    ' * Dimanche REPOS. Chaque séance finit par un finisher (thrusters ou complexe aux haltères).',
     ' * Vélo : 20 min chaque jour, dans la check-list du jour de l\'accueil.',
     ' * Les exercices tournent sur les 4 semaines (une variante par semaine et par schéma de',
-    ' * mouvement) ; la charge monte S1 → S3 puis S4 allège.',
+    ' * mouvement) ; la charge monte S1 → S3 puis S4 allège les charges.',
     ' * Adapté : profil 147 kg pour 1,78 m, debout/banc (au sol : seulement des crunchs), ZÉRO saut (low-impact).',
     ' * Matériel : haltères 2×15 et 2×10 kg, barre 30 kg, veste lestée 10 kg, poids chevilles',
-    ' * 2×4 + 2×2 kg, tapis de sol, vélo Domyos EB900.',
+    ' * 2×4 + 2×2 kg, tapis de sol, vélo d\'appartement.',
     ' * Généré par scripts/gen-plan.mjs — ne pas éditer à la main.',
     ' */',
     'const fullPlan = [',
@@ -658,8 +672,8 @@ function renderDart() {
   const out = [
     "import '../models/workout_model.dart';",
     '',
-    '/// Programme perte de poids — 4 semaines, une séance chaque jour (bas et haut',
-    '/// du corps en alternance). Les exercices tournent d\'une semaine à l\'autre.',
+    '/// Programme perte de poids — 4 semaines, 6 séances par semaine et dimanche repos',
+    '/// (bas et haut du corps en alternance). Les exercices tournent d\'une semaine à l\'autre.',
     '/// Low-impact, 100% debout ou sur banc.',
     '/// Généré par scripts/gen-plan.mjs — ne pas éditer à la main.',
     'class DefaultWorkoutData {',
