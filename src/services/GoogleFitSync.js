@@ -7,6 +7,7 @@
 // Firebase associés). On évite ainsi les doublons côté Google Fit / Health Connect.
 import GoogleFitService, { BIKE_ACTIVITY_TYPES, VIRTUAL_BIKE_ACTIVITY_TYPES } from './GoogleFitService';
 import HealthConnect, { ensureHealthAccess, isHealthConnectApp } from './HealthConnect';
+import { workoutParts } from './WorkoutIntensity';
 import { getWorkoutHistory } from './WorkoutStorage';
 import { getWeightHistory, importWeightRecords } from './WeightStorage';
 import { getCardioSessions, importCardioSessions, deleteCardioSession } from './CardioStorage';
@@ -94,25 +95,53 @@ async function writeHealthExercise({ clientId, type, title, notes, endTime, dura
   });
 }
 
+// Types d'activité Google Fit : 80 = musculation, 22 = entraînement en circuit,
+// 18 = vélo d'appartement, 7 = marche. Health Connect : voir HealthConnectPlugin.kt.
+const GF_STRENGTH = 80;
+const GF_CIRCUIT = 22;
+const GF_STATIONARY_BIKE = 18;
+const GF_WALKING = 7;
+
 export async function syncWorkoutToGoogleFit(workout) {
   const endTime = new Date(workout.date).getTime();
   // duration est enregistrée en minutes (chrono réel de la séance).
   const durationMs = minutesToMs(workout.duration, DEFAULT_WORKOUT_DURATION_MS);
+  const startTime = endTime - durationMs;
   const title = `Project Fat Loss - ${workout.title || 'Entraînement'}`;
   const description = `Séance de musculation. Poids total soulevé : ${workout.weightLifted || 0} kg.`;
+  // Musculation puis finisher en circuit (ou circuit entier le mercredi) : les
+  // points cardio suivent le vrai type d'effort de chaque partie.
+  const parts = workoutParts(workout, durationMs);
   if (isHealthConnectApp()) {
-    await writeHealthExercise({
-      clientId: `workout-${workout.id}`, type: 'strength', title, notes: description,
-      endTime, durationMs, calories: workout.calories,
-    });
+    // Une séance Health Connect par partie, calories réparties selon la durée.
+    for (const [index, part] of parts.entries()) {
+      const partMs = part.endOffsetMs - part.startOffsetMs;
+      const finisher = part.kind === 'circuit' && parts.length > 1;
+      await writeHealthExercise({
+        clientId: index === 0 ? `workout-${workout.id}` : `workout-${workout.id}-${part.kind}`,
+        type: part.kind === 'circuit' ? 'hiit' : 'strength',
+        title: finisher ? `${title} — finisher` : title,
+        notes: description,
+        endTime: startTime + part.endOffsetMs,
+        durationMs: partMs,
+        calories: Math.round((Number(workout.calories) || 0) * (partMs / durationMs)),
+      });
+    }
   } else {
+    const gfType = (kind) => (kind === 'circuit' ? GF_CIRCUIT : GF_STRENGTH);
     await GoogleFitService.addActivity({
-      activityType: 80, // Strength training → affiché « Musculation » dans Google Fit
+      // Séance affichée « Musculation », ou « Entraînement en circuit » le mercredi.
+      activityType: parts.length === 1 ? gfType(parts[0].kind) : GF_STRENGTH,
       name: title,
       description,
-      startTime: endTime - durationMs,
+      startTime,
       duration: durationMs,
-      calories: workout.calories || 0
+      calories: workout.calories || 0,
+      segments: parts.map((part) => ({
+        activityType: gfType(part.kind),
+        startOffsetMs: part.startOffsetMs,
+        endOffsetMs: part.endOffsetMs,
+      })),
     });
   }
   markSynced('workout', workout.id);
@@ -143,7 +172,7 @@ export async function syncCardioToGoogleFit(session) {
     });
   } else {
     await GoogleFitService.addActivity({
-      activityType: isBike ? 1 : 7, // 1 = Vélo, 7 = Marche
+      activityType: isBike ? GF_STATIONARY_BIKE : GF_WALKING,
       name: title,
       description,
       startTime: endTime - durationMs,

@@ -267,8 +267,9 @@ class HealthConnectPlugin : Plugin() {
     // ── Écriture ────────────────────────────────────────────────────────
 
     /**
-     * Séance : type « strength » (musculation), « bike » (vélo d'appartement) ou
-     * « walk » (marche), avec ses calories actives et sa distance éventuelles.
+     * Séance : type « strength » (musculation), « hiit » (circuit / finisher
+     * intense), « bike » (vélo d'appartement) ou « walk » (marche), avec ses
+     * calories actives et sa distance éventuelles.
      */
     @PluginMethod
     fun writeExercise(call: PluginCall) {
@@ -281,6 +282,7 @@ class HealthConnectPlugin : Plugin() {
         }
         val exerciseType = when (call.getString("type")) {
             "bike" -> ExerciseSessionRecord.EXERCISE_TYPE_BIKING_STATIONARY
+            "hiit" -> ExerciseSessionRecord.EXERCISE_TYPE_HIGH_INTENSITY_INTERVAL_TRAINING
             "walk" -> ExerciseSessionRecord.EXERCISE_TYPE_WALKING
             else -> ExerciseSessionRecord.EXERCISE_TYPE_STRENGTH_TRAINING
         }
