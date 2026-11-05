@@ -347,7 +347,9 @@ class GoogleFitService {
   // des sessions : Google Fit les dérive des segments d'activité
   // (com.google.activity.segment) et du nombre de pas. On écrit donc, en plus
   // de la session et des calories :
-  //   - un segment d'activité sur toute la durée (fait bouger les anneaux) ;
+  //   - un segment d'activité sur toute la durée (fait bouger les anneaux), ou
+  //     plusieurs si `activity.segments` est fourni : [{ activityType,
+  //     startOffsetMs, endOffsetMs }] (musculation puis finisher en circuit) ;
   //   - les pas si `activity.steps` est fourni (marche : cadence → Points cardio).
   async addActivity(activity) {
     if (!this.isInitialized) await this.init();
@@ -386,15 +388,21 @@ class GoogleFitService {
         }]
       });
 
-      // 3. Segment d'activité : c'est lui qui alimente Minutes actives et Points cardio.
+      // 3. Segments d'activité : ce sont eux qui alimentent Minutes actives et
+      // Points cardio (1 point/min en musculation, 2 en circuit intense).
       await this.ensureDataSource('com.google.activity.segment', 'ProjectFatLossActivity');
-      await this.writeIntervalPoint(
-        'com.google.activity.segment',
-        'ProjectFatLossActivity',
-        startTimeNanos,
-        endTimeNanos,
-        [{ intVal: activity.activityType }]
-      );
+      const segments = activity.segments?.length
+        ? activity.segments
+        : [{ activityType: activity.activityType, startOffsetMs: 0, endOffsetMs: durationMillis }];
+      for (const segment of segments) {
+        await this.writeIntervalPoint(
+          'com.google.activity.segment',
+          'ProjectFatLossActivity',
+          this.toNanos(startTimeMillis + segment.startOffsetMs),
+          this.toNanos(startTimeMillis + segment.endOffsetMs),
+          [{ intVal: segment.activityType }]
+        );
+      }
 
       // 4. Pas (optionnel) : Google Fit utilise la cadence de marche pour les Points cardio.
       const steps = Math.round(activity.steps || 0);
