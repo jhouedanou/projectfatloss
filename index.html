@@ -10,7 +10,7 @@
         window.BASE_URL = '';
         // Vérifier si nous sommes en production sur GitHub Pages
         if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')) {
-          // Extraire le chemin de base depuis l'URL actuelle (ex: /projectfatloss/)
+          // Extraire le chemin de base depuis l'URL actuelle (site à la racine : '/')
           const pathArray = window.location.pathname.split('/');
           if (pathArray.length > 1) {
             window.BASE_URL = '/' + pathArray[1]; // ex: /projectfatloss
@@ -129,10 +129,10 @@
         console.log('OneSignal: Mode développement local - stub compatible activé');
       }
     </script>
-    <script type="module" crossorigin src="/projectfatloss/assets/index-b03220a0.js"></script>
-    <link rel="modulepreload" crossorigin href="/projectfatloss/assets/firebase-2b0b4eca.js">
-    <link rel="stylesheet" href="/projectfatloss/assets/index-916f0e45.css">
-  <link rel="manifest" href="/projectfatloss/manifest.webmanifest"></head>
+    <script type="module" crossorigin src="/assets/index-d8d23d20.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/firebase-2b0b4eca.js">
+    <link rel="stylesheet" href="/assets/index-916f0e45.css">
+  <link rel="manifest" href="/manifest.webmanifest"></head>
   <body class="dark-theme">
     <div id="root">
       <!-- Écran de démarrage : remplacé par React au montage. Sert aussi de
