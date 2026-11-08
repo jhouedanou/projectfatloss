@@ -67,6 +67,8 @@ class GoogleFitService {
     this.accessToken = null;
     this.tokenExpiresAt = 0;
     this.isInitialized = false;
+    // Sources de données déjà vérifiées pendant cette visite.
+    this.readyDataSources = new Set();
   }
 
   async init() {
@@ -178,6 +180,7 @@ class GoogleFitService {
     }
     this.accessToken = null;
     this.tokenExpiresAt = 0;
+    this.readyDataSources.clear();
   }
 
   // Construit l'ID déterministe d'une source de données "raw"
@@ -186,26 +189,37 @@ class GoogleFitService {
     return `raw:${dataTypeName}:${PROJECT_NUMBER}:ProjectFatLoss:web:1:${streamName}`;
   }
 
-  // Crée la source de données si elle n'existe pas déjà (ignore l'erreur 409).
+  // Crée la source de données si elle n'existe pas encore. On la cherche
+  // d'abord (GET) : la créer à chaque envoi remplissait la console d'erreurs
+  // 409. Une source vérifiée n'est plus redemandée pendant la visite.
   async ensureDataSource(dataTypeName, streamName) {
+    const dataSourceId = this.buildDataSourceId(dataTypeName, streamName);
+    if (this.readyDataSources.has(dataSourceId)) return;
     try {
-      await this.apiFetch('dataSources', 'POST', {
-        dataStreamName: streamName,
-        type: 'raw',
-        application: { name: 'Project Fat Loss' },
-        dataType: { name: dataTypeName },
-        device: {
-          manufacturer: 'ProjectFatLoss',
-          model: 'web',
-          type: 'unknown',
-          uid: '1',
-          version: '1'
-        }
-      });
+      await this.apiFetch(`dataSources/${dataSourceId}`, 'GET');
     } catch (error) {
-      // 409 Conflict = source déjà existante, ce qui est attendu.
-      if (error.status !== 409) throw error;
+      // 404 : source absente. 403 : lecture non permise, on tente la création.
+      if (error.status !== 404 && error.status !== 403) throw error;
+      try {
+        await this.apiFetch('dataSources', 'POST', {
+          dataStreamName: streamName,
+          type: 'raw',
+          application: { name: 'Project Fat Loss' },
+          dataType: { name: dataTypeName },
+          device: {
+            manufacturer: 'ProjectFatLoss',
+            model: 'web',
+            type: 'unknown',
+            uid: '1',
+            version: '1'
+          }
+        });
+      } catch (createError) {
+        // 409 Conflict = source déjà existante, ce qui convient.
+        if (createError.status !== 409) throw createError;
+      }
     }
+    this.readyDataSources.add(dataSourceId);
   }
 
   // Convertit des millisecondes en nanosecondes (chaîne) après validation.
@@ -374,19 +388,26 @@ class GoogleFitService {
       // 1. Créer la source de données (ignore l'erreur 409 si elle existe déjà).
       await this.ensureDataSource('com.google.calories.expended', 'ProjectFatLossCalories');
 
-      // 2. Écrire le point de calories dépensées dans le dataset.
+      // 2. Écrire le point de calories dépensées dans le dataset. Google Fit
+      // refuse un total jugé impossible pour la durée (« DataPoint out of
+      // range ») : la séance est quand même envoyée, sans ses calories.
       const datasetId = `${startTimeNanos}-${endTimeNanos}`;
-      await this.apiFetch(`dataSources/${dataSourceId}/datasets/${datasetId}`, 'PATCH', {
-        dataSourceId,
-        minStartTimeNs: startTimeNanos,
-        maxEndTimeNs: endTimeNanos,
-        point: [{
-          dataTypeName: 'com.google.calories.expended',
-          startTimeNanos,
-          endTimeNanos,
-          value: [{ fpVal: activity.calories }]
-        }]
-      });
+      try {
+        await this.apiFetch(`dataSources/${dataSourceId}/datasets/${datasetId}`, 'PATCH', {
+          dataSourceId,
+          minStartTimeNs: startTimeNanos,
+          maxEndTimeNs: endTimeNanos,
+          point: [{
+            dataTypeName: 'com.google.calories.expended',
+            startTimeNanos,
+            endTimeNanos,
+            value: [{ fpVal: activity.calories }]
+          }]
+        });
+      } catch (error) {
+        if (error.status !== 400) throw error;
+        console.warn('Google Fit : calories refusées, séance envoyée sans elles.', error.message);
+      }
 
       // 3. Segments d'activité : ce sont eux qui alimentent Minutes actives et
       // Points cardio (1 point/min en musculation, 2 en circuit intense).
@@ -421,7 +442,8 @@ class GoogleFitService {
       const sessionId = `projectfatloss-${startTimeMillis}`;
       await this.apiFetch(`sessions/${sessionId}`, 'PUT', {
         id: sessionId,
-        name: activity.name,
+        // Google Fit refuse un nom de plus de 100 caractères.
+        name: String(activity.name || 'Project Fat Loss').slice(0, 100),
         description: activity.description,
         startTimeMillis,
         endTimeMillis,
