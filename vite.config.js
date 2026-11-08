@@ -2,19 +2,17 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// isProd = true pour toute commande `vite build` (CI ou local), false en `vite serve` (dev).
-// Fiable contrairement à process.env.NODE_ENV qui n'est pas défini au build.
 // Le mode `capacitor` (vite build --mode capacitor) produit le bundle embarqué
 // dans l'APK Android : base relative (servi depuis https://localhost par le
 // WebView Capacitor) et pas de service worker — le cache PWA est inutile et
 // source de confusion quand les assets sont déjà locaux.
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(({ mode }) => {
   const isCapacitor = mode === 'capacitor';
-  const isProd = command === 'build';
-  const BASE = isCapacitor ? './' : (isProd ? '/projectfatloss/' : '/');
+  // Site servi à la racine de son domaine (exercise.houedanou.com, voir
+  // public/CNAME) ; l'APK charge ses fichiers en relatif.
+  const BASE = isCapacitor ? './' : '/';
 
   return {
-  // Ajouter la base URL pour GitHub Pages
   base: BASE,
 
   plugins: [
@@ -75,46 +73,46 @@ export default defineConfig(({ command, mode }) => {
         background_color: '#000000',
         display: 'standalone',
         orientation: 'portrait',
-        scope: isProd ? '/projectfatloss/' : '/',
-        start_url: isProd ? '/projectfatloss/' : '/',
+        scope: '/',
+        start_url: '/',
         icons: [
           {
-            src: isProd ? '/projectfatloss/icons/icon-72x72.png' : '/icons/icon-72x72.png',
+            src: '/icons/icon-72x72.png',
             sizes: '72x72',
             type: 'image/png'
           },
           {
-            src: isProd ? '/projectfatloss/icons/icon-96x96.png' : '/icons/icon-96x96.png',
+            src: '/icons/icon-96x96.png',
             sizes: '96x96',
             type: 'image/png'
           },
           {
-            src: isProd ? '/projectfatloss/icons/icon-128x128.png' : '/icons/icon-128x128.png',
+            src: '/icons/icon-128x128.png',
             sizes: '128x128',
             type: 'image/png'
           },
           {
-            src: isProd ? '/projectfatloss/icons/icon-144x144.png' : '/icons/icon-144x144.png',
+            src: '/icons/icon-144x144.png',
             sizes: '144x144',
             type: 'image/png'
           },
           {
-            src: isProd ? '/projectfatloss/icons/icon-152x152.png' : '/icons/icon-152x152.png',
+            src: '/icons/icon-152x152.png',
             sizes: '152x152',
             type: 'image/png'
           },
           {
-            src: isProd ? '/projectfatloss/icons/icon-192x192.png' : '/icons/icon-192x192.png',
+            src: '/icons/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: isProd ? '/projectfatloss/icons/icon-384x384.png' : '/icons/icon-384x384.png',
+            src: '/icons/icon-384x384.png',
             sizes: '384x384',
             type: 'image/png'
           },
           {
-            src: isProd ? '/projectfatloss/icons/icon-512x512.png' : '/icons/icon-512x512.png',
+            src: '/icons/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

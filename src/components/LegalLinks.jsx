@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 // (exigence de l'écran de consentement OAuth Google) et les liens doivent
 // fonctionner aussi bien sur le web que dans l'APK Capacitor, où la page est
 // servie depuis https://localhost — un chemin relatif y donnerait un 404.
-export const PRIVACY_URL = 'https://jhouedanou.github.io/projectfatloss/privacy.html';
-export const TERMS_URL = 'https://jhouedanou.github.io/projectfatloss/terms.html';
+export const PRIVACY_URL = 'https://exercise.houedanou.com/privacy.html';
+export const TERMS_URL = 'https://exercise.houedanou.com/terms.html';
 
 /** Liens vers la politique de confidentialité et les conditions d'utilisation. */
 export default function LegalLinks({ sx }) {

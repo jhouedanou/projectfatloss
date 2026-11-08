@@ -10,7 +10,7 @@
         window.BASE_URL = '';
         // Vérifier si nous sommes en production sur GitHub Pages
         if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')) {
-          // Extraire le chemin de base depuis l'URL actuelle (ex: /projectfatloss/)
+          // Extraire le chemin de base depuis l'URL actuelle (site à la racine : '/')
           const pathArray = window.location.pathname.split('/');
           if (pathArray.length > 1) {
             window.BASE_URL = '/' + pathArray[1]; // ex: /projectfatloss
