@@ -8,6 +8,7 @@
 import GoogleFitService, { BIKE_ACTIVITY_TYPES, VIRTUAL_BIKE_ACTIVITY_TYPES } from './GoogleFitService';
 import HealthConnect, { ensureHealthAccess, isHealthConnectApp } from './HealthConnect';
 import { workoutParts } from './WorkoutIntensity';
+import { parseDayTitle } from '../utils/dayTitle';
 import { getWorkoutHistory } from './WorkoutStorage';
 import { getWeightHistory, importWeightRecords } from './WeightStorage';
 import { getCardioSessions, importCardioSessions, deleteCardioSession } from './CardioStorage';
@@ -107,8 +108,10 @@ export async function syncWorkoutToGoogleFit(workout) {
   // duration est enregistrée en minutes (chrono réel de la séance).
   const durationMs = minutesToMs(workout.duration, DEFAULT_WORKOUT_DURATION_MS);
   const startTime = endTime - durationMs;
-  const title = `Project Fat Loss - ${workout.title || 'Entraînement'}`;
-  const description = `Séance de musculation. Poids total soulevé : ${workout.weightLifted || 0} kg.`;
+  // Nom court (« Project Fat Loss - Full body fonctionnel ») : Google Fit
+  // refuse plus de 100 caractères. Le titre complet passe dans la description.
+  const title = `Project Fat Loss - ${parseDayTitle(workout.title).name || 'Entraînement'}`;
+  const description = `${workout.title ? `${workout.title}. ` : ''}Séance de musculation. Poids total soulevé : ${workout.weightLifted || 0} kg.`;
   // Musculation puis finisher en circuit (ou circuit entier le mercredi) : les
   // points cardio suivent le vrai type d'effort de chaque partie.
   const parts = workoutParts(workout, durationMs);

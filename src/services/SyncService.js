@@ -7,8 +7,9 @@
  * - fullSync()        : pull + merge + push (à appeler à la connexion).
  *
  * Données de l'utilisateur sous users/{uid}/ : workouts, weighIns, cardio,
- * nutrition (un document par jour), foods (aliments personnalisés) et
- * exercises (exercices personnels). Chaque document garde l'enregistrement
+ * nutrition (un document par jour), foods (aliments personnalisés),
+ * exercises (exercices personnels) et settings/driveSync (lien du dossier
+ * Health Sync et clé API, pour les retrouver sur chaque appareil). Chaque document garde l'enregistrement
  * local entier en texte JSON (champ `json`) : Firestore refuse les tableaux
  * imbriqués et les valeurs undefined. Quelques champs lisibles (date, titre…)
  * l'accompagnent pour la console Firebase.
@@ -34,6 +35,8 @@ const USER_EXERCISES_KEY = 'user_custom_exercises';
 const CARDIO_KEY = 'cardio_sessions_data';
 const NUTRITION_KEY = 'pfl_nutrition_logs';
 const CUSTOM_FOODS_KEY = 'pfl_custom_foods';
+// Réglages de la synchro Health Sync / Google Drive (GoogleDriveImport.js).
+const DRIVE_SETTINGS_KEY = 'pfl_drive_sync';
 
 // Une écriture groupée Firestore accepte 500 opérations au plus.
 const BATCH_SIZE = 400;
@@ -43,6 +46,16 @@ const getNutritionLogs = () => {
     return JSON.parse(localStorage.getItem(NUTRITION_KEY) || '{}');
   } catch {
     return {};
+  }
+};
+
+/** Lien du dossier et clé API enregistrés sur cet appareil (sans la date de synchro). */
+const getDriveSettings = () => {
+  try {
+    const { folderUrl = '', apiKey = '' } = JSON.parse(localStorage.getItem(DRIVE_SETTINGS_KEY) || '{}');
+    return folderUrl || apiKey ? { folderUrl, apiKey } : null;
+  } catch {
+    return null;
   }
 };
 
@@ -166,6 +179,8 @@ export const syncData = async () => {
       ...getCustomFoods().map((food) => [userDoc(uid, 'foods', foodKey(food)), foodDoc(food)]),
       // Exercices personnels : un document par nom
       ...getUserExercises().filter((ex) => ex?.name).map((ex) => [userDoc(uid, 'exercises', ex.name), exerciseDoc(ex)]),
+      // Réglages de la synchro Health Sync / Drive
+      ...(getDriveSettings() ? [[userDoc(uid, 'settings', 'driveSync'), toDoc(getDriveSettings())]] : []),
     ];
 
     await commitInChunks(writes);
@@ -289,6 +304,17 @@ export const pushUserExercise = async (exercise) => {
 
 export const deleteRemoteUserExercise = (name) => deleteOne('deleteRemoteUserExercise', 'exercises', name);
 
+/**
+ * Enregistre dans le compte le lien du dossier Health Sync et la clé API :
+ * ils reviennent à la connexion sur un autre appareil ou navigateur.
+ */
+export const pushDriveSettings = async (settings) => {
+  await pushOne('pushDriveSettings', 'settings', 'driveSync', toDoc({
+    folderUrl: settings?.folderUrl || '',
+    apiKey: settings?.apiKey || '',
+  }));
+};
+
 // --- Pull --------------------------------------------------------------------
 
 const records = (docs) => docs.map((d) => d.record).filter(hasId);
@@ -301,12 +327,13 @@ export const fetchSyncedData = async () => {
     const user = await requireUser();
     if (!user) return notReady();
 
-    const [workouts, weighIns, cardio, nutrition, foods] = await Promise.all([
+    const [workouts, weighIns, cardio, nutrition, foods, settings] = await Promise.all([
       readCollection(user.uid, 'workouts'),
       readCollection(user.uid, 'weighIns'),
       readCollection(user.uid, 'cardio'),
       readCollection(user.uid, 'nutrition'),
       readCollection(user.uid, 'foods'),
+      readCollection(user.uid, 'settings'),
     ]);
 
     // nutrition : reconstruit l'objet { [day]: { meals, calorieGoal } }
@@ -326,6 +353,7 @@ export const fetchSyncedData = async () => {
         customFoods: foods
           .sort((a, b) => String(b.data?.createdAt || '').localeCompare(String(a.data?.createdAt || '')))
           .map(docToCustomFood),
+        driveSettings: settings.find((d) => d.id === 'driveSync')?.record || null,
       },
       syncedAt: new Date().toISOString(),
     };
@@ -383,6 +411,18 @@ export const applySyncedData = (syncedData) => {
       });
 
       localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(Array.from(map.values())));
+    }
+
+    // Réglages Health Sync / Drive : ce qui est réglé sur cet appareil prime,
+    // le compte complète ce qui manque (nouvel appareil, nouveau navigateur).
+    if (syncedData.driveSettings && typeof syncedData.driveSettings === 'object') {
+      let local = {};
+      try { local = JSON.parse(localStorage.getItem(DRIVE_SETTINGS_KEY) || '{}'); } catch { /* vide */ }
+      localStorage.setItem(DRIVE_SETTINGS_KEY, JSON.stringify({
+        ...local,
+        folderUrl: local.folderUrl || syncedData.driveSettings.folderUrl || '',
+        apiKey: local.apiKey || syncedData.driveSettings.apiKey || '',
+      }));
     }
 
     return true;

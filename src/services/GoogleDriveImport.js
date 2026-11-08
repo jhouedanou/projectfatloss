@@ -122,6 +122,12 @@ export function setDriveSyncSettings(patch) {
   try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { /* vide */ }
   const next = { ...saved, ...patch };
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch { /* quota */ }
+  // Lien et clé enregistrés aussi dans le compte : ils suivent sur chaque appareil.
+  if ('folderUrl' in patch || 'apiKey' in patch) {
+    import('./SyncService')
+      .then(({ pushDriveSettings }) => pushDriveSettings(next))
+      .catch(() => {});
+  }
   return getDriveSyncSettings();
 }
 

@@ -299,7 +299,8 @@ const CardioTracker = () => {
             </button>
             <p className="cardio-sync-hint">
               Le dossier doit être partagé avec « Tous les utilisateurs disposant du lien ».
-              Plusieurs liens possibles, séparés par un espace.
+              Plusieurs liens possibles, séparés par un espace. Connecté à votre compte,
+              ces réglages vous suivent sur le site et dans l'application.
             </p>
           </form>
         </details>
