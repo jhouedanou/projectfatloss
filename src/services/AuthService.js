@@ -6,7 +6,7 @@
  *     créé avec Google, pour s'en servir dans l'APK.
  * => Console Firebase : Authentication > Méthode de connexion, activer Google et
  *    E-mail/Mot de passe ; Paramètres > Domaines autorisés, ajouter
- *    jhouedanou.github.io.
+ *    exercise.houedanou.com.
  */
 import {
   GoogleAuthProvider,

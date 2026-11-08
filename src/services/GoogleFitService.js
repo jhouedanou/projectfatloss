@@ -4,7 +4,7 @@
 //
 // IMPORTANT : dans la Google Cloud Console, l'OAuth Client ID ci-dessous doit
 // déclarer comme "Authorized JavaScript origins" :
-//   - https://jhouedanou.github.io   (production GitHub Pages)
+//   - https://exercise.houedanou.com (production, GitHub Pages + domaine perso)
 //   - http://localhost:5173          (développement local)
 const CLIENT_ID = '310337608749-e771j9tp94c7i0mts2basfarc53i4ecl.apps.googleusercontent.com';
 // Même client OAuth pour l'import Google Drive (GoogleDriveImport.js).

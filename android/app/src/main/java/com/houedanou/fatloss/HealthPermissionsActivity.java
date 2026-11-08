@@ -12,7 +12,7 @@ import android.os.Bundle;
  */
 public class HealthPermissionsActivity extends Activity {
 
-    private static final String PRIVACY_URL = "https://jhouedanou.github.io/projectfatloss/privacy.html";
+    private static final String PRIVACY_URL = "https://exercise.houedanou.com/privacy.html";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

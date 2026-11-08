@@ -9,9 +9,8 @@ const NOTIFICATION_SETTINGS_KEY = 'notification_settings';
 const DEFAULT_TIME = '16:00'; // 4h par défaut
 
 // URL du service worker relative à la base de déploiement.
-// En prod GitHub Pages, import.meta.env.BASE_URL vaut '/projectfatloss/' →
-// '/projectfatloss/sw.js'. En dev, '/' → '/sw.js'. Un chemin codé en dur
-// '/sw.js' pointerait sur la racine du domaine (404 sous /projectfatloss/).
+// import.meta.env.BASE_URL vaut '/' sur le site (domaine à la racine) et
+// './' dans l'APK : le chemin du service worker suit la base du build.
 const SW_URL = `${import.meta.env.BASE_URL}sw.js`;
 
 /**
