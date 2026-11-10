@@ -7,6 +7,7 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.MealType
@@ -24,6 +25,7 @@ import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Mass
+import androidx.health.connect.client.units.Percentage
 import com.getcapacitor.JSArray
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
@@ -49,7 +51,7 @@ import kotlin.reflect.KClass
  * Lecture : pas par jour, séances d'exercice (vélo de Strava, Holofit, Google Fit…)
  * avec leurs calories et leur distance, pesées.
  * Écriture : séances (musculation, vélo, marche) avec calories et distance,
- * pesées, journal alimentaire du jour. Chaque écriture porte un identifiant
+ * pesées et taux de graisse de la balance, journal alimentaire du jour. Chaque écriture porte un identifiant
  * client (clientRecordId) : renvoyer la même séance la remplace, sans doublon.
  */
 @CapacitorPlugin(name = "HealthConnect")
@@ -71,6 +73,7 @@ class HealthConnectPlugin : Plugin() {
         ActiveCaloriesBurnedRecord::class,
         DistanceRecord::class,
         WeightRecord::class,
+        BodyFatRecord::class,
         NutritionRecord::class,
     )
     private val permissions: Set<String> =
@@ -350,6 +353,32 @@ class HealthConnectPlugin : Plugin() {
                         zoneOffset = zoneOf(time),
                         weight = Mass.kilograms(kg),
                         metadata = metadataFor("pfl-weight-$id"),
+                    )
+                )
+            )
+            JSObject().put("written", 1)
+        }
+    }
+
+    /** Taux de graisse corporelle mesuré par la balance, en pourcentage. */
+    @PluginMethod
+    fun writeBodyFat(call: PluginCall) {
+        val id = call.getString("clientId")
+        val timeMs = call.getLong("timeMs")
+        val percent = call.getDouble("percent")
+        if (id == null || timeMs == null || percent == null || percent <= 0 || percent >= 100) {
+            call.reject("clientId, timeMs et percent (entre 0 et 100) requis")
+            return
+        }
+        run(call) {
+            val time = Instant.ofEpochMilli(timeMs)
+            client.insertRecords(
+                listOf(
+                    BodyFatRecord(
+                        time = time,
+                        zoneOffset = zoneOf(time),
+                        percentage = Percentage(percent),
+                        metadata = metadataFor("pfl-bodyfat-$id"),
                     )
                 )
             )

@@ -478,6 +478,16 @@ class GoogleFitService {
     }
   }
 
+  // Enregistre un taux de graisse corporelle (balance à impédance) dans Google Fit.
+  async addBodyFat(percentage, timestampMillis = Date.now()) {
+    if (!this.isInitialized) await this.init();
+    await this.ensureDataSource('com.google.body.fat.percentage', 'ProjectFatLossBodyFat');
+    await this.writeInstantPoint('com.google.body.fat.percentage', 'ProjectFatLossBodyFat', timestampMillis, [
+      { fpVal: percentage }
+    ]);
+    return true;
+  }
+
   // Enregistre un résumé nutritionnel (calories + macros) dans Google Fit.
   async addNutrition(nutrition, timestampMillis = Date.now()) {
     if (!this.isInitialized) await this.init();

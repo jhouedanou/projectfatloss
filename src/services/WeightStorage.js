@@ -11,9 +11,11 @@ const WEIGHT_HISTORY_KEY = 'weight_history_data';
  * @param {number} weight - Le poids en kilogrammes
  * @param {string} date - La date de l'enregistrement (optionnelle, par défaut date actuelle)
  * @param {string} notes - Notes supplémentaires (optionnel)
+ * @param {Object|null} composition - composition corporelle de la balance
+ *   (graisse, muscles, eau… voir BodyComposition.js), optionnelle
  * @returns {Object} - L'enregistrement créé
  */
-export const addWeightRecord = (weight, date = null, notes = '') => {
+export const addWeightRecord = (weight, date = null, notes = '', composition = null) => {
   try {
     if (!weight || isNaN(weight) || weight <= 0) {
       throw new Error('Poids invalide');
@@ -27,7 +29,8 @@ export const addWeightRecord = (weight, date = null, notes = '') => {
       id: Date.now(),
       weight: parseFloat(weight),
       date: date || new Date().toISOString(),
-      notes
+      notes,
+      ...(composition ? { composition } : {})
     };
     
     // Ajouter l'enregistrement à l'historique

@@ -31,6 +31,7 @@ const ACCESS_LABELS = {
   WRITE_ACTIVE_CALORIES_BURNED: 'écrire les calories',
   WRITE_DISTANCE: 'écrire la distance',
   WRITE_WEIGHT: 'écrire le poids',
+  WRITE_BODY_FAT: 'écrire le taux de graisse',
   WRITE_NUTRITION: 'écrire les repas',
 };
 

@@ -109,7 +109,7 @@
     <tr><th>Catégorie</th><th>Contenu</th></tr>
     <tr><td>Profil</td><td>Poids, taille, âge, sexe — servent à calculer vos calories et votre objectif alimentaire</td></tr>
     <tr><td>Entraînements</td><td>Séances réalisées, exercices, charges, durées, calories estimées, statistiques</td></tr>
-    <tr><td>Poids</td><td>Historique de vos pesées</td></tr>
+    <tr><td>Poids</td><td>Historique de vos pesées et, si vous l'importez, la composition corporelle mesurée par votre balance (graisse, muscles, eau, os, protéines, métabolisme de base). Une capture d'écran de l'app de votre balance est lue sur votre appareil : l'image n'est envoyée nulle part, seuls les chiffres que vous validez sont gardés.</td></tr>
     <tr><td>Alimentation</td><td>Journaux alimentaires quotidiens et aliments personnalisés</td></tr>
     <tr><td>Cardio</td><td>Séances de vélo et de marche enregistrées</td></tr>
     <tr><td>Programme</td><td>Programme personnalisé, exercices ajoutés, charges par exercice</td></tr>
@@ -133,7 +133,7 @@
   <ul>
     <li>votre profil (nom affiché, avatar) ;</li>
     <li>vos séances d'entraînement et vos exercices personnalisés ;</li>
-    <li>vos pesées ;</li>
+    <li>vos pesées (avec la composition corporelle, si vous l'importez) ;</li>
     <li>vos séances cardio ;</li>
     <li>vos journaux alimentaires et vos aliments personnalisés.</li>
   </ul>
@@ -151,7 +151,7 @@
   </p>
   <ul>
     <li><code>fitness.activity.write</code> — écrire les calories dépensées lors de vos séances ;</li>
-    <li><code>fitness.body.write</code> — écrire votre poids lors d'une pesée ;</li>
+    <li><code>fitness.body.write</code> — écrire votre poids et, s'il est connu, votre taux de graisse lors d'une pesée ;</li>
     <li><code>fitness.nutrition.write</code> — écrire vos apports alimentaires.</li>
   </ul>
   <p>
@@ -290,7 +290,9 @@
   <p>
     The app normally works entirely from your browser's or phone's local storage.
     This data is never sent anywhere and only you can access it: profile (weight,
-    height, age, sex), workout history and statistics, weigh-ins, daily nutrition logs
+    height, age, sex), workout history and statistics, weigh-ins (with body composition
+    from your smart scale if you import it — a screenshot of the scale's app is read on
+    your device and never uploaded; only the figures you confirm are kept), daily nutrition logs
     and custom foods, cardio sessions, your customized program and per-exercise loads,
     preferences (theme, language, notifications, voice guidance, camera settings),
     optional contact details (e-mail and WhatsApp number, if you enter them to send
@@ -316,7 +318,7 @@
   <p>
     If you connect Google Fit, the app requests three <strong>write-only</strong> scopes:
     <code>fitness.activity.write</code> (calories burned during your sessions),
-    <code>fitness.body.write</code> (your body weight) and
+    <code>fitness.body.write</code> (your body weight and, when known, body fat percentage) and
     <code>fitness.nutrition.write</code> (your food intake).
   </p>
   <p>
