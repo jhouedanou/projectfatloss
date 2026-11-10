@@ -152,11 +152,26 @@ export async function syncWorkoutToGoogleFit(workout) {
 
 export async function syncWeightToGoogleFit(record) {
   const time = new Date(record.date).getTime();
+  // Taux de graisse de la balance : envoyé avec la pesée s'il est connu.
+  const bodyFat = Number(record.composition?.bodyFat) || 0;
   if (isHealthConnectApp()) {
     await ensureHealthAccess(['WRITE_WEIGHT']);
     await HealthConnect.writeWeight({ clientId: String(record.id), timeMs: time, kg: Number(record.weight) });
   } else {
     await GoogleFitService.addWeight(record.weight, time);
+  }
+  if (bodyFat > 0) {
+    // Un refus ici (autorisation non donnée) n'empêche pas la pesée de partir.
+    try {
+      if (isHealthConnectApp()) {
+        await ensureHealthAccess(['WRITE_BODY_FAT']);
+        await HealthConnect.writeBodyFat({ clientId: String(record.id), timeMs: time, percent: bodyFat });
+      } else {
+        await GoogleFitService.addBodyFat(bodyFat, time);
+      }
+    } catch (error) {
+      console.warn('[health] taux de graisse non envoyé :', error?.message);
+    }
   }
   markSynced('weight', record.id);
 }

@@ -1,0 +1,309 @@
+/* Import d'une mesure de balance (capture oraimo ou saisie) et carte de composition */
+
+.scale-import {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--sep-op);
+}
+
+.scale-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.scale-import-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1 1 220px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--acc-line);
+  border-radius: var(--r-sm);
+  background: var(--acc-soft);
+  color: var(--label);
+  font: 600 0.95rem var(--font-text);
+  cursor: pointer;
+  transition: background var(--t) var(--ease), border-color var(--t) var(--ease);
+}
+
+.scale-import-btn:hover:not(:disabled) {
+  border-color: var(--acc);
+}
+
+.scale-import-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.scale-import-btn.ghost {
+  background: transparent;
+  border-color: var(--sep);
+  color: var(--label-2);
+}
+
+.scale-import-btn:focus-visible,
+.scale-form-close:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+.scale-import-hint {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--label-3);
+}
+
+.scale-reading {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 0.88rem;
+  color: var(--label-2);
+}
+
+.scale-reading-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.scale-reading-bar span {
+  display: block;
+  height: 100%;
+  background: var(--acc);
+  transition: width var(--t) linear;
+}
+
+.scale-import-error {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  color: var(--err);
+}
+
+/* Formulaire de vérification */
+.scale-form {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--sep);
+  border-radius: var(--r);
+  background: var(--surface-2);
+}
+
+.scale-form-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.scale-form-head h4 {
+  margin: 0;
+  font: 700 1rem var(--font-display);
+  color: var(--label);
+}
+
+.scale-form-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -10px -10px -10px 0;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--label-2);
+  cursor: pointer;
+}
+
+.scale-notice {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 10px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--label-2);
+}
+
+.scale-notice.warn {
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--warn-soft);
+  color: var(--label);
+}
+
+.scale-notice.warn svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--warn);
+}
+
+.scale-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.scale-field.is-date {
+  grid-column: 1 / -1;
+}
+
+.scale-field {
+  display: grid;
+  gap: 5px;
+  align-content: end;
+  font-size: 0.82rem;
+  color: var(--label-2);
+}
+
+.scale-field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--sep);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--label);
+  font: 600 1rem var(--font-text);
+  font-variant-numeric: tabular-nums;
+  color-scheme: dark;
+}
+
+.scale-field input:focus {
+  outline: none;
+  border-color: var(--acc);
+  box-shadow: 0 0 0 2px var(--acc-soft);
+}
+
+.scale-field.is-missing input {
+  border-color: var(--warn);
+}
+
+.scale-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* Carte « Composition corporelle » */
+.comp-card {
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.comp-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.weight-tracker .comp-head h3 {
+  margin: 0;
+}
+
+.comp-date {
+  font-size: 0.82rem;
+  color: var(--label-3);
+}
+
+.comp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.comp-tile {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+
+.comp-label {
+  font-size: 0.75rem;
+  color: var(--label-2);
+}
+
+.comp-value {
+  font: 700 1.15rem var(--font-display);
+  color: var(--label);
+  font-variant-numeric: tabular-nums;
+}
+
+.comp-value small {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--label-3);
+}
+
+.comp-delta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--label-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.comp-delta.good { color: var(--ok); }
+.comp-delta.bad { color: var(--err); }
+
+.comp-bmr {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--sep-op);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--label-2);
+}
+
+.comp-bmr p {
+  margin: 8px 0 0;
+}
+
+.comp-bmr strong {
+  color: var(--label);
+}
+
+.comp-bmr-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--label);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.comp-bmr-toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--acc);
+  flex: none;
+}
+
+.comp-bmr-note {
+  font-size: 0.8rem;
+  color: var(--label-3);
+}
+
+/* Résumé dans l'historique des pesées */
+.record-composition {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}

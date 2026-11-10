@@ -25,6 +25,8 @@ import {
   importWeightsFromHealthConnect
 } from '../services/GoogleFitSync';
 import GoogleFitIcon from './GoogleFitIcon';
+import { ScaleImport, CompositionCard, compositionSummary } from './BodyComposition';
+import { getLatestCompositions } from '../services/BodyComposition';
 import './WeightTracker.css';
 import { healthServiceName, isHealthConnectApp } from '../services/HealthConnect';
 
@@ -101,6 +103,7 @@ function WeightTracker() {
   const [newWeight, setNewWeight] = useState('');
   const [notes, setNotes] = useState('');
   const [stats, setStats] = useState({});
+  const [compositions, setCompositions] = useState({ latest: null, previous: null });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showEncouragement, setShowEncouragement] = useState(false);
@@ -128,6 +131,38 @@ function WeightTracker() {
     const history = getWeightHistory();
     setWeightRecords(history);
     setStats(getWeightStats());
+    setCompositions(getLatestCompositions());
+  };
+
+  // Enregistre une pesée (saisie simple ou mesure de balance) et affiche
+  // l'encouragement si le poids du jour remonte.
+  const saveWeight = ({ weight, date = null, notes: recordNotes = '', composition = null }) => {
+    const currentHistory = getWeightHistory();
+    const lastWeight = currentHistory.length > 0 ? currentHistory[currentHistory.length - 1].weight : null;
+    addWeightRecord(weight, date, recordNotes, composition);
+    if (!date && lastWeight && weight - lastWeight >= 0.2) {
+      setWeightIncrease(weight - lastWeight);
+      setShowEncouragement(true);
+    }
+    loadWeightData();
+  };
+
+  // Mesure de la balance : date du jour = maintenant, autre jour = 8 h ce jour-là.
+  const handleScaleSave = ({ weight, date, composition }) => {
+    setError('');
+    try {
+      const isToday = date === format(new Date(), 'yyyy-MM-dd');
+      saveWeight({
+        weight,
+        date: isToday ? null : new Date(`${date}T08:00:00`).toISOString(),
+        notes: 'Balance oraimo',
+        composition,
+      });
+      setSuccess(composition ? 'Mesure de la balance enregistrée !' : t('weight.recordSaved', { defaultValue: 'Poids enregistré !' }));
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.message || t('weight.errorSaving', { defaultValue: 'Erreur lors de l\'enregistrement' }));
+    }
   };
   
   const handleAddWeight = (e) => {
@@ -143,20 +178,7 @@ function WeightTracker() {
         return;
       }
       
-      const currentHistory = getWeightHistory();
-      const lastWeight = currentHistory.length > 0 ? currentHistory[currentHistory.length - 1].weight : null;
-      
-      addWeightRecord(weightValue, null, notes);
-      
-      if (lastWeight && weightValue > lastWeight) {
-        const increase = weightValue - lastWeight;
-        if (increase >= 0.2) {
-          setWeightIncrease(increase);
-          setShowEncouragement(true);
-        }
-      }
-      
-      loadWeightData();
+      saveWeight({ weight: weightValue, notes });
       setNewWeight('');
       setNotes('');
       setSuccess(t('weight.recordSaved', { defaultValue: 'Poids enregistré !' }));
@@ -234,7 +256,16 @@ function WeightTracker() {
         
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
+
+        {/* Balance connectée : capture oraimo lue sur l'appareil, ou saisie */}
+        <ScaleImport onSave={handleScaleSave} />
       </div>
+
+      <CompositionCard
+        key={compositions.latest?.id || 'none'}
+        latest={compositions.latest}
+        previous={compositions.previous}
+      />
       
       {/* Statistiques de poids */}
       {stats.current && (
@@ -358,6 +389,7 @@ function WeightTracker() {
                 <div className="record-info">
                   <div className="record-weight">{record.weight} <span style={{ fontSize: '0.9rem', color: 'rgba(235,235,245,0.32)', fontWeight: 600 }}>kg</span></div>
                   <div className="record-date">{formatDate(record.date)}</div>
+                  {record.composition && <div className="record-composition">{compositionSummary(record.composition)}</div>}
                   {record.notes && <div className="record-notes">{record.notes}</div>}
                 </div>
                 <div className="record-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
