@@ -22,10 +22,12 @@ Un filtre de période (7 j, 30 j, 90 j, 1 an, tout) s'applique à la partie « �
 
 - **APK Android** : Health Connect (pas, calories, distance, séances de toutes les applications, pesées). Lecture à l'ouverture et par le bouton « Synchroniser ».
 - **Site** : un site web ne peut pas lire Health Connect. Les données arrivent du téléphone par le compte (Firebase) : il faut être connecté au même compte dans l'APK et sur le site. Import Google Fit possible tant que ce service existe (fermeture fin 2026).
+- **Health Sync (Google Drive)** : séances exportées par l'application Health Sync dans le dossier « Health Sync Activités » (dossier partagé par lien + clé API Google, ou connexion Google). Les autres fichiers du dossier (pas, poids…) ne sont pas lus.
+- **Google Health** (à l'essai) : pas par jour, pesées et taux de graisse par l'API `health.googleapis.com`. Demande d'activer « Google Health API » sur le projet Google Cloud ; jamais essayé sur un vrai compte.
 - **Pesée** : saisie à la main ou capture d'écran de l'app de la balance oraimo, lue sur l'appareil.
 - **Historique de l'ancienne app** (séances guidées, vélo coché, pas) : toujours lu, jamais modifié.
 
-Code : `src/dashboard/` (écran, graphiques), `src/services/FitStore.js` (stockage), `FitSync.js` (import), `FitMetrics.js` (calculs), `SyncService.js` (compte).
+Code : `src/dashboard/` (écran, graphiques), `src/services/FitStore.js` (stockage), `FitSync.js`, `DriveImport.js`, `GoogleHealth.js` (imports), `FitMetrics.js` (calculs), `SyncService.js` (compte).
 
 ## Ton
 

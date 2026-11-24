@@ -9,6 +9,7 @@
  *   - fitDays           : un document par mois, totaux par jour ;
  *   - fitSessions       : un document par mois, séances importées ;
  *   - settings/goal     : poids visé ;
+ *   - settings/driveSync: lien du dossier Health Sync et clé API ;
  *   - workouts, cardio  : séances de l'ancienne application, lues seulement.
  * Chaque document garde son contenu en texte JSON (champ `json`) : Firestore
  * refuse les tableaux imbriqués et les valeurs undefined.
@@ -38,6 +39,17 @@ const WEIGHT_HISTORY_KEY = 'weight_history_data';
 // Anciennes séances : rangées telles quelles, lues par FitStore.
 const LEGACY_WORKOUTS_KEY = 'workout_history';
 const LEGACY_CARDIO_KEY = 'cardio_sessions_data';
+// Lien du dossier Health Sync et clé API (DriveImport.js).
+const DRIVE_SETTINGS_KEY = 'pfl_drive_sync';
+
+const getDriveSettings = () => {
+  try {
+    const { folderUrl = '', apiKey = '' } = JSON.parse(localStorage.getItem(DRIVE_SETTINGS_KEY) || '{}');
+    return folderUrl || apiKey ? { folderUrl, apiKey } : null;
+  } catch {
+    return null;
+  }
+};
 
 // Une écriture groupée Firestore accepte 500 opérations au plus.
 const BATCH_SIZE = 400;
@@ -138,6 +150,7 @@ export const syncData = async () => {
       ...Object.entries(sessionsByMonth(getStoredFitSessions()))
         .map(([month, sessions]) => [userDoc(uid, 'fitSessions', month), toDoc(sessions, { month, count: sessions.length })]),
       ...(goalKg ? [[userDoc(uid, 'settings', 'goal'), toDoc({ goalKg })]] : []),
+      ...(getDriveSettings() ? [[userDoc(uid, 'settings', 'driveSync'), toDoc(getDriveSettings())]] : []),
     ];
 
     await commitInChunks(writes);
@@ -184,6 +197,14 @@ export const pushGoal = async (goalKg) => {
   await pushOne('pushGoal', 'settings', 'goal', toDoc({ goalKg: goalKg || null }));
 };
 
+/** Envoie le lien du dossier Health Sync et la clé API : ils suivent sur chaque appareil. */
+export const pushDriveSettings = async (settings) => {
+  await pushOne('pushDriveSettings', 'settings', 'driveSync', toDoc({
+    folderUrl: settings?.folderUrl || '',
+    apiKey: settings?.apiKey || '',
+  }));
+};
+
 // --- Réception ----------------------------------------------------------------
 
 const records = (docs) => docs.map((d) => d.record).filter(hasId);
@@ -217,6 +238,18 @@ export const pullData = async () => {
     // Poids visé : celui de cet appareil prime, le compte complète.
     const remoteGoal = settings.find((d) => d.id === 'goal')?.record?.goalKg;
     if (!getGoalKg() && remoteGoal) setGoalKg(remoteGoal);
+
+    // Dossier Health Sync : ce qui est réglé ici prime, le compte complète.
+    const remoteDrive = settings.find((d) => d.id === 'driveSync')?.record;
+    if (remoteDrive && typeof remoteDrive === 'object') {
+      let local = {};
+      try { local = JSON.parse(localStorage.getItem(DRIVE_SETTINGS_KEY) || '{}'); } catch { /* vide */ }
+      localStorage.setItem(DRIVE_SETTINGS_KEY, JSON.stringify({
+        ...local,
+        folderUrl: local.folderUrl || remoteDrive.folderUrl || '',
+        apiKey: local.apiKey || remoteDrive.apiKey || '',
+      }));
+    }
 
     // Anciennes séances : union par id avec celles de cet appareil.
     const mergeLegacy = (key, remote) => {

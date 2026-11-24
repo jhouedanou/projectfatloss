@@ -1,0 +1,131 @@
+import React, { useState } from 'react';
+import { Cloud, FolderOpen, HeartPulse, Smartphone } from 'lucide-react';
+import { getDriveSettings, importFromDrive, parseFolderIds, setDriveSettings } from '../services/DriveImport';
+import { importFromGoogleHealth } from '../services/GoogleHealth';
+import { isHealthConnectApp } from '../services/HealthConnect';
+
+/** « 1 nouvelle séance », « 3 nouvelles séances » : chaque mot prend un s. */
+const plural = (count, words) => `${count} ${words.split(' ').map((w) => (count > 1 && w !== 'de' ? `${w}s` : w)).join(' ')}`;
+
+/**
+ * Sources de données : d'où le tableau de bord peut lire le poids et
+ * l'activité, et un bouton par source.
+ * @param {(action: () => Promise<string|void>) => void} run - lance une action et affiche son message
+ * @param {boolean} busy - une action est en cours
+ * @param {() => Promise<string|void>} onSync - Health Connect (APK) ou compte (site)
+ * @param {() => Promise<string|void>} [onGoogleFit] - site : import Google Fit
+ * @param {boolean} signedIn
+ */
+export default function Sources({ run, busy, onSync, onGoogleFit, signedIn }) {
+  const [settings, setSettings] = useState(() => getDriveSettings());
+  const [folderUrl, setFolderUrl] = useState(settings.folderUrl);
+  const [apiKey, setApiKey] = useState(settings.savedApiKey);
+  const [folderError, setFolderError] = useState('');
+
+  const readDrive = () => {
+    const url = folderUrl.trim();
+    if (url && parseFolderIds(url).length === 0) {
+      setFolderError("Ce lien n'est pas reconnu. Collez le lien de partage du dossier (il contient « /folders/ »).");
+      return;
+    }
+    setFolderError('');
+    setSettings(setDriveSettings({ folderUrl: url, ...(apiKey.trim() || settings.savedApiKey ? { apiKey: apiKey.trim() } : {}) }));
+    run(async () => {
+      const result = await importFromDrive();
+      setSettings(getDriveSettings());
+      const skipped = result.other ? ` ${plural(result.other, 'autre fichier')} non lu${result.other > 1 ? 's' : ''} (format inconnu).` : '';
+      return `Health Sync : ${plural(result.files, 'fichier')} de séances, ${plural(result.sessions, 'nouvelle séance')}.${skipped}`;
+    });
+  };
+
+  const readGoogleHealth = () => run(async () => {
+    const result = await importFromGoogleHealth();
+    return `Google Health : ${plural(result.days, 'jour')} de pas, ${plural(result.weights, 'nouvelle pesée')}.`;
+  });
+
+  return (
+    <section className="db-card db-wide src" aria-labelledby="src-title">
+      <div className="db-card-head">
+        <h3 id="src-title">Sources de données</h3>
+      </div>
+
+      <ul className="src-list">
+        <li>
+          <Smartphone size={20} className="src-icon" aria-hidden="true" />
+          <div className="src-copy">
+            <strong>{isHealthConnectApp() ? 'Health Connect' : 'Application Android + compte'}</strong>
+            <p>
+              {isHealthConnectApp()
+                ? 'Pas, calories, distance, séances et pesées du téléphone.'
+                : "L'application Android lit Health Connect et envoie tout ici par votre compte. Un site web ne peut pas lire Health Connect."}
+            </p>
+          </div>
+          <button type="button" className="db-btn small" onClick={() => run(onSync)} disabled={busy}>
+            {isHealthConnectApp() ? 'Lire' : signedIn ? 'Recevoir' : 'Se connecter'}
+          </button>
+        </li>
+
+        <li className="src-block">
+          <FolderOpen size={20} className="src-icon" aria-hidden="true" />
+          <div className="src-copy">
+            <strong>Health Sync (Google Drive)</strong>
+            <p>
+              Séances exportées par l'application Health Sync dans le dossier « Health Sync Activités ».
+              Partagez ce dossier avec « Tous les utilisateurs disposant du lien », puis collez son lien.
+            </p>
+            <label className="src-field" htmlFor="src-folder">Lien du dossier</label>
+            <input
+              id="src-folder"
+              type="url"
+              inputMode="url"
+              autoComplete="off"
+              value={folderUrl}
+              onChange={(e) => setFolderUrl(e.target.value)}
+              placeholder="https://drive.google.com/drive/folders/…"
+              aria-describedby={folderError ? 'src-folder-error' : undefined}
+              aria-invalid={!!folderError}
+            />
+            {folderError && <p id="src-folder-error" className="src-error" role="alert">{folderError}</p>}
+            {!settings.hasBuildKey && (
+              <>
+                <label className="src-field" htmlFor="src-key">Clé API Google (API Drive activée)</label>
+                <input id="src-key" type="text" autoComplete="off" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
+              </>
+            )}
+            <p className="src-hint">
+              {settings.lastSyncAt
+                ? `Dernière lecture : ${new Date(settings.lastSyncAt).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}.`
+                : 'Sans lien, une connexion Google est demandée pour chercher le dossier dans votre Drive.'}
+            </p>
+          </div>
+          <button type="button" className="db-btn small" onClick={readDrive} disabled={busy}>Lire le dossier</button>
+        </li>
+
+        {!isHealthConnectApp() && (
+          <li>
+            <HeartPulse size={20} className="src-icon" aria-hidden="true" />
+            <div className="src-copy">
+              <strong>Google Health</strong>
+              <p>
+                Pas et pesées de votre compte Google Health. À l'essai : il faut d'abord activer « Google Health API »
+                dans la console Google Cloud du projet.
+              </p>
+            </div>
+            <button type="button" className="db-btn small" onClick={readGoogleHealth} disabled={busy}>Connecter</button>
+          </li>
+        )}
+
+        {onGoogleFit && (
+          <li>
+            <Cloud size={20} className="src-icon" aria-hidden="true" />
+            <div className="src-copy">
+              <strong>Google Fit</strong>
+              <p>Pas, calories, distance et séances. Google ferme ce service fin 2026.</p>
+            </div>
+            <button type="button" className="db-btn small" onClick={() => run(onGoogleFit)} disabled={busy}>Importer</button>
+          </li>
+        )}
+      </ul>
+    </section>
+  );
+}
