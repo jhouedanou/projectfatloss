@@ -70,8 +70,9 @@ export default function Sources({ run, busy, onSync, onGoogleFit, signedIn }) {
           <div className="src-copy">
             <strong>Health Sync (Google Drive)</strong>
             <p>
-              Séances exportées par l'application Health Sync dans le dossier « Health Sync Activités ».
-              Partagez ce dossier avec « Tous les utilisateurs disposant du lien », puis collez son lien.
+              Séances exportées par l'application Health Sync (durée, distance, calories, fréquence cardiaque).
+              Partagez le dossier avec « Tous les utilisateurs disposant du lien », puis collez son lien.
+              Les fichiers .fit et .tcx décrivent les mêmes séances : le fichier .csv de chacune suffit.
             </p>
             <label className="src-field" htmlFor="src-folder">Lien du dossier</label>
             <input

@@ -697,7 +697,7 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, onLogin, s
                         <span className="db-session-stats">
                           <strong>{hoursMinutes(s.minutes)}</strong>
                           <span>
-                            {[s.kcal ? `${fmt(s.kcal)} kcal` : null, s.km ? `${fmt(s.km, 1)} km` : null].filter(Boolean).join(' · ')}
+                            {[s.kcal ? `${fmt(s.kcal)} kcal` : null, s.km ? `${fmt(s.km, 1)} km` : null, s.heartAvg ? `${s.heartAvg} bpm` : null].filter(Boolean).join(' · ')}
                           </span>
                         </span>
                       </li>
