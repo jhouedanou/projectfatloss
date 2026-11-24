@@ -7,7 +7,13 @@
  *   CYCLING 2026.10.03 11.06 Strava.csv
  *   CRICKET 2026.10.03 11.06 Google Fit.csv   (même séance, vue par Google Fit)
  * Colonnes : source, type, nom, date (aaaa.mm.jj hh:mm:ss), heure, temps écoulé
- * (s), temps actif (s), distance (km), calories (kcal), …
+ * (s), temps actif (s), distance (km), calories (kcal), pas, fréquence
+ * cardiaque moyenne, fréquence cardiaque maximale, vitesse moyenne, …
+ *
+ * Le même dossier contient aussi, pour chaque séance, un fichier .fit et
+ * souvent un .tcx (« aaaa.mm.jj hh.mm-TYPE.fit »). Ils décrivent les mêmes
+ * séances, avec le détail point par point : le CSV suffit pour le tableau de
+ * bord, ils ne sont donc pas téléchargés.
  *
  * Toutes les séances sont importées, quel que soit leur type. Une même séance
  * vue par deux sources (débuts à moins de 2 min) n'est gardée qu'une fois.
@@ -44,6 +50,13 @@ export function classifyHealthSyncType(type) {
   if (/RUN|JOG/.test(t)) return { kind: 'walk', label: 'Course' };
   if (/WALK|HIK/.test(t)) return { kind: 'walk', label: 'Marche' };
   return { kind: 'other', label: 'Autre sport' };
+}
+
+/** « google_fit » → « Google Fit », « strava » → « Strava ». */
+function sourceName(source) {
+  const text = String(source || '').replace(/_/g, ' ').trim();
+  if (!text) return 'Health Sync';
+  return text.replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 }
 
 // ── Lecture du CSV Health Sync ───────────────────────────────────────
@@ -90,6 +103,8 @@ export function parseHealthSyncCsv(text) {
     seconds,
     distanceKm: Number(cols[7]) || 0,
     calories: Number(cols[8]) || 0,
+    heartAvg: Number(cols[10]) || 0,
+    heartMax: Number(cols[11]) || 0,
   };
 }
 
@@ -109,20 +124,25 @@ export function activitiesToSessions(activities) {
   return groups.map((group) => {
     const best = group.reduce((a, b) => (b.seconds > a.seconds ? b : a));
     // Le type le plus parlant : une source autre que Google Fit (Strava…) si elle existe.
-    const named = group.find((a) => a.type !== 'CRICKET' && !/google fit/i.test(a.source)) || best;
+    const named = group.find((a) => a.type !== 'CRICKET' && !/google.?fit/i.test(a.source)) || best;
+    // Chaque source ne remplit pas tout (Strava sans calories, par exemple) :
+    // la plus grande valeur du groupe est gardée.
+    const most = (read) => Math.max(...group.map(read));
     const { kind, label } = classifyHealthSyncType(group.some((a) => classifyHealthSyncType(a.type).kind === 'bike') ? 'CYCLING' : named.type);
     const startMs = best.start.getTime();
     return {
       id: `hs-${Math.round(startMs / 60000)}`,
       kind,
       label,
-      title: best.name || named.name || label,
-      app: named.source || 'Health Sync',
+      title: named.name || best.name || label,
+      app: sourceName(named.source),
       startMs,
       endMs: startMs + best.seconds * 1000,
       minutes: Math.max(1, Math.round(best.seconds / 60)),
-      kcal: best.calories > 0 ? Math.round(best.calories) : null,
-      km: best.distanceKm > 0 ? Math.round(best.distanceKm * 10) / 10 : null,
+      kcal: most((a) => a.calories) > 0 ? Math.round(most((a) => a.calories)) : null,
+      km: most((a) => a.distanceKm) >= 0.05 ? Math.round(most((a) => a.distanceKm) * 10) / 10 : null,
+      heartAvg: most((a) => a.heartAvg) > 0 ? Math.round(most((a) => a.heartAvg)) : null,
+      heartMax: most((a) => a.heartMax) > 0 ? Math.round(most((a) => a.heartMax)) : null,
       source: 'health_sync',
     };
   });
@@ -249,7 +269,7 @@ export async function importFromDrive() {
   const publicIds = parseFolderIds(settings.folderUrl);
   const apiKey = publicIds.length && settings.apiKey ? settings.apiKey : null;
 
-  const folders = apiKey
+  const folders = publicIds.length
     ? publicIds.map((id) => ({ id }))
     : (await listFiles(
       "mimeType='application/vnd.google-apps.folder' and name contains 'Health Sync' and trashed=false"
