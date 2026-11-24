@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Scale as ScaleIcon, Clock, Dumbbell, Bike, Target } from 'lucide-react';
+import { Scale as ScaleIcon, Clock, Dumbbell, Bike, Target, Gauge } from 'lucide-react';
 import { getWorkoutHistory } from '../services/WorkoutStorage';
 import { getWeightHistory } from '../services/WeightStorage';
 import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
@@ -13,10 +13,17 @@ import {
   getWeekProgress,
   startOfWeek,
 } from '../services/WeightLossPlan';
+import { INTENSITY_LEVELS, getIntensityMode, setIntensityMode } from '../services/AdaptiveIntensity';
 import DailyChecklist from './DailyChecklist';
 import './HomeDashboard.css';
 
 const fmtKg = (kg) => kg.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
+
+// Choix du niveau d'intensité : automatique (mesures de la balance) ou fixé.
+const INTENSITY_CHOICES = [
+  { mode: 'auto', label: 'Auto' },
+  ...Object.values(INTENSITY_LEVELS).map((level) => ({ mode: level.key, label: level.label })),
+];
 
 /** Ligne « Vélo 40 / 140 min » avec sa barre de progression. */
 function WeekRow({ icon, tone, label, value, total }) {
@@ -41,6 +48,8 @@ export default function HomeDashboard({ onStartWorkout }) {
   const weights = useMemo(() => getWeightHistory(), []);
   // Objectif mensuel de perte de poids : il fixe les minutes de vélo du plan.
   const [goalKg, setGoalKg] = useState(() => getMonthlyGoalKg());
+  // Niveau d'intensité : 'auto' (d'après les pesées) ou un niveau fixé à la main.
+  const [intensityMode, setIntensityModeState] = useState(() => getIntensityMode());
   // Plan et jour courant ne bougent pas pendant l'affichage du tableau de
   // bord : lus une fois, pas à chaque tick du minuteur.
   const plan = useMemo(() => getActiveWorkoutPlan(), []);
@@ -71,13 +80,21 @@ export default function HomeDashboard({ onStartWorkout }) {
   const done = weekWorkouts.length;
 
   // Objectif en minutes (vélo + musculation) et minutes faites depuis lundi.
-  const goal = useMemo(() => computeWeekTargets(weekPlanDays, { goalKg }), [weekPlanDays, goalKg]);
+  // Le niveau d'intensité (lu dans computeWeekTargets) fixe le vélo et les repos.
+  const goal = useMemo(() => computeWeekTargets(weekPlanDays, { goalKg }), [weekPlanDays, goalKg, intensityMode]);
+  const intensity = goal.intensity;
   const progress = useMemo(() => getWeekProgress(), [checklistVersion]);
 
   const handleGoalChange = (kg) => {
     if (kg === goalKg) return;
     setMonthlyGoalKg(kg);
     setGoalKg(kg);
+  };
+
+  const handleIntensityChange = (mode) => {
+    if (mode === intensityMode) return;
+    setIntensityMode(mode);
+    setIntensityModeState(mode);
   };
 
   // Bande semaine : 7 cellules (lundi → dimanche) avec statut par jour.
@@ -245,6 +262,36 @@ export default function HomeDashboard({ onStartWorkout }) {
           environ <strong>−{fmtKg(goal.projectedKgPerMonth)} kg par mois</strong>
           {streak > 1 ? ` · série de ${streak} jours` : ''}
         </p>
+      </div>
+
+      {/* Intensité : réglée d'après les pesées (graisse, muscle, poids) ou à la main */}
+      <div className="hd-intensity card">
+        <div className="hd-goal-head">
+          <Gauge size={18} />
+          <span className="hd-goal-title">Intensité</span>
+          <span className={`hd-intensity-level ${intensity.key}`}>{intensity.label}</span>
+        </div>
+        <p className="hd-intensity-reason">{intensity.reason}</p>
+        <p className="hd-intensity-effect">{intensity.effect}</p>
+        <div className="hd-goal-options hd-intensity-options" role="radiogroup" aria-label="Niveau d'intensité">
+          {INTENSITY_CHOICES.map((choice) => (
+            <button
+              key={choice.mode}
+              type="button"
+              role="radio"
+              aria-checked={choice.mode === intensityMode}
+              className={`hd-goal-option${choice.mode === intensityMode ? ' active' : ''}`}
+              onClick={() => handleIntensityChange(choice.mode)}
+            >
+              {choice.label}
+            </button>
+          ))}
+        </div>
+        {intensityMode !== 'auto' && (
+          <p className="hd-intensity-auto">
+            Niveau automatique : {INTENSITY_LEVELS[intensity.auto.level].label.toLowerCase()}. {intensity.auto.reason}
+          </p>
+        )}
       </div>
     </div>
   );

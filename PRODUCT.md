@@ -16,6 +16,8 @@ Une seule personne : 147 kg pour 1,78 m, objectif −3 à −4 kg par mois. Pas 
 
 28 jours, 6 séances par semaine et le dimanche en repos, 27 à 40 min de musculation intense (400 kcal et plus par séance, finisher en fin de séance), **rien au sol sauf les crunchs**, aucun saut, muscles alternés d'un jour à l'autre, + 20 min de vélo chaque jour. Le déficit vient aussi de l'assiette (−500 kcal/jour).
 
+**Intensité** : trois niveaux (douce, normale, soutenue), réglés d'après les pesées (masse grasse, masse musculaire, poids sur ~4 semaines) ou choisis à la main sur l'accueil. Le niveau change les repos de la séance et le vélo (15, 20 ou 25 min), jamais les exercices ni les charges. Règles : `src/services/AdaptiveIntensity.js`.
+
 ## Ton
 
 Français, vouvoiement, simple et direct. Encourageant sans infantiliser ; pas de jargon (« J7 », « S1 Adaptation », « RÉCUPÉRATION ACTIVE (Séa… »).
