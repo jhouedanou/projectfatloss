@@ -5,8 +5,10 @@
  * donc un déficit de ~760 à ~1 010 kcal par jour. Une partie vient de
  * l'assiette (objectif calorique de NutritionGoals), le reste vient du sport :
  * 20 min de vélo chaque jour et six séances de musculation par semaine.
- * Le vélo est fixe : l'objectif choisi (3 à 4 kg) dit seulement ce qu'il faut
- * encore retirer de l'assiette si le plan n'y suffit pas.
+ * Le niveau d'intensité (AdaptiveIntensity : mesures de la balance, ou choix
+ * à la main) fait varier le vélo (15, 20 ou 25 min) et les repos de la séance.
+ * L'objectif choisi (3 à 4 kg) dit seulement ce qu'il faut encore retirer de
+ * l'assiette si le plan n'y suffit pas.
  *
  * Seules les calories EN PLUS du repos sont comptées (MET − 1) : le TDEE
  * contient déjà la dépense de repos, il ne faut pas la compter deux fois.
@@ -23,6 +25,8 @@ import { getUserWeight, isBikeName } from './CalorieEstimator';
 import { getTDEE, getCalorieTarget } from './NutritionGoals';
 import { getWorkoutHistory } from './WorkoutStorage';
 import { getCardioSessions } from './CardioStorage';
+import { getWeightHistory } from './WeightStorage';
+import { resolveIntensity } from './AdaptiveIntensity';
 
 export const KCAL_PER_KG = 7700;
 export const DAYS_PER_MONTH = 30.4;
@@ -33,18 +37,12 @@ const GOAL_KEY = 'monthly_loss_goal_kg';
 export const BIKE_MET = 6.8;
 export const STRENGTH_MET = 3.5;
 
-// Vélo : 20 min chaque jour du programme, jours sans musculation compris.
-export const BIKE_MINUTES_PER_DAY = 20;
-
 // MET du vélo pour estimer les calories d'un bloc coché (comme CalorieEstimator).
 const BIKE_LOG_MET = 7.0;
 
-// Modèle de repos de StepWorkout.jsx (15 s + 5 s par série faite, plafond
-// 40 s ; 45 s entre deux exercices) — même modèle que scripts/gen-plan.mjs.
-const SET_PAUSE_BASE = 15;
-const SET_PAUSE_INCREMENT = 5;
-const SET_PAUSE_MAX = 40;
-const EXERCISE_PAUSE = 45;
+// Modèle de repos de StepWorkout.jsx au niveau normal : 15 s + 5 s par série
+// faite, plafond 40 s ; 45 s entre deux exercices (comme scripts/gen-plan.mjs).
+// Les valeurs de chaque niveau sont dans AdaptiveIntensity.INTENSITY_LEVELS.
 
 export function isBikeExercise(exercise) {
   return isBikeName(exercise?.name);
@@ -69,6 +67,23 @@ export function setMonthlyGoalKg(kg) {
   } catch (e) {
     return false;
   }
+}
+
+// ── Niveau d'intensité ───────────────────────────────────────────────
+
+/**
+ * Niveau d'intensité appliqué aujourd'hui (pesées + objectif du mois, ou
+ * niveau choisi à la main) : repos de la séance et minutes de vélo.
+ */
+export function getCurrentIntensity({ goalKg = getMonthlyGoalKg() } = {}) {
+  return resolveIntensity({ records: getWeightHistory(), goalKg });
+}
+
+/** Repos en secondes après la série `setNum` (0 = première), ou entre deux exercices. */
+export function pauseSeconds({ isExerciseTransition, setNum = 0 }, intensity = getCurrentIntensity()) {
+  if (isExerciseTransition) return intensity.exercisePause;
+  const { base, increment, max } = intensity.setPause;
+  return Math.min(base + Math.max(0, setNum) * increment, max);
 }
 
 // ── Dépense et déficit ───────────────────────────────────────────────
@@ -102,7 +117,7 @@ function setWorkSeconds(exercise) {
  * Minutes estimées d'une séance, vélo et musculation séparés.
  * @returns {{ bike: number, strength: number, total: number }}
  */
-export function estimateSessionMinutes(day) {
+export function estimateSessionMinutes(day, intensity = getCurrentIntensity()) {
   if (!day || day.isRestDay) return { bike: 0, strength: 0, total: 0 };
   let bikeSeconds = 0;
   let strengthSeconds = 0;
@@ -116,10 +131,10 @@ export function estimateSessionMinutes(day) {
     for (let set = 0; set < sets; set += 1) {
       strengthSeconds += setWorkSeconds(exercise);
       if (set < sets - 1) {
-        strengthSeconds += Math.min(SET_PAUSE_BASE + set * SET_PAUSE_INCREMENT, SET_PAUSE_MAX);
+        strengthSeconds += pauseSeconds({ isExerciseTransition: false, setNum: set }, intensity);
       }
     }
-    if (index < exercises.length - 1) strengthSeconds += EXERCISE_PAUSE;
+    if (index < exercises.length - 1) strengthSeconds += pauseSeconds({ isExerciseTransition: true }, intensity);
   });
   const bike = Math.round(bikeSeconds / 60);
   const strength = Math.round(strengthSeconds / 60);
@@ -132,7 +147,10 @@ export function estimateSessionMinutes(day) {
  * Cibles d'une semaine du programme (7 jours) pour l'objectif choisi.
  * @param {Array} weekDays jours de la semaine (plan complet)
  */
-export function computeWeekTargets(weekDays, { goalKg = getMonthlyGoalKg(), weightKg = getUserWeight() } = {}) {
+export function computeWeekTargets(
+  weekDays,
+  { goalKg = getMonthlyGoalKg(), weightKg = getUserWeight(), intensity = getCurrentIntensity({ goalKg }) } = {}
+) {
   const days = (weekDays || []).filter(Boolean);
   const sessionDays = days.filter((d) => !d.isRestDay);
   const sessions = sessionDays.length;
@@ -144,9 +162,9 @@ export function computeWeekTargets(weekDays, { goalKg = getMonthlyGoalKg(), weig
   const dailyNeeded = (goalKg * KCAL_PER_KG) / DAYS_PER_MONTH;
 
   const strengthMinutes = sessionDays.reduce(
-    (sum, d) => sum + estimateSessionMinutes(d).strength, 0
+    (sum, d) => sum + estimateSessionMinutes(d, intensity).strength, 0
   );
-  const bikeMinutes = BIKE_MINUTES_PER_DAY * days.length;
+  const bikeMinutes = intensity.bikeMinutes * days.length;
 
   const weeklyKcal = dietDaily * 7 + bikeMinutes * bikeRate + strengthMinutes * strengthRate;
   const projectedKgPerMonth = (weeklyKcal / 7) * DAYS_PER_MONTH / KCAL_PER_KG;
@@ -162,7 +180,8 @@ export function computeWeekTargets(weekDays, { goalKg = getMonthlyGoalKg(), weig
     bikeMinutes,
     strengthMinutes,
     totalMinutes: bikeMinutes + strengthMinutes,
-    bikePerSession: BIKE_MINUTES_PER_DAY,
+    bikePerSession: intensity.bikeMinutes,
+    intensity,
     projectedKgPerMonth,
     missingKcalPerDay,
   };

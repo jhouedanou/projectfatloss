@@ -224,3 +224,45 @@
   color: var(--ok);
   font-weight: 700;
 }
+
+/* ── Intensité : niveau réglé d'après les pesées, ou à la main ─────── */
+.hd-intensity {
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.hd-intensity .hd-goal-head { margin-bottom: 8px; }
+.hd-intensity-level {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--label);
+  background: var(--surface-2);
+  border: 1px solid var(--sep-op);
+}
+.hd-intensity-level.hard { color: var(--acc); border-color: var(--acc); }
+.hd-intensity-level.light { color: var(--warn); border-color: var(--warn); }
+.hd-intensity-reason {
+  margin: 0 0 2px;
+  font-size: 0.9rem;
+  color: var(--label);
+}
+.hd-intensity-effect {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  color: var(--label-2);
+}
+.hd-intensity-options {
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 0;
+}
+.hd-intensity-options .hd-goal-option {
+  font-size: 0.85rem;
+  padding: 10px 2px;
+}
+.hd-intensity-auto {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--label-2);
+}

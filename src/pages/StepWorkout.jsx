@@ -12,6 +12,7 @@ import ProgressTracker from '../components/ProgressTracker';
 import SpeechSettingsDialog from '../components/SpeechSettingsDialog';
 import DayPills from '../components/DayPills';
 import { getActiveWorkoutPlan } from '../services/WorkoutCustomization';
+import { pauseSeconds } from '../services/WeightLossPlan';
 import { initSpeechService, announceExercise, announceSet, announcePause, announceCount, announceRepetition, announceSideChange, announceWorkoutComplete, setEnabled as setSpeechEnabled, isEnabled as isSpeechEnabled } from '../services/SpeechService';
 import { saveWorkout } from '../services/WorkoutStorage';
 import notificationService from '../services/NotificationService';
@@ -31,13 +32,10 @@ const formatTime = (seconds) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-// Durées de repos adaptées : repos plus long entre exercices pour récupérer
-// de la force, et repos entre séries qui augmente avec la fatigue cumulée.
-const SET_PAUSE_BASE_SECONDS = 15;        // repos de base entre deux séries
-const SET_PAUSE_INCREMENT_SECONDS = 5;    // +5s par série déjà réalisée
-const SET_PAUSE_MAX_SECONDS = 40;         // plafond du repos entre séries
-const EXERCISE_PAUSE_SECONDS = 45;        // repos entre exercices (récupération force)
-const PAUSE_DURATION_SECONDS = SET_PAUSE_BASE_SECONDS; // valeur par défaut historique
+// Durées de repos : repos plus long entre exercices pour récupérer de la
+// force, et repos entre séries qui augmente avec la fatigue cumulée. Les
+// valeurs dépendent du niveau d'intensité (AdaptiveIntensity) ; au niveau
+// normal : 15 s + 5 s par série faite, plafond 40 s, 45 s entre exercices.
 
 // Exercices unilatéraux (« /côté », « /jambe ») : délai avant le passage
 // automatique au second côté, le temps de changer de bras ou de jambe.
@@ -46,14 +44,7 @@ const SIDE_SWITCH_DELAY_SECONDS = 3;
 // Calcule la durée de pause en fonction du contexte (changement d'exercice ou
 // de série) afin d'avoir plus de force pour l'effort suivant.
 function getPauseDuration({ isExerciseTransition, setNum = 0 }) {
-  if (isExerciseTransition) {
-    return EXERCISE_PAUSE_SECONDS;
-  }
-  const reps = Math.max(0, setNum);
-  return Math.min(
-    SET_PAUSE_BASE_SECONDS + reps * SET_PAUSE_INCREMENT_SECONDS,
-    SET_PAUSE_MAX_SECONDS
-  );
+  return pauseSeconds({ isExerciseTransition, setNum });
 }
 
 // Correction de l'import du fichier JSON
