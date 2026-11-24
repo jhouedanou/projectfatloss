@@ -15,7 +15,7 @@ export default function Header({ user, onAccountClick }) {
             <img src={getAssetPath('/logo.png')} alt="" />
           </span>
           <div className="pfl-header-copy">
-            <p className="pfl-header-title">Project Fat Loss</p>
+            <h1 className="pfl-header-title">Project Fat Loss</h1>
             <p className="pfl-header-subtitle">{today.charAt(0).toUpperCase() + today.slice(1)}</p>
           </div>
         </div>

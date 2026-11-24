@@ -11,12 +11,13 @@ import {
 } from '../services/FitMetrics';
 import { getAllSessions, getFitDays, getFitMeta, getGoalKg, setGoalKg } from '../services/FitStore';
 import { addWeightRecord, deleteWeightRecord, getWeightHistory } from '../services/WeightStorage';
-import { fitSourceName } from '../services/FitSync';
 import { isHealthConnectApp } from '../services/HealthConnect';
 import {
   BarChart, HeatLegend, Heatmap, KIND_COLORS, KindLegend, Sparkline, WeightChart, longDate, shortDate,
 } from './charts';
 import { ScaleImport } from './ScaleImport';
+import WeekSummary from './WeekSummary';
+import Sources from './Sources';
 import './Dashboard.css';
 
 const PERIOD_KEY = 'fit_period';
@@ -93,8 +94,9 @@ const COMPOSITION_TILES = [
  * @param {number} dataVersion - change quand les données locales ont été modifiées ailleurs (synchro du compte)
  * @param {() => Promise<string|void>} onSync - synchro demandée par l'utilisateur ; peut renvoyer un message
  * @param {() => Promise<string|void>} [onGoogleFit] - site : import Google Fit
+ * @param {() => void} onLogin - ouvre la connexion au compte
  */
-export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }) {
+export default function Dashboard({ dataVersion, onSync, onGoogleFit, onLogin, signedIn }) {
   const [version, setVersion] = useState(0);
   const [periodKey, setPeriodKey] = useState(() => {
     try {
@@ -222,7 +224,6 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
   const shownSessions = allSessions ? periodSessions : periodSessions.slice(0, SESSIONS_SHOWN);
 
   const hasActivity = Object.keys(data.days).length > 0 || data.sessions.length > 0;
-  const isEmpty = !hasActivity && points.length === 0;
 
   // ── Actions ────────────────────────────────────────────────────────
   const choosePeriod = (key) => {
@@ -245,6 +246,14 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
       refresh();
     }
   };
+
+  // Échap ferme la feuille « pesée ».
+  useEffect(() => {
+    if (!showWeighIn) return undefined;
+    const onKey = (event) => { if (event.key === 'Escape') setShowWeighIn(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showWeighIn]);
 
   // Le message de synchro s'efface seul.
   useEffect(() => {
@@ -275,7 +284,6 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
     refresh();
   };
 
-  const sourceName = fitSourceName();
   const lastSync = Number(data.meta.lastSyncAt) || null;
 
   return (
@@ -295,27 +303,63 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
           {busy ? 'Synchro…' : 'Synchroniser'}
         </button>
       </div>
-      {note && <p className={`db-note ${note.tone}`} role={note.tone === 'err' ? 'alert' : 'status'}>{note.text}</p>}
+      {note && (
+        <p className={`db-note ${note.tone}`} role={note.tone === 'err' ? 'alert' : 'status'}>
+          {note.text}
+          {note.tone === 'err' && <button type="button" className="db-link" onClick={() => setNote(null)}>Fermer</button>}
+        </p>
+      )}
 
-      {isEmpty ? (
-        <div className="db-card db-empty">
-          <h2>Aucune donnée pour l'instant</h2>
-          <p>
-            {isHealthConnectApp()
-              ? 'Appuyez sur « Synchroniser » pour lire vos pas, vos séances et vos pesées dans Health Connect.'
-              : 'Connectez-vous à votre compte pour recevoir les données de votre téléphone, ou importez-les depuis Google Fit.'}
-          </p>
-          <div className="db-empty-actions">
-            <button type="button" className="db-btn primary" onClick={() => setShowWeighIn(true)}>
-              <Plus size={16} aria-hidden="true" /> Ajouter une pesée
-            </button>
-            {onGoogleFit && (
-              <button type="button" className="db-btn" onClick={() => run(onGoogleFit)} disabled={busy}>Importer depuis Google Fit</button>
-            )}
-          </div>
+      {/* Pas encore d'activité : dire d'où elle vient et quoi faire */}
+      {!hasActivity && (
+        <div className="db-card db-setup">
+          <h2>Vos données d'activité ne sont pas encore ici</h2>
+          {isHealthConnectApp() ? (
+            <>
+              <p>Appuyez sur « Synchroniser » pour lire vos pas, vos séances et vos pesées dans Health Connect.</p>
+              <div className="db-setup-actions">
+                <button type="button" className="db-btn primary" onClick={() => run(onSync)} disabled={busy}>
+                  <RefreshCw size={16} aria-hidden="true" /> Synchroniser
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p>
+                Un site web ne peut pas lire Health Connect. C'est l'application Android qui lit vos pas, vos séances
+                et vos pesées, puis les envoie ici par votre compte.
+              </p>
+              <ol>
+                <li>Installez l'application Android (APK) sur votre téléphone et appuyez sur « Synchroniser ».</li>
+                <li>Connectez-vous au même compte dans l'application Android et sur ce site.</li>
+              </ol>
+              <div className="db-setup-actions">
+                {signedIn ? (
+                  <button type="button" className="db-btn primary" onClick={() => run(onSync)} disabled={busy}>
+                    <RefreshCw size={16} aria-hidden="true" /> Recevoir les données du compte
+                  </button>
+                ) : (
+                  <button type="button" className="db-btn primary" onClick={onLogin}>Se connecter</button>
+                )}
+                <button type="button" className="db-btn" onClick={() => setShowWeighIn(true)}>
+                  <Plus size={16} aria-hidden="true" /> Ajouter une pesée
+                </button>
+              </div>
+              <p className="db-setup-more">
+                Sans l'application Android : le dossier Health Sync de Google Drive ou Google Health.{' '}
+                <button type="button" className="db-link" onClick={() => document.getElementById('src-title')?.scrollIntoView({ block: 'start' })}>
+                  Voir les sources de données
+                </button>
+              </p>
+            </>
+          )}
         </div>
-      ) : (
+      )}
+
         <>
+          <WeekSummary days={data.days} sessions={data.sessions} points={points} today={today} />
+
+          <h2 className="db-section">Évolution</h2>
           {/* Une seule rangée de filtres, au-dessus de tous les graphiques */}
           <div className="db-periods" role="radiogroup" aria-label="Période affichée">
             {PERIODS.map((p) => (
@@ -336,7 +380,7 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
             {/* ── Poids ─────────────────────────────────────────────── */}
             <section className="db-card db-weight" aria-labelledby="db-weight-title">
               <div className="db-card-head">
-                <h2 id="db-weight-title"><Scale size={17} aria-hidden="true" /> Poids</h2>
+                <h3 id="db-weight-title"><Scale size={17} aria-hidden="true" /> Poids</h3>
                 <button type="button" className="db-btn small" onClick={() => setShowWeighIn(true)}>
                   <Plus size={15} aria-hidden="true" /> Pesée
                 </button>
@@ -423,7 +467,7 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
                 </>
               ) : (
                 <div className="viz-empty">
-                  Pas encore de pesée. Ajoutez-en une, ou synchronisez {sourceName}.
+                  Pas encore de pesée. Ajoutez-en une avec le bouton « Pesée ».
                 </div>
               )}
             </section>
@@ -432,7 +476,7 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
             {latestComposition && (
               <section className="db-card" aria-labelledby="db-comp-title">
                 <div className="db-card-head">
-                  <h2 id="db-comp-title">Composition corporelle</h2>
+                  <h3 id="db-comp-title">Composition corporelle</h3>
                   <span className="db-card-note">{shortDate(latestComposition.day)}</span>
                 </div>
                 <div className="db-tiles">
@@ -474,7 +518,7 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
             {/* ── Activité ─────────────────────────────────────────── */}
             <section className="db-card db-activity" aria-labelledby="db-activity-title">
               <div className="db-card-head">
-                <h2 id="db-activity-title"><Activity size={17} aria-hidden="true" /> Activité</h2>
+                <h3 id="db-activity-title"><Activity size={17} aria-hidden="true" /> Activité</h3>
                 <span className="db-card-note">{!period.days ? 'depuis le début' : canCompare ? `${period.label}, comparé aux ${period.label} d'avant` : period.label}</span>
               </div>
 
@@ -554,7 +598,7 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
             {/* ── Régularité ───────────────────────────────────────── */}
             <section className="db-card" aria-labelledby="db-heat-title">
               <div className="db-card-head">
-                <h2 id="db-heat-title">Régularité</h2>
+                <h3 id="db-heat-title">Régularité</h3>
                 <span className="db-card-note">{HEATMAP_WEEKS} dernières semaines</span>
               </div>
               <div className="db-facts">
@@ -571,10 +615,11 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
             {/* ── Semaine par semaine ──────────────────────────────── */}
             <section className="db-card db-wide" aria-labelledby="db-table-title">
               <div className="db-card-head">
-                <h2 id="db-table-title">Semaine par semaine</h2>
+                <h3 id="db-table-title">Semaine par semaine</h3>
                 <span className="db-card-note">{TABLE_WEEKS} dernières semaines</span>
               </div>
-              <div className="db-table-wrap">
+              {tableRows.length === 0 && <div className="viz-empty">Pas encore de semaine à afficher.</div>}
+              <div className="db-table-wrap" hidden={tableRows.length === 0}>
                 <table className="db-table">
                   <thead>
                     <tr>
@@ -612,7 +657,7 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
             {/* ── Séances ──────────────────────────────────────────── */}
             <section className="db-card db-wide" aria-labelledby="db-sessions-title">
               <div className="db-card-head">
-                <h2 id="db-sessions-title">Séances</h2>
+                <h3 id="db-sessions-title">Séances</h3>
                 <span className="db-card-note">
                   {periodSessions.length} séance{periodSessions.length > 1 ? 's' : ''} · {hoursMinutes(summary.sportMinutes)}
                 </span>
@@ -666,21 +711,24 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, signedIn }
                 </button>
               )}
             </section>
+
+            <Sources run={run} busy={busy} onSync={onSync} onGoogleFit={onGoogleFit} signedIn={signedIn} />
           </div>
 
-          {onGoogleFit && (
-            <p className="db-foot-action">
-              <button type="button" className="db-link" onClick={() => run(onGoogleFit)} disabled={busy}>Importer depuis Google Fit</button>
-              <span> (ce service de Google ferme fin 2026)</span>
-            </p>
-          )}
         </>
-      )}
 
       {/* Feuille « pesée » : saisie, capture de la balance, dernières pesées */}
       {showWeighIn && (
         <div className="db-sheet-backdrop" onClick={() => setShowWeighIn(false)}>
-          <div className="db-sheet" role="dialog" aria-modal="true" aria-labelledby="db-sheet-title" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="db-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="db-sheet-title"
+            tabIndex={-1}
+            ref={(node) => { if (node && !node.contains(document.activeElement)) node.focus(); }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="db-card-head">
               <h2 id="db-sheet-title">Ajouter une pesée</h2>
               <button type="button" className="db-icon-btn" onClick={() => setShowWeighIn(false)} aria-label="Fermer">

@@ -45,6 +45,14 @@ export default function App() {
       .catch((error) => console.warn('[fit] lecture automatique différée :', error?.message));
   }, [bump]);
 
+  // Échap ferme la fenêtre de connexion.
+  useEffect(() => {
+    if (!showLogin) return undefined;
+    const onKey = (event) => { if (event.key === 'Escape') setShowLogin(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showLogin]);
+
   const handleSync = async () => {
     if (isHealthConnectApp()) {
       const result = await syncFit({ prompt: true });
@@ -85,6 +93,7 @@ export default function App() {
           dataVersion={dataVersion}
           signedIn={!!user}
           onSync={handleSync}
+          onLogin={() => setShowLogin(true)}
           onGoogleFit={isHealthConnectApp() ? null : handleGoogleFit}
         />
       </main>
@@ -95,7 +104,7 @@ export default function App() {
       </footer>
 
       {showLogin && !user && (
-        <div className="fit-modal" onClick={() => setShowLogin(false)}>
+        <div className="fit-modal" role="dialog" aria-modal="true" aria-label="Connexion au compte" onClick={() => setShowLogin(false)}>
           <div className="fit-modal-box" onClick={(e) => e.stopPropagation()}>
             <LoginForm onClose={() => setShowLogin(false)} />
           </div>

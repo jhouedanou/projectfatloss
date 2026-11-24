@@ -40,8 +40,7 @@ Ou ouvrir le projet dans Android Studio : `npx cap open android`.
 adb install -r android\app\build\outputs\apk\debug\app-debug.apk
 ```
 
-(Débogage USB ou Wi-Fi activé sur le téléphone ; voir `wear/README.md` pour la
-procédure d'appairage adb en Wi-Fi, identique côté téléphone.)
+(Débogage USB ou Wi-Fi activé sur le téléphone.)
 
 ## Notes
 

@@ -1,7 +1,7 @@
 name: Build APKs
 
-# Compile les deux APK debug (téléphone Capacitor + montre Wear OS) et les
-# publie en artefacts téléchargeables depuis la page du run.
+# Compile l'APK debug du téléphone (Capacitor) et le
+# publie en artefact téléchargeable depuis la page du run.
 on:
   workflow_dispatch:
   push:
@@ -10,7 +10,6 @@ on:
       - 'claude/**'
     paths:
       - 'android/**'
-      - 'wear/**'
       - 'src/**'
       - 'public/**'
       - 'scripts/**'
@@ -62,25 +61,4 @@ jobs:
         with:
           name: fatloss-telephone-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-
-  watch-apk:
-    name: APK montre (Wear OS)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Compiler l'APK
-        working-directory: wear
-        run: ./gradlew --no-daemon assembleDebug
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: fatloss-montre-debug-apk
-          path: wear/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
