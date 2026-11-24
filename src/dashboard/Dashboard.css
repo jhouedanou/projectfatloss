@@ -628,3 +628,18 @@
 }
 .db-setup .db-setup-more { margin: 12px 0 0; font-size: 0.8125rem; }
 #src-title { scroll-margin-top: 140px; }
+
+.src-password { grid-column: 2 / -1; }
+.src-password p { margin: 0; font-size: 0.8125rem; color: var(--label-2); }
+.src-password strong { color: var(--label); }
+.src-password input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--sep);
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, .05);
+  color: var(--label);
+  font: 400 16px var(--font-text);
+}
+.src-password .src-hint { margin: 6px 0 10px; font-size: 0.75rem; }

@@ -12,10 +12,12 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  reauthenticateWithPopup,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
+  updatePassword,
   updateProfile,
 } from 'firebase/auth';
 import { auth, isFirebaseConfigured, isNativeApp } from './firebase';
@@ -123,6 +125,38 @@ export const signInWithGoogle = async () => {
     return { success: true, user, session: true };
   } catch (error) {
     console.error('[auth] Google error:', error.code, error.message);
+    return { success: false, error: friendlyError(error) };
+  }
+};
+
+/** Le compte connecté peut-il déjà se connecter par e-mail et mot de passe ? */
+export const hasPasswordLogin = (user) =>
+  Boolean(user?.providerData?.some((provider) => provider.providerId === 'password'));
+
+/**
+ * Donne un mot de passe au compte connecté (créé avec Google), pour s'en
+ * servir dans l'APK, où la connexion Google n'existe pas. Aucun e-mail n'est
+ * envoyé. Si la connexion date trop, Google redemande le compte une fois.
+ */
+export const setAccountPassword = async (password) => {
+  const cfg = ensureConfigured();
+  if (!cfg.ok) return { success: false, error: cfg.error };
+  const user = auth.currentUser;
+  if (!user) return { success: false, error: "Connectez-vous d'abord." };
+  if (!password || password.length < 6) {
+    return { success: false, error: 'Le mot de passe doit faire au moins 6 caractères.' };
+  }
+  try {
+    try {
+      await updatePassword(user, password);
+    } catch (error) {
+      if (error?.code !== 'auth/requires-recent-login' || !canUseGoogleSignIn) throw error;
+      await reauthenticateWithPopup(user, new GoogleAuthProvider());
+      await updatePassword(user, password);
+    }
+    return { success: true, email: user.email };
+  } catch (error) {
+    console.error('[auth] setAccountPassword error:', error.code, error.message);
     return { success: false, error: friendlyError(error) };
   }
 };

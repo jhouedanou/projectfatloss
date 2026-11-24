@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Header from '../components/Header/Header';
 import LoginForm from '../components/LoginForm';
 import Dashboard from '../dashboard/Dashboard';
-import { onAuthChange, signOut } from '../services/AuthService';
+import { hasPasswordLogin, onAuthChange, signOut } from '../services/AuthService';
 import { fullSync } from '../services/SyncService';
 import { syncFit } from '../services/FitSync';
 import { canReadDriveSilently, importFromDrive } from '../services/DriveImport';
@@ -107,6 +107,7 @@ export default function App() {
         <Dashboard
           dataVersion={dataVersion}
           signedIn={!!user}
+          account={user ? { email: user.email || '', hasPassword: hasPasswordLogin(user) } : null}
           onSync={handleSync}
           onLogin={() => setShowLogin(true)}
           onGoogleFit={isHealthConnectApp() ? null : handleGoogleFit}
