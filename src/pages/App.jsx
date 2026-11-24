@@ -85,6 +85,7 @@ export default function App() {
           dataVersion={dataVersion}
           signedIn={!!user}
           onSync={handleSync}
+          onLogin={() => setShowLogin(true)}
           onGoogleFit={isHealthConnectApp() ? null : handleGoogleFit}
         />
       </main>

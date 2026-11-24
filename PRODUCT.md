@@ -8,6 +8,7 @@ Une seule personne : environ 147 kg pour 1,78 m, qui veut perdre du poids sur la
 
 Un seul écran : un **tableau de bord** pour suivre le poids et l'activité. L'app ne guide plus de séance, ne propose plus de programme et ne note plus les repas.
 
+0. **Résumé de la semaine** (en haut) : un anneau de pas par jour, le total de pas, puis kilomètres, calories, sport, séances et poids moyen, chacun comparé à la semaine d'avant. Flèches pour revenir aux semaines passées.
 1. **Poids** : dernière pesée, tendance (moyenne des 7 derniers jours pesés), écart sur la période, rythme par semaine, poids visé et date estimée.
 2. **Composition corporelle** (balance à impédance) : graisse, masse grasse, muscles, graisse viscérale, eau, IMC, avec leur évolution.
 3. **Activité** : pas, minutes de sport, calories actives, distance ; comparaison avec la période d'avant ; graphique par jour, semaine ou mois.
@@ -15,12 +16,12 @@ Un seul écran : un **tableau de bord** pour suivre le poids et l'activité. L'a
 5. **Semaine par semaine** : poids moyen, écart, pas, sport, calories — pour lire le lien entre activité et poids.
 6. **Séances** : temps par famille (vélo, musculation, marche et course, autre) et liste des séances.
 
-Un filtre de période (7 j, 30 j, 90 j, 1 an, tout) s'applique à tout l'écran.
+Un filtre de période (7 j, 30 j, 90 j, 1 an, tout) s'applique à la partie « Évolution » (points 1 à 6).
 
 ## D'où viennent les données
 
 - **APK Android** : Health Connect (pas, calories, distance, séances de toutes les applications, pesées). Lecture à l'ouverture et par le bouton « Synchroniser ».
-- **Site** : les données arrivent du téléphone par le compte (Firebase). Import Google Fit possible tant que ce service existe (fermeture fin 2026).
+- **Site** : un site web ne peut pas lire Health Connect. Les données arrivent du téléphone par le compte (Firebase) : il faut être connecté au même compte dans l'APK et sur le site. Import Google Fit possible tant que ce service existe (fermeture fin 2026).
 - **Pesée** : saisie à la main ou capture d'écran de l'app de la balance oraimo, lue sur l'appareil.
 - **Historique de l'ancienne app** (séances guidées, vélo coché, pas) : toujours lu, jamais modifié.
 
