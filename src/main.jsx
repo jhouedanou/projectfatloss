@@ -1,13 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { appTheme } from './theme';
 import App from './pages/App';
 import './index.css';
-import './i18n';
 import { registerSW } from 'virtual:pwa-register';
-import { initNotificationService } from './services/NotificationService';
 
 // ErrorBoundary simple pour capturer les erreurs de rendu
 class ErrorBoundary extends React.Component {
@@ -95,29 +90,10 @@ try {
   console.warn('localStorage non disponible:', error);
 }
 
-// Initialiser le service de notifications de façon plus sûre
-const initNotificationsAsync = async () => {
-  try {
-    // Attendre un peu pour que l'app se charge d'abord
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await initNotificationService();
-    console.log('Service de notifications initialisé');
-  } catch (error) {
-    console.warn('Avertissement initialisation notifications:', error);
-    // Ne pas bloquer l'application pour les notifications
-  }
-};
-
-// Lancer l'initialisation sans bloquer
-initNotificationsAsync();
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <ThemeProvider theme={appTheme}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
+      <App />
     </ErrorBoundary>
   </React.StrictMode>
 );

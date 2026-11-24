@@ -1,6 +1,6 @@
 ---
 name: Project Fat Loss
-description: Carnet d'entraînement sombre pour perdre du poids — une séance par jour, 20 min de vélo, rien de superflu entre l'utilisateur et sa série.
+description: Tableau de bord sombre pour suivre son poids et son activité (voir PRODUCT.md ; les parties sur la séance guidée ci-dessous décrivent l'ancienne application).
 colors:
   bg: "#000000"
   bg-el: "#0e0e10"

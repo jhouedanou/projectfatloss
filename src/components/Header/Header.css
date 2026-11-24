@@ -1,6 +1,7 @@
 /* En-tête — barre iOS : fond noir flouté, hairline basse, icônes nues. */
 
 .pfl-header {
+  position: sticky;
   top: 0;
   z-index: 1200;
   color: var(--label);
@@ -94,3 +95,6 @@
   align-items: center;
   gap: 4px;
 }
+
+button.pfl-header-icon { cursor: pointer; padding: 0; }
+button.pfl-header-icon:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }

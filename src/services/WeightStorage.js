@@ -48,8 +48,8 @@ export const addWeightRecord = (weight, date = null, notes = '', composition = n
       .catch(() => {});
 
     // APK : envoi vers Health Connect si l'accès est déjà accordé
-    import('./GoogleFitSync')
-      .then(({ autoSyncToHealth }) => autoSyncToHealth('weight', newRecord))
+    import('./FitSync')
+      .then(({ sendWeightToHealth }) => sendWeightToHealth(newRecord))
       .catch(() => {});
 
     return newRecord;
