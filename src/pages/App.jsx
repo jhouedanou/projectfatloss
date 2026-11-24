@@ -1,553 +1,106 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Fade } from '@mui/material';
-import { Dumbbell, BarChart2, Scale, Play, Settings, Calendar, Award, ArrowLeft, Apple, Bike, ChevronRight } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import {
-  getActiveWorkoutPlan,
-  isVeloEnabled,
-  setVeloEnabled,
-  dayHasVelo,
-} from '../services/WorkoutCustomization';
-import StepWorkout from './StepWorkout';
-import WorkoutCalendar from '../components/WorkoutCalendar';
-import WorkoutStats from '../components/WorkoutStats';
-import WeightTracker from '../components/WeightTracker';
-import CalorieCounter from '../components/CalorieCounter';
-import LanguageSelector from '../components/LanguageSelector';
-import WorkoutCustomizer from '../components/WorkoutCustomizer'; 
-import NotificationSettingsDialog from '../components/NotificationSettingsDialog';
-import ProfileDialog from '../components/ProfileDialog';
-import YouTubeButton from '../components/YouTubeButton';
-import { initNotificationService } from '../services/NotificationService';
-// Import de la synthèse vocale supprimé
-import { days as initialWorkoutPlan } from '../data'; 
-import '../components/WeightTracker.css';
-import '../components/WorkoutCustomizer.css'; 
-import HomeExerciseCarousel from '../components/HomeExerciseCarousel';
-import HomeDashboard from '../components/HomeDashboard';
-import HomeTrackers from '../components/HomeTrackers';
-import WeekSelector from '../components/WeekSelector';
+import React, { useCallback, useEffect, useState } from 'react';
 import Header from '../components/Header/Header';
-import { getServiceWorkerPath, getAssetPath } from '../utils/paths';
-import { hasContactInfo, sendWorkoutReport, getContactInfo } from '../services/ContactService';
-import { getWeightHistory } from '../services/WeightStorage';
+import LoginForm from '../components/LoginForm';
+import Dashboard from '../dashboard/Dashboard';
 import { onAuthChange, signOut } from '../services/AuthService';
 import { fullSync } from '../services/SyncService';
-import LoginForm from '../components/LoginForm';
-import CardioTracker from '../components/CardioTracker';
-import { parseDayTitle } from '../utils/dayTitle';
-import SettingToggle from '../components/SettingToggle';
-import { estimateSessionMinutes, computeWeekTargets } from '../services/WeightLossPlan';
+import { syncFit } from '../services/FitSync';
+import { isHealthConnectApp } from '../services/HealthConnect';
+import { PRIVACY_URL, TERMS_URL } from '../utils/legal';
 
-const NOTIFICATION_DURATION = 3000;
+const plural = (count, word) => `${count} ${word}${count > 1 ? 's' : ''}`;
 
+/** Résumé d'un import, pour le message affiché après la synchro. */
+const importMessage = (result) =>
+  `${result.source} : ${plural(result.days, 'jour')}, ${plural(result.sessions, 'séance')}`
+  + `${result.weights ? `, ${plural(result.weights, 'pesée')}` : ''} lus.`;
+
+/**
+ * L'application : un tableau de bord (poids, composition, activité).
+ * Les données viennent de Health Connect dans l'APK ; le site les reçoit par
+ * le compte, ou les lit dans Google Fit.
+ */
 export default function App() {
-  const { t } = useTranslation();
-  const [current, setCurrent] = useState(() => {
-    const savedDay = localStorage.getItem('currentWorkoutDay');
-    const dayOfWeek = (new Date().getDay() + 6) % 7; // 0 = Lundi, 6 = Dimanche
-    if (savedDay !== null) {
-      const savedIndex = parseInt(savedDay, 10);
-      const activeWeek = Math.floor(savedIndex / 7);
-      return activeWeek * 7 + dayOfWeek;
-    }
-    return dayOfWeek; // Par défaut, jour de la semaine en cours de la Semaine 1
-  });
-  const [stepMode, setStepMode] = useState(false);
-  const [autoMode, setAutoMode] = useState(false);
-  const [viewMode, setViewMode] = useState('workout');
-  const [showLanguageSelector, setShowLanguageSelector] = useState(() => {
-    const savedPref = localStorage.getItem('showLanguageSelector');
-    return false;
-  });
-  
-  const [workoutPlan, setWorkoutPlan] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const [showCustomizer, setShowCustomizer] = useState(false);
-  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
-  const [showExercises, setShowExercises] = useState(false);
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
-  // Vélo de fin de séance optionnel (réglage global mémorisé)
-  const [veloEnabled, setVeloEnabledState] = useState(() => isVeloEnabled());
-  // Le jour courant propose-t-il un vélo (dans le plan brut) ? Sinon pas d'interrupteur.
-  const currentDayHasVelo = useMemo(() => dayHasVelo(current), [current, showCustomizer]);
+  // Incrémenté quand les données locales changent hors du tableau de bord.
+  const [dataVersion, setDataVersion] = useState(0);
+  const bump = useCallback(() => setDataVersion((v) => v + 1), []);
 
-  // Auth Firebase : suit l'état de connexion et synchronise à la connexion
+  // Compte : à la connexion, reçoit puis envoie les données.
+  useEffect(() => onAuthChange((u) => {
+    setUser(u);
+    if (!u) return;
+    setShowLogin(false);
+    fullSync()
+      .then(bump)
+      .catch((error) => console.warn('[sync] différée :', error?.message));
+  }), [bump]);
+
+  // APK : lecture de Health Connect à l'ouverture, sans demande d'autorisation.
   useEffect(() => {
-    const unsubscribe = onAuthChange((u) => {
-      setUser(u);
-      if (u) {
-        setShowLogin(false);
-        // Pull + merge + push à la connexion (offline-first)
-        fullSync()
-          .then(() => console.log('Synchronisation Firebase terminée'))
-          .catch((e) => console.warn('Sync échouée:', e?.message));
-      }
-    });
-    return unsubscribe;
-  }, []);
+    if (!isHealthConnectApp()) return;
+    syncFit({ prompt: false })
+      .then((result) => { if (result) bump(); })
+      .catch((error) => console.warn('[fit] lecture automatique différée :', error?.message));
+  }, [bump]);
 
-  const handleLogout = async () => {
-    await signOut();
-    setUser(null);
+  const handleSync = async () => {
+    if (isHealthConnectApp()) {
+      const result = await syncFit({ prompt: true });
+      if (user) await fullSync();
+      return result ? importMessage(result) : undefined;
+    }
+    if (!user) {
+      setShowLogin(true);
+      return 'Connectez-vous pour recevoir les données de votre téléphone.';
+    }
+    const result = await fullSync();
+    if (!result.success) throw new Error(result.error);
+    return 'Données du compte à jour.';
   };
 
-  useEffect(() => {
-    try {
-      setIsLoading(true);
-      const plan = getActiveWorkoutPlan();
-      
-      if (!plan || plan.length === 0) {
-        setWorkoutPlan(initialWorkoutPlan);
-      } else {
-        setWorkoutPlan(plan);
-      }
-      
-      // Initialiser les notifications
-      initNotificationService();
-      
-      // Enregistrer le service worker pour les notifications
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register(getServiceWorkerPath())
-          .then(registration => {
-            console.log('Service Worker enregistré avec succès:', registration);
-          })
-          .catch(error => {
-            console.error('Erreur lors de l\'enregistrement du Service Worker:', error);
-          });
-      }
-      
-    } catch (error) {
-      console.error('Erreur lors du chargement du plan d\'entraînement:', error);
-      setWorkoutPlan(initialWorkoutPlan);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-  
-  useEffect(() => {
-    if (!isLoading && workoutPlan.length > 0 && current >= workoutPlan.length) {
-      setCurrent(0);
-    }
-  }, [workoutPlan, current, isLoading]);
-  
-  // Forcer le retour à la vue workout lors du démarrage d'une séance
-  useEffect(() => {
-    if (stepMode && viewMode !== 'workout') {
-      setViewMode('workout');
-    }
-  }, [stepMode, viewMode]);
-  
-  const handleCloseCustomizer = () => {
-    setShowCustomizer(false);
-    try {
-      const plan = getActiveWorkoutPlan();
-      if (plan && plan.length > 0) {
-        setWorkoutPlan(plan);
-      }
-    } catch (error) {
-      console.error('Erreur lors du rechargement du plan:', error);
-    }
+  const handleGoogleFit = async () => {
+    const result = await syncFit({ prompt: true });
+    return result ? importMessage(result) : undefined;
   };
 
-  // Recharge le programme affiché après un changement de réglage vélo.
-  const reloadActivePlan = () => {
-    try {
-      const plan = getActiveWorkoutPlan();
-      if (plan && plan.length > 0) {
-        setWorkoutPlan(plan);
-      }
-    } catch (error) {
-      console.error('Erreur lors du rechargement du plan:', error);
+  const handleAccount = async () => {
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
+    if (window.confirm('Se déconnecter du compte ? Les données restent sur cet appareil.')) {
+      await signOut();
+      setUser(null);
     }
   };
-
-  // Active/désactive le vélo de fin de séance et recharge le plan affiché.
-  const handleToggleVelo = () => {
-    const next = !veloEnabled;
-    setVeloEnabledState(next);
-    setVeloEnabled(next);
-    reloadActivePlan();
-  };
-
-  useEffect(() => {
-    localStorage.setItem('currentWorkoutDay', current.toString());
-  }, [current]);
-
-  useEffect(() => {
-    localStorage.setItem('showLanguageSelector', showLanguageSelector);
-  }, [showLanguageSelector]);
-
-  // Initialisation de la synthèse vocale supprimée
-
-  const toggleLanguageSelector = () => {
-    setShowLanguageSelector(prev => !prev);
-  };
-  
-  const moveToNextDay = () => {
-    if (workoutPlan && workoutPlan.length > 0) {
-      setCurrent(prev => (prev + 1) % workoutPlan.length);
-    }
-    setStepMode(false);
-    setShowExercises(false);
-  };
-
-  // Bouton Start central : lance la séance du jour (un jour de repos ouvre
-  // simplement la carte repos — mêmes sémantiques que le bouton de la vue jour).
-  const handleStartSession = () => {
-    setViewMode('workout');
-    setShowExercises(true);
-    if (workoutPlan && workoutPlan.length > 0 && current < workoutPlan.length
-        && !workoutPlan[current].isRestDay) {
-      setStepMode(true);
-    }
-  };
-  
-  const handleWorkoutComplete = (workoutData) => {
-    console.log('Entraînement terminé:', workoutData);
-    
-    // Récupérer le poids actuel si disponible
-    const weightHistory = getWeightHistory();
-    const currentWeight = weightHistory.length > 0 
-      ? weightHistory[weightHistory.length - 1].weight 
-      : null;
-    
-    // Ajouter le poids actuel aux données
-    const completeWorkoutData = {
-      ...workoutData,
-      currentWeight
-    };
-    
-    // Envoyer le rapport d'entraînement
-    if (hasContactInfo()) {
-      sendWorkoutReport(completeWorkoutData).then(success => {
-        if (success) {
-          console.log('Rapport d\'entraînement envoyé');
-        }
-      });
-    }
-    
-    if ("Notification" in window && Notification.permission === "granted" && workoutPlan && workoutPlan.length > 0) {
-      new Notification(t('notifications.workoutComplete'), {
-        body: t('notifications.nextDay', { day: (current + 1) % workoutPlan.length + 1 }),
-        icon: getAssetPath('/favicon.ico')
-      });
-    }
-    
-    moveToNextDay();
-    
-    setViewMode('history');
-  };
-  
-  useEffect(() => {
-    if ("Notification" in window && Notification.permission !== "denied") {
-      Notification.requestPermission();
-    }
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <img
-          src={getAssetPath('/logo.png')}
-          alt="Project Fat Loss"
-          className="loading-logo"
-        />
-        <div className="loading-spinner"></div>
-        <p>{t('app.loading')}</p>
-      </div>
-    );
-  }
-
-  const isPlanAvailable = workoutPlan && workoutPlan.length > 0 && current < workoutPlan.length;
 
   return (
-    <>
-      <div className="app" style={{
-        width: '100%',
-        overflowX: 'hidden',
-        position: 'relative',
-        minHeight: '100dvh',
-        paddingBottom: stepMode ? 0 : 'calc(94px + env(safe-area-inset-bottom))',
-      }}>
-        {!stepMode && (
-          <Header
-            onNotificationSettings={() => setShowNotificationSettings(true)}
-            onProfile={() => setShowProfile(true)}
-            onBack={showExercises ? () => setShowExercises(false) : null}
-            user={user}
-            onAccountClick={() => (user ? handleLogout() : setShowLogin(true))}
-          />
-        )}
+    <div className="fit-app">
+      <Header user={user} onAccountClick={handleAccount} />
 
-        {/* Modale de connexion */}
-        {showLogin && !user && (
-          <div
-            onClick={() => setShowLogin(false)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 2000,
-              background: 'rgba(0,0,0,0.55)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '16px',
-            }}
-          >
-            <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: '400px' }}>
-              <LoginForm onClose={() => setShowLogin(false)} />
-            </div>
+      <main>
+        <Dashboard
+          dataVersion={dataVersion}
+          signedIn={!!user}
+          onSync={handleSync}
+          onGoogleFit={isHealthConnectApp() ? null : handleGoogleFit}
+        />
+      </main>
+
+      <footer className="fit-footer">
+        <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">Politique de confidentialité</a>
+        <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">Conditions d'utilisation</a>
+      </footer>
+
+      {showLogin && !user && (
+        <div className="fit-modal" onClick={() => setShowLogin(false)}>
+          <div className="fit-modal-box" onClick={(e) => e.stopPropagation()}>
+            <LoginForm onClose={() => setShowLogin(false)} />
           </div>
-        )}
-        <div style={{ 
-          width: '100%', 
-          overflowX: 'hidden',
-          position: 'relative'
-        }}>
-          
-          {showLanguageSelector && <LanguageSelector />}
-          
-          {showCustomizer && <WorkoutCustomizer onClose={handleCloseCustomizer} />}
-          
-          {/* Contenu principal avec transitions */}
-          <Fade in={viewMode === 'workout'} timeout={300} unmountOnExit mountOnEnter>
-            <div>
-              {isPlanAvailable && (
-                <>
-                  {!stepMode ? (
-                    !showExercises ? (
-                      <>
-                        <HomeDashboard
-                          onStartWorkout={() => setShowExercises(true)}
-                        />
-
-                        {/* Lien rapide : Cardio (sorti de la barre d'onglets) */}
-                        <div className="home-quicklinks">
-                          <button className="card press home-quicklink" onClick={() => setViewMode('cardio')}>
-                            <span className="home-quicklink-tile"><Bike size={20} /></span>
-                            <span className="home-quicklink-copy">
-                              <span className="home-quicklink-title">Cardio</span>
-                              <span className="home-quicklink-sub">Sorties vélo & marche à la demande</span>
-                            </span>
-                            <ChevronRight size={18} className="home-quicklink-chevron" />
-                          </button>
-                        </div>
-
-                        {/* En-tête de section programme + accès personnalisation */}
-                        <div className="section-head">
-                          <h2 className="section-title">Programme</h2>
-                          <button className="btn-soft" onClick={() => setShowCustomizer(true)}>
-                            <Settings size={15} /> Personnaliser
-                          </button>
-                        </div>
-                        <WeekSelector
-                          days={workoutPlan}
-                          current={current}
-                          onSelectDay={(dayIndex) => {
-                            setCurrent(dayIndex);
-                            setShowExercises(true);
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <div className="day-content">
-                        <div className="hero-section">
-                          <div className="hero-content">
-                            <button className="btn-soft hero-back" onClick={() => setShowExercises(false)}>
-                              <ArrowLeft size={14} strokeWidth={2.5} />
-                              <span>Programme</span>
-                            </button>
-                            <h2 className="hero-title">{parseDayTitle(workoutPlan[current].title).name}</h2>
-                            <p className="hero-subtitle">
-                              {workoutPlan[current].isRestDay
-                                ? t('restDay.subtitle', { defaultValue: 'Journée de récupération' })
-                                : (() => {
-                                    // Muscu guidée dans l'app ; vélo lancé ou coché depuis la check-list de l'accueil.
-                                    const minutes = estimateSessionMinutes(workoutPlan[current]);
-                                    const weekStart = Math.floor(current / 7) * 7;
-                                    const goal = computeWeekTargets(workoutPlan.slice(weekStart, weekStart + 7));
-                                    return `Jour ${current + 1} · ~${minutes.total} min de muscu · vélo ${goal.bikePerSession} min (check-list)`;
-                                  })()}
-                            </p>
-                          </div>
-                        </div>
-                      
-                      {workoutPlan[current].isRestDay ? (
-                        /* Affichage jour de repos */
-                        <div className="rest-day-card">
-                          <Award size={72} color="#30d158" style={{ marginBottom: '24px' }} />
-                          <h3>{t('restDay.title', { defaultValue: 'Repos total' })}</h3>
-                          <p>{t('restDay.description', { defaultValue: 'La croissance musculaire a lieu pendant le repos. Hydratez-vous bien et préparez-vous pour demain.' })}</p>
-                          <div className="sticky-btn-wrapper">
-                            <button
-                              className="sticky-start-btn rest-btn"
-                              onClick={() => moveToNextDay()}
-                            >
-                              Passer au jour suivant
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="exercises-container">
-                          {/* Interrupteur : vélo de fin de séance optionnel */}
-                          {currentDayHasVelo && (
-                            <SettingToggle
-                              icon={<Bike size={20} color={veloEnabled ? '#0a84ff' : 'rgba(235,235,245,0.32)'} />}
-                              title="Vélo en fin de séance"
-                              subtitle={veloEnabled ? 'Inclus dans la séance' : 'Retiré de la séance'}
-                              checked={veloEnabled}
-                              onToggle={handleToggleVelo}
-                              ariaLabel="Activer ou désactiver le vélo de fin de séance"
-                            />
-                          )}
-
-                          {/* Liste groupée des exercices */}
-                          <div className="exercise-list card">
-                            {workoutPlan[current].exercises.map((exo, index) => (
-                              <div key={index} className="exercise-row">
-                                <span className="exercise-row-num">{index + 1}</span>
-                                <div className="exercise-row-copy">
-                                  <h3 className="exercise-row-name">{exo.name}</h3>
-                                  <span className="exercise-row-meta">
-                                    {exo.sets}{exo.equip ? ` · ${exo.equip}` : ''}
-                                  </span>
-                                  {exo.desc && <p className="exercise-row-desc">{exo.desc}</p>}
-                                </div>
-                                <div className="exercise-row-action">
-                                  <YouTubeButton exercise={exo} />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Sticky Start Button */}
-                          <div className="sticky-btn-wrapper">
-                            <button
-                              className="sticky-start-btn"
-                              onClick={() => setStepMode(true)}
-                            >
-                              <Play size={18} fill="currentColor" />
-                              Commencer l'entraînement
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                ) : (
-                  <StepWorkout 
-                      dayIndex={current} 
-                      onBack={() => {
-                        setStepMode(false);
-                        setAutoMode(false);
-                      }}
-                      onComplete={handleWorkoutComplete}
-                      autoMode={autoMode}
-                      onNotificationSettings={() => setShowNotificationSettings(true)}
-                    />
-                  )}
-                </>
-              )}
-              {!isPlanAvailable && (
-                <div className="error-message">
-                  <h2>{t('app.planError')}</h2>
-                  <p>{t('app.planErrorDetails')}</p>
-                  <button 
-                    className="reload-button"
-                    onClick={() => window.location.reload()}
-                  >
-                    {t('app.reload')}
-                  </button>
-                </div>
-              )}
-            </div>
-          </Fade>
-
-          <Fade in={viewMode === 'history'} timeout={300} unmountOnExit mountOnEnter>
-            <div className="history-content">
-              <WorkoutStats />
-              {/* Progrès, muscles travaillés, habitudes : déplacés de l'accueil */}
-              <HomeTrackers />
-              <WorkoutCalendar />
-            </div>
-          </Fade>
-
-          <Fade in={viewMode === 'weight'} timeout={300} unmountOnExit mountOnEnter>
-            <div className="weight-content">
-              <WeightTracker />
-            </div>
-          </Fade>
-
-          <Fade in={viewMode === 'calorie'} timeout={300} unmountOnExit mountOnEnter>
-            <div className="calorie-content">
-              <CalorieCounter />
-            </div>
-          </Fade>
-
-          <Fade in={viewMode === 'cardio'} timeout={300} unmountOnExit mountOnEnter>
-            <div className="cardio-content">
-              <CardioTracker />
-            </div>
-          </Fade>
         </div>
-        
-        {/* Barre d'onglets — 2+2 autour du bouton Start central, cachée en séance */}
-        {!stepMode && (
-          <nav className="tabbar">
-            <button
-              className={`tabbar-tab${viewMode === 'workout' ? ' active' : ''}`}
-              onClick={() => { setViewMode('workout'); setShowExercises(false); }}
-            >
-              <Dumbbell size={22} />
-              <span>{t('nav.workout')}</span>
-            </button>
-            <button
-              className={`tabbar-tab${viewMode === 'history' ? ' active' : ''}`}
-              onClick={() => setViewMode('history')}
-            >
-              <BarChart2 size={22} />
-              <span>{t('nav.history')}</span>
-            </button>
-            <button
-              className="tabbar-start"
-              aria-label="Démarrer la séance du jour"
-              onClick={handleStartSession}
-            >
-              <Play size={26} fill="currentColor" />
-            </button>
-            <button
-              className={`tabbar-tab${viewMode === 'calorie' ? ' active' : ''}`}
-              onClick={() => setViewMode('calorie')}
-            >
-              <Apple size={22} />
-              <span>{t('nav.calorie', { defaultValue: 'Nutrition' })}</span>
-            </button>
-            <button
-              className={`tabbar-tab${viewMode === 'weight' ? ' active' : ''}`}
-              onClick={() => setViewMode('weight')}
-            >
-              <Scale size={22} />
-              <span>{t('nav.weight')}</span>
-            </button>
-          </nav>
-        )}
-
-        {/* Boîte de dialogue des paramètres de notification */}
-        <NotificationSettingsDialog
-          open={showNotificationSettings}
-          onClose={() => setShowNotificationSettings(false)}
-        />
-
-        {/* Boîte de dialogue du profil (poids, taille, âge, sexe) */}
-        <ProfileDialog
-          open={showProfile}
-          onClose={() => setShowProfile(false)}
-        />
-      </div>
-    </>
+      )}
+    </div>
   );
 }

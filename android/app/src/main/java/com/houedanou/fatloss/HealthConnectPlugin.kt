@@ -183,6 +183,48 @@ class HealthConnectPlugin : Plugin() {
         }
     }
 
+    /**
+     * Totaux de chaque jour (heure locale) sur les `days` derniers jours :
+     * pas, calories actives, calories totales et distance, toutes applications
+     * confondues. Une mesure sans donnée ce jour-là est absente.
+     */
+    @PluginMethod
+    fun readDailyTotals(call: PluginCall) {
+        val days = (call.getInt("days") ?: 30).coerceIn(1, 400)
+        run(call) {
+            val today = LocalDate.now()
+            val start = today.minusDays((days - 1).toLong()).atStartOfDay()
+            val end = today.plusDays(1).atStartOfDay()
+            val groups = client.aggregateGroupByPeriod(
+                AggregateGroupByPeriodRequest(
+                    metrics = setOf(
+                        StepsRecord.COUNT_TOTAL,
+                        ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL,
+                        TotalCaloriesBurnedRecord.ENERGY_TOTAL,
+                        DistanceRecord.DISTANCE_TOTAL,
+                    ),
+                    timeRangeFilter = TimeRangeFilter.between(start, end),
+                    timeRangeSlicer = Period.ofDays(1),
+                )
+            )
+            val out = JSArray()
+            groups.forEach { group ->
+                val steps = group.result[StepsRecord.COUNT_TOTAL]
+                val active = group.result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]?.inKilocalories
+                val total = group.result[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inKilocalories
+                val meters = group.result[DistanceRecord.DISTANCE_TOTAL]?.inMeters
+                if (steps == null && active == null && total == null && meters == null) return@forEach
+                val item = JSObject().put("date", group.startTime.toLocalDate().toString())
+                if (steps != null) item.put("steps", steps)
+                if (active != null) item.put("activeKcal", active)
+                if (total != null) item.put("totalKcal", total)
+                if (meters != null) item.put("distanceM", meters)
+                out.put(item)
+            }
+            JSObject().put("days", out)
+        }
+    }
+
     /** Séances d'exercice entre startMs et endMs, avec calories et distance de la même app. */
     @PluginMethod
     fun readExerciseSessions(call: PluginCall) {

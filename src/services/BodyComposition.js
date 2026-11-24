@@ -76,33 +76,3 @@ export function getLatestCompositions() {
     previous: history[history.length - 2] || null,
   };
 }
-
-// --- BMR de la balance pour l'objectif calories ------------------------------
-
-const SCALE_BMR_KEY = 'pfl_use_scale_bmr';
-// Au-delà, la mesure est trop ancienne : retour au calcul par la formule.
-const SCALE_BMR_MAX_AGE_DAYS = 90;
-
-export function isScaleBmrEnabled() {
-  try {
-    return localStorage.getItem(SCALE_BMR_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-export function setScaleBmrEnabled(enabled) {
-  try {
-    if (enabled) localStorage.setItem(SCALE_BMR_KEY, '1');
-    else localStorage.removeItem(SCALE_BMR_KEY);
-  } catch { /* stockage indisponible */ }
-}
-
-/** BMR de la dernière mesure de moins de 90 jours, ou null. */
-export function getLatestScaleBmr() {
-  const history = getCompositionHistory().filter((record) => Number(record.composition.bmr) > 0);
-  const last = history[history.length - 1];
-  if (!last) return null;
-  const ageDays = (Date.now() - new Date(last.date).getTime()) / 86400000;
-  return ageDays <= SCALE_BMR_MAX_AGE_DAYS ? Number(last.composition.bmr) : null;
-}

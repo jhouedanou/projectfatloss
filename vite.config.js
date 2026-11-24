@@ -68,7 +68,7 @@ export default defineConfig(({ mode }) => {
       manifest: {
         name: 'Project Fatloss',
         short_name: 'Fatloss',
-        description: "Application de suivi d'entraînement avec calcul des calories brûlées",
+        description: "Tableau de bord du poids et de l'activité",
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',
