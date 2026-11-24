@@ -28,13 +28,13 @@ export function ScaleImport({ onSave }) {
   const [reading, setReading] = useState(null);
   const [readError, setReadError] = useState('');
   const [draft, setDraft] = useState(null);
-  const [notices, setNotices] = useState({ isAverage: false, found: null });
+  const [notices, setNotices] = useState({ isAverage: false, found: null, otherDays: 0 });
   const [formError, setFormError] = useState('');
 
   const openManual = () => {
     setReadError('');
     setFormError('');
-    setNotices({ isAverage: false, found: null });
+    setNotices({ isAverage: false, found: null, otherDays: 0 });
     setDraft(emptyDraft());
   };
 
@@ -54,7 +54,7 @@ export function ScaleImport({ onSave }) {
         setReadError("Aucune valeur trouvée sur cette image. Vérifiez que c'est une capture de l'app oraimo home, ou saisissez les valeurs à la main.");
         return;
       }
-      setNotices({ isAverage: result.isAverage, found });
+      setNotices({ isAverage: result.isAverage, found, otherDays: result.otherDays || 0 });
       setDraft({
         ...emptyDraft(),
         ...(result.date ? { date: result.date } : {}),
@@ -127,7 +127,7 @@ export function ScaleImport({ onSave }) {
         />
       </div>
       <p className="scale-import-hint">
-        Une ou deux captures de l'onglet <strong>Jour</strong> (la liste défile). Elles sont lues sur votre téléphone et ne sont envoyées nulle part.
+        Une capture de l'onglet <strong>Jour</strong> par mesure (deux si la liste défile). Elles sont lues sur votre téléphone et ne sont envoyées nulle part.
       </p>
 
       {reading && (
@@ -157,6 +157,15 @@ export function ScaleImport({ onSave }) {
               <span>
                 Cette capture vient de l'onglet <strong>Mois</strong> ou <strong>semaine</strong> : ce sont des moyennes.
                 Pour votre mesure du jour, prenez l'onglet <strong>Jour</strong> ou l'écran juste après la pesée.
+              </span>
+            </p>
+          )}
+          {notices.otherDays > 0 && (
+            <p className="scale-notice warn">
+              <TriangleAlert size={16} aria-hidden="true" />
+              <span>
+                {notices.otherDays === 1 ? 'Une capture est' : `${notices.otherDays} captures sont`} d'un autre jour :
+                {' '}importez chaque jour séparément.
               </span>
             </p>
           )}

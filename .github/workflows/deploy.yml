@@ -34,6 +34,8 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           # Clé API Google (Drive API) pour synchroniser un dossier Health Sync public
           VITE_GOOGLE_API_KEY: ${{ secrets.VITE_GOOGLE_API_KEY }}
+          # Dossier Health Sync lu par défaut ; la variable du dépôt, si elle existe, le remplace
+          VITE_HEALTH_SYNC_FOLDER: ${{ vars.VITE_HEALTH_SYNC_FOLDER || 'https://drive.google.com/drive/folders/12JeEoA2xB7X_fRNOvnLoJQESvHJIyNJ3' }}
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4

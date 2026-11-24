@@ -23,7 +23,8 @@
  * Deux accès :
  *   - dossier partagé (« Tous les utilisateurs disposant du lien ») + clé API
  *     Google : sans connexion (clé fournie au build par VITE_GOOGLE_API_KEY,
- *     ou saisie dans les sources de données) ;
+ *     lien par VITE_HEALTH_SYNC_FOLDER, ou saisis dans les sources de données).
+ *     Le dossier est alors lu à l'ouverture du site ;
  *   - sinon connexion Google (drive.readonly) et recherche des dossiers
  *     « Health Sync … activités ».
  * L'API Google Drive doit être activée sur le projet Google Cloud.
@@ -168,7 +169,8 @@ export function getDriveSettings() {
   try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { /* vide */ }
   const buildKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
   return {
-    folderUrl: saved.folderUrl || '',
+    // Lien réglé sur cet appareil, sinon celui fourni au build (VITE_HEALTH_SYNC_FOLDER).
+    folderUrl: saved.folderUrl || import.meta.env.VITE_HEALTH_SYNC_FOLDER || '',
     apiKey: saved.apiKey || buildKey,
     savedApiKey: saved.apiKey || '',
     hasBuildKey: !!buildKey,
@@ -254,6 +256,12 @@ async function listFiles(q, apiKey = null) {
     pageToken = data.nextPageToken;
   } while (pageToken);
   return files;
+}
+
+/** Lecture possible sans rien demander : lien de dossier et clé API connus. */
+export function canReadDriveSilently() {
+  const { folderUrl, apiKey } = getDriveSettings();
+  return parseFolderIds(folderUrl).length > 0 && !!apiKey;
 }
 
 // ── Import ───────────────────────────────────────────────────────────

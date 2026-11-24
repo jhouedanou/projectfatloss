@@ -10,6 +10,9 @@
  * « Masse musculaire »…) au-dessus, la valeur juste en dessous, dans la même
  * colonne. On cherche donc chaque libellé, puis le nombre le plus proche sous
  * lui ; à défaut (écran en liste), le nombre à sa droite sur la même ligne.
+ * Sur l'écran « Histoire », la date est celle placée sous la bulle du point
+ * choisi sur la courbe. Chaque capture est lue deux fois (en gris pour les
+ * libellés, d'origine pour les chiffres) : voir mergePasses.
  * Les valeurs restent à vérifier : l'utilisateur les relit avant d'enregistrer.
  */
 
@@ -95,7 +98,7 @@ function findValue(anchor, numbers, field, { width, height }) {
   return null;
 }
 
-/** Date complète affichée sur la capture (2026/11/10, 10/11/2026…), sinon null. */
+/** Date complète lue dans un texte (2026/11/10, 10/11/2026…), sinon null. */
 function findDate(text) {
   const iso = text.match(/(20\d{2})[/.-](\d{1,2})[/.-](\d{1,2})/);
   const fr = text.match(/(\d{1,2})[/.-](\d{1,2})[/.-](20\d{2})/);
@@ -133,39 +136,117 @@ export function parseOraimoWords(words, size) {
     }
   }
 
-  const text = content.map((item) => item.text).join(' ');
+  // Dates lues, avec leur position. L'écran « Histoire » en affiche plusieurs,
+  // sous la courbe : la bonne est celle placée sous la bulle du point choisi
+  // (« 148.60Kilogramme »), au-dessus de la grille des valeurs.
+  const dates = content
+    .map((item) => ({ item, date: findDate(item.text) }))
+    .filter((entry) => entry.date);
+  const firstAnchorY = Math.min(
+    size.height,
+    ...content.filter((item) => FIELDS.some((field) => ANCHORS[field.key].some((a) => item.norm.startsWith(a)))).map((item) => item.y0)
+  );
+  const bubble = content.find((item) => /\d/.test(item.text) && /kilo|kg|lb/i.test(item.text) && item.y1 < firstAnchorY
+    && dates.some((entry) => entry.item.y0 > item.y1));
+  let date = null;
+  let dateFromBubble = false;
+  if (bubble && dates.length) {
+    const below = dates.filter((entry) => entry.item.y0 > bubble.y1);
+    const nearest = below.reduce((a, b) => (Math.abs(b.item.cx - bubble.cx) < Math.abs(a.item.cx - bubble.cx) ? b : a));
+    // La bulle est centrée sur son point : la date doit être à peu près dessous.
+    if (Math.abs(nearest.item.cx - bubble.cx) <= size.width * 0.08) {
+      date = nearest.date;
+      dateFromBubble = true;
+    }
+  } else if (new Set(dates.map((entry) => entry.date)).size === 1) {
+    date = dates[0].date;
+  }
+
   return {
     values,
-    // Onglet « Mois » ou « semaine » : « Valeur moyenne anthropométrique ».
-    isAverage: content.some((item) => item.norm.startsWith('moyenne')),
-    date: findDate(text),
+    // « Valeur moyenne anthropométrique » : onglet « Mois » ou « semaine ».
+    // L'onglet « Jour » porte le même titre, mais un jour daté est une mesure,
+    // pas une moyenne.
+    isAverage: !dateFromBubble && content.some((item) => item.norm.startsWith('moyenne')),
+    date,
   };
 }
 
-/** Réunit les lectures de plusieurs captures (la liste oraimo défile). */
+/**
+ * Réunit les lectures de plusieurs captures d'une même mesure (la liste oraimo
+ * défile). Une capture datée d'un autre jour que la première est une autre
+ * mesure : elle est laissée de côté et comptée dans `otherDays`.
+ */
 export function mergeReadings(readings) {
-  return readings.reduce(
+  const day = readings.find((reading) => reading.date)?.date || null;
+  const same = readings.filter((reading) => !reading.date || reading.date === day);
+  return same.reduce(
     (merged, reading) => ({
+      ...merged,
       values: { ...reading.values, ...merged.values },
       isAverage: merged.isAverage || reading.isAverage,
-      date: merged.date || reading.date,
     }),
-    { values: {}, isAverage: false, date: null }
+    { values: {}, isAverage: false, date: day, otherDays: readings.length - same.length }
   );
 }
 
-async function imageSize(file) {
-  const bitmap = await createImageBitmap(file);
-  const size = { width: bitmap.width, height: bitmap.height };
-  bitmap.close?.();
-  return size;
+/**
+ * Réunit deux lectures de la même image. Les libellés gris clair d'oraimo ne
+ * sont lus que sur l'image en niveaux de gris ; les chiffres, eux, sont plus
+ * sûrs sur l'image d'origine (« 20 » y reste « 20 »). On garde donc les mots
+ * de la lecture grise, et on remplace un nombre par celui de l'image d'origine
+ * quand elle en a lu un au même endroit.
+ */
+export function mergePasses(grayWords, colorWords) {
+  const numbers = (colorWords || []).filter((w) => w?.bbox && NUMBER_RE.test(w.text || ''));
+  const used = new Set();
+  const merged = (grayWords || []).map((word) => {
+    if (!word?.bbox || !NUMBER_RE.test(word.text || '')) return word;
+    const { x0, y0, x1, y1 } = word.bbox;
+    const twin = numbers.find((n) => {
+      const cx = (n.bbox.x0 + n.bbox.x1) / 2;
+      const cy = (n.bbox.y0 + n.bbox.y1) / 2;
+      return cx >= x0 && cx <= x1 && cy >= y0 && cy <= y1;
+    });
+    if (!twin) return word;
+    used.add(twin);
+    return { ...word, text: twin.text };
+  });
+  // Nombres vus seulement sur l'image d'origine.
+  return [...merged, ...numbers.filter((n) => !used.has(n) && !merged.some((w) => w?.bbox
+    && (n.bbox.x0 + n.bbox.x1) / 2 >= w.bbox.x0 && (n.bbox.x0 + n.bbox.x1) / 2 <= w.bbox.x1
+    && (n.bbox.y0 + n.bbox.y1) / 2 >= w.bbox.y0 && (n.bbox.y0 + n.bbox.y1) / 2 <= w.bbox.y1))];
 }
+
+/** Image en niveaux de gris (data URL) et sa taille. */
+async function toGray(file) {
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement('canvas');
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close?.();
+  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const px = image.data;
+  for (let i = 0; i < px.length; i += 4) {
+    const gray = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+    px[i] = gray;
+    px[i + 1] = gray;
+    px[i + 2] = gray;
+  }
+  ctx.putImageData(image, 0, 0);
+  return { url: canvas.toDataURL('image/png'), size: { width: canvas.width, height: canvas.height } };
+}
+
+const wordsOf = (data) => (data.blocks || []).flatMap((block) =>
+  block.paragraphs.flatMap((paragraph) => paragraph.lines.flatMap((line) => line.words)));
 
 /**
  * Lit une ou plusieurs captures oraimo.
  * @param {File[]} files
  * @param {(progress: number) => void} [onProgress] - de 0 à 1
- * @returns {Promise<{ values: Object, isAverage: boolean, date: string|null }>}
+ * @returns {Promise<{ values: Object, isAverage: boolean, date: string|null, otherDays: number }>}
  */
 export async function readOraimoScreenshots(files, onProgress) {
   const { createWorker } = await import('tesseract.js');
@@ -173,19 +254,20 @@ export async function readOraimoScreenshots(files, onProgress) {
   const worker = await createWorker('fra', 1, {
     logger: (message) => {
       if (message.status === 'recognizing text' && typeof message.progress === 'number') {
-        onProgress?.((current + message.progress) / files.length);
+        onProgress?.((current + message.progress) / (files.length * 2));
       }
     },
   });
   try {
     const readings = [];
     for (const [index, file] of files.entries()) {
-      current = index;
-      const size = await imageSize(file);
-      const { data } = await worker.recognize(file, {}, { blocks: true });
-      const words = (data.blocks || []).flatMap((block) =>
-        block.paragraphs.flatMap((paragraph) => paragraph.lines.flatMap((line) => line.words)));
-      readings.push(parseOraimoWords(words, size));
+      // Deux lectures par capture : en gris (libellés), puis d'origine (chiffres).
+      const gray = await toGray(file);
+      current = index * 2;
+      const grayRead = await worker.recognize(gray.url, {}, { blocks: true });
+      current = index * 2 + 1;
+      const colorRead = await worker.recognize(file, {}, { blocks: true });
+      readings.push(parseOraimoWords(mergePasses(wordsOf(grayRead.data), wordsOf(colorRead.data)), gray.size));
     }
     onProgress?.(1);
     return mergeReadings(readings);

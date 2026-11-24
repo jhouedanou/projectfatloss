@@ -95,8 +95,9 @@ const COMPOSITION_TILES = [
  * @param {() => Promise<string|void>} onSync - synchro demandée par l'utilisateur ; peut renvoyer un message
  * @param {() => Promise<string|void>} [onGoogleFit] - site : import Google Fit
  * @param {() => void} onLogin - ouvre la connexion au compte
+ * @param {{ email: string, hasPassword: boolean }|null} account - compte connecté
  */
-export default function Dashboard({ dataVersion, onSync, onGoogleFit, onLogin, signedIn }) {
+export default function Dashboard({ dataVersion, onSync, onGoogleFit, onLogin, signedIn, account }) {
   const [version, setVersion] = useState(0);
   const [periodKey, setPeriodKey] = useState(() => {
     try {
@@ -712,7 +713,7 @@ export default function Dashboard({ dataVersion, onSync, onGoogleFit, onLogin, s
               )}
             </section>
 
-            <Sources run={run} busy={busy} onSync={onSync} onGoogleFit={onGoogleFit} signedIn={signedIn} />
+            <Sources run={run} busy={busy} onSync={onSync} onGoogleFit={onGoogleFit} signedIn={signedIn} account={account} />
           </div>
 
         </>

@@ -3,6 +3,7 @@ import { Cloud, FolderOpen, HeartPulse, Smartphone } from 'lucide-react';
 import { getDriveSettings, importFromDrive, parseFolderIds, setDriveSettings } from '../services/DriveImport';
 import { importFromGoogleHealth } from '../services/GoogleHealth';
 import { isHealthConnectApp } from '../services/HealthConnect';
+import { setAccountPassword } from '../services/AuthService';
 
 /** « 1 nouvelle séance », « 3 nouvelles séances » : chaque mot prend un s. */
 const plural = (count, words) => `${count} ${words.split(' ').map((w) => (count > 1 && w !== 'de' ? `${w}s` : w)).join(' ')}`;
@@ -15,12 +16,29 @@ const plural = (count, words) => `${count} ${words.split(' ').map((w) => (count 
  * @param {() => Promise<string|void>} onSync - Health Connect (APK) ou compte (site)
  * @param {() => Promise<string|void>} [onGoogleFit] - site : import Google Fit
  * @param {boolean} signedIn
+ * @param {{ email: string, hasPassword: boolean }|null} account - compte connecté
  */
-export default function Sources({ run, busy, onSync, onGoogleFit, signedIn }) {
+export default function Sources({ run, busy, onSync, onGoogleFit, signedIn, account }) {
   const [settings, setSettings] = useState(() => getDriveSettings());
   const [folderUrl, setFolderUrl] = useState(settings.folderUrl);
   const [apiKey, setApiKey] = useState(settings.savedApiKey);
   const [folderError, setFolderError] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordSet, setPasswordSet] = useState(false);
+
+  // Compte Google sans mot de passe : l'APK ne peut pas s'y connecter.
+  const needsPassword = !isHealthConnectApp() && account && !account.hasPassword && !passwordSet;
+
+  const savePassword = (event) => {
+    event.preventDefault();
+    run(async () => {
+      const result = await setAccountPassword(password);
+      if (!result.success) throw new Error(result.error);
+      setPassword('');
+      setPasswordSet(true);
+      return `Mot de passe enregistré. Dans l'application Android, connectez-vous avec ${result.email} et ce mot de passe.`;
+    });
+  };
 
   const readDrive = () => {
     const url = folderUrl.trim();
@@ -63,6 +81,27 @@ export default function Sources({ run, busy, onSync, onGoogleFit, signedIn }) {
           <button type="button" className="db-btn small" onClick={() => run(onSync)} disabled={busy}>
             {isHealthConnectApp() ? 'Lire' : signedIn ? 'Recevoir' : 'Se connecter'}
           </button>
+          {needsPassword && (
+            <form className="src-password" onSubmit={savePassword}>
+              <p>
+                L'application Android n'a pas la connexion Google. Choisissez un mot de passe pour vous y connecter
+                avec <strong>{account.email}</strong>.
+              </p>
+              <label className="src-field" htmlFor="src-password">Mot de passe pour l'application Android</label>
+              <input
+                id="src-password"
+                type="password"
+                autoComplete="new-password"
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                aria-describedby="src-password-hint"
+                required
+              />
+              <p id="src-password-hint" className="src-hint">Au moins 6 caractères. Votre connexion Google sur le site reste inchangée.</p>
+              <button type="submit" className="db-btn small" disabled={busy}>Enregistrer le mot de passe</button>
+            </form>
+          )}
         </li>
 
         <li className="src-block">

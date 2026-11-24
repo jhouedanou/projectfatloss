@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Header from '../components/Header/Header';
 import LoginForm from '../components/LoginForm';
 import Dashboard from '../dashboard/Dashboard';
-import { onAuthChange, signOut } from '../services/AuthService';
+import { hasPasswordLogin, onAuthChange, signOut } from '../services/AuthService';
 import { fullSync } from '../services/SyncService';
 import { syncFit } from '../services/FitSync';
+import { canReadDriveSilently, importFromDrive } from '../services/DriveImport';
 import { isHealthConnectApp } from '../services/HealthConnect';
 import { PRIVACY_URL, TERMS_URL } from '../utils/legal';
 
@@ -43,6 +44,20 @@ export default function App() {
     syncFit({ prompt: false })
       .then((result) => { if (result) bump(); })
       .catch((error) => console.warn('[fit] lecture automatique différée :', error?.message));
+  }, [bump]);
+
+  // Site : lecture du dossier Health Sync à l'ouverture quand le lien et la clé
+  // sont connus (aucune fenêtre Google), au plus une fois par quart d'heure.
+  useEffect(() => {
+    if (isHealthConnectApp() || !canReadDriveSilently()) return;
+    const KEY = 'pfl_drive_autosync_at';
+    let last = 0;
+    try { last = Number(sessionStorage.getItem(KEY)) || 0; } catch { /* stockage indisponible */ }
+    if (Date.now() - last < 15 * 60 * 1000) return;
+    try { sessionStorage.setItem(KEY, String(Date.now())); } catch { /* idem */ }
+    importFromDrive()
+      .then((result) => { if (result.sessions) bump(); })
+      .catch((error) => console.warn('[drive] lecture automatique différée :', error?.message));
   }, [bump]);
 
   // Échap ferme la fenêtre de connexion.
@@ -92,6 +107,7 @@ export default function App() {
         <Dashboard
           dataVersion={dataVersion}
           signedIn={!!user}
+          account={user ? { email: user.email || '', hasPassword: hasPasswordLogin(user) } : null}
           onSync={handleSync}
           onLogin={() => setShowLogin(true)}
           onGoogleFit={isHealthConnectApp() ? null : handleGoogleFit}
